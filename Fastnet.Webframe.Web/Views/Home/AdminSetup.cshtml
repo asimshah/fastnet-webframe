@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Administrator Setup";
+}
+@section styles {
+@Styles.Render("~/Content/main/adminsetup/css")
+}
+<div class="SitePanel admin-setup">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+                <h2>Administrator Set up</h2>
+                <p>
+                    There are no members defined and the most probable reason for this is that this is a new site. At minimum there needs to be a member called
+                    "Administrator" - no features are available until this member is set up.
+                </p>
+                <p>
+                    Use this form to create this member - all that is required is to provide a password. Once the Administrator is created, you
+                    will be redirected to the Home page.
+                </p>
+                <p><i>Note that once created, the only way to change the Administrator password is to login as the Administrator - please keep make sure the password you create here is kept securely.</i>
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="password" class="control-label">Password</label>
+                    <input id="password" type="password" class="form-control" placeholder="password" data-text="password" />
+                    <label for="confirmpassword" class="control-label">Confirm Password</label>
+                    <input id="confirmpassword" type="password" class="form-control" placeholder="password" data-text="confirmpassword" />
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <button class="btn btn-primary" data-cmd="save">Save</button>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="message"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/main/adminsetup")
+}

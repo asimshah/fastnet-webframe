@@ -1,0 +1,21 @@
+﻿@import (reference) "constants.less";
+
+.admin-setup {
+    color: @default-site-foreground-colour;
+    background-color: @default-site-background-colour;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+
+    .container {
+        margin-top: 24px;
+    }
+
+    button[data-cmd='save'] {
+        min-width: 120px;
+    }
+
+    .message {
+        color: @error-message-text;
+    }
+}

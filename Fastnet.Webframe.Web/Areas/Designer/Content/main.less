@@ -1,0 +1,122 @@
+﻿@navigation-bar-background: #2638a7;
+@navigation-bar-foreground: #ffffff;
+
+.navbar-inverse {
+    color: @navigation-bar-foreground;
+    background-color: @navigation-bar-background;
+    border-color: @navigation-bar-background;
+
+    .navbar-brand {
+        color: @navigation-bar-foreground;
+        font-size: 22pt;
+    }
+
+    .navbar-nav > li > a {
+        color: @navigation-bar-foreground;
+    }
+}
+
+.body-content {
+    width: 75%;
+}
+
+.panel-diagram {
+    @lp-width: 40px;
+    @cp-width: 200px;
+    @rp-width: 40px;
+    @sp: 4px;
+    @cp-height: 200px;
+    @mp-height: 20px;
+    @bp-height: 40px;
+    @panel-border:  1px solid black ;
+    @panel-border-highlit:  1px solid red ;
+    .test-container {
+        position: relative;
+    }
+    .test-child {
+        position: absolute;
+    }
+    .browser-panel {
+    }
+    .site-panel {
+        .test-container;
+        height: @bp-height + @mp-height + @cp-height + (@sp * 6);
+        border: @panel-border;
+        width:  @lp-width + @cp-width + @rp-width + (@sp * 8);
+    }
+    .banner-panel {
+        .test-child;
+        top: @sp;
+        left: @sp;
+        height: @bp-height;
+        border:  @panel-border;
+        width:  @lp-width + @cp-width + @rp-width + (@sp * 6);
+    }
+    .menu-panel {
+        .test-child;
+        top: @bp-height + (@sp * 2);
+        left: @sp;
+        height: @mp-height;
+        width:  @lp-width + @cp-width + @rp-width + (@sp * 6);
+        border:  @panel-border;
+    }
+    .content-container {
+        .test-child;
+        top: @bp-height + @mp-height + (@sp * 1);
+        left: @sp;
+    }
+    .content-panel {
+        .test-container;
+        top: @sp * 2;
+        height: @cp-height + (@sp * 2);
+        width: @lp-width + @cp-width + @rp-width + (@sp * 6);
+        border:  @panel-border;
+    }
+
+    .centre-panel {
+        .test-child;
+        left: @lp-width + (@sp * 2);
+        top: 0;
+        height: @cp-height;
+        width: @cp-width;
+        border:  @panel-border;
+        margin: @sp @sp @sp @sp;
+    }
+
+    .left-panel {
+        .test-child;
+        width: @lp-width;
+        height: @cp-height;
+        border:  @panel-border;
+        margin: @sp @sp @sp @sp;
+    }
+
+    .right-panel {
+        .test-child;
+        left: @lp-width + @cp-width + (@sp * 4);
+        top: 0;
+        width: @rp-width;
+        height: @cp-height;
+        border:  @panel-border;
+        margin: @sp @sp @sp @sp;
+    }
+    .highlit {
+        border: @panel-border-highlit;
+    }
+
+}
+.vertical-links {
+    .form-group {
+        margin-bottom: 2px;
+    }
+    .btn {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+}
+.default-css pre {
+    font-size: 10px;
+}
+#less-editor {
+    height: 300px;
+}

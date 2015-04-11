@@ -1,0 +1,57 @@
+﻿@using Fastnet.Webframe.Web.Common
+@using Fastnet.Webframe.Web.Models
+@model AdministratorViewModel
+@{
+    ViewBag.Title = "Administrator Setup";
+}
+
+<h2>@ViewBag.Title.</h2>
+<p>
+    There are no members defined and the most probable reason for this is that this is a new site. At minimum there needs to be one member registered
+    as the Administrator - no features are available until this member is set up.
+</p>
+<p>
+    Use this form to create this member - You need to provide an email address and a password. Once the Administrator is created, you
+    will be redirected to the Home page.
+</p>
+<p>No email is sent to this email address at this stage but it will be used by the system to communicate with the Administrator. No user will be allowed to register on this site using this email address.</p>
+<p>
+    <i>Note that once created, the only way to change the Administrator password is to login as the Administrator using this email and password - please make sure the credentials you create here are kept securely.</i>
+</p>
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+    @*<h4>Create a new account.</h4>*@
+    <hr />
+    @*@Html.ValidationSummary("", new { @class = "text-danger" })*@
+    <div class="form-group">
+        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Email)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Password)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+        <div class="col-md-10">
+            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.ConfirmPassword)
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" class="btn btn-default" value="Register" />
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

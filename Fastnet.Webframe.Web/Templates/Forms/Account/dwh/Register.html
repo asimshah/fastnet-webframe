@@ -1,0 +1,49 @@
+﻿<div class="dialog">
+    <div class="dialog-body">
+        <h4>Create a new Account</h4>
+        <div class="form-group" data-property>
+            <label for="email">Email address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter email" data-item="email">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Password" data-item="password">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" data-item="confirm-password">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="firstName">First Name</label>
+            <input type="text" class="form-control" id="firstName" placeholder="First Name" data-item="first-name">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="lastName">Last Name</label>
+            <input type="text" class="form-control" id="lastName" placeholder="Last Name" data-item="last-name">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="dob">Date of Birth</label>
+            <div class="input-group date" data-type="date">
+                <input type="text" class="form-control" id="dob" placeholder="Date of Birth" data-item="date-of-birth">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+            </div>
+            <!--<div class="help-block">We use this to validate your membership of the BMC</div>-->
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="dob">BMC Membership</label>
+            <input type="text" class="form-control" id="bmc" placeholder="BMC Membership" data-item="bmc-membership">
+            <div class="message"></div>
+        </div>
+
+    </div>
+    <div class="dialog-footer">
+        <button  class="btn btn-primary" data-cmd="register">Register</button>
+        <button  class="btn btn-default" data-cmd="cancel">Cancel</button>
+    </div>
+</div>

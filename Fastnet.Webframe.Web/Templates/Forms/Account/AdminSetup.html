@@ -1,0 +1,40 @@
+﻿<div class="dialog">
+    <div class="dialog-body">
+        <div class="form-group">
+            <h2>Administrator Set up</h2>
+            <p>
+                There are no members defined and the most probable reason for this is that this is a new site. At minimum there needs to be one member registered
+                as the Administrator - no features are available until this member is set up.
+            </p>
+            <p>
+                Use this form to create this member - You need to provide an email address and a password. Once the Administrator is created, you
+                will be redirected to the Home page.
+            </p>
+            <p>No email is sent to this email address at this stage but it will be used by the system to communicate with the Administrator. No user will be allowed to register on this site using this email address.</p>
+            <p>
+                <i>Note that once created, the only way to change the Administrator password is to login as the Administrator using this email and password - please make sure the credentials you create here are kept securely.</i>
+            </p>
+        </div>
+        <div class="form-group" data-property>
+            <label for="email" class="control-label">Email Address</label>
+            <input id="email" type="email" class="form-control" placeholder="email address" data-item="email" />
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="password" class="control-label">Password</label>
+            <input id="password" type="password" class="form-control" placeholder="password" data-item="password" />
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="confirmpassword" class="control-label">Confirm Password</label>
+            <input id="confirmpassword" type="password" class="form-control" placeholder="password" data-item="confirm-password" />
+            <div class="message"></div>
+        </div>
+        <div class="error"></div>
+        <div class="form-group">
+            <button class="btn btn-primary" data-cmd="save">Save</button>
+        </div>
+    </div>
+</div>
+
+

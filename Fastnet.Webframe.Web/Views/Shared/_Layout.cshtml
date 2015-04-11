@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <base href="@ViewBag.BaseUrl" />
+    <link href="~/webframelogo-16.16.ico" rel="shortcut icon" type="image/x-icon" />
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/site/css")
+    @RenderSection("styles", required: false)
+</head>
+<body>
+
+    <div class="SitePanel">
+        <div class="edit-panel hide">
+            <div class="edit-toolbar">
+                <div>Edit mode - use right-click/control-click on a panel to start editor</div>
+                <div>
+                    <button class="btn btn-danger btn-xs pull-right" data-cmd="exit-edit-mode"><span>&times;</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="login-status"><div class="login-name"></div></div>
+        <div class="BannerPanel editable-content"></div>
+        @RenderBody()
+        <div id="form" class="form-container">
+
+        </div>
+    </div>
+    <div class="modal fade" id="message-box" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">System Message</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            @*<label for="message-text" class="control-label">Message:</label>*@
+                            <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    @*<button type="button" class="btn btn-primary">Send message</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/fastnet")
+    <script>
+        var baseUrl = '@Url.Content("~/")';
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

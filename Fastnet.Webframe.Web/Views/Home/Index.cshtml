@@ -1,0 +1,40 @@
+﻿@using Fastnet.Webframe.Web.Common
+@using Fastnet.Webframe.Web.Models
+@model Fastnet.Webframe.Web.Models.PageModel
+@{
+    ViewBag.Title = "Home";
+    ViewBag.BaseUrl = Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/");
+}
+@section styles {
+    @if (Model.Features.HasFlag(Features.DateCapture))
+    {
+        @Styles.Render("~/Content/datepicker/css");
+    }
+    @*@Styles.Render("~/Content/site/css")*@
+    @Styles.Render("~/Content/page/css")
+}
+<div class="MenuPanel"></div>
+<div class="ContentPanel">
+    <div class="LeftPanel editable-content"></div>
+    <div class="CentrePanel editable-content"></div>
+    <div class="RightPanel editable-content"></div>
+</div>
+
+@section scripts {
+    @if (Model.Features.HasFlag(Features.DateCapture))
+    {
+        @Scripts.Render("~/bundles/datepicker");
+    }    
+    @Scripts.Render("~/bundles/main/page")
+    @Scripts.Render("~/bundles/identity")
+    @if (Model.CanEditPages)
+    {
+        @Scripts.Render("~/bundles/main/editor");
+    }
+    <script>
+        $(function () {
+            $.core$page.Start(@Html.Raw(@Model.ToJson()));
+        });
+    </script>
+}
+
