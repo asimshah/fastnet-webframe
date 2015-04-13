@@ -67,7 +67,9 @@ namespace Fastnet.Webframe.Web.Common
             PasswordResetFailed,
             Register,
             RegistrationConfirmation,
-            UserProfile
+            UserProfile,
+            //
+            InsertHyperlink
         }
         private formTypes type;
         //protected string templateFolder = HostingEnvironment.MapPath("~/Templates");
@@ -82,6 +84,7 @@ namespace Fastnet.Webframe.Web.Common
         public static readonly FormTemplate Register = new FormTemplate(formTypes.Register);
         public static readonly FormTemplate RegistrationConfirmation = new FormTemplate(formTypes.RegistrationConfirmation);
         public static readonly FormTemplate UserProfile = new FormTemplate(formTypes.UserProfile);
+        public static readonly FormTemplate InsertHyperlink = new FormTemplate(formTypes.InsertHyperlink);
         private FormTemplate(formTypes ft)
         {
             type = ft;
@@ -93,8 +96,20 @@ namespace Fastnet.Webframe.Web.Common
                 case formTypes.Form:
                 case formTypes.ModalForm:
                     return Path.Combine(templateFolder, "Forms");
-                default:
+                case formTypes.ActivationFailed:
+                case formTypes.ChangePassword:
+                case formTypes.Login:
+                case formTypes.PasswordReset:
+                case formTypes.PasswordResetConfirmation:
+                case formTypes.PasswordResetFailed:
+                case formTypes.Register:
+                case formTypes.RegistrationConfirmation:
+                case formTypes.UserProfile:
                     return Path.Combine(templateFolder, "Forms", "Account");
+                case formTypes.InsertHyperlink:
+                    return Path.Combine(templateFolder, "Forms", "Editor");
+                default:
+                    throw new ApplicationException("No root for form");
             }
         }
         protected override string GetTemplateFilename()
@@ -129,6 +144,8 @@ namespace Fastnet.Webframe.Web.Common
                     return RegistrationConfirmation;
                 case formTypes.UserProfile:
                     return UserProfile;
+                case formTypes.InsertHyperlink:
+                    return InsertHyperlink;
             }
             throw new ArgumentOutOfRangeException("type");
         }

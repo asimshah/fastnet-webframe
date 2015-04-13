@@ -149,7 +149,7 @@ namespace Fastnet.Webframe.CoreData
             //        m.MapRightKey("MemberId");
             //        m.ToTable("RoleMember");
             //    });
-            
+
             modelBuilder.Entity<Group>()
                 .HasMany(t => t.RegistrationKeys)
                 .WithMany(t => t.Groups)
@@ -224,7 +224,7 @@ namespace Fastnet.Webframe.CoreData
             bool isEmpty = IsDatabaseCompletelyEmpty();
             if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
             {
-                LoadLegacyData();               
+                LoadLegacyData();
             }
             else
             {
@@ -235,9 +235,41 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredPanels();
                 EnsureInitialPages();
                 SetSiteVersion("4.0.0.0");
+                EnsureCSSFiles();
                 //RequestCSSRewrite();
             }
-            ctx.CreateCSSFiles();
+            //ctx.CreateCSSFromPanels();
+        }
+
+        private void EnsureCSSFiles()
+        {
+            var folder = CSSRule.GetDefaultCSSFolder();
+            Dictionary<string, string> defaultCSS = new Dictionary<string, string>()
+            {
+                {"BrowserPanel", ".BrowserPanel\n{\n}\n"},
+                {"SitePanel", ".SitePanel\n{\n    margin: 0 auto;\n    font-family: verdana;\n    font-size: 10.5pt;\n    width: 840px;\n}\n"},
+                {"BannerPanel", ".BannerPanel\n{\n    height: 90px;\n}\n"},
+                {"MenuPanel", ".MenuPanel\n{\n    background-color: #1b76bc;\n    color: #ffffff;\n    border: 0 none transparent;\n    display: none;\n}\n"},
+                {"LeftPanel", ".LeftPanel\n{\n    width: 210px;\n}\n"},
+                {"CentrePanel", ".CentrePanel\n{\n}\n"},
+                {"RightPanel", ".RightPanel\n{\n    display: none;\n}\n"},
+            };
+            foreach (var item in defaultCSS)
+            {
+                var panel = item.Key;
+                var cssText = item.Value;
+                string cssFileName = System.IO.Path.Combine(folder, panel + ".css");
+                if (!System.IO.File.Exists(cssFileName))
+                {
+                    System.IO.File.WriteAllText(cssFileName, cssText);
+                }
+            }
+            var menuCssText = ".menu-normal\n{\n    font-family: Arial Black;\n    font-size: 10pt;\n    background-color: #1b76bc;\n    color: #ffffff;\n}\n\n.menu-hover:hover\n{\n    background-color: #28aae1;\n    color: #000000;\n}\n";
+            string menuCssFile = System.IO.Path.Combine(folder, "Menu.css");
+            if (!System.IO.File.Exists(menuCssFile))
+            {
+                System.IO.File.WriteAllText(menuCssFile, menuCssText);
+            }
         }
 
         private void EnsureInitialPages()
@@ -297,7 +329,7 @@ namespace Fastnet.Webframe.CoreData
             var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
 
             Page bannerPage = AddPage(directory, "Site Banner.docx");
-            Page homePage = AddPage(directory, "Home Page.docx");
+            Page homePage = AddHtmlPage(directory, "Home Page.html");
             homePage.IsLandingPage = true;
             AccessRule rule = GetAccessRule(Permission.ViewPages, true);
             //int groupType = (int)GroupTypes.System | (int)GroupTypes.SystemDefinedMembers;
@@ -308,7 +340,7 @@ namespace Fastnet.Webframe.CoreData
             par.Group = group;
             par.Page = homePage;
             ctx.PageAccessRules.Add(par);
-            Page leftPage = AddPage(directory, "Left side panel.docx");
+            Page leftPage = AddHtmlPage(directory, "Left side panel.html");// AddPage(directory, "Left side panel.docx");
             //leftPage.IsSidePage = bannerPage.IsSidePage = true;
             ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = bPanel, Page = bannerPage, Timestamp = BitConverter.GetBytes(1) });
             ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = lPanel, Page = leftPage, Timestamp = BitConverter.GetBytes(1) });
@@ -325,6 +357,46 @@ namespace Fastnet.Webframe.CoreData
                 ctx.AccessRules.Add(rule);
             }
             return rule;
+        }
+        private Page AddHtmlPage(Directory directory, string htmlFilename)
+        {
+            try
+            {
+                string defaultPagesFolder = HostingEnvironment.MapPath("~/Default Pages");
+                //string docxFullname = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
+                string htmlFileName = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
+                //byte[] docxData = System.IO.File.ReadAllBytes(docxFullname);
+                byte[] htmlData = System.IO.File.ReadAllBytes(htmlFileName);
+                string htmlString = Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
+                Page page = ctx.CreateNewPage();// new Page();
+                page.Name = System.IO.Path.GetFileNameWithoutExtension(htmlFilename);
+                //page.TimeStamp = BitConverter.GetBytes(-1);
+                page.Visible = true;
+                page.VersionCount = 0;
+                page.Locked = true;
+                directory.Pages.Add(page);
+                //
+                PageMarkup pm = new PageMarkup();
+                pm.CreatedBy = "Administrator";
+                pm.CreatedOn = DateTime.UtcNow;
+                //pm.VersionNumber = page.VersionCount;
+                //pm.TimeStamp = BitConverter.GetBytes(-1);
+                //
+                pm.Data = null;// docxData;
+                pm.MarkupLength = 0;// docxData.Length;
+                pm.HtmlText = htmlString;// GetHtmlPageFragment(htmlString);
+                pm.HtmlTextLength = pm.HtmlText.Length;
+                //pm.HtmlStyles = GetHtmlStyles(htmlString);
+                // pm.HtmlScripts ??????
+                page.MarkupType = MarkupType.Html;
+                page.PageMarkup = pm;
+                return page;
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                throw;
+            }
         }
         private Page AddPage(Directory directory, string docxFilename)
         {
@@ -423,7 +495,7 @@ namespace Fastnet.Webframe.CoreData
             Func<string, string> extractId = (text) =>
                 {
                     //string text = "page/58";
-                    string pattern = @"[^0-9]+";                    
+                    string pattern = @"[^0-9]+";
                     return Regex.Replace(text, pattern, "");
                 };
             HtmlNodeCollection aNodes = contentDiv.SelectNodes("//a");
@@ -536,60 +608,60 @@ namespace Fastnet.Webframe.CoreData
             Debug.Assert(!String.IsNullOrWhiteSpace(configConnectionString));
             //using (var scope = new TransactionScope())
             //{
-                using (var tran = ctx.Database.BeginTransaction())
+            using (var tran = ctx.Database.BeginTransaction())
+            {
+                try
                 {
-                    try
+                    using (LegacyLoader ll = new LegacyLoader(ctx, configConnectionString))
                     {
-                        using (LegacyLoader ll = new LegacyLoader(ctx, configConnectionString))
-                        {
-                            ll.LoadClientApps();
-                            Log.Write("legacyData: ClientApps loaded");
-                            ll.LoadRoles();
-                            Log.Write("legacyData: Roles loaded");
-                            ll.LoadRegistrationKeys();
-                            Log.Write("legacyData: RegistrationKeys loaded");
-                            ll.LoadGroups();
-                            Log.Write("legacyData: Groups loaded");
-                            ll.LoadMembers();
-                            Log.Write("legacyData: Members loaded");
-                            ll.LoadAccessRules();
-                            Log.Write("legacyData: AccessRules loaded");
-                            ll.LoadBackgrounds();
-                            Log.Write("legacyData: Backgrounds loaded");
-                            ll.LoadDirectories();
-                            Log.Write("legacyData: Directories loaded");
-                            ll.LoadDirectoryAccessRules();
-                            Log.Write("legacyData: DirectoryAccessRules loaded");
-                            ll.LoadFonts();
-                            Log.Write("legacyData: Fonts loaded");
-                            ll.LoadStyles();
-                            Log.Write("legacyData: Styles loaded");
-                            ll.LoadPanels();
-                            Log.Write("legacyData: Panels loaded");
-                            ll.LoadDocuments();
-                            Log.Write("legacyData: Documents loaded");
-                            ll.LoadPages();
-                            Log.Write("legacyData: Pages loaded");
-                            ll.LoadPanelPages();
-                            Log.Write("legacyData: PanelPages loaded");
-                            ll.LoadPageAccessRules();
-                            Log.Write("legacyData: PageAccessRules loaded");
-                            ll.LoadImages();
-                            Log.Write("legacyData: Images loaded");
-                            ll.LoadSiteSettings();
-                            Log.Write("legacyData: SiteSettings loaded");
-                            ll.LoadMenus();
-                            Log.Write("legacyData: Menus loaded");
-                        }
-                        tran.Commit();
+                        ll.LoadClientApps();
+                        Log.Write("legacyData: ClientApps loaded");
+                        ll.LoadRoles();
+                        Log.Write("legacyData: Roles loaded");
+                        ll.LoadRegistrationKeys();
+                        Log.Write("legacyData: RegistrationKeys loaded");
+                        ll.LoadGroups();
+                        Log.Write("legacyData: Groups loaded");
+                        ll.LoadMembers();
+                        Log.Write("legacyData: Members loaded");
+                        ll.LoadAccessRules();
+                        Log.Write("legacyData: AccessRules loaded");
+                        ll.LoadBackgrounds();
+                        Log.Write("legacyData: Backgrounds loaded");
+                        ll.LoadDirectories();
+                        Log.Write("legacyData: Directories loaded");
+                        ll.LoadDirectoryAccessRules();
+                        Log.Write("legacyData: DirectoryAccessRules loaded");
+                        ll.LoadFonts();
+                        Log.Write("legacyData: Fonts loaded");
+                        ll.LoadStyles();
+                        Log.Write("legacyData: Styles loaded");
+                        ll.LoadPanels();
+                        Log.Write("legacyData: Panels loaded");
+                        ll.LoadDocuments();
+                        Log.Write("legacyData: Documents loaded");
+                        ll.LoadPages();
+                        Log.Write("legacyData: Pages loaded");
+                        ll.LoadPanelPages();
+                        Log.Write("legacyData: PanelPages loaded");
+                        ll.LoadPageAccessRules();
+                        Log.Write("legacyData: PageAccessRules loaded");
+                        ll.LoadImages();
+                        Log.Write("legacyData: Images loaded");
+                        ll.LoadSiteSettings();
+                        Log.Write("legacyData: SiteSettings loaded");
+                        ll.LoadMenus();
+                        Log.Write("legacyData: Menus loaded");
                     }
-                    catch (Exception xe)
-                    {
-                        tran.Rollback();
-                        Log.Write(xe);
-                        throw;
-                    }
+                    tran.Commit();
                 }
+                catch (Exception xe)
+                {
+                    tran.Rollback();
+                    Log.Write(xe);
+                    throw;
+                }
+            }
             //}
         }
 
@@ -1215,6 +1287,6 @@ namespace Fastnet.Webframe.CoreData
             ecb.Metadata = @"res://*/WebframeDataModel.csdl|res://*/WebframeDataModel.ssdl|res://*/WebframeDataModel.msl";
             return ecb.ToString();
         }
-        
+
     }
 }

@@ -62,6 +62,9 @@
             }
             $T.validationFunctions[dataItem].push({ validator: validationFunction, message: errorMessage });
         },
+        AddIsRequiredValidation: function (dataItem, errorMessage) {
+            $T.AddValidation(dataItem, $T.validateIsRequired, errorMessage);
+        },
         ApplyValidation: function (formItem, isValid, errorMessage) {
             var message = formItem.find(".message");
             var deferred = new $.Deferred();
@@ -117,7 +120,9 @@
                     form.modal('hide');
                 } else {
                     e.preventDefault();
-                    $T.onCommand($T.context, cmd);
+                    if ($T.onCommand !== null) {
+                        $T.onCommand($T.context, cmd);
+                    }
                 }
             });
         },
@@ -210,6 +215,7 @@
             });
             return deferred.promise();
         },
+        //
         findFormItem: function (form, item) {
             var itemSelector = $U.Format("*[data-item='{0}']", item);
             return form.find(itemSelector).closest("[data-property]");
@@ -237,16 +243,23 @@
         leaveFocus: function (formitem, item) {
             var data = $T.dataValues[item];
             var validations = $T.validationFunctions[item];
-            $.when($F.Validate($T.context, formitem, data, validations)
-                ).then(function () {
-                    var errors = $T.form.find("*[data-property][data-state='error']").length;
-                    var totalWithState = $T.form.find("*[data-property][data-state]").length;
-                    var total = $T.form.find("*[data-property]").length;
-                    if ($T.afterItemValidation !== null) {
-                        $T.afterItemValidation($T.context, item, total, totalWithState, errors);
-                    }
-                });
-        }
+            if (typeof validations !== "undefined" && validations !== null) {
+                $.when($F.Validate($T.context, formitem, data, validations)
+                    ).then(function () {
+                        var errors = $T.form.find("*[data-property][data-state='error']").length;
+                        var totalWithState = $T.form.find("*[data-property][data-state]").length;
+                        var total = $T.form.find("*[data-property]").length;
+                        if ($T.afterItemValidation !== null) {
+                            $T.afterItemValidation($T.context, item, total, totalWithState, errors);
+                        }
+                    });
+            }
+        },
+        validateIsRequired: function (ctx, val, formItem, errorMessage) {
+        return $T.ApplyValidation(formItem, function () {
+            return !(val === null || val === "");
+        }, errorMessage);
+    },
     };
     $(function () {
         $.fastnet$forms.init();

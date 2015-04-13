@@ -99,7 +99,7 @@ namespace Fastnet.Webframe.CoreData
     }
     public partial class CoreDataContext
     {
-        public void CreateCSSFiles()
+        public void CreateCSSFromPanels()
         {
             var folder = CSSRule.GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/Content/Main/AppCSS");
             string[] panelList = new string[] {

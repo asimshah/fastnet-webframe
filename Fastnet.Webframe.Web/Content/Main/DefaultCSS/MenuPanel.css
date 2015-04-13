@@ -2,10 +2,6 @@
 {
     background-color: #1b76bc;
     color: #ffffff;
-    border-left: 0px  None;
-    border-top: 0px  None;
-    border-right: 0px  None;
-    border-bottom: 3px #bb006d Solid;
+    border: 0 none transparent;
     display: none;
-    height: 31px;
 }

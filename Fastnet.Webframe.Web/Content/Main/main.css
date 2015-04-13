@@ -57,6 +57,7 @@ body {
   background-color: white;
   color: black;
   min-width: 128px;
+  z-index: 49999;
 }
 .context-menu-container .context-menu-item {
   margin: 2px;
@@ -76,6 +77,17 @@ body {
 .context-menu-container .context-menu-item.disabled:hover {
   background-color: lightgray;
   color: white;
+}
+div[contenteditable=true] {
+  resize: none;
+  outline: 0 solid transparent;
+  border: none;
+}
+div[contenteditable=true]:active,
+div[contenteditable=true]:focus {
+  outline: 2px dashed red;
+  border: none;
+  z-index: 44444;
 }
 .edit-panel {
   height: 0;

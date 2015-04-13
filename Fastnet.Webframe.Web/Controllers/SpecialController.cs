@@ -20,7 +20,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("updateCSSFromDB")]
         public HttpResponseMessage WriteCSSFromDB()
         {
-            DataContext.CreateCSSFiles();
+            DataContext.CreateCSSFromPanels();
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
 

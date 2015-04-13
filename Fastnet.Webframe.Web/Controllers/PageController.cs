@@ -64,6 +64,10 @@ using System.IO;
                 {
                     data = PrepareDocXpage(page);
                 }
+                else if (page.MarkupType == MarkupType.Html)
+                {
+                    data = PrepareHTMLPage(page);
+                }
             }
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.CreatedOn, page.PageId);
             //if (th
@@ -151,7 +155,11 @@ using System.IO;
             var bannerPanel = GetPanelInfo(page, Data.Panel.BannerPanel);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Visible = bannerPanel.Visible, PageId = bannerPanel.PageId });
         }
-
+        private dynamic PrepareHTMLPage(Page page)
+        {
+            string htmlText = page.PageMarkup.HtmlText;
+            return new { PageId = page.PageId, HtmlText = htmlText, HtmlStyles = string.Empty };
+        }
         private dynamic PrepareDocXpage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;

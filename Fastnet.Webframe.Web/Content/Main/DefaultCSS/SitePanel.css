@@ -1,7 +1,7 @@
-.SitePanel {
+.SitePanel
+{
+    margin: 0 auto;
     font-family: verdana;
     font-size: 10.5pt;
-    margin-left: auto;
-    margin-right: auto;
     width: 840px;
 }
