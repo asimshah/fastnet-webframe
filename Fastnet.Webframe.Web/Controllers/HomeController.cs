@@ -81,6 +81,13 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("")]
         public async Task<ActionResult> Index(string id = null)
         {
+            if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", true))
+            {
+                Member admin = DataContext.Members.Single(m => m.IsAdministrator);
+                var user = await UserManager.FindByIdAsync(admin.Id);
+                await SignInManager.SignInAsync(user, false, false);
+                return RedirectToAction("Index");
+            }
             if (id != null)
             {
                 this.CurrentPageId = id;
@@ -94,12 +101,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 // account. Nothing will work until the Administrator account is set up
                 return RedirectToAction("CreateAdministrator");
             }
-            if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", true))
-            {
-                Member admin = DataContext.Members.Single(m => m.IsAdministrator);
-                var user = await UserManager.FindByIdAsync(admin.Id);
-                await SignInManager.SignInAsync(user, false, false);
-            }
+
             var homeNoCache = this.Request.Path.EndsWith("$home");
             CurrentPageId = pm.StartPage;
             return View(pm);

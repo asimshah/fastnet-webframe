@@ -56,7 +56,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
                 .Include(
-                    "~/Scripts/tinymce/js/tinymce/tinymce.min.js",
+                    "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/fastnet/fastnet.contextmenu.js",
                     "~/Scripts/main/core.editor.js"
                 ));

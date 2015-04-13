@@ -78,13 +78,13 @@ body {
   background-color: lightgray;
   color: white;
 }
-div[contenteditable=true] {
+[contenteditable=true] {
   resize: none;
   outline: 0 solid transparent;
   border: none;
 }
-div[contenteditable=true]:active,
-div[contenteditable=true]:focus {
+[contenteditable=true]:active,
+[contenteditable=true]:focus {
   outline: 2px dashed red;
   border: none;
   z-index: 44444;

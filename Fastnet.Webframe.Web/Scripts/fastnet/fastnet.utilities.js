@@ -155,12 +155,46 @@
             }
         },
         //,
-        MessageBox: function (text) {
-            $($T.messageBoxElementId).find("#message-text").text(text);
+        MessageBox: function (text, options) {
+            var runtimeOptions = {
+                title: 'System Message',
+                enableSystemCancel: false, // i.e. modal-header x box
+                enableOKButton: true, 
+                enableCancelButton: false, 
+                okButtonLabel: 'Close',
+                cancelButtonLabel: 'Cancel',
+                OKFunction: null
+            };
+            if (typeof options !== "undefined" && options !== null) {
+                $.extend(runtimeOptions, options);
+                //$($T.messageBoxElementId).find("#message-text").text(text);
+                //$($T.messageBoxElementId).modal();
+            }
+            var mb = $($T.messageBoxElementId);
+            mb.find("#message-text").text(text);
+            mb.find(".modal-footer button[data-cmd='ok']").text(runtimeOptions.okButtonLabel);
+            mb.find(".modal-footer button[data-cmd='cancel']").text(runtimeOptions.cancelButtonLabel);
+            if (!runtimeOptions.enableSystemCancel) {
+                mb.find(".modal-header button").hide();
+            }
+            if (!runtimeOptions.enableOKButton) {
+                mb.find(".modal-footer button[data-cmd='ok']").hide();
+            } else {
+                mb.find(".modal-footer button[data-cmd='ok']").on('click', function () {
+                    $T.Debug("OK button click");
+                    $($T.messageBoxElementId).modal('hide');
+                    if (runtimeOptions.OKFunction !== null) {
+                        runtimeOptions.OKFunction();
+                    }
+                });
+            }
+            if (!runtimeOptions.enableCancelButton) {
+                mb.find(".modal-header button[data-cmd='cancel']").hide();
+            }
             $($T.messageBoxElementId).modal();
             //$(id).modal();
         },
-        MessageBoxUsingJQueryUI: function (message, options) {
+        messageBoxWithOptions: function (message, options) {
             //var wWidth = $(window).width();
             //var dWidth = wWidth * 0.8;
             var dialogClass = "message-box";
