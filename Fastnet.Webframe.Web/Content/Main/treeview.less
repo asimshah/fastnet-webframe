@@ -1,0 +1,28 @@
+﻿.tree-node {
+    padding-left: 2px;
+    padding-right: 4px;
+
+    .node-item.selected {
+        border-radius: 1px;
+        border: 2px solid #dedede;
+        background-color: #dedede;
+    }
+
+    .node-control-icon, .node-item {
+        cursor: pointer;
+    }
+
+    &.node-closed {
+        .child-nodes {
+            display: none;
+        }
+    }
+
+    .child-nodes {
+        margin-left: 16px;
+    }
+
+    &.node-indent {
+        margin-left: 16px;
+    }
+}

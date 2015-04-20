@@ -66,12 +66,16 @@ namespace Fastnet.Webframe.CoreData
         public bool UserFlag5 { get; set; }
 
 
-        //public virtual ICollection<Role> Roles { get; set; }
         private ICollection<Group> groups;
         public virtual ICollection<Group> Groups
         {
             get { return groups ?? (groups = new HashSet<Group>()); }
             set { groups = value; }
+        }
+        [NotMapped]
+        public string Fullname
+        {
+            get { return string.Format("{0} {1}", this.FirstName, this.LastName).Trim(); }
         }
         //
         public static string HashPassword(string password)

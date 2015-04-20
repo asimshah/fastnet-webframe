@@ -1,4 +1,5 @@
-﻿@import (reference) "constants.less";
+﻿//@import (reference) "../bootstrap.css";
+@import (reference) "constants.less";
 
 /*@-ms-viewport {
     width: device-width;
@@ -11,18 +12,7 @@ body {
     font-family: Calibri;
 }
 
-.modal-content {
-    .modal-header, .modal-footer {
-        padding: 10px;
-    }
 
-    .modal-body {
-        textarea.form-control {
-            box-shadow: none;
-            border-style: none;
-        }
-    }
-}
 // now follow default values for all the panels
 .SitePanel {
     //font-family: verdana;
@@ -57,9 +47,6 @@ body {
     }
 }
 
-.blockui-spinner {
-    color: white;
-}
 
 .context-menu-container {
     @context-menu-background: white;
@@ -71,6 +58,7 @@ body {
     color: black;
     min-width: 128px;
     z-index: 49999;
+
     .context-menu-item {
         margin: 2px;
         /*margin-top:2px;
@@ -214,29 +202,107 @@ body {
     margin-right: auto;
 }
 
-.modal-dialog {
-    .block-outer {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        //opacity: 0.5;
-        background-color: rgba(255,255,255,0.75);
+.node-item {
+    //color: red;
+    .fa-folder {
+        color: #ef9a12;
     }
 
-    .block-inner {
-        display: flex;
-        z-index: 5000;
-        height: 100%;
-        justify-content: center;
-        align-items: center;
+    .title {
+        margin-left: 2px;
+    }
+}
+
+
+
+
+.editor-dialog {
+    font-size: small;
+
+    div[class*='col-xs'] {
+        padding-left: 8px;
+        padding-right: 8px;
     }
 
-    .block-spinner {
-        z-index: 9999;
-        //opacity: 1;
-        color: blue;
+    .browser-separator {
+        display: none;
+        border: 1px solid black;
+        width: 2px;
+        height: 80px;
+    }
+
+    .browser-folder-content {
+        // background-color: lightgray;
+        padding: 8px;
+        //border: 1px solid red;
+        table {
+            td, th {
+                padding-left: 2px;
+            }
+
+            thead {
+                tr {
+                    border-bottom: 2px solid #444444;
+                    background-color: #aaaaaa;
+                    color: white;
+                }
+            }
+
+            tbody {
+                &:before {
+                    content: "-";
+                    display: block;
+                    line-height: 0.25em;
+                    color: transparent;
+                }
+
+                tr:nth-child(even) {
+                    background-color: #eeeeee;
+                }
+
+                td div {
+                    padding: 2px;
+                }
+            }
+
+            margin-top: -12px;
+            width: 100%;
+
+            td.url {
+                width: 20%;
+
+                div {
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    border-radius: 2px;
+                    &:hover {
+                        //border: 1px solid hsl(207.7, 56.4%, 45.9%);
+                        border: 2px solid hsl(207.7, 100%, 45.9%);
+                    }
+
+                    &.selected {
+                        //background-color: #337ab7;
+                        background-color: hsl(207, 75%, 64%);
+                        color: white;
+                    }
+                }
+            }
+
+            td.name {
+                width: 70%;
+            }
+
+            td.side-content {
+                width: 10%;
+            }
+        }
+    }
+
+    .browser-tree {
+        padding-right: 8px;
+        margin-right: 8px;
+        //background-color: bisque;
+        //border-right: 1px solid #dedede;
     }
 }
 
@@ -244,6 +310,8 @@ body {
     font-style: italic;
     color: @error-message-text;
 }
+
+
 /*.login-status {
     display:none;
 }*/

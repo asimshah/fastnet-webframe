@@ -155,6 +155,7 @@ using System.IO;
             var bannerPanel = GetPanelInfo(page, Data.Panel.BannerPanel);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Visible = bannerPanel.Visible, PageId = bannerPanel.PageId });
         }
+
         private dynamic PrepareHTMLPage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;

@@ -376,7 +376,7 @@ namespace Fastnet.Webframe.CoreData
                 page.Locked = true;
                 directory.Pages.Add(page);
                 //
-                PageMarkup pm = new PageMarkup();
+                PageMarkup pm = page.PageMarkup;// new PageMarkup();
                 pm.CreatedBy = "Administrator";
                 pm.CreatedOn = DateTime.UtcNow;
                 //pm.VersionNumber = page.VersionCount;
@@ -417,7 +417,7 @@ namespace Fastnet.Webframe.CoreData
                 page.Locked = true;
                 directory.Pages.Add(page);
                 //
-                PageMarkup pm = new PageMarkup();
+                PageMarkup pm = page.PageMarkup;// new PageMarkup();
                 pm.CreatedBy = "Administrator";
                 pm.CreatedOn = DateTime.UtcNow;
                 //pm.VersionNumber = page.VersionCount;

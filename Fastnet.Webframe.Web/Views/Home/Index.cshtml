@@ -6,6 +6,10 @@
     ViewBag.BaseUrl = Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/");
 }
 @section styles {
+    @if (Model.CanEditPages)
+    {
+        @Styles.Render("~/Content/editor/css");
+    }
     @if (Model.Features.HasFlag(Features.DateCapture))
     {
         @Styles.Render("~/Content/datepicker/css");
@@ -24,7 +28,7 @@
     @if (Model.Features.HasFlag(Features.DateCapture))
     {
         @Scripts.Render("~/bundles/datepicker");
-    }    
+    }
     @Scripts.Render("~/bundles/main/page")
     @Scripts.Render("~/bundles/identity")
     @if (Model.CanEditPages)

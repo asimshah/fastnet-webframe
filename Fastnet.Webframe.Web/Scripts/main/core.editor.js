@@ -1,26 +1,218 @@
 ﻿(function ($) {
     var $T;
     var $U;
+    var $TV;
+    var pageBrowser = function (options) {
+        this.options = $.extend({
+            OnCancel: null,
+            OnSelect: null
+        }, options);
+        var contentTemplate =
+            "        <table  cellpadding='0' cellspacing='0' border='0' id='folder-content'>" +
+            "          <thead>" +
+            "            <tr>" +
+            "                <th class='url'>Url</th>" +
+            "                <th class='name'>Name</th>" +
+            "                <th class='side-content'></th>" +
+            "            </tr>" +
+            "          </thead>" +
+            "          <tbody>" +
+            "            {{#data}}" +
+            "            <tr>" +
+            "                <td class='url'><div data-id='{{PageId}}'>{{Url}}</div></td>" +
+            "                <td class='name'><div>{{Name}}</div></td>" +
+            "                <td class='side-content'><div>{{SC}}</div></td>" +
+            "            </tr>" +
+            "            {{/data}}" +
+            "          </tbody>" +
+            "        </table>";
+        var bfl = null;
+        var treeview = null;
+        var currentDirectoryId = null;
+        var self = this;
+        pageBrowser.prototype.SelectedPageId = null;
+        pageBrowser.prototype.Show = function () {
+            bfl = new $.fastnet$form("template/form/BrowseForLink", {});
+            treeview = $TV.NewTreeview({
+                Selector: ".browser-tree",
+                OnSelectChanged: onFolderSelectChanged,
+                OnExpandCollapse: onExpandCollapse,
+            });
+            var url = $U.Format("store/directories");
+            $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+
+                //$F.Bind({ afterItemValidation: null, onCommand: onCommand });
+                bfl.disableCommand("select-page");
+                bfl.disableCommand("delete-page");
+                bfl.disableCommand("add-new-page");
+                bfl.show(function (f) {
+                    loadTreeViewItem(null, data);
+                });
+            });
+            
+            //$.when($F.LoadForm(self, "Page Browser", "template/form/BrowseForLink", "editor-dialog find-link", { ClientAction: { IsModal: true, IsResizable: true } })
+            //    ).then(function () {
+            //        form = $F.GetForm();
+            //        treeview = $TV.NewTreeview({
+            //            Selector: ".browser-tree",
+            //            OnSelectChanged: onFolderSelectChanged,
+            //            OnExpandCollapse: onExpandCollapse,
+            //        });
+            //        var url = $U.Format("store/directories");
+            //        $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+            //            loadTreeViewItem(null, data);
+            //            $F.Bind({ afterItemValidation: null, onCommand: onCommand });
+            //            $F.DisableCommand("select-page");
+            //            $F.DisableCommand("delete-page");
+            //            $F.DisableCommand("add-new-page");
+            //            $F.Show();
+            //        });
+            //    });
+        };
+        function onCommand(ctx, cmd) {
+            switch (cmd) {
+                case "system-close":
+                case "cancel":
+                    if (self.options.OnCancel !== null) {
+                        self.options.OnCancel();
+                    }
+                    break;
+                case "select-page":
+                    if (self.options.OnSelect !== null) {
+                        self.options.OnSelect(self.SelectedPageId);
+                    }
+                    break;
+                case "add-new-page":
+                    createNewPage();
+                    break;
+                default:
+                    $U.Debug("browser cmd: {0}", cmd);
+                    break;
+            }
+        };
+        function createNewPage() {
+            var url = $U.Format("store/createpage");
+            var postData = { directoryId: currentDirectoryId };
+            $.when(
+                $U.AjaxPost({ url: url, data: postData })
+                ).then(function (result) {
+                    var pageId = result.PageId;
+                    $U.Debug("created new page {0}", result.Url);
+                    loadDirectoryContent();
+                });
+        };
+        function selectPage(pageId) {
+            self.SelectedPageId = pageId;
+            if (self.SelectedPageId === null) {
+                $F.DisableCommand("select-page");
+                $F.DisableCommand("delete-page");
+                $U.Debug("Selected page {0}", self.SelectedPageId);
+            } else {
+                $F.EnableCommand("select-page");
+                $F.EnableCommand("delete-page");
+            }
+            
+        };
+        function onExpandCollapse (data) {
+            $U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
+            if (!data.isLoaded) {
+                loadSubdirectories(data.node, parseInt(data.userData));
+            }
+        };
+        function onFolderSelectChanged  (data) {
+            $U.Debug("de(select) for {0}, closed = {1}, selected = {2}, child count = {3}", data.userData, data.isClosed, data.isSelected, data.childCount);
+            var directoryId = parseInt(data.userData);
+            var folderContent = bfl.find(".browser-folder-content");
+            if (currentDirectoryId !== directoryId) {
+                currentDirectoryId = directoryId;
+                loadDirectoryContent();
+                //folderContent.show();
+            }
+            if (data.isSelected) {
+                bfl.enableCommand("add-new-page");
+                folderContent.show();
+            } else {
+                bfl.disableCommand("add-new-page");
+                folderContent.hide();
+            }
+        };
+        function loadTreeViewItem(node, data) {
+            $.each(data, function (index, item) {
+                var html = $U.Format("<span class='fa fa-folder folder-icon' ></span><span class='title' >{0}</span>", item.Name);
+                node = treeview.AddNode(node, { NodeHtml: html, Title: item.Name, UserData: item.Id, ChildCount: item.SubdirectoryCount });
+                //ctx.contextMenu.AttachTo(node);
+            });
+        };
+        function loadSubdirectories(node, directoryId) {
+            var url = $U.Format("store/directories/{0}", directoryId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+                if (data.length === 0) {
+                    // there are no subdirectories but we need to ensure that the node
+                    // is set to isLoaded.
+                    //$TV.SetNodeLoaded(node);
+                    treeview.SetNodeLoaded(node);
+                } else {
+                    loadTreeViewItem(node, data);
+                }
+            });
+        };
+        function loadDirectoryContent() {
+            var url = $U.Format("store/content/{0}", currentDirectoryId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+                if (data.length > 0) {
+                    var content = { data: [] };
+                    $.each(data, function (index, item) {
+                        var sc = "";
+                        if (item.HasBanner) {
+                            sc += "B";
+                        }
+                        if (item.HasLeft) {
+                            sc += "L";
+                        }
+                        if (item.HasRight) {
+                            sc += "R";
+                        }
+                        content.data.push({
+                            PageId: item.PageId,
+                            Url: item.Url,
+                            Name: item.Name,
+                            SC: sc
+                        });
+                    });
+                    var dataTable = $(Mustache.to_html(contentTemplate, content));
+                    $(".browser-folder-content").empty().append(dataTable);
+                    $(".browser-folder-content table td.url div").on("click", function (e) {
+                        //debugger;
+                        var target = $(e.currentTarget);
+                        if (target.hasClass("selected")) {
+                            target.removeClass("selected");
+                            selectPage(null);
+                        } else {
+                            $(".browser-folder-content table td.url div").removeClass("selected");
+                            target.addClass("selected");
+                            selectPage(target.attr("data-id"));
+                        }
+                        
+                    });
+                } else {
+                    $(".browser-folder-content table").off();
+                    $(".browser-folder-content").empty().html("<div>Folder is empty</div>")
+                }
+            });
+        };
+    };
     $.core$editor = {
         cm: null,
         isOpen: false,
         Init: function () {
             $T = this;
             $U = $.fastnet$utilities;
+            $TV = $.fastnet$treeview;
             //$U.Debug("");
             $T.cm = $.fastnet$contextmenu.GetContextMenu();
-            //$cm.AddMenuItem("Open Editor", "open-editor", $T.OnContextMenu, {})
-            //$cm.AddMenuItem("Close Editor", "close-editor", $T.OnContextMenu, {})
-            $cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
-            $cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
+            //$cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
+            //$cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
             $cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
-            //$cm.BeforeOpen = function (src) {
-            //    var html = src.outerHTML;
-            //    $U.Debug(html);
-            //    //$cm.AddMenuItem("test", "test", $T.OnContextMenu, {})
-            //    //var item = $cm.AddMenuItem("test2", "test2", $T.OnContextMenu, {})
-            //    //$cm.DisableMenuItem(item);
-            //};
             $(".edit-panel").on("click", function (e) {
                 var cmd = $(e.target).attr("data-cmd");
                 if (typeof cmd === "undefined" || cmd === false) {
@@ -55,21 +247,61 @@
             //return result;
         },
         InsertLink: {
+            browserState: {
+                currentDirectoryId: null
+            },
+            treeview: null,
+            //treePanel: null,
             currentEditor: null,
             Start: function () {
                 var $this = this;
                 $this.currentEditor = tinymce.EditorManager.activeEditor;
-                var text = $this.currentEditor.selection.getContent({ format: 'html' });
-                $.when($F.LoadForm($this, "Insert Link", "template/form/inserthyperlink", "editor-dialog insert-link", { ClientAction: { IsModal: true } })
-                    ).then(function () {
-                        var form = $F.GetForm();
-                        $(form).find("#linktext").val(text);
-                        $F.AddIsRequiredValidation("linkurl", "Link url is required");
-                        $F.AddIsRequiredValidation("linktext", "Some link text is required");
-                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                        $F.DisableCommand("insertlink");
-                        $F.Show();
-                    });
+                var text = "";
+                var url = "";
+                var htmlText = $this.currentEditor.selection.getContent({ format: 'html' });
+                htmlText = $("<textarea/>").html(htmlText).text();
+                try{
+                    if ($(htmlText).prop("tagName") === "A") {
+                        text = $(htmlText).text();
+                        url = $(htmlText).attr("href");
+                    } else {
+                        text = htmlText;
+                    }
+                } catch (e) {
+                    text = htmlText;
+                }
+
+                var f = new $.fastnet$form("template/form/inserthyperlink", {
+                    Title: "Insert Link",
+                    OnCommand: function (form, cmd) {
+                        switch (cmd) {
+                            case "find-link":
+                                f.close();
+                                $T.BrowseForLink.Start();
+                                break;
+                        }
+                    }
+                });
+
+                f.fill({
+                    "linkurl": url,
+                    "linktext": text
+                });
+                f.addIsRequiredValidator("linkurl");
+                f.disableCommand("insertlink");
+                f.show();
+                
+                //$.when($F.LoadForm($this, "Insert Link", "template/form/inserthyperlink", "editor-dialog insert-link", { ClientAction: { IsModal: true } })
+                //    ).then(function () {
+                //        var form = $F.GetForm();
+                //        $(form).find("#linkurl").val(url);
+                //        $(form).find("#linktext").val(text);
+                //        $F.AddIsRequiredValidation("linkurl", "Link url is required");
+                //        $F.AddIsRequiredValidation("linktext", "Some link text is required");
+                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
+                //        $F.DisableCommand("insertlink");
+                //        $F.Show();
+                //    });
             },
             AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
                 if (totalErrors > 0) {
@@ -77,7 +309,8 @@
                 } else {
                     $F.EnableCommand("insertlink");
                 }
-            },
+            },        
+            pb: null,
             OnCommand: function (ctx, cmd) {
                 switch (cmd) {
                     case "insertlink":
@@ -90,8 +323,30 @@
                         ctx.currentEditor.execCommand("mceReplaceContent", 0, content);
                         $F.Close();
                         break;
+                    case "find-link":
+
+                        ctx.pb = new pageBrowser();
+                        ctx.pb.Show();
+                        //ctx.BrowseForLink();
+                        break;
+                    case "system-close":
+                    case "cancel":
+                        //if (ctx.currentForm === "find-link") {
+                        //    ctx.Start();
+                        //}
+                        break;
+                    default:
+                        alert("This feature is not implemented");
+                        break;
                 }
             },
+        },
+        BrowseForLink : {
+            Start: function() {
+                var pb = new pageBrowser();
+
+                pb.Show();
+            }
         },
         IsDirty: function () {
             var result = false;
@@ -103,7 +358,11 @@
             });
             return result;
         },
+
         OnBeforeContextMenuOpen: function (src) {
+            $cm.ClearMenuItems();
+            $cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
+            $cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
             var panel = $(src).closest(".editable-content");
             if (typeof panel !== "undefined" && panel !== null) {
                 //if ($(panel).hasClass("editor-open")) {
@@ -238,6 +497,16 @@
             $("table.mce-item-table").removeClass("mce-item-table");
             $("div.mce-resizehandle").remove();
             $("div[contenteditable='true'").removeAttr('contenteditable');
+        },
+        testtree: function () {
+            var form = $F.GetForm();
+            var treePanel = form.find(".browser-tree");
+            var alphaNode = $TV.AddNode(treePanel, { Title: "Alpha", UserData: 1 });
+            var alpha_1_node = $TV.AddNode(alphaNode, { Title: "Alpha-1", UserData: 2 });
+            var alpha_1_1_node = $TV.AddNode(alpha_1_node, { Title: "Alpha-1-1", UserData: 3 });
+            var betaNode = $TV.AddNode(treePanel, { Title: "Beta", UserData: 4 });
+            var gammaNode = $TV.AddNode(treePanel, { Title: "Gamma", UserData: 5 });
+            var deltaNode = $TV.AddNode(treePanel, { Title: "Delta", UserData: 6 });
         }
     };
     $(function () {

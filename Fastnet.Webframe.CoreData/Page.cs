@@ -46,7 +46,11 @@ namespace Fastnet.Webframe.CoreData
             get { return forwardLinks ?? (forwardLinks = new HashSet<Page>()); }
             set { forwardLinks = value; }
         }
-
+        [NotMapped]
+        public string Url
+        {
+            get { return string.Format("/page/{0}", PageId); }
+        }
         public virtual ICollection<Page> BackLinks { get; set; } // this page is hyperlinked from these pages
         public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
     }
@@ -61,6 +65,8 @@ namespace Fastnet.Webframe.CoreData
             }
             Debug.Print("Page: largest pk = {0}", largest);
             Page p = new Page { PageId = largest + 1 };
+            p.PageMarkup = new PageMarkup();
+            
             this.Pages.Add(p);
             return  p;         
         }

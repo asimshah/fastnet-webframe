@@ -12,7 +12,7 @@ namespace Fastnet.Webframe.Web
                         "~/Scripts/jquery-{version}.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-            "~/Scripts/jquery.validate*"));
+                "~/Scripts/jquery.validate*"));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
@@ -56,8 +56,11 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
                 .Include(
+                    "~/Scripts/jquery-ui-{version}.js",
+                    //"~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/fastnet/fastnet.contextmenu.js",
+                    "~/Scripts/fastnet/fastnet.treeview.js",
                     "~/Scripts/main/core.editor.js"
                 ));
 
@@ -72,6 +75,8 @@ namespace Fastnet.Webframe.Web
             bundles.Add(new StyleBundle("~/Content/css").Include(
                   "~/Content/font-awesome/css/font-awesome.min.css",
                   "~/Content/bootstrap.css",
+                  "~/Content/main/treeview.css",
+                  "~/Content/main/forms.css",
                   "~/Content/main/main.css"));
 
             bundles.Add(new StyleBundle("~/Content/datepicker/css").Include(
@@ -107,6 +112,11 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new StyleBundle("~/Content/identity/css").Include(
                 "~/Content/main/identity.css"
+                ));
+
+            bundles.Add(new StyleBundle("~/Content/editor/css").Include(
+                "~/Content/themes/base/all.css"
+                //"~/Content/datatables/css/jquery.datatables.css"
                 ));
         }
     }

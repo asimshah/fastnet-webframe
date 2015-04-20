@@ -69,7 +69,10 @@ namespace Fastnet.Webframe.Web.Common
             RegistrationConfirmation,
             UserProfile,
             //
-            InsertHyperlink
+            InsertHyperlink,
+            BrowseForLink,
+            //
+            TestForm
         }
         private formTypes type;
         //protected string templateFolder = HostingEnvironment.MapPath("~/Templates");
@@ -85,6 +88,8 @@ namespace Fastnet.Webframe.Web.Common
         public static readonly FormTemplate RegistrationConfirmation = new FormTemplate(formTypes.RegistrationConfirmation);
         public static readonly FormTemplate UserProfile = new FormTemplate(formTypes.UserProfile);
         public static readonly FormTemplate InsertHyperlink = new FormTemplate(formTypes.InsertHyperlink);
+        public static readonly FormTemplate BrowseForLink = new FormTemplate(formTypes.BrowseForLink);
+        public static readonly FormTemplate TestForm = new FormTemplate(formTypes.TestForm);
         private FormTemplate(formTypes ft)
         {
             type = ft;
@@ -93,6 +98,8 @@ namespace Fastnet.Webframe.Web.Common
         {
             switch (type)
             {
+                case formTypes.TestForm:
+                    return Path.Combine(templateFolder, "Forms");
                 case formTypes.Form:
                 case formTypes.ModalForm:
                     return Path.Combine(templateFolder, "Forms");
@@ -107,6 +114,7 @@ namespace Fastnet.Webframe.Web.Common
                 case formTypes.UserProfile:
                     return Path.Combine(templateFolder, "Forms", "Account");
                 case formTypes.InsertHyperlink:
+                case formTypes.BrowseForLink:
                     return Path.Combine(templateFolder, "Forms", "Editor");
                 default:
                     throw new ApplicationException("No root for form");
@@ -146,6 +154,10 @@ namespace Fastnet.Webframe.Web.Common
                     return UserProfile;
                 case formTypes.InsertHyperlink:
                     return InsertHyperlink;
+                case formTypes.BrowseForLink:
+                    return BrowseForLink;
+                case formTypes.TestForm:
+                    return TestForm;
             }
             throw new ArgumentOutOfRangeException("type");
         }

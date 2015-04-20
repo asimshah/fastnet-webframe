@@ -24,6 +24,22 @@ namespace Fastnet.Webframe.Web.Controllers
         private CoreDataContext DataContext = Core.GetDataContext();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private string CurrentMemberId
+        {
+            get
+            {
+                if (Session["member-id"] == null)
+                {
+                    return null;
+                }
+                return (string)Session["member-id"];
+            }
+            set
+            {
+                Session["member-id"] = value;
+                Debug.Print("recorded member {0}", value ?? "null");
+            }
+        }
         private string CurrentPageId
         {
             get { return (string)Session["current-page-id"]; }
@@ -86,8 +102,16 @@ namespace Fastnet.Webframe.Web.Controllers
                 Member admin = DataContext.Members.Single(m => m.IsAdministrator);
                 var user = await UserManager.FindByIdAsync(admin.Id);
                 await SignInManager.SignInAsync(user, false, false);
+                //RecordCurrentMember();
                 return RedirectToAction("Index");
             }
+            // **NB** I'm recording the member here because:
+            // 1. I have not found any way of recovering user information from an apicontroller
+            // 2. The user identity information is not updated till after the autologin sign in 
+            //    has completed the Redirect back to the Index method. IT IS PROBABLY
+            //    true that I can remove the following call to RecordCurrentMember() if
+            //    I decide to get rid of "AutologinAdmin" as it is done on login/logoff below)
+            RecordCurrentMember();
             if (id != null)
             {
                 this.CurrentPageId = id;
@@ -140,6 +164,7 @@ namespace Fastnet.Webframe.Web.Controllers
             AuthenticationManager.SignOut();
             this.InEditMode = false;
             this.CurrentPageId = null;
+            RecordCurrentMember();
             return RedirectToAction("Index");
             //PageModel pm = GetPageModel();// new PageModel(id);
             //return View("Index", pm);
@@ -190,6 +215,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
+                            RecordCurrentMember();
                             return Json(new { Success = true });
                         default:
                             return Json(new { Success = false, Error = statusToString(result) });
@@ -545,6 +571,11 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 return null;
             }
+        }
+        private void RecordCurrentMember()
+        {
+            Member m = GetCurrentMember();
+            CurrentMemberId = m == null ? null : m.Id;
         }
     }
 

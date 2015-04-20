@@ -1,0 +1,59 @@
+﻿<div tabindex="-1" class="modal fade" id="fn-3">
+    <div class="modal-dialog container-fluid">
+        <div class="modal-content">
+            <div class="section">
+                <div class="modal-header">
+                    <div>
+                        <button class="close" type="button" data-cmd="system-close" data-dismiss="modal"><span>×</span></button>                        <h4 class="modal-title">Test form</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="modal-body {{BodyClasses}}">
+                    <h4>Enter link url and text</h4>
+                    <div class="form-group" data-property="">
+                        <div class="input-group" y="">
+                            <!--<label for="linkurl">Link Url</label>-->
+                            <input class="form-control" id="linkurl" type="text" placeholder="link url" data-item="linkurl">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" data-cmd="find-link"><span class="fa fa-search"></span></button>
+                            </span>
+                        </div>
+
+                        <div class="message"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="browser-toolbar"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="browser-tree pull-left"></div>
+                        </div>
+                        <div class="col-xs-8">
+                            <div class="browser-folder-content ">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="modal-footer">
+                    <div>
+                        <button class="btn btn-sm btn-danger pull-left" data-cmd="delete-page">Delete Page</button>
+                        <button class="btn btn-sm btn-primary pull-left" data-cmd="add-new-page">Add New Page</button>
+                        <button class="btn btn-sm btn-primary" data-cmd="select-page">Select</button>
+                        <button class="btn btn-sm btn-default" data-cmd="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <span class="resize-grip hidden"></span>
+        </div>
+        <div class="block-outer hidden">
+            <div class="block-inner">
+                <i class="fa fa-cog fa-spin fa-3x block-spinner"></i>
+            </div>
+        </div>
+    </div>
+</div>
