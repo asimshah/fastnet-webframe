@@ -925,6 +925,7 @@
     <Content Include="Templates\Emails\AccountActivation.html" />
     <Content Include="Templates\Emails\PasswordReset.html" />
     <Content Include="Templates\Forms\Account\ActivationFailed.html" />
+    <Content Include="Templates\Forms\Account\ActivationSuccessful.html" />
     <Content Include="Templates\Forms\Account\ChangePassword.html" />
     <Content Include="Templates\Forms\Account\dwh\Register.html" />
     <Content Include="Templates\Forms\Account\Login.html" />
@@ -932,7 +933,6 @@
     <Content Include="Templates\Forms\Account\PasswordResetConfirmation.html" />
     <Content Include="Templates\Forms\Account\PasswordResetFailed.html" />
     <Content Include="Templates\Forms\Account\Register.html" />
-    <Content Include="Templates\Forms\Account\AdminSetup.html" />
     <Content Include="Templates\Forms\Account\UserProfile.html" />
     <Content Include="Templates\Forms\TestForm.html" />
     <Content Include="Templates\Forms\Editor\BrowseForLink.html" />

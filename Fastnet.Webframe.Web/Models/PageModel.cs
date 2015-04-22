@@ -16,7 +16,7 @@ namespace Fastnet.Webframe.Web.Models
     public abstract class ClientSideAction
     {
         public string Name { get; protected set; }
-        public bool IsModal { get; protected set; }
+        public bool IsModal { get; protected set; } // obsolete?
         public bool IsDialogue { get; protected set; }
         public ClientSideAction(ClientSideActions name, bool isDialogue, bool isModal = false)
         {
@@ -37,6 +37,9 @@ namespace Fastnet.Webframe.Web.Models
             ClientSideAction action = null;
             switch (name)
             {
+                case ClientSideActions.activationsuccessful:
+                    action = new ActivationSucceededDialogue();
+                    break;
                 case ClientSideActions.activationfailed:
                     action = new ActivationFailedDialogue();
                     break;
@@ -129,6 +132,15 @@ namespace Fastnet.Webframe.Web.Models
             this.LastName = member.LastName;
             MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 6);
             RequireComplexPassword = ApplicationSettings.Key("RequireComplexPassword", false);
+        }
+    }
+    public class ActivationSucceededDialogue : ClientSideAction
+    {
+       
+        public ActivationSucceededDialogue()
+            : base(ClientSideActions.activationsuccessful, true, true)
+        {
+
         }
     }
     public class ActivationFailedDialogue : ClientSideAction

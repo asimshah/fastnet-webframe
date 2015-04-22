@@ -156,7 +156,7 @@ body {
 
     .login-name {
         text-decoration: none;
-
+        cursor: pointer;
         &:hover {
             text-decoration: underline;
         }
@@ -219,90 +219,95 @@ body {
 .editor-dialog {
     font-size: small;
 
-    div[class*='col-xs'] {
-        padding-left: 8px;
-        padding-right: 8px;
-    }
+    &.store-browser {
 
-    .browser-separator {
-        display: none;
-        border: 1px solid black;
-        width: 2px;
-        height: 80px;
-    }
 
-    .browser-folder-content {
-        // background-color: lightgray;
-        padding: 8px;
-        //border: 1px solid red;
-        table {
-            td, th {
-                padding-left: 2px;
-            }
+        div[class*='col-xs'] {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
 
-            thead {
-                tr {
-                    border-bottom: 2px solid #444444;
-                    background-color: #aaaaaa;
-                    color: white;
-                }
-            }
+        .browser-separator {
+            display: none;
+            border: 1px solid black;
+            width: 2px;
+            height: 80px;
+        }
 
-            tbody {
-                &:before {
-                    content: "-";
-                    display: block;
-                    line-height: 0.25em;
-                    color: transparent;
+        .browser-folder-content {
+            // background-color: lightgray;
+            padding: 8px;
+            //border: 1px solid red;
+            table {
+                td, th {
+                    padding-left: 2px;
                 }
 
-                tr:nth-child(even) {
-                    background-color: #eeeeee;
-                }
-
-                td div {
-                    padding: 2px;
-                }
-            }
-
-            margin-top: -12px;
-            width: 100%;
-
-            td.url {
-                width: 20%;
-
-                div {
-                    cursor: pointer;
-                    border: 2px solid transparent;
-                    border-radius: 2px;
-                    &:hover {
-                        //border: 1px solid hsl(207.7, 56.4%, 45.9%);
-                        border: 2px solid hsl(207.7, 100%, 45.9%);
-                    }
-
-                    &.selected {
-                        //background-color: #337ab7;
-                        background-color: hsl(207, 75%, 64%);
+                thead {
+                    tr {
+                        border-bottom: 2px solid #444444;
+                        background-color: #aaaaaa;
                         color: white;
                     }
                 }
-            }
 
-            td.name {
-                width: 70%;
-            }
+                tbody {
+                    &:before {
+                        content: "-";
+                        display: block;
+                        line-height: 0.25em;
+                        color: transparent;
+                    }
 
-            td.side-content {
-                width: 10%;
+                    tr:nth-child(even) {
+                        background-color: #eeeeee;
+                    }
+
+                    td div {
+                        padding: 2px;
+                    }
+                }
+
+                margin-top: -12px;
+                width: 100%;
+
+                td.url {
+                    width: 20%;
+
+                    div {
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        border-radius: 2px;
+
+                        &:hover {
+                            //border: 1px solid hsl(207.7, 56.4%, 45.9%);
+                            border: 2px solid hsl(207.7, 100%, 45.9%);
+                        }
+
+                        &.selected {
+                            //background-color: #337ab7;
+                            background-color: hsl(207, 75%, 64%);
+                            color: white;
+                        }
+                    }
+                }
+
+                td.name {
+                    width: 70%;
+                }
+
+                td.side-content {
+                    width: 10%;
+                }
             }
         }
-    }
 
-    .browser-tree {
-        padding-right: 8px;
-        margin-right: 8px;
-        //background-color: bisque;
-        //border-right: 1px solid #dedede;
+        .browser-tree {
+            padding-right: 8px;
+            margin-right: 8px;
+            //background-color: bisque;
+            //border-right: 1px solid #dedede;
+        }
     }
 }
 

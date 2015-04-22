@@ -12,6 +12,10 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
+.modal-dialog .modal-content .modal-header.resizable {
+  border-top: 4px solid #04b01b;
+  border-radius: 4px;
+}
 .modal-dialog .modal-content .modal-body textarea.form-control {
   box-shadow: none;
   border-style: none;

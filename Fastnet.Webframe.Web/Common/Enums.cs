@@ -25,6 +25,7 @@ namespace Fastnet.Webframe.Web.Common
     {
         register,
         login,
+        activationsuccessful,
         activationfailed,
         userprofile,
         passwordreset,

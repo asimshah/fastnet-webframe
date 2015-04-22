@@ -56,9 +56,10 @@ namespace Fastnet.Webframe.Web.Common
         private enum formTypes
         {
             None,
-            Form,
-            ModalForm,
+            //Form,
+            //ModalForm,
             //
+            ActivationSuccessful,
             ActivationFailed,
             ChangePassword,
             Login,
@@ -76,9 +77,10 @@ namespace Fastnet.Webframe.Web.Common
         }
         private formTypes type;
         //protected string templateFolder = HostingEnvironment.MapPath("~/Templates");
-        public static readonly FormTemplate Form = new FormTemplate(formTypes.Form);
-        public static readonly FormTemplate ModalForm = new FormTemplate(formTypes.ModalForm);
+        //public static readonly FormTemplate Form = new FormTemplate(formTypes.Form);
+        //public static readonly FormTemplate ModalForm = new FormTemplate(formTypes.ModalForm);
         public static readonly FormTemplate ActivationFailed = new FormTemplate(formTypes.ActivationFailed);
+        public static readonly FormTemplate ActivationSuccessful = new FormTemplate(formTypes.ActivationSuccessful);
         public static readonly FormTemplate ChangePassword = new FormTemplate(formTypes.ChangePassword);
         public static readonly FormTemplate Login = new FormTemplate(formTypes.Login);
         public static readonly FormTemplate PasswordReset = new FormTemplate(formTypes.PasswordReset);
@@ -100,10 +102,11 @@ namespace Fastnet.Webframe.Web.Common
             {
                 case formTypes.TestForm:
                     return Path.Combine(templateFolder, "Forms");
-                case formTypes.Form:
-                case formTypes.ModalForm:
-                    return Path.Combine(templateFolder, "Forms");
+                //case formTypes.Form:
+                //case formTypes.ModalForm:
+                //    return Path.Combine(templateFolder, "Forms");
                 case formTypes.ActivationFailed:
+                case formTypes.ActivationSuccessful:
                 case formTypes.ChangePassword:
                 case formTypes.Login:
                 case formTypes.PasswordReset:
@@ -122,7 +125,6 @@ namespace Fastnet.Webframe.Web.Common
         }
         protected override string GetTemplateFilename()
         {
-
             return string.Format("{0}.html", type.ToString().ToLower());
         }
         public static FormTemplate FromString(string type)
@@ -130,16 +132,19 @@ namespace Fastnet.Webframe.Web.Common
             formTypes ft = (formTypes)Enum.Parse(typeof(formTypes), type, true);
             switch(ft)
             {
+                case formTypes.ActivationSuccessful:
+                    return ActivationSuccessful;
                 case formTypes.ActivationFailed:
                     return ActivationFailed;
                 case formTypes.ChangePassword:
                     return ChangePassword;
-                case formTypes.Form:
-                    return Form;
+                //case formTypes.Form:
+                //    return Form;
+
+                //case formTypes.ModalForm:
+                //    return ModalForm;
                 case formTypes.Login:
                     return Login;
-                case formTypes.ModalForm:
-                    return ModalForm;
                 case formTypes.PasswordReset:
                     return PasswordReset;
                 case formTypes.PasswordResetConfirmation:

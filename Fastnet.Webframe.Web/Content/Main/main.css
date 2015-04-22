@@ -131,6 +131,7 @@ body {
 }
 .login-status .login-name {
   text-decoration: none;
+  cursor: pointer;
 }
 .login-status .login-name:hover {
   text-decoration: underline;
@@ -174,66 +175,66 @@ body {
 .editor-dialog {
   font-size: small;
 }
-.editor-dialog div[class*='col-xs'] {
+.editor-dialog.store-browser div[class*='col-xs'] {
   padding-left: 8px;
   padding-right: 8px;
 }
-.editor-dialog .browser-separator {
+.editor-dialog.store-browser .browser-separator {
   display: none;
   border: 1px solid black;
   width: 2px;
   height: 80px;
 }
-.editor-dialog .browser-folder-content {
+.editor-dialog.store-browser .browser-folder-content {
   padding: 8px;
 }
-.editor-dialog .browser-folder-content table {
+.editor-dialog.store-browser .browser-folder-content table {
   margin-top: -12px;
   width: 100%;
 }
-.editor-dialog .browser-folder-content table td,
-.editor-dialog .browser-folder-content table th {
+.editor-dialog.store-browser .browser-folder-content table td,
+.editor-dialog.store-browser .browser-folder-content table th {
   padding-left: 2px;
 }
-.editor-dialog .browser-folder-content table thead tr {
+.editor-dialog.store-browser .browser-folder-content table thead tr {
   border-bottom: 2px solid #444444;
   background-color: #aaaaaa;
   color: white;
 }
-.editor-dialog .browser-folder-content table tbody:before {
+.editor-dialog.store-browser .browser-folder-content table tbody:before {
   content: "-";
   display: block;
   line-height: 0.25em;
   color: transparent;
 }
-.editor-dialog .browser-folder-content table tbody tr:nth-child(even) {
+.editor-dialog.store-browser .browser-folder-content table tbody tr:nth-child(even) {
   background-color: #eeeeee;
 }
-.editor-dialog .browser-folder-content table tbody td div {
+.editor-dialog.store-browser .browser-folder-content table tbody td div {
   padding: 2px;
 }
-.editor-dialog .browser-folder-content table td.url {
+.editor-dialog.store-browser .browser-folder-content table td.url {
   width: 20%;
 }
-.editor-dialog .browser-folder-content table td.url div {
+.editor-dialog.store-browser .browser-folder-content table td.url div {
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 2px;
 }
-.editor-dialog .browser-folder-content table td.url div:hover {
+.editor-dialog.store-browser .browser-folder-content table td.url div:hover {
   border: 2px solid #007eea;
 }
-.editor-dialog .browser-folder-content table td.url div.selected {
+.editor-dialog.store-browser .browser-folder-content table td.url div.selected {
   background-color: #5eaae8;
   color: white;
 }
-.editor-dialog .browser-folder-content table td.name {
+.editor-dialog.store-browser .browser-folder-content table td.name {
   width: 70%;
 }
-.editor-dialog .browser-folder-content table td.side-content {
+.editor-dialog.store-browser .browser-folder-content table td.side-content {
   width: 10%;
 }
-.editor-dialog .browser-tree {
+.editor-dialog.store-browser .browser-tree {
   padding-right: 8px;
   margin-right: 8px;
 }

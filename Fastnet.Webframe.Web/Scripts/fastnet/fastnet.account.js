@@ -1,6 +1,112 @@
 ﻿(function ($) {
     var $T;
     var $U;
+    function updateCurrentUserDisplay() {
+        //setTimeout(function () {
+        //    $.when(
+        //    $U.AjaxGet({ url: "account/currentuser" }, true)
+        //    ).then(function (r) {
+        //        if (r.Authenticated) {
+        //            var userEmailAddress = r.EmailAddress;
+        //            var userName = r.Name;
+        //            $(".login-name").html(userName).removeClass('hide');
+        //        } else {
+        //            $(".login-name").addClass('hide').html("");
+        //        }
+        //    });
+        //}, 0);
+        $.when(
+        $U.AjaxGet({ url: "account/currentuser" }, true)
+        ).then(function (r) {
+            if (r.Authenticated) {
+                var userEmailAddress = r.EmailAddress;
+                var userName = r.Name;
+                $(".login-name").html(userName).removeClass('hide');
+            } else {
+                $(".login-name").addClass('hide').html("");
+            }
+        });
+    };
+    function validateEmailAddress(form, email, errorMessage, errors) {
+        // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
+        //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+        var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
+        r = emailReg.test(email);
+        if (!r) {
+            errors.push(errorMessage);
+        }
+        return r;
+    };
+    function validEmailAddressNotInUse(form, val, errorMessage, errors) {
+        var deferred = new $.Deferred();
+        $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
+            ).then(function (data) {
+                $U.Debug("validator with message \"{0}\" called", errorMessage);
+                if (data.InUse) {
+                    errors.push(errorMessage);
+                    deferred.reject(false);
+                } else {
+                    deferred.resolve(true);
+                }
+            });
+        return deferred.promise();
+    };
+    function validEmailAddressInUse(form, val, errorMessage, errors) {
+        var deferred = new $.Deferred();
+        $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
+            ).then(function (data) {
+                $U.Debug("validator with message \"{0}\" called", errorMessage);
+                if (data.InUse) {
+                    deferred.resolve(true);
+                } else {
+                    errors.push(errorMessage);
+                    deferred.reject(false);
+                }
+            });
+        return deferred.promise();
+    };
+    function validatePasswordComplexity(form, val, errorMessage, errors) {
+        // (?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$
+        var complexPassword = $T.options.ClientAction.RequireComplexPassword;
+        var r = false;
+        if (!complexPassword) {
+            r = true;
+        } else {
+            var complexReg = new RegExp(/(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/);
+            r = complexReg.test(val);
+        }
+        if (!r) {
+            errors.push(errorMessage);
+        }
+        return r;
+    };
+    function validatePasswordLength(form, val, errorMessage, errors) {
+        var minlength = $T.options.ClientAction.MinimumPasswordLength;
+        var errorMessage = $U.Format(errorMessage, minlength);
+        r = val.length >= minlength;
+        if (!r) {
+            errors.push(errorMessage);
+        }
+        return r;
+    };
+    function validateConfirmPassword(form, val, errorMessage, errors) {
+        var password = form.getData("password");// $F.GetFormData("password");// ctx.dataValues["password"];
+        var r = !(val === null || val === "" || typeof password === "undefined" || password === null || val !== password);
+        if (!r) {
+            errors.push(errorMessage);
+        }
+        return r;
+    };
+    function _loadModel(name, onComplete) {
+        var url = $U.Format("model/{0}", name);
+        $.when($U.AjaxGet({ url: url }, true)
+            ).then(function (r) {
+                $T.options = r;
+                if (typeof onComplete !== "undefined" && $.isFunction(onComplete)) {
+                    onComplete();
+                }
+            });
+    }
     $.fastnet$account = {
         onComplete: null,
         options: null,
@@ -23,6 +129,9 @@
                 case "activationfailed":
                     $T.ActivationFailed.Start();
                     break;
+                case "activationsuccessful":
+                    $T.ActivationSuccessful.Start();
+                    break;
                 case "userprofile":
                     $T.UserProfile.Start();
                     break;
@@ -38,420 +147,447 @@
                     break;
             }
         },
-        ActivationFailed: {
+        ActivationSuccessful: {
             Start: function () {
-                var $this = this;
-                $.when($F.LoadForm($this, "Activation Failed", "template/form/activationfailed", "identity-dialog activation-failed", $T.options)
-                    ).then(function () {
-                        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
-                        $F.Show();
-                    });
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    default:
-                        break;
-                }
+                var asf = new $.fastnet$form("template/form/activationsuccessful", {
+                    Title: "Activation Successful",
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "close":
+                                asf.close();
+                                break;
+                        }
+                    }
+                });
+                asf.show();
             }
         },
-        ChangePassword:  {
-            Start: function() {
-                var $this = this;
-                $.when($F.LoadForm($this, "Change Password", "template/form/changepassword", "identity-dialog changepassword", $T.options)
-                    ).then(function () {
-                        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
-                        $F.AddValidation("password", $T.ValidatePasswordLength, "Minimum length for a password is {0} chars");
-                        $F.AddValidation("password", $T.ValidatePasswordComplexity, "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
+        ActivationFailed: {
+            Start: function () {
+                var aff = new $.fastnet$form("template/form/activationfailed", {
+                    Title: "Activation Failed",
+                    AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress,
+                    OnCommand: function (f, cmd) {
 
-                        $F.AddValidation("confirm-password", $T.ValidateConfirmPassword, "Passwords do not match");
-                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                        $F.DisableCommand("save-changes");
-                        $F.Show();
-                    });
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "save-changes":
-                        ctx.SaveChanges(ctx);
-                        break;
-                }
-            },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0) {// || totalItems !== totalWithState) {
-                    $F.DisableCommand("save-changes");
-                } else {
-                    $F.EnableCommand("save-changes");
-                }
-            },
-            SaveChanges: function (ctx) {
-                var emailAddress = $T.options.ClientAction.EmailAddress;
-                var password = $F.GetFormData("password");
-                var postData = { emailAddress: emailAddress, password: password };
-                $.when(
-                    $U.AjaxPost({ url: "account/passwordreset", data: postData })
-                    ).then(function (result) {
-                        var success = result.Success;
-                        if (success) {
-                            $F.Close();
-                            if ($.isFunction($T.onComplete)) {
-                                $T.onComplete();
-                            }
-                        } else {
-                            $F.GetForm().find(".error").html(result.Error);
-                        }
-                    });
+                    }
+                });
+                aff.show();
             }
+        },
+        ChangePassword: {
+            Start: function () {
+                function changePassword(cpf) {
+                    var emailAddress = $T.options.ClientAction.EmailAddress;
+                    var data = cpf.getData();
+                    var password = data.password;// $F.GetFormData("password");
+                    var postData = { emailAddress: emailAddress, password: password };
+                    $.when(
+                        $U.AjaxPost({ url: "account/passwordreset", data: postData })
+                        ).then(function (result) {
+                            var success = result.Success;
+                            if (success) {
+                                cpf.close();
+                                //$F.Close();
+                                //if ($.isFunction($T.onComplete)) {
+                                //    $T.onComplete();
+                                //}
+                            } else {
+                                cpf.find(".error").html(result.Error);
+                                //$F.GetForm().find(".error").html(result.Error);
+                            }
+                        });
+                }
+                var cpf = new $.fastnet$form("template/form/changepassword", {
+                    Title: "Change Password",
+                    EmailAddress: $T.options.ClientAction.EmailAddress,
+                    AfterItemValidation: function (r) {
+                        if (cpf.isValid() === true) {
+                            cpf.enableCommand("save-changes");
+                        } else {
+                            cpf.disableCommand("save-changes");
+                        }
+                    },
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "save-changes":
+                                changePassword(cpf);
+                                break;
+                        }
+                    }
+                });
+                cpf.addIsRequiredValidator("password", "A password is required")
+                cpf.addValidators("password", [
+                    {
+                        func: validatePasswordLength,
+                        isDeferred: false,
+                        errorMessage: "Minimum length for a password is {0} chars"
+                    },
+                    {
+                        func: validatePasswordComplexity,
+                        isDeferred: true,
+                        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
+                    }
+                ]);
+                cpf.addValidator("confirm-password",
+                    {
+                        func: validateConfirmPassword,
+                        isDeferred: false,
+                        errorMessage: "Passwords do not match"
+                    }
+                );
+                cpf.disableCommand("save-changes");
+                cpf.show();
+                var $this = this;
+                //$.when($F.LoadForm($this, "Change Password", "template/form/changepassword", "identity-dialog changepassword", $T.options)
+                //    ).then(function () {
+                //        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
+                //        $F.AddValidation("password", $T.ValidatePasswordLength, "Minimum length for a password is {0} chars");
+                //        $F.AddValidation("password", $T.ValidatePasswordComplexity, "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
+
+                //        $F.AddValidation("confirm-password", $T.ValidateConfirmPassword, "Passwords do not match");
+                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
+                //        $F.DisableCommand("save-changes");
+                //        $F.Show();
+                //    });
+            },
         },
         Login: {
             Start: function () {
-                var $this = this;
-                $.when($F.LoadForm($this, "Login", "template/form/login", "identity-dialog login", $T.options)
-                    ).then(function () {
-                        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
-                        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
-                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                        $F.DisableCommand("login");
-                        $F.Show();
-                        //setTimeout(function () {
-                        //    setTimeout(function () {
-                        //        $F.UnBlock();
-                        //    }, 5000);
-                        //    $F.Block();
-                        //}, 3000);
-                    });
-
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "login":
-                        ctx.Login(ctx);
-                        break;
-                    case "passwordreset":
-                    case "register":
-                        $T.SwitchDialogue(cmd);
-                        break;
-                }
-            },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0 || totalItems !== totalWithState) {
-                    $F.DisableCommand("login");
-                } else {
-                    $F.EnableCommand("login");
-                }
-            },
-            Login: function (ctx) {
-                var emailAddress = $F.GetFormData("email");
-                var password = $F.GetFormData("password");
-                var postData = { emailAddress: emailAddress, password: password };
-                $.when(
-                    $U.AjaxPost({ url: "account/login", data: postData })
-                    ).then(function (result) {
-                        var success = result.Success;
-                        if (success) {
-                            $F.Close();
-                            if ($.isFunction($T.onComplete)) {
-                                $T.onComplete();
+                function login(lf) {
+                    var data = lf.getData();
+                    var emailAddress = data.email;
+                    var password = data.password;
+                    var postData = { emailAddress: emailAddress, password: password };
+                    $.when(
+                        $U.AjaxPost({ url: "account/login", data: postData })
+                        ).then(function (result) {
+                            var success = result.Success;
+                            if (success) {
+                                lf.close();
+                                updateCurrentUserDisplay();
+                                //if ($.isFunction($T.onComplete)) {
+                                //    $T.onComplete();
+                                //}
+                            } else {
+                                lf.find(".error").html(result.Error);
                             }
-                        } else {
-                            $F.GetForm().find(".error").html(result.Error);
+                        });
+                };
+                var lf = new $.fastnet$form("template/form/login", {
+                    Title: "Login",
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "login":
+                                login(lf);
+                                //ctx.Login(ctx);
+                                break;
+                            case "passwordreset":
+                                lf.close();
+                                _loadModel("passwordreset", $T.ResetPassword.Start);
+                                break;
+                            case "register":
+                                //var url = $U.Format("model/{0}", dialoguename);
+                                lf.close();
+                                _loadModel("register", $T.Registration.Start);
+                                //$T.SwitchDialogue(cmd);
+                                break;
                         }
-                    });
+                    },
+                    AfterItemValidation: function (r) {
+                        if (lf.isValid() === true) {
+                            lf.enableCommand("login");
+                        } else {
+                            lf.disableCommand("login");
+                        }
+                    }
+                });
+                lf.addIsRequiredValidator("email", "An email address is required");
+                lf.addIsRequiredValidator("password", "A password is required");
+                lf.disableCommand("login");
+                lf.show();
+                //var $this = this;
+                //$.when($F.LoadForm($this, "Login", "template/form/login", "identity-dialog login", $T.options)
+                //    ).then(function () {
+                //        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
+                //        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
+                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
+                //        $F.DisableCommand("login");
+                //        $F.Show();
+                //    });
             },
         },
         PasswordResetFailed: {
             Start: function () {
-                var $this = this;
-                $.when($F.LoadForm($this, "Password Reset Failed", "template/form/passwordresetfailed", "identity-dialog passwordreset-failed", $T.options)
-                    ).then(function () {
-                        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
-                        $F.Show();
-                    });
+                var prff = new $.fastnet$form("template/form/passwordresetfailed", {
+                    Title: "Password Reset Failed",
+                    AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress
+                });
+                prff.show();
+                //var $this = this;
+                //$.when($F.LoadForm($this, "Password Reset Failed", "template/form/passwordresetfailed", "identity-dialog passwordreset-failed", $T.options)
+                //    ).then(function () {
+                //        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
+                //        $F.Show();
+                //    });
             },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    default:
-                        break;
-                }
-            }
         },
         Registration: {
-            form: null,
-            dataValues: {},
-            validationFunctions: {},
+            //form: null,
+            //dataValues: {},
+            //validationFunctions: {},
             Start: function () {
-                var $this = this;
-                $.when($F.LoadForm($this, "Registration", "template/form/register", "identity-dialog registration", $T.options)
-                    ).then(function () {
-                        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
-                        $F.AddValidation("email", $T.ValidateEmailAddress, "This is not a valid email address");
-                        $F.AddValidation("email", $this.ValidEmailAddressNotInUse, "This email address is already in use");
-
-                        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
-                        $F.AddValidation("password", $T.ValidatePasswordLength, "Minimum length for a password is {0} chars");
-                        $F.AddValidation("password", $T.ValidatePasswordComplexity, "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
-
-                        $F.AddValidation("confirm-password", $T.ValidateConfirmPassword, "Passwords do not match");
-                        $F.AddValidation("first-name", $T.ValidateIsRequired, "A first name is required");
-                        $F.AddValidation("last-name", $T.ValidateIsRequired, "A last name is required");
-
-                        if ($T.options.Customer.Customer === "dwh") {
-                            $F.AddValidation("date-of-birth", $T.ValidateIsRequired, "A date of birth is required in order to valid BMC membership");
-                            $F.AddValidation("bmc-membership", $T.ValidateIsRequired, "BMC membership is required to register on this site");
-                        }
-
-                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                        $F.DisableCommand("register");
-                        $F.Show();
-                    });
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "register":
-                        ctx.Register(ctx);
-                        break;
-                    case "registration-close":
-                        if ($.isFunction($T.onComplete)) {
-                            $T.onComplete();
-                        }
-                        break;
-                }
-            },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0 || totalItems !== totalWithState) {
-                    $F.DisableCommand("register");
-                } else {
-                    $F.EnableCommand("register");
-                }
-            },
-            Confirmation: function (emailaddress) {
-                var $this = this;
-                $.when($F.LoadForm($this, "Registration Confirmed", "template/form/registrationconfirmation", "identity-dialog registration", $T.options, { EmailAddress: emailaddress })
-                    ).then(function () {
-                        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
-                        $F.Show();
-                    });
-            },
-            Register: function (ctx) {
-                // gather data
-                var emailAddress = $F.GetFormData("email");
-                var password = $F.GetFormData("password");
-                var firstName = $F.GetFormData("first-name");
-                var lastName = $F.GetFormData("last-name");
-                var postData = { emailAddress: emailAddress, password: password, firstName: firstName, lastName: lastName };
-                if ($T.options.Customer === "dwh") {
-                    var dateOfBirth = $F.GetFormData("date-of-birth");
-                    var bmcMembership = $F.GetFormData("bmc-membership");
-                    postData["dateOfBirth"] = dateOfBirth;
-                    postData["bmcMembership"] = bmcMembership;
-                }
-                $F.Block();
-                $.when(
-                    $U.AjaxPost({ url: "account/register", data: postData })
-                    ).then(function (result) {
-                        $F.UnBlock();
-                        var success = result.Success;
-                        if (success) {
-                            $F.Close();
-                            ctx.Confirmation(emailAddress);
-                            //if ($.isFunction($T.onComplete)) {
-                            //    $T.onComplete();
-                            //}
+                function register(f) {
+                    // gather data
+                    var data = f.getData();
+                    var emailAddress = data.email;// $F.GetFormData("email");
+                    var password = data.password;//$F.GetFormData("password");
+                    var firstName = data["first-name"];//$F.GetFormData("first-name");
+                    var lastName = data["last-name"];//$F.GetFormData("last-name");
+                    var postData = { emailAddress: emailAddress, password: password, firstName: firstName, lastName: lastName };
+                    //if ($T.options.Customer === "dwh") {
+                    //    var dateOfBirth = $F.GetFormData("date-of-birth");
+                    //    var bmcMembership = $F.GetFormData("bmc-membership");
+                    //    postData["dateOfBirth"] = dateOfBirth;
+                    //    postData["bmcMembership"] = bmcMembership;
+                    //}
+                    f.block();
+                    $.when(
+                        $U.AjaxPost({ url: "account/register", data: postData })
+                        ).then(function (result) {
+                            f.unBlock();
+                            var success = result.Success;
+                            if (success) {
+                                f.close();
+                                var cf = new $.fastnet$form("template/form/registrationconfirmation", {
+                                    Title: "Registration Confirmed",
+                                    EmailAddress: emailAddress,
+                                    OnCommand: function (tf, cmd) {
+                                        switch (cmd) {
+                                            case "registration-close":
+                                                cf.close();
+                                                break;
+                                        }
+                                    }
+                                });
+                                cf.show();
+                            } else {
+                                f.find(".error").html(result.Error);
+                            }
+                        });
+                };
+                var rf = new $.fastnet$form("template/form/register", {
+                    Title: "Registration",
+                    AfterItemValidation: function (r) {
+                        if (rf.isValid() === true) {
+                            rf.enableCommand("register");
                         } else {
-                            $F.GetForm().find(".error").html(result.Error);
+                            rf.disableCommand("register");
                         }
-                    });
+                    },
+                    OnCommand: function (form, cmd) {
+                        switch (cmd) {
+                            case "register":
+                                register(form);
+                                break;
+                            case "registration-close":
+                                if ($.isFunction($T.onComplete)) {
+                                    $T.onComplete();
+                                }
+                                break;
+                        }
+                    }
+                });
+                rf.addIsRequiredValidator("email", "An email address is required");
+                rf.addValidators("email", [
+                    {
+                        func: validateEmailAddress,
+                        isDeferred: false,
+                        errorMessage: "This is not a valid email address"
+                    },
+                    {
+                        func: validEmailAddressNotInUse,
+                        isDeferred: true,
+                        errorMessage: "This email address is already in use"
+                    }
+                ]);
+                rf.addIsRequiredValidator("password", "A password is required");
+                rf.addValidators("password", [
+                    {
+                        func: validatePasswordLength,
+                        isDeferred: false,
+                        errorMessage: "Minimum length for a password is {0} chars"
+                    },
+                    {
+                        func: validatePasswordComplexity,
+                        isDeferred: true,
+                        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
+                    }
+                ])
+                rf.addValidator("confirm-password",
+                    {
+                        func: validateConfirmPassword,
+                        isDeferred: false,
+                        errorMessage: "Passwords do not match"
+                    }
+                );
+                rf.addIsRequiredValidator("first-name", "A first name is required");
+                rf.addIsRequiredValidator("last-name", "A last name is required");
+                rf.disableCommand("register");
+                rf.show();
             },
-            ValidEmailAddressNotInUse: function (ctx, val, formitem, errorMessage) {
-                return $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val })
-                    ).then(function (data) {
-                        var inUse = data.InUse;
-                        return $F.ApplyValidation(formitem, function () {
-                            return !inUse;
-                        }, errorMessage);
-                    });
-            }
         },
         ResetPassword: {
             Start: function () {
-                var $this = this;
-                $.when($F.LoadForm($this, "Password Reset", "template/form/passwordreset", "identity-dialog passwordreset", $T.options)
-                    ).then(function () {
-                        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
-                        $F.AddValidation("email", $T.ValidateEmailAddress, "This is not a valid email address");
-                        $F.AddValidation("email", $this.ValidEmailAddressInUse, "This email address not recognised");
-                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                        $F.DisableCommand("request-reset");
-                        $F.Show();
-                    });
-            },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0) {
-                    $F.DisableCommand("request-reset");
-                } else {
-                    $F.EnableCommand("request-reset");
-                }
-            },
-            Confirmation: function (emailaddress) {
-                var $this = this;
-                $.when($F.LoadForm($this, "Reset Email Sent", "template/form/passwordresetconfirmation", "identity-dialog passwordresetconfirmation", $T.options, { EmailAddress: emailaddress })
-                    ).then(function () {
-                        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
-                        $F.Show();
-                    });
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "request-reset":
-                        ctx.RequestPasswordReset(ctx);
-                        break;
-                    case "request-reset-close":
-                        if ($.isFunction($T.onComplete)) {
-                            $T.onComplete();
-                        }
-                }
-            },
-            RequestPasswordReset: function(ctx) {
-                var emailAddress = $F.GetFormData("email");
-                var postData = { emailAddress: emailAddress };
-                $F.Block();
-                $.when($U.AjaxPost({ url: "account/requestpasswordreset", data: postData })
-                    ).then(function (result) {
-                        $F.UnBlock();
-                        var success = result.Success;
-                        if (success) {
-                            $F.Close();
-                            ctx.Confirmation(emailAddress);
+                function requestPasswordResetEmail(f) {
+                    var data = f.getData();
+                    var emailAddress = data.email;// $F.GetFormData("email");
+                    var postData = { emailAddress: emailAddress };
+                    f.block();
+                    $.when($U.AjaxPost({ url: "account/requestpasswordreset", data: postData })
+                        ).then(function (result) {
+                            f.unBlock();
+                            var success = result.Success;
+                            if (success) {
+                                f.close();
+                                //ctx.Confirmation(emailAddress);
+                                var cf = new $.fastnet$form("template/form/passwordresetconfirmation", {
+                                    Title: "Reset Email Sent",
+                                    EmailAddress: emailAddress,
+                                    OnCommand: function (tf, cmd) {
+                                        switch (cmd) {
+                                            case "request-reset-close":
+                                                cf.close();
+                                                break;
+                                        }
+                                    }
+                                });
+                                cf.show();
+                            } else {
+                                f.find(".error").html(result.Error);
+                            }
+                        });
+                };
+                var rpf = new $.fastnet$form("template/form/passwordreset", {
+                    Title: "Password Reset",
+                    AfterItemValidation: function (r) {
+                        if (rpf.isValid() === true) {
+                            rpf.enableCommand("request-reset");
                         } else {
-                            $F.GetForm().find(".error").html(result.Error);
+                            rpf.disableCommand("request-reset");
                         }
-                    });
+                    },
+                    OnCommand: function (form, cmd) {
+                        switch (cmd) {
+                            case "request-reset":
+                                requestPasswordResetEmail(rpf);
+                                break;
+                        }
+                    }
+                });
+                rpf.addIsRequiredValidator("email", "An email address is required");
+                rpf.addValidators("email", [
+                    {
+                        func: validateEmailAddress,
+                        isDeferred: false,
+                        errorMessage: "This is not a valid email address"
+                    },
+                    {
+                        func: validEmailAddressInUse,
+                        isDeferred: true,
+                        errorMessage: "This email address not recognised"
+                    }
+                ]);
+                rpf.disableCommand("request-reset");
+                rpf.show();
+                //var $this = this;
+                //$.when($F.LoadForm($this, "Password Reset", "template/form/passwordreset", "identity-dialog passwordreset", $T.options)
+                //    ).then(function () {
+                //        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
+                //        $F.AddValidation("email", $T.ValidateEmailAddress, "This is not a valid email address");
+                //        $F.AddValidation("email", $this.ValidEmailAddressInUse, "This email address not recognised");
+                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
+                //        $F.DisableCommand("request-reset");
+                //        $F.Show();
+                //    });
             },
-            ValidEmailAddressInUse: function (ctx, val, formitem, errorMessage) {
-                return $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val })
-                    ).then(function (data) {
-                        var inUse = data.InUse;
-                        return $F.ApplyValidation(formitem, function () {
-                            return inUse;
-                        }, errorMessage);
-                    });
-            }
         },
         UserProfile: {
             emailAddress: null,
             Start: function () {
+                function updateUserProfile(upf) {
+                    var data = upf.getData();
+                    var firstName = data["first-name"];//$F.GetFormData("first-name");
+                    var lastName = data["last-name"];//$F.GetFormData("last-name");
+                    var emailAddress = $T.options.ClientAction.EmailAddress;//ctx.emailAddress;
+                    $U.Debug("save {0} {1} {2}", emailAddress, firstName, lastName);
+                    var postData = { emailAddress: emailAddress, firstName: firstName, lastName: lastName };
+                    $.when(
+                        $U.AjaxPost({ url: "account/updateuser", data: postData })
+                        ).then(function (result) {
+                            var success = result.Success;
+                            if (success) {
+                                updateCurrentUserDisplay();
+                                upf.close();
+                                //$F.Close();
+                            } else {
+                                upf.find(".error").html(result.Error);
+                                //$F.GetForm().find(".error").html(result.Error);
+                            }
+                        });
+                }
                 var $this = this;
                 var url = "model/permitted/userprofile";
-                $.when($U.AjaxGet({ url: url })
+                $.when($U.AjaxGet({ url: url }, true)
                     ).then(function (result) {
                         if (result.Permitted) {
-                            url = "model/userprofile";
-                            $.when($U.AjaxGet({ url: url })).then(function (r) {
-                                $T.options = r;
-                                $this.emailAddress = $T.options.ClientAction.EmailAddress;
-                                $.when($F.LoadForm($this, "User Profile", "template/form/userprofile", "identity-dialog uerprofile", $T.options, $T.options.ClientAction)
-                                    ).then(function () {
-                                        $F.AddValidation("first-name", $T.ValidateIsRequired, "A first name is required");
-                                        $F.AddValidation("last-name", $T.ValidateIsRequired, "A last name is required");
-                                        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                                        $F.DisableCommand("save-changes");
-                                        $F.Show();
-                                    });
+                            _loadModel("userprofile", function () {
+                                var upf = new $.fastnet$form("template/form/userprofile", {
+                                    Title: "User Profile",
+                                    EmailAddress: $T.options.ClientAction.EmailAddress,
+                                    FirstName: $T.options.ClientAction.FirstName,
+                                    LastName: $T.options.ClientAction.LastName,
+                                    AfterItemValidation: function (r) {
+                                        if (upf.isValid() === true) {
+                                            upf.enableCommand("save-changes");
+                                        } else {
+                                            upf.disableCommand("save-changes");
+                                        }
+                                    },
+                                    OnCommand: function (f, cmd) {
+                                        switch (cmd) {
+                                            case "save-changes":
+                                                updateUserProfile(upf);
+                                                break;
+                                        }
+                                    }
+                                });
+                                upf.addIsRequiredValidator("first-name", "A first name is required");
+                                upf.addIsRequiredValidator("last-name", "A last name is required");
+                                upf.disableCommand("save-changes");
+                                upf.show();
                             });
+                            //url = "model/userprofile";
+                            //$.when($U.AjaxGet({ url: url })).then(function (r) {
+                            //    var upf = new $.fastnet$form("template/form/userprofile", {
+                            //        Title: "User Profile",
+                            //        EmailAddress: $T.options.ClientAction.EmailAddress
+                            //    });
+                            //    $T.options = r;
+                            //    $this.emailAddress = $T.options.ClientAction.EmailAddress;
+                            //    $.when($F.LoadForm($this, "User Profile", "template/form/userprofile", "identity-dialog uerprofile", $T.options, $T.options.ClientAction)
+                            //        ).then(function () {
+                            //            $F.AddValidation("first-name", $T.ValidateIsRequired, "A first name is required");
+                            //            $F.AddValidation("last-name", $T.ValidateIsRequired, "A last name is required");
+                            //            $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
+                            //            $F.DisableCommand("save-changes");
+                            //            $F.Show();
+                            //        });
+                            //});
                         } else {
                             $U.MessageBox("Please login first.");
                         }
                     });
             },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0) {// || totalItems !== totalWithState) {
-                    $F.DisableCommand("save-changes");
-                } else {
-                    $F.EnableCommand("save-changes");
-                }
-            },
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "save-changes":
-                        ctx.SaveChanges(ctx);
-                        break;
-                }
-            },
-            SaveChanges: function (ctx) {
-                var firstName = $F.GetFormData("first-name");
-                var lastName = $F.GetFormData("last-name");
-                var emailAddress = ctx.emailAddress;
-                $U.Debug("save {0} {1} {2}", emailAddress, firstName, lastName);
-                var postData = { emailAddress: emailAddress, firstName: firstName, lastName: lastName };
-                $.when(
-                    $U.AjaxPost({ url: "account/updateuser", data: postData })
-                    ).then(function (result) {
-                        var success = result.Success;
-                        if (success) {
-                            $F.Close();
-                        } else {
-                            $F.GetForm().find(".error").html(result.Error);
-                        }
-                    });
-            }
-        },
-        SwitchDialogue: function (dialoguename) {
-            var url = $U.Format("model/{0}", dialoguename);
-            $.when($U.AjaxGet({ url: url })).then(function (r) {
-                $T.options = r;
-                switch (dialoguename) {
-                    case "register":
-                        $T.Registration.Start();
-                        break;
-                    case "passwordreset":
-                        $T.ResetPassword.Start();
-                        break;
-                }
-            });
-        },
-        ValidateConfirmPassword: function (ctx, val, formitem, errorMessage) {
-            var password = $F.GetFormData("password");// ctx.dataValues["password"];
-            return $F.ApplyValidation(formitem, function () {
-                var result = val === null || val === "" || typeof password === "undefined" || password === null;
-                if (!result) {
-                    result = val === password;
-                }
-                return result;
-            }, errorMessage);
-        },
-        ValidatePasswordLength: function (ctx, val, formitem, errorMessage) {
-            var minlength = $T.options.ClientAction.MinimumPasswordLength;
-            var errorMessage = $U.Format(errorMessage, minlength);
-            return $F.ApplyValidation(formitem, function () {
-                return val.length >= minlength;
-            }, errorMessage);
-        },
-        ValidatePasswordComplexity: function (ctx, val, formitem, errorMessage) {
-            // (?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$
-            var complexPassword = $T.options.ClientAction.RequireComplexPassword;
-            return $F.ApplyValidation(formitem, function () {
-                if (!complexPassword) {
-                    return true;
-                } else {
-                    var complexReg = new RegExp(/(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/);
-                    return complexReg.test(val);
-                }
-            }, errorMessage);
-        },
-        ValidateIsRequired: function (ctx, val, formitem, errorMessage) {
-            return $F.ApplyValidation(formitem, function () {
-                return !(val === null || val === "");
-            }, errorMessage);
-        },
-        ValidateEmailAddress: function (ctx, email, formitem, errorMessage) {
-            var message = formitem.find(".message");
-            var deferred = $.Deferred();
-            //var r = false;
-            // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
-            //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-            var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
-            return $F.ApplyValidation(formitem, function () {
-                return emailReg.test(email);
-            }, errorMessage);
         },
     };
     $(function () {

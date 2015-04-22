@@ -97,6 +97,14 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("")]
         public async Task<ActionResult> Index(string id = null)
         {
+            var memberCount = DataContext.Members.Count();
+            //Debug.Print("Member count = {0}", memberCount);
+            if (memberCount == 0)
+            {
+                // I assume that we are here because this a is a brand new database that has no Administrator
+                // account. Nothing will work until the Administrator account is set up
+                return RedirectToAction("CreateAdministrator");
+            }
             if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", true))
             {
                 Member admin = DataContext.Members.Single(m => m.IsAdministrator);
@@ -117,14 +125,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 this.CurrentPageId = id;
             }
             PageModel pm = GetPageModel();// new PageModel(id);
-            var memberCount = DataContext.Members.Count();
-            //Debug.Print("Member count = {0}", memberCount);
-            if (memberCount == 0)
-            {
-                // I assume that we are here because this a is a brand new database that has no Administrator
-                // account. Nothing will work until the Administrator account is set up
-                return RedirectToAction("CreateAdministrator");
-            }
+
 
             var homeNoCache = this.Request.Path.EndsWith("$home");
             CurrentPageId = pm.StartPage;
@@ -300,7 +301,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 member.LastLoginDate = DateTime.Now;
                 await DataContext.SaveChangesAsync();
-                PageModel pm = GetPageModel();// new PageModel(null);
+                PageModel pm = GetPageModel(ClientSideActions.activationsuccessful, null);// new PageModel(null);
                 return View("Index", pm);
             }
             else
@@ -336,7 +337,7 @@ namespace Fastnet.Webframe.Web.Controllers
             Member member = DataContext.Members.SingleOrDefault(m => m.Id == userId);
             if (member != null && member.PasswordResetCode == code)
             {
-                // temp only!! member.PasswordResetCode = null; // ensure it cannot be done again
+                member.PasswordResetCode = null; // ensure it cannot be done again
                 await DataContext.SaveChangesAsync();
                 PageModel pm = GetPageModel(ClientSideActions.changepassword, member);
                 return View("Index", pm);
@@ -450,6 +451,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             ApplicationUser user = await UserManager.FindByEmailAsync(emailAddress);
             return Json(new { InUse = user != null }, JsonRequestBehavior.AllowGet);
+            //return Json(user == null, JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
         [AllowAnonymous]
@@ -471,14 +473,14 @@ namespace Fastnet.Webframe.Web.Controllers
         [Authorize]
         [HttpPost]
         [Route("account/updateuser")]
-        public async Task<ActionResult> UpdateUser(MemberUpdateViewModel model)
+        public ActionResult UpdateUser(MemberUpdateViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);                
                 member.FirstName = model.firstName;
                 member.LastName = model.lastName;
-                await DataContext.SaveChangesAsync();
+                DataContext.SaveChanges();
                 return Json(new { Success = true });
             }
             else

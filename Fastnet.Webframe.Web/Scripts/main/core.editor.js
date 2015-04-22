@@ -32,7 +32,7 @@
         var self = this;
         pageBrowser.prototype.SelectedPageId = null;
         pageBrowser.prototype.Show = function () {
-            bfl = new $.fastnet$form("template/form/BrowseForLink", {});
+            bfl = new $.fastnet$form("template/form/BrowseForLink", { Title: "Store Browser", IsResizable: true });
             treeview = $TV.NewTreeview({
                 Selector: ".browser-tree",
                 OnSelectChanged: onFolderSelectChanged,
@@ -104,12 +104,12 @@
         function selectPage(pageId) {
             self.SelectedPageId = pageId;
             if (self.SelectedPageId === null) {
-                $F.DisableCommand("select-page");
-                $F.DisableCommand("delete-page");
+                bfl.disableCommand("select-page");
+                bfl.disableCommand("delete-page");
                 $U.Debug("Selected page {0}", self.SelectedPageId);
             } else {
-                $F.EnableCommand("select-page");
-                $F.EnableCommand("delete-page");
+                bfl.enableCommand("select-page");
+                bfl.enableCommand("delete-page");
             }
             
         };
@@ -210,8 +210,6 @@
             $TV = $.fastnet$treeview;
             //$U.Debug("");
             $T.cm = $.fastnet$contextmenu.GetContextMenu();
-            //$cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
-            //$cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
             $cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
             $(".edit-panel").on("click", function (e) {
                 var cmd = $(e.target).attr("data-cmd");
@@ -276,9 +274,24 @@
                     OnCommand: function (form, cmd) {
                         switch (cmd) {
                             case "find-link":
-                                f.close();
                                 $T.BrowseForLink.Start();
                                 break;
+                            case "insertlink":
+                                var data = f.getData();
+                                if (data.linktext === null || data.linktext === "") {
+                                    data.linktext = data.linkurl;
+                                }
+                                var content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
+                                $this.currentEditor.execCommand("mceReplaceContent", 0, content);
+                                f.close();
+                                break;
+                        }
+                    },
+                    AfterItemValidation: function (form, result) {
+                        if (result.success) {
+                            f.enableCommand("insertlink");
+                        } else {
+                            f.disableCommand("insertlink");
                         }
                     }
                 });
@@ -303,48 +316,10 @@
                 //        $F.Show();
                 //    });
             },
-            AfterItemValidation: function (ctx, item, totalItems, totalWithState, totalErrors) {
-                if (totalErrors > 0) {
-                    $F.DisableCommand("insertlink");
-                } else {
-                    $F.EnableCommand("insertlink");
-                }
-            },        
-            pb: null,
-            OnCommand: function (ctx, cmd) {
-                switch (cmd) {
-                    case "insertlink":
-                        var form = $F.GetForm();
-                        var url = $(form).find("#linkurl").val();
-                        var linktext = $(form).find("#linktext").val();
-                        var content = $U.Format('<a href="{0}">{1}</a>', url, linktext);
-                        $U.Debug(content);
-                        //ctx.currentEditor.insertContent(content);
-                        ctx.currentEditor.execCommand("mceReplaceContent", 0, content);
-                        $F.Close();
-                        break;
-                    case "find-link":
-
-                        ctx.pb = new pageBrowser();
-                        ctx.pb.Show();
-                        //ctx.BrowseForLink();
-                        break;
-                    case "system-close":
-                    case "cancel":
-                        //if (ctx.currentForm === "find-link") {
-                        //    ctx.Start();
-                        //}
-                        break;
-                    default:
-                        alert("This feature is not implemented");
-                        break;
-                }
-            },
         },
         BrowseForLink : {
             Start: function() {
                 var pb = new pageBrowser();
-
                 pb.Show();
             }
         },
