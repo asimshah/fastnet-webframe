@@ -1,4 +1,30 @@
 ﻿(function ($) {
+    function test() {
+        //debugger;
+
+        
+        //function a() {
+        //    this.id = index++;
+        //    a.prototype.test1 = function (x) {
+        //        if (typeof x !== "undefined") {
+        //            this.id = x;
+        //        }
+        //        return this.id;
+        //    }
+        //}
+        //var t1 = new a();
+        //var t2 = new a();
+        //$U.Debug("t1.test1 = {0}", t1.test1());
+        //$U.Debug("t2.test1 = {0}", t2.test1());
+        //var t = {
+        //    ta: a
+        //};
+        //var t3 = new t.ta();
+        //var t4 = new t.ta();
+        //$U.Debug("t3.test1 = {0}", t3.test1(12));
+        //$U.Debug("t4.test1 = {0}", t4.test1());
+        debugger;
+    }
     var $T;
     var $U;
     $.core$page = {
@@ -11,7 +37,7 @@
                 Debug.writeln(location.href);
                 location.href = location.href;
             });
-        },        
+        },
         ClearContent: function (panelName) {
             var styleId = $U.Format("{0}-style", panelName.toLowerCase());
             $("head").find("#" + styleId).remove();
@@ -40,12 +66,12 @@
                     if (url.startsWith("/page")) {
                         var id = parseInt(url.substring(6));
                         $T.SetPage(url.substring(6));
-                        window.history.pushState({href: url}, null, url);
+                        window.history.pushState({ href: url }, null, url);
                     }
                     break;
             }
         },
-        IsLinkInternal: function(url) {
+        IsLinkInternal: function (url) {
             var result = false;
             url = $T.StandardiseUrl(url);
             var builtIn = ["/home", "/login", "/register", "/recoverpassword",
@@ -64,8 +90,8 @@
                 return r;
             };
             var internalUrl = !(url.startsWith("http") || url.startsWith("file") || url.startsWith("mailto"));
-            if( internalUrl) {
-                if(isBuiltIn(url)) {
+            if (internalUrl) {
+                if (isBuiltIn(url)) {
                     result = true;
                 } else {
                     result = url.startsWith("/page") || url.startsWith("/document") || url.startsWith("/video");
@@ -81,7 +107,7 @@
                 });
             });
         },
-        StandardiseUrl: function(url) {
+        StandardiseUrl: function (url) {
             var thisSite = $("head base").attr("href");
             url = url.toLowerCase();
             if (url.startsWith(thisSite)) {
@@ -95,7 +121,7 @@
             return url;
         },
         LoadHomePage: function () {
-        //LoadHomePage: function (sa) {
+            //LoadHomePage: function (sa) {
             var homeUrl = "pageapi/home";
             //if (sa != null && sa !== "") {
             //    homeUrl = homeUrl + "/" + sa;
@@ -127,7 +153,7 @@
                 $U.MessageBox("#exampleModal");
             });
         },
-        QueryAuthentication : function() {
+        QueryAuthentication: function () {
             $.when(
                 $U.AjaxGet({ url: "account/currentuser" }, true)
                 ).then(function (r) {
@@ -159,7 +185,9 @@
                     });
                 });
         },
-        SetContent: function (panelName, styleList, html) {
+        SetContent: function (panelName, pageInfo) {
+            var styleList = pageInfo.styleList;
+            var html = pageInfo.html;
             var styleId = $U.Format("{0}-style", panelName.toLowerCase());
             var style = $U.Format("<style id='{0}'>", styleId);
             $.each(styleList, function (i, item) {
@@ -183,9 +211,13 @@
                     $T.GotoInternalLink(url);
                 }
             });
-            $("." + panelName).empty().append(content);
+            var panelSelector = "." + panelName;
+            $(panelSelector).empty().append(content);
+            $(panelSelector).attr("data-page-id", pageInfo.pageId);
+            $(panelSelector).attr("data-panel", panelName);
         },
         Start: function (options) {
+            //test();
             $T.options = options;
             //$T.LoadHomePage(options.StartPage);
             $T.LoadHomePage();
@@ -207,13 +239,13 @@
             //    $U.Block(".SitePanel");
             //    //$(".SitePanel").block({  message: "<i class='fa fa-cog fa-spin'></i>", css: { backgroundColor: 'white' } });
             //}, 3000);
-           
+
         },
         UpdatePanel: function (panelName, currentPageId, newPageId) {
             if (currentPageId !== newPageId) {
                 if (newPageId != null) {
                     $.when($U.AjaxGet({ url: "pageapi/page/" + newPageId })).then(function (result) {
-                        $T.SetContent(panelName, result.HtmlStyles, result.HtmlText);
+                        $T.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId });
                     });
                 } else {
                     $T.ClearContent(panelName);

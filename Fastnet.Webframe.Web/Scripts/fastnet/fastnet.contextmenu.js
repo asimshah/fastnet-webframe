@@ -9,34 +9,37 @@
         GetContextMenu: function () {
             // add singleton context menu panel to body
             //$cm = $.apollo$widgets.ContextMenu;
-            $cm = $T.cm;
-            if ($cm.widget === null) {
-                $(document)[0].addEventListener("click", $cm.hide, false);
-                $cm.widget = $("<div class='context-menu-container'></div>");
-                $cm.widget[0].addEventListener("click", function (e) {
-                    $($cm.widget).hide();
+            //$cm = $T.cm;
+            var cmenu = $T.cm;
+            if (cmenu.widget === null) {
+                $(document)[0].addEventListener("click", cmenu.hide, false);
+                cmenu.widget = $("<div class='context-menu-container'></div>");
+                cmenu.widget[0].addEventListener("click", function (e) {
+                    $(cmenu.widget).hide();
                 }, false);
-                $cm.widget.appendTo("body").hide();
+                cmenu.widget.appendTo("body").hide();
             }
-            return $cm;
+            return cmenu;
         },
         cm: {
             menuItems: [],
             beforeOpen: null,
             hide: function () {
-                $cm = $T.cm;
-                ($cm.widget).hide();
+                //$cm = $T.cm;
+                ($T.cm.widget).hide();
             },
             onContextmenu: function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-                $cm = $T.cm;
+                //$cm = $T.cm;
                 $(".context-menu-container").off().empty();
-                if ($cm.BeforeOpen !== null) {
-                    $cm.BeforeOpen(e.srcElement);
+                $(".context-menu-container").hide();
+                $T.cm.ClearMenuItems();
+                if ($T.cm.BeforeOpen !== null) {
+                    $T.cm.BeforeOpen($T.cm, e.srcElement);
                 }
                 var itemCount = 0;
-                $.each($cm.menuItems, function (index, md) {
+                $.each($T.cm.menuItems, function (index, md) {
                     if (md.hide === false) {
                         var menuItem = md.menuItem;
                         var mi = $(menuItem).appendTo(".context-menu-container");
@@ -80,9 +83,11 @@
                 $(element)[0].addEventListener("contextmenu", this.onContextmenu, false);
             },
             BeforeOpen: function (handler) {
+
                 this.beforeOpen = handler;
             },
             DetachFrom: function (element) {
+                this.beforeOpen = null;
                 $(element)[0].removeEventListener("contextmenu", this.onContextmenu, false);
             },
 
@@ -107,6 +112,9 @@
                     //});
                     //$(mi).removeClass("disabled");
                 }
+            },
+            Hide: function() {
+                $(".context-menu-container").hide();
             },
             HideMenuItem: function (index) {
                 var item = $T.cm.findMenuItem(index);

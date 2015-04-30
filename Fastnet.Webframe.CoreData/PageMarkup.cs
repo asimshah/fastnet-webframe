@@ -12,8 +12,11 @@ namespace Fastnet.Webframe.CoreData
         //public long PageMarkupId { get; set; }
         [Key, ForeignKey("Page")]
         public long PageId { get; set; }
-        public System.DateTime CreatedOn { get; set; }
+        public System.DateTimeOffset CreatedOn { get; set; }
         public string CreatedBy { get; set; }
+        
+        public System.DateTimeOffset? ModifiedOn { get; set; }
+        public string ModifiedBy { get; set; }
         //public int VersionNumber { get; set; }
         //public int MarkupTypeCode { get; set; }
         //public string WordMlText { get; set; }
@@ -32,5 +35,21 @@ namespace Fastnet.Webframe.CoreData
         public virtual Page Page { get; set; }
         //public virtual ICollection<MarkupDocumentLink> DocumentLinks { get; set; }
         //public virtual ICollection<MarkupPageLink> PageLinks { get; set; }
+        [NotMapped]
+        public System.DateTime LastModifiedOn
+        {
+            get
+            {
+                if (ModifiedOn.HasValue)
+                {
+                    return ModifiedOn.Value.UtcDateTime;
+                }
+                else
+                {
+                    return CreatedOn.UtcDateTime;
+                }
+                //return ModifiedOn ?? CreatedOn.DateTime;
+            }
+        }
     }
 }

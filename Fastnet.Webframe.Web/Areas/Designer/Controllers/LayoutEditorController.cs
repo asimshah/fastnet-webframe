@@ -32,8 +32,33 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
                 customLess = File.ReadAllText(filename);
             }
             string helpText = GetHelpText(panel);
+            string displayName = string.Empty;
+            switch (panel)
+            {
+                case "site-panel":
+                    displayName = "Site Panel";
+                    break;
+                case "banner-panel":
+                    displayName = "Banner Panel";
+                    break;
+                case "menu-panel":
+                    displayName = "Menu Panel";
+                    break;
+                case "content-panel":
+                    displayName = "Content Panel";
+                    break;
+                case "left-panel":
+                    displayName = "Left Panel";
+                    break;
+                case "centre-panel":
+                    displayName = "Centre Panel";
+                    break;
+                case "right-panel":
+                    displayName = "Right Panel";
+                    break;
+            }
             Debug.Print("returning: GetPanelInformation");
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { DefaultCSS = defaultCSS, CustomLess = customLess, HelpText = helpText });
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { Panel = displayName, DefaultCSS = defaultCSS, CustomLess = customLess, HelpText = helpText });
         }
         [HttpPost]
         [Route("savepanelcss")]

@@ -56,6 +56,7 @@ namespace Fastnet.Webframe.Web.Common
         private enum formTypes
         {
             None,
+            MessageBox,
             //Form,
             //ModalForm,
             //
@@ -72,6 +73,9 @@ namespace Fastnet.Webframe.Web.Common
             //
             InsertHyperlink,
             BrowseForLink,
+            PageProperties,
+            DirectoryProperties,
+            DocumentProperties,
             //
             TestForm
         }
@@ -91,6 +95,10 @@ namespace Fastnet.Webframe.Web.Common
         public static readonly FormTemplate UserProfile = new FormTemplate(formTypes.UserProfile);
         public static readonly FormTemplate InsertHyperlink = new FormTemplate(formTypes.InsertHyperlink);
         public static readonly FormTemplate BrowseForLink = new FormTemplate(formTypes.BrowseForLink);
+        public static readonly FormTemplate PageProperties = new FormTemplate(formTypes.PageProperties);
+        public static readonly FormTemplate DirectoryProperties = new FormTemplate(formTypes.DirectoryProperties);
+        public static readonly FormTemplate DocumentProperties = new FormTemplate(formTypes.DocumentProperties);
+        public static readonly FormTemplate MessageBox = new FormTemplate(formTypes.MessageBox);
         public static readonly FormTemplate TestForm = new FormTemplate(formTypes.TestForm);
         private FormTemplate(formTypes ft)
         {
@@ -104,7 +112,8 @@ namespace Fastnet.Webframe.Web.Common
                     return Path.Combine(templateFolder, "Forms");
                 //case formTypes.Form:
                 //case formTypes.ModalForm:
-                //    return Path.Combine(templateFolder, "Forms");
+                case formTypes.MessageBox:
+                    return Path.Combine(templateFolder, "Forms");
                 case formTypes.ActivationFailed:
                 case formTypes.ActivationSuccessful:
                 case formTypes.ChangePassword:
@@ -118,6 +127,9 @@ namespace Fastnet.Webframe.Web.Common
                     return Path.Combine(templateFolder, "Forms", "Account");
                 case formTypes.InsertHyperlink:
                 case formTypes.BrowseForLink:
+                case formTypes.PageProperties:
+                case formTypes.DirectoryProperties:
+                case formTypes.DocumentProperties:
                     return Path.Combine(templateFolder, "Forms", "Editor");
                 default:
                     throw new ApplicationException("No root for form");
@@ -140,9 +152,10 @@ namespace Fastnet.Webframe.Web.Common
                     return ChangePassword;
                 //case formTypes.Form:
                 //    return Form;
-
                 //case formTypes.ModalForm:
                 //    return ModalForm;
+                case formTypes.MessageBox:
+                    return MessageBox;
                 case formTypes.Login:
                     return Login;
                 case formTypes.PasswordReset:
@@ -161,6 +174,12 @@ namespace Fastnet.Webframe.Web.Common
                     return InsertHyperlink;
                 case formTypes.BrowseForLink:
                     return BrowseForLink;
+                case formTypes.PageProperties:
+                    return PageProperties;
+                case formTypes.DirectoryProperties:
+                    return DirectoryProperties;
+                case formTypes.DocumentProperties:
+                    return DocumentProperties;
                 case formTypes.TestForm:
                     return TestForm;
             }

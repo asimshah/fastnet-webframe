@@ -7,9 +7,12 @@
         // OnSelectChanged - select/deselect callback
         // OnExpandCollapse - expand/collapse callback
         this.options = $.extend({
+            cm: null,
+            EnableContextMenu: false,
             Selector: null,
             OnSelectChanged: null,
             OnExpandCollapse: null,
+            OnBeforeContextMenu: null,
             NodeIndent: "16px",
             nodeTemplate:
                 "<div class='tree-node node-closed' data-user='{{UserData}}' >" +
@@ -23,6 +26,39 @@
                 "</div>",
         }, options);
         this.rootNodes = [];
+        /*
+            AddMenuItem: function (text, cmd, action, data) {
+                //$cm = this;
+                var count = $T.cm.menuItems.length;
+                var menuItem = $U.Format("<div class='context-menu-item' data-cmd='{1}' data-cm-index='{2}'><span >{0}</span></div>", text, cmd, count);
+                var md = { menuItem: menuItem, cmd: cmd, action: action, data: data, separator: false, disabled: false, hide: false };
+                $T.cm.menuItems.push(md);
+                return count;
+            },
+            AddSeparator: function () {
+                var count = $T.cm.menuItems.length;
+                var sep = $U.Format("<div class='context-menu-item-separator' data-cm-index='{0}' ></div>", count);
+                var md = { menuItem: sep, cmd: null, action: null, data: null, separator: true, disabled: false, hide: false };
+                $T.cm.menuItems.push(md);
+            },
+         */
+        tv.prototype.AddMenuItem = function (text, cmd, action, data) {
+            this.options.cm.AddMenuItem(text, cmd, action, data);
+        };
+        tv.prototype.AddSeparator = function () {
+            this.options.cm.AddSeparator();
+        }
+        //tv.prototype.FindNode = function (data) {
+        //    var node = null;
+        //    $.each(this.rootNodes, function (index, root) {
+        //        var n = $(root).find("[data-user='" + data.UserData + "']");
+        //        if (n.length > 0) {
+        //            node = n;
+        //            return false;
+        //        }
+        //    });
+        //    return node;
+        //}
         tv.prototype.AddNode = function (node, data) {
             if (typeof data.ChildCount === "undefined" || data.ChildCount === null) {
                 data.ChildCount = 0;
@@ -33,6 +69,15 @@
             if (node === null) {
                 newNode = $(nodeHtml).appendTo($(this.options.Selector));
                 this.rootNodes.push(newNode);
+                if (this.options.EnableContextMenu) {
+                    this.options.cm = $.fastnet$contextmenu.GetContextMenu();
+                    this.options.cm.AttachTo(newNode);
+                    var $this = this;
+                    this.options.cm.BeforeOpen = function (cm, src) {
+                        var userData = $(src).closest(".tree-node").attr("data-user");
+                        $this.options.OnBeforeContextMenu(cm, userData);
+                    };
+                }
             } else {
                 var childrenPanel = $(node).find("> .child-nodes");
                 newNode = $(nodeHtml).appendTo($(childrenPanel));
@@ -68,6 +113,9 @@
             };
             var nodeItem = $(node).find("> .node-item");
             nodeItem.on("click", function (e) {
+                if (self.options.EnableContextMenu) {
+                    self.options.cm.hide();
+                }
                 e.stopPropagation();
                 e.preventDefault();
                 if ($(nodeItem).hasClass("selected")) {

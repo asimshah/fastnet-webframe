@@ -58,7 +58,7 @@ using System.IO;
             //HttpContext.Current.Session["CurrentPage"] = pageId;
             Data.Page page = DataContext.Pages.Find(pageId);
             object data = null;
-            if(this.Request.IsModified(page.PageMarkup.CreatedOn, page.PageId))
+            if(this.Request.IsModified(page.PageMarkup.LastModifiedOn, page.PageId))
             {
                 if (page.MarkupType == MarkupType.DocX)
                 {
@@ -69,7 +69,7 @@ using System.IO;
                     data = PrepareHTMLPage(page);
                 }
             }
-            return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.CreatedOn, page.PageId);
+            return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
             //if (th
             //{
             //    HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK, data);
@@ -94,20 +94,6 @@ using System.IO;
         [Route("panelinfo/{id}")]
         public HttpResponseMessage GetSidePanelInformation(string id)
         {
-            //Func<Data.Page, Data.Panel, dynamic> getPanelInfo = (cp, p) =>
-            //    {
-            //        dynamic x = new ExpandoObject();
-            //        x.Name = p.Name;
-            //        //x.Height = p.PixelHeight;
-            //        //x.Width = p.PixelWidth;
-            //        x.Visible = p.Visible;
-            //        if (x.Visible)
-            //        {
-            //            var sp = FindSidePage(cp, p);
-            //            x.PageId = sp != null ? sp.PageId.ToString() : null;
-            //        }
-            //        return x;
-            //    };
             Data.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
             var result = new
             {
@@ -254,8 +240,8 @@ using System.IO;
             var ifNoneMatch = Request.Headers.IfNoneMatch;
             var temp = ifNoneMatch.FirstOrDefault();
             string receivedTag = temp == null ? null : temp.Tag;
-            var modifiedOn = DateTime.SpecifyKind(page.PageMarkup.CreatedOn, DateTimeKind.Utc);
-            string etag = CreateEtag(page.PageId, page.PageMarkup.CreatedOn);
+            var modifiedOn = page.PageMarkup.LastModifiedOn;// DateTime.SpecifyKind(page.PageMarkup.CreatedOn, DateTimeKind.Utc);
+            string etag = CreateEtag(page.PageId, page.PageMarkup.LastModifiedOn);
             return etag != receivedTag || ifModifiedSince.HasValue == false || (modifiedOn - ifModifiedSince.Value) > TimeSpan.FromSeconds(1);
         }
         //private void SetCacheInfo(Page page)

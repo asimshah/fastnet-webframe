@@ -11,7 +11,7 @@
   color: #ffffff;
 }
 .body-content {
-  width: 75%;
+  width: 80%;
 }
 .panel-diagram .test-container {
   position: relative;
@@ -82,7 +82,7 @@
   border: 1px solid red;
 }
 .vertical-links .form-group {
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 .vertical-links .btn {
   padding-top: 2px;

@@ -934,6 +934,9 @@
     <Content Include="Templates\Forms\Account\PasswordResetFailed.html" />
     <Content Include="Templates\Forms\Account\Register.html" />
     <Content Include="Templates\Forms\Account\UserProfile.html" />
+    <Content Include="Templates\Forms\Editor\DirectoryProperties.html" />
+    <Content Include="Templates\Forms\Editor\PageProperties.html" />
+    <Content Include="Templates\Forms\MessageBox.html" />
     <Content Include="Templates\Forms\TestForm.html" />
     <Content Include="Templates\Forms\Editor\BrowseForLink.html" />
     <Content Include="Templates\Forms\Editor\InsertHyperlink.html" />

@@ -149,7 +149,7 @@
         },
         ActivationSuccessful: {
             Start: function () {
-                var asf = new $.fastnet$form("template/form/activationsuccessful", {
+                var asf = new $.fastnet$forms.CreateForm("template/form/activationsuccessful", {
                     Title: "Activation Successful",
                     OnCommand: function (f, cmd) {
                         switch (cmd) {
@@ -158,19 +158,19 @@
                                 break;
                         }
                     }
-                });
+                }, {});
                 asf.show();
             }
         },
         ActivationFailed: {
             Start: function () {
-                var aff = new $.fastnet$form("template/form/activationfailed", {
+                var aff = new $.fastnet$forms.CreateForm("template/form/activationfailed", {
                     Title: "Activation Failed",
-                    AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress,
+                    //AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress,
                     OnCommand: function (f, cmd) {
 
                     }
-                });
+                }, { AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress });
                 aff.show();
             }
         },
@@ -197,9 +197,9 @@
                             }
                         });
                 }
-                var cpf = new $.fastnet$form("template/form/changepassword", {
+                var cpf = new $.fastnet$forms.CreateForm("template/form/changepassword", {
                     Title: "Change Password",
-                    EmailAddress: $T.options.ClientAction.EmailAddress,
+                    //EmailAddress: $T.options.ClientAction.EmailAddress,
                     AfterItemValidation: function (r) {
                         if (cpf.isValid() === true) {
                             cpf.enableCommand("save-changes");
@@ -214,7 +214,7 @@
                                 break;
                         }
                     }
-                });
+                }, { EmailAddress: $T.options.ClientAction.EmailAddress});
                 cpf.addIsRequiredValidator("password", "A password is required")
                 cpf.addValidators("password", [
                     {
@@ -237,7 +237,7 @@
                 );
                 cpf.disableCommand("save-changes");
                 cpf.show();
-                var $this = this;
+                //var $this = this;
                 //$.when($F.LoadForm($this, "Change Password", "template/form/changepassword", "identity-dialog changepassword", $T.options)
                 //    ).then(function () {
                 //        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
@@ -273,7 +273,7 @@
                             }
                         });
                 };
-                var lf = new $.fastnet$form("template/form/login", {
+                var lf = new $.fastnet$forms.CreateForm("template/form/login", {
                     Title: "Login",
                     OnCommand: function (f, cmd) {
                         switch (cmd) {
@@ -300,7 +300,7 @@
                             lf.disableCommand("login");
                         }
                     }
-                });
+                }, {});
                 lf.addIsRequiredValidator("email", "An email address is required");
                 lf.addIsRequiredValidator("password", "A password is required");
                 lf.disableCommand("login");
@@ -318,10 +318,10 @@
         },
         PasswordResetFailed: {
             Start: function () {
-                var prff = new $.fastnet$form("template/form/passwordresetfailed", {
-                    Title: "Password Reset Failed",
-                    AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress
-                });
+                var prff = new $.fastnet$forms.CreateForm("template/form/passwordresetfailed", {
+                    Title: "Password Reset Failed"//,
+                    //AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress
+                }, { AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress });
                 prff.show();
                 //var $this = this;
                 //$.when($F.LoadForm($this, "Password Reset Failed", "template/form/passwordresetfailed", "identity-dialog passwordreset-failed", $T.options)
@@ -358,9 +358,9 @@
                             var success = result.Success;
                             if (success) {
                                 f.close();
-                                var cf = new $.fastnet$form("template/form/registrationconfirmation", {
+                                var cf = new $.fastnet$forms.CreateForm("template/form/registrationconfirmation", {
                                     Title: "Registration Confirmed",
-                                    EmailAddress: emailAddress,
+                                    //EmailAddress: emailAddress,
                                     OnCommand: function (tf, cmd) {
                                         switch (cmd) {
                                             case "registration-close":
@@ -368,14 +368,36 @@
                                                 break;
                                         }
                                     }
-                                });
+                                }, { EmailAddress: emailAddress});
                                 cf.show();
                             } else {
                                 f.find(".error").html(result.Error);
                             }
                         });
                 };
-                var rf = new $.fastnet$form("template/form/register", {
+                //var rf = new $.fastnet$form("template/form/register", {
+                //    Title: "Registration",
+                //    AfterItemValidation: function (r) {
+                //        if (rf.isValid() === true) {
+                //            rf.enableCommand("register");
+                //        } else {
+                //            rf.disableCommand("register");
+                //        }
+                //    },
+                //    OnCommand: function (form, cmd) {
+                //        switch (cmd) {
+                //            case "register":
+                //                register(form);
+                //                break;
+                //            case "registration-close":
+                //                if ($.isFunction($T.onComplete)) {
+                //                    $T.onComplete();
+                //                }
+                //                break;
+                //        }
+                //    }
+                //});
+                var rf = new $.fastnet$forms.CreateForm("template/form/register", {
                     Title: "Registration",
                     AfterItemValidation: function (r) {
                         if (rf.isValid() === true) {
@@ -396,7 +418,7 @@
                                 break;
                         }
                     }
-                });
+                }, {});
                 rf.addIsRequiredValidator("email", "An email address is required");
                 rf.addValidators("email", [
                     {
@@ -450,9 +472,9 @@
                             if (success) {
                                 f.close();
                                 //ctx.Confirmation(emailAddress);
-                                var cf = new $.fastnet$form("template/form/passwordresetconfirmation", {
+                                var cf = new $.fastnet$forms.CreateForm("template/form/passwordresetconfirmation", {
                                     Title: "Reset Email Sent",
-                                    EmailAddress: emailAddress,
+                                    //EmailAddress: emailAddress,
                                     OnCommand: function (tf, cmd) {
                                         switch (cmd) {
                                             case "request-reset-close":
@@ -460,14 +482,14 @@
                                                 break;
                                         }
                                     }
-                                });
+                                }, { EmailAddress: emailAddress});
                                 cf.show();
                             } else {
                                 f.find(".error").html(result.Error);
                             }
                         });
                 };
-                var rpf = new $.fastnet$form("template/form/passwordreset", {
+                var rpf = new $.fastnet$forms.CreateForm("template/form/passwordreset", {
                     Title: "Password Reset",
                     AfterItemValidation: function (r) {
                         if (rpf.isValid() === true) {
@@ -483,7 +505,7 @@
                                 break;
                         }
                     }
-                });
+                }, {});
                 rpf.addIsRequiredValidator("email", "An email address is required");
                 rpf.addValidators("email", [
                     {
@@ -541,11 +563,11 @@
                     ).then(function (result) {
                         if (result.Permitted) {
                             _loadModel("userprofile", function () {
-                                var upf = new $.fastnet$form("template/form/userprofile", {
+                                var upf = new $.fastnet$forms.CreateForm("template/form/userprofile", {
                                     Title: "User Profile",
-                                    EmailAddress: $T.options.ClientAction.EmailAddress,
-                                    FirstName: $T.options.ClientAction.FirstName,
-                                    LastName: $T.options.ClientAction.LastName,
+                                    //EmailAddress: $T.options.ClientAction.EmailAddress,
+                                    //FirstName: $T.options.ClientAction.FirstName,
+                                    //LastName: $T.options.ClientAction.LastName,
                                     AfterItemValidation: function (r) {
                                         if (upf.isValid() === true) {
                                             upf.enableCommand("save-changes");
@@ -560,6 +582,10 @@
                                                 break;
                                         }
                                     }
+                                }, {
+                                    EmailAddress: $T.options.ClientAction.EmailAddress,
+                                    FirstName: $T.options.ClientAction.FirstName,
+                                    LastName: $T.options.ClientAction.LastName
                                 });
                                 upf.addIsRequiredValidator("first-name", "A first name is required");
                                 upf.addIsRequiredValidator("last-name", "A last name is required");

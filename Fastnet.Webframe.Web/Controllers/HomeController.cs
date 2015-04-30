@@ -105,7 +105,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 // account. Nothing will work until the Administrator account is set up
                 return RedirectToAction("CreateAdministrator");
             }
-            if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", true))
+            if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", false))
             {
                 Member admin = DataContext.Members.Single(m => m.IsAdministrator);
                 var user = await UserManager.FindByIdAsync(admin.Id);

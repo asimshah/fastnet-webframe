@@ -7,7 +7,6 @@
         messageBoxElementId: "#message-box",
         localPlayerName: "",
         localDataNamespace: "fastnet-",
-        //ajaxDepth: 0,
         Init: function () {
             $T = this;
             if ($.blockUI !== undefined) {
@@ -41,12 +40,8 @@
             $(document).ajaxError($T.AjaxCallFailed);
         },
         //
-        //AjaxPost: function (url, data, done, always, fail, busyMessage) {
         AjaxPost: function (args) {
-            //var result = $T.prepareAjaxCall(args);
-            //if (!result.abortCall) {
-            //$T.BlockUI(result.args.busyMessage);
-            //$T.ajaxDepth++;
+
             $(".ajax-error-message").empty();
             return $.ajax({
                 url: $T.rootUrl + args.url,
@@ -54,29 +49,8 @@
                 type: "POST",
                 data: JSON.stringify(args.data)
             });
-            //    .done(function (result) {
-            //    if ($.isFunction(result.args.done)) {
-            //        result.args.done(result);
-            //    }
-            //}).fail(function (jqXHR) {
-            //    if (handleFailureInternally) {
-            //        $T.AjaxCallFailed(jqXHR, result.args.url);
-            //    } else {
-            //        if (jqXHR.responseJSON !== null) {
-            //            result.args.fail(jqXHR.responseJSON);
-            //        }
-            //    }
-            //}).always(function () {
-            //    $T.UnBlockUI();
-            //    if ($.isFunction(result.args.always)) {
-            //        result.args.always();
-            //    }
-            //});
-            //}
         },
         AjaxGet: function (args, noCache) {
-            //var ctx = $T.prepareAjaxCall(args);
-            //$T.BlockUI(ctx.args.busyMessage);
             var cache = true;
             if (typeof noCache !== "undefined") {
                 cache = !noCache;
@@ -95,9 +69,6 @@
             var element = $(".ajax-error-message");
             if (element.length === 0) {
                 $T.MessageBox(errorMessage);
-                //$($T.messageBoxElementId).find("#message-text").text(errorMessage);
-                //$($T.messageBoxElementId).modal();
-                //$T.MessageBox(errorMessage)
             }
             else {
                 element.html(errorMessage);
@@ -156,43 +127,51 @@
         },
         //,
         MessageBox: function (text, options) {
-            var runtimeOptions = {
-                title: 'System Message',
-                enableSystemCancel: false, // i.e. modal-header x box
-                enableOKButton: true, 
-                enableCancelButton: false, 
-                okButtonLabel: 'Close',
-                cancelButtonLabel: 'Cancel',
-                OKFunction: null
-            };
-            if (typeof options !== "undefined" && options !== null) {
-                $.extend(runtimeOptions, options);
-                //$($T.messageBoxElementId).find("#message-text").text(text);
-                //$($T.messageBoxElementId).modal();
+            function _mbox(text, options) {
+                var runtimeOptions = {
+                    title: 'System Message',
+                    enableSystemCancel: false, // i.e. modal-header x box
+                    enableOKButton: true,
+                    enableCancelButton: false,
+                    okButtonLabel: 'Close',
+                    cancelButtonLabel: 'Cancel',
+                    OKFunction: null
+                };
+                if (typeof options !== "undefined" && options !== null) {
+                    $.extend(runtimeOptions, options);
+                }
+                var mb = $($T.messageBoxElementId);
+                mb.find("#message-text").text(text);
+                mb.find(".modal-footer button[data-cmd='ok']").text(runtimeOptions.okButtonLabel);
+                mb.find(".modal-footer button[data-cmd='cancel']").text(runtimeOptions.cancelButtonLabel);
+                if (!runtimeOptions.enableSystemCancel) {
+                    mb.find(".modal-header button").hide();
+                }
+                if (!runtimeOptions.enableOKButton) {
+                    mb.find(".modal-footer button[data-cmd='ok']").hide();
+                } else {
+                    mb.find(".modal-footer button[data-cmd='ok']").on('click', function () {
+                        $T.Debug("OK button click");
+                        $($T.messageBoxElementId).modal('hide');
+                        if (runtimeOptions.OKFunction !== null) {
+                            runtimeOptions.OKFunction();
+                        }
+                    });
+                }
+                if (!runtimeOptions.enableCancelButton) {
+                    mb.find(".modal-header button[data-cmd='cancel']").hide();
+                }
+                $($T.messageBoxElementId).modal();
             }
-            var mb = $($T.messageBoxElementId);
-            mb.find("#message-text").text(text);
-            mb.find(".modal-footer button[data-cmd='ok']").text(runtimeOptions.okButtonLabel);
-            mb.find(".modal-footer button[data-cmd='cancel']").text(runtimeOptions.cancelButtonLabel);
-            if (!runtimeOptions.enableSystemCancel) {
-                mb.find(".modal-header button").hide();
-            }
-            if (!runtimeOptions.enableOKButton) {
-                mb.find(".modal-footer button[data-cmd='ok']").hide();
-            } else {
-                mb.find(".modal-footer button[data-cmd='ok']").on('click', function () {
-                    $T.Debug("OK button click");
-                    $($T.messageBoxElementId).modal('hide');
-                    if (runtimeOptions.OKFunction !== null) {
-                        runtimeOptions.OKFunction();
-                    }
+            if (typeof $.fastnet$form === "function") {
+                var mb = new $.fastnet$messageBox({
+                    Title: "System Message",
+                    OKLabel: "Close"
                 });
+                mb.show(text);
+            } else {
+                _mbox(text, options);
             }
-            if (!runtimeOptions.enableCancelButton) {
-                mb.find(".modal-header button[data-cmd='cancel']").hide();
-            }
-            $($T.messageBoxElementId).modal();
-            //$(id).modal();
         },
         messageBoxWithOptions: function (message, options) {
             //var wWidth = $(window).width();
@@ -378,46 +357,6 @@
         GetTextNode: function (elem) {
             return $(elem).contents().filter(function () { return this.nodeType === 3 });
         },
-        //prepareAjaxCall: function (args) {
-        //    var handleFailureInternally = false;
-        //    var abortCall = false;
-        //    //var defaultArgs = {
-        //    //    busyMessage: "Waiting for server ...",
-        //    //};
-        //    if (args.url === undefined || args.url.length === 0) {
-        //        $T.MessageBox("Internal system Error - called without a url");
-        //        abortCall = true;
-        //    }
-        //    //if (args.busyMessage === undefined) {
-        //    //    args.busyMessage = defaultArgs.busyMessage;
-        //    //}
-        //    //if (args.fail === undefined || args.fail === null || !$.isFunction(args.fail)) {
-        //    //    handleFailureInternally = true;
-        //    //}
-        //    return { abortCall: abortCall, handleFailureInternally: handleFailureInternally, args: args };
-        //},
-        //ajax: function (params, ctx) {
-        //    return $.ajax(params).done(function (result) {
-        //        if ($.isFunction(ctx.args.done)) {
-        //            ctx.args.done(result);
-        //        }
-        //    }).fail(function (jqXHR) {
-        //        if (ctx.handleFailureInternally) {
-        //            $T.AjaxCallFailed(jqXHR, ctx.args.url);
-        //        } else {
-        //            if (jqXHR.responseJSON !== null) {
-        //                ctx.args.fail(jqXHR.responseJSON);
-        //            }
-        //        }
-        //    }).always(function () {
-        //        $T.UnBlockUI();
-        //        if ($.isFunction(ctx.args.always)) {
-        //            always();
-        //        }
-        //        //$T.ajaxDepth--;
-        //        //$T.Debug("{0}: ajax get <- {1}", $T.ajaxDepth, url);
-        //    });
-        //},
     };
 
     $(function () {

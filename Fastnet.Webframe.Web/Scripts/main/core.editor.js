@@ -3,7 +3,20 @@
     var $U;
     var $TV;
     var pageBrowser = function (options) {
+        // the page browser is constructed with a nested treeview:
+        // 1. the primary form is a browserforlink
+        // 2. inside this form a subform is embedded - the treeview
+        //    Note that the treeview does not use fastnet.forms.js
+        // this.forms keeps track of these two instances - see show()
+        var pb = this;
+        this.forms = {
+            tv: null,
+            bfl: null
+        };
         this.options = $.extend({
+            rootDirectoryId: null,
+            currentDirectoryId: null,
+            OnClose: null,
             OnCancel: null,
             OnSelect: null
         }, options);
@@ -14,72 +27,43 @@
             "                <th class='url'>Url</th>" +
             "                <th class='name'>Name</th>" +
             "                <th class='side-content'></th>" +
+            "                <th class='edit-button'></th>" +
+            "                <th class='delete-button'></th>" +
             "            </tr>" +
             "          </thead>" +
             "          <tbody>" +
             "            {{#data}}" +
-            "            <tr>" +
-            "                <td class='url'><div data-id='{{PageId}}'>{{Url}}</div></td>" +
+            "            <tr data-id='{{Id}}' data-type='{{Type}}' data-url='{{Url}}' data-landing-page='{{LandingPage}}'>" +
+            "                <td class='url'><div>{{Url}}</div></td>" +
             "                <td class='name'><div>{{Name}}</div></td>" +
             "                <td class='side-content'><div>{{SC}}</div></td>" +
+            "                <td class='edit-button buttons'><div><span class='fa fa-pencil-square-o edit' title='Edit properties'></span></div></td>" +
+            "                <td class='delete-button buttons'><div><span class='fa fa-times delete' title='Delete'></span></div></td>" +
             "            </tr>" +
             "            {{/data}}" +
             "          </tbody>" +
             "        </table>";
-        var bfl = null;
-        var treeview = null;
-        var currentDirectoryId = null;
-        var self = this;
-        pageBrowser.prototype.SelectedPageId = null;
-        pageBrowser.prototype.Show = function () {
-            bfl = new $.fastnet$form("template/form/BrowseForLink", { Title: "Store Browser", IsResizable: true });
-            treeview = $TV.NewTreeview({
-                Selector: ".browser-tree",
-                OnSelectChanged: onFolderSelectChanged,
-                OnExpandCollapse: onExpandCollapse,
-            });
-            var url = $U.Format("store/directories");
-            $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
-
-                //$F.Bind({ afterItemValidation: null, onCommand: onCommand });
-                bfl.disableCommand("select-page");
-                bfl.disableCommand("delete-page");
-                bfl.disableCommand("add-new-page");
-                bfl.show(function (f) {
-                    loadTreeViewItem(null, data);
-                });
-            });
-            
-            //$.when($F.LoadForm(self, "Page Browser", "template/form/BrowseForLink", "editor-dialog find-link", { ClientAction: { IsModal: true, IsResizable: true } })
-            //    ).then(function () {
-            //        form = $F.GetForm();
-            //        treeview = $TV.NewTreeview({
-            //            Selector: ".browser-tree",
-            //            OnSelectChanged: onFolderSelectChanged,
-            //            OnExpandCollapse: onExpandCollapse,
-            //        });
-            //        var url = $U.Format("store/directories");
-            //        $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
-            //            loadTreeViewItem(null, data);
-            //            $F.Bind({ afterItemValidation: null, onCommand: onCommand });
-            //            $F.DisableCommand("select-page");
-            //            $F.DisableCommand("delete-page");
-            //            $F.DisableCommand("add-new-page");
-            //            $F.Show();
-            //        });
-            //    });
-        };
-        function onCommand(ctx, cmd) {
+        function close() {
+            pb.forms.bfl.close();
+        }
+        function onCommand(cmd) {
             switch (cmd) {
                 case "system-close":
                 case "cancel":
-                    if (self.options.OnCancel !== null) {
-                        self.options.OnCancel();
+                    if (pb.options.OnCancel !== null) {
+                        pb.options.OnCancel();
+                    }
+                    if (pb.options.OnClose !== null) {
+                        pb.options.OnClose();
                     }
                     break;
                 case "select-page":
-                    if (self.options.OnSelect !== null) {
-                        self.options.OnSelect(self.SelectedPageId);
+                    if (pb.options.OnSelect !== null) {
+                        pb.options.OnSelect(pb.options.Context, pb.SelectedItem);
+                    }
+                    close();
+                    if (pb.options.OnClose !== null) {
+                        pb.options.OnClose();
                     }
                     break;
                 case "add-new-page":
@@ -90,9 +74,137 @@
                     break;
             }
         };
+        function showFolderProperties(id) {
+            function saveDirectory(f) {
+                var data = f.getData();
+                var url = "store/update/directory";
+                var postData = { id: id, name: data.name };
+                $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                    f.close();
+                    var node = findDirectoryNode(id)
+                    node.find(".title").text(data.name);
+                });
+            }
+            var url = $U.Format("store/get/directory/{0}", id);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                //var options = $.extend({
+                //    Title: $U.Format("Folder Properties"),
+                //    AfterItemValidation: function () {
+                //        if (dpf.isValid()) {
+                //            dpf.enableCommand("save-changes");
+                //        } else {
+                //            dpf.disableCommand("save-changes");
+                //        }
+                //    },
+                //    OnCommand: function (f, cmd) {
+                //        switch (cmd) {
+                //            case "save-changes":
+                //                saveDirectory(f);
+                //                break;
+                //        }
+                //    }
+                //}, r);
+                //var dpf = new $.fastnet$form("template/form/directoryproperties", options);
+                var options = {
+                    Title: $U.Format("Folder Properties"),
+                    AfterItemValidation: function () {
+                        if (dpf.isValid()) {
+                            dpf.enableCommand("save-changes");
+                        } else {
+                            dpf.disableCommand("save-changes");
+                        }
+                    },
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "save-changes":
+                                saveDirectory(f);
+                                break;
+                        }
+                    }
+                };
+                var dpf = new $.fastnet$forms.CreateForm("template/form/directoryproperties", options, r);
+                dpf.addIsRequiredValidator("name", "A folder name is required")
+                dpf.disableCommand("save-changes");
+                dpf.show();
+            });
+        }
+        function showPageProperties(id) {
+            function savePage(f) {
+                var data = f.getData();
+                var url = "store/update/page";
+                var postData = { id: id, name: data.name };
+                $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                    f.close();
+                    loadDirectoryContent();
+                });
+            }
+            var url = $U.Format("store/get/page/{0}", id);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                //var options = $.extend({
+                //    Title: $U.Format("{0} Properties", r.Url),
+                //    AfterItemValidation: function () {
+                //        if (ppf.isValid()) {
+                //            ppf.enableCommand("save-changes");
+                //        } else {
+                //            ppf.disableCommand("save-changes");
+                //        }
+                //    },
+                //    OnCommand: function (f, cmd) {
+                //        switch (cmd) {
+                //            case "save-changes":
+                //                savePage(f);
+                //                break;
+                //        }
+                //    }
+                //}, r);
+                //var ppf = new $.fastnet$form("template/form/pageproperties", options);
+                var options = {
+                    Title: $U.Format("{0} Properties", r.Url),
+                    AfterItemValidation: function () {
+                        if (ppf.isValid()) {
+                            ppf.enableCommand("save-changes");
+                        } else {
+                            ppf.disableCommand("save-changes");
+                        }
+                    },
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "save-changes":
+                                savePage(f);
+                                break;
+                        }
+                    }
+                };
+                var ppf = new $.fastnet$forms.CreateForm("template/form/pageproperties", options, r);
+                ppf.addIsRequiredValidator("name", "A page name is required")
+                ppf.disableCommand("save-changes");
+                ppf.show();
+            });
+        };
+        function deleteItem(type, id) {
+            var url = $U.Format("store/delete");
+            var postData = { type: type, id: id };
+            $.when(
+                $U.AjaxPost({ url: url, data: postData })
+                ).then(function (result) {
+                    $U.Debug("deleted {0}/{1}", type, id);
+                    if (type === "directory") {
+                        removeDirectoryNode(id);
+                    } else {
+                        loadDirectoryContent();
+                    }
+                });
+        };
+        function findDirectoryNode(id) {
+            return $(".store-browser .browser-tree").find(".tree-node[data-user='" + id + "']");
+        }
+        function removeDirectoryNode(id) {
+            var node = findDirectoryNode(id);
+            node.remove();
+        }
         function createNewPage() {
             var url = $U.Format("store/createpage");
-            var postData = { directoryId: currentDirectoryId };
+            var postData = { directoryId: pb.options.currentDirectoryId };
             $.when(
                 $U.AjaxPost({ url: url, data: postData })
                 ).then(function (result) {
@@ -101,45 +213,61 @@
                     loadDirectoryContent();
                 });
         };
-        function selectPage(pageId) {
-            self.SelectedPageId = pageId;
-            if (self.SelectedPageId === null) {
-                bfl.disableCommand("select-page");
-                bfl.disableCommand("delete-page");
-                $U.Debug("Selected page {0}", self.SelectedPageId);
+        function createNewDirectory(parentDirectoryId) {
+            var url = $U.Format("store/createdirectory");
+            var postData = { directoryId: parentDirectoryId };
+            $.when(
+                $U.AjaxPost({ url: url, data: postData })
+                ).then(function (result) {
+                    var directoryId = result.DirectoryId;
+                    var name = result.Name;
+                    $U.Debug("created new directory {0}", directoryId);
+                    var parentNode = findDirectoryNode(parentDirectoryId);// pb.forms.tv.FindNode({ UserData: parentDirectoryId })
+                    loadTreeViewItem(parentNode, [{ Name: name, Id: directoryId, SubdirectoryCount: 0 }]);
+                });
+        }
+        function selectItem(type, id, url) {
+            if (type === null) {
+                pb.SelectedItem = {};
+                pb.forms.bfl.disableCommand("select-page");
+                $U.Debug("Selected item cleared");
             } else {
-                bfl.enableCommand("select-page");
-                bfl.enableCommand("delete-page");
+                pb.SelectedItem = { Type: type, Id: id, Url: url };
+                pb.forms.bfl.enableCommand("select-page");
+                $U.Debug("Selected item:  {0}/{1}", pb.SelectedItem.Type, pb.SelectedItem.Id);
             }
-            
         };
-        function onExpandCollapse (data) {
+        function onExpandCollapse(data) {
             $U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
             if (!data.isLoaded) {
                 loadSubdirectories(data.node, parseInt(data.userData));
             }
         };
-        function onFolderSelectChanged  (data) {
+        function onFolderSelectChanged(data) {
+            var browser = this;
             $U.Debug("de(select) for {0}, closed = {1}, selected = {2}, child count = {3}", data.userData, data.isClosed, data.isSelected, data.childCount);
             var directoryId = parseInt(data.userData);
-            var folderContent = bfl.find(".browser-folder-content");
-            if (currentDirectoryId !== directoryId) {
-                currentDirectoryId = directoryId;
+            var folderContent = pb.forms.bfl.find(".browser-folder-content");
+            //if (currentDirectoryId !== directoryId) {
+            //    currentDirectoryId = directoryId;
+            //    loadDirectoryContent();
+            //}
+            if (pb.options.currentDirectoryId !== directoryId) {
+                pb.options.currentDirectoryId = directoryId;
                 loadDirectoryContent();
-                //folderContent.show();
             }
             if (data.isSelected) {
-                bfl.enableCommand("add-new-page");
+                pb.forms.bfl.enableCommand("add-new-page");
                 folderContent.show();
             } else {
-                bfl.disableCommand("add-new-page");
+                pb.forms.bfl.disableCommand("add-new-page");
                 folderContent.hide();
             }
         };
         function loadTreeViewItem(node, data) {
             $.each(data, function (index, item) {
                 var html = $U.Format("<span class='fa fa-folder folder-icon' ></span><span class='title' >{0}</span>", item.Name);
-                node = treeview.AddNode(node, { NodeHtml: html, Title: item.Name, UserData: item.Id, ChildCount: item.SubdirectoryCount });
+                pb.forms.tv.AddNode(node, { NodeHtml: html, Title: item.Name, UserData: item.Id, ChildCount: item.SubdirectoryCount });
                 //ctx.contextMenu.AttachTo(node);
             });
         };
@@ -149,35 +277,38 @@
                 if (data.length === 0) {
                     // there are no subdirectories but we need to ensure that the node
                     // is set to isLoaded.
-                    //$TV.SetNodeLoaded(node);
-                    treeview.SetNodeLoaded(node);
+                    pb.forms.tv.SetNodeLoaded(node);
                 } else {
                     loadTreeViewItem(node, data);
                 }
             });
         };
         function loadDirectoryContent() {
-            var url = $U.Format("store/content/{0}", currentDirectoryId);
+            var url = $U.Format("store/content/{0}", pb.options.currentDirectoryId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
                 if (data.length > 0) {
                     var content = { data: [] };
                     $.each(data, function (index, item) {
-                        var sc = "";
-                        if (item.HasBanner) {
-                            sc += "B";
+                        if (item.Type === "page") {
+                            var sc = "";
+                            if (item.HasBanner) {
+                                sc += "B";
+                            }
+                            if (item.HasLeft) {
+                                sc += "L";
+                            }
+                            if (item.HasRight) {
+                                sc += "R";
+                            }
+                            content.data.push({
+                                Type: item.Type,
+                                Id: item.Id,
+                                Url: item.Url,
+                                Name: item.Name,
+                                LandingPage: item.LandingPage ? "true" : "false",
+                                SC: sc
+                            });
                         }
-                        if (item.HasLeft) {
-                            sc += "L";
-                        }
-                        if (item.HasRight) {
-                            sc += "R";
-                        }
-                        content.data.push({
-                            PageId: item.PageId,
-                            Url: item.Url,
-                            Name: item.Name,
-                            SC: sc
-                        });
                     });
                     var dataTable = $(Mustache.to_html(contentTemplate, content));
                     $(".browser-folder-content").empty().append(dataTable);
@@ -186,13 +317,42 @@
                         var target = $(e.currentTarget);
                         if (target.hasClass("selected")) {
                             target.removeClass("selected");
-                            selectPage(null);
+                            selectItem(null);
+                            //selectPage(null);
                         } else {
                             $(".browser-folder-content table td.url div").removeClass("selected");
                             target.addClass("selected");
-                            selectPage(target.attr("data-id"));
+                            var id = parseInt(target.closest("tr").attr("data-id"));
+                            var type = target.closest("tr").attr("data-type");
+                            var url = target.closest("tr").attr("data-url");
+                            selectItem(type, id, url);
+                            // selectPage(target.closest("tr").attr("data-id"));
                         }
-                        
+
+                    });
+                    $(".browser-folder-content table td.edit-button span").on("click", function (e) {
+                        var target = $(e.currentTarget);
+                        var id = parseInt(target.closest("tr").attr("data-id"));
+                        var type = target.closest("tr").attr("data-type");
+                        if (type === "page") {
+                            showPageProperties(id);
+                        }
+                    });
+                    $(".browser-folder-content table td.delete-button span").on("click", function (e) {
+                        var target = $(e.currentTarget);
+                        var id = parseInt(target.closest("tr").attr("data-id"));
+                        var type = target.closest("tr").attr("data-type");
+                        $U.Debug("delete button on {0}/{1}", type, id);
+                        var mb = new $.fastnet$messageBox({
+                            CancelButton: true
+                        });
+                        var message = $U.Format("Please confirm that <b>/{0}/{1}</b> should be deleted", type, id);
+                        mb.show(message, function (cmd) {
+                            $U.Debug("message box returned command {0}", cmd);
+                            if (cmd === "ok") {
+                                deleteItem(type, id);
+                            }
+                        });
                     });
                 } else {
                     $(".browser-folder-content table").off();
@@ -200,8 +360,92 @@
                 }
             });
         };
+        function onFolderTreeContextMenu(src, index, cmd, data) {
+            switch (cmd) {
+                case "new-folder":
+                    createNewDirectory(data.ParentDirectoryId);
+                    break;
+                case "delete-folder":
+                    var mb = new $.fastnet$messageBox({
+                        CancelButton: true
+                    });
+                    var message = $U.Format("Deleting a folder will also delete its content and all sub-folders. Please confirm.");
+                    mb.show(message, function (cmd) {
+                        $U.Debug("message box returned command {0}", cmd);
+                        if (cmd === "ok") {
+                            deleteItem("directory", data.DirectoryId);
+                        }
+                    });
+                    break;
+                case "folder-properties":
+                    showFolderProperties(data.DirectoryId);
+                    break;
+            }
+        }
+        pageBrowser.prototype.SelectedItem = {};
+        pageBrowser.prototype.Show = function () {
+            var pb = this;
+            pb.forms.bfl = new $.fastnet$forms.CreateForm("template/form/BrowseForLink", {
+                Title: "Store Browser",
+                IsResizable: true,
+                OnCommand: function (f, cmd) {
+                    onCommand(cmd);
+                } // onCommand
+            }, {});
+            //var osc = onFolderSelectChanged.bind(browser);
+            pb.forms.tv = $TV.NewTreeview({
+                EnableContextMenu: true,
+                Selector: ".store-browser .browser-tree",
+                OnSelectChanged: onFolderSelectChanged,
+                OnExpandCollapse: onExpandCollapse,
+                OnBeforeContextMenu: function (cm, userData) {
+                    var id = parseInt(userData);
+                    if (pb.options.currentDirectoryId === id) {
+                        pb.forms.tv.AddMenuItem("New folder", "new-folder", onFolderTreeContextMenu, { ParentDirectoryId: id });
+                        if (pb.options.rootDirectoryId !== id) {
+                            pb.forms.tv.AddMenuItem("Delete folder ...", "delete-folder", onFolderTreeContextMenu, { DirectoryId: id });
+                            pb.forms.tv.AddSeparator();
+                            pb.forms.tv.AddMenuItem("Properties ...", "folder-properties", onFolderTreeContextMenu, { DirectoryId: id });
+                        }
+                        //$U.Debug("tv context menu opening");
+                    }
+                }
+            });
+            var url = $U.Format("store/directories");
+            $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+                pb.forms.bfl.disableCommand("select-page");
+                pb.forms.bfl.disableCommand("add-new-page");
+                pb.forms.bfl.show(function (f) {
+                    // I am assuming here that on this first call for directories
+                    // I will always get an array of one entry and that
+                    // entry is the $root directory (renamed by the server to Store)
+                    pb.options.rootDirectoryId = data[0].Id;
+                    loadTreeViewItem(null, data);
+                });
+            });
+
+            //bfl = new $.fastnet$form("template/form/BrowseForLink", {
+            //    Title: "Store Browser",
+            //    IsResizable: true,
+            //    OnCommand: onCommand
+            //});
+            //treeview = $TV.NewTreeview({
+            //    Selector: ".browser-tree",
+            //    OnSelectChanged: onFolderSelectChanged,
+            //    OnExpandCollapse: onExpandCollapse,
+            //});
+            //var url = $U.Format("store/directories");
+            //$.when($U.AjaxGet({ url: url }, true)).then(function (data) {
+            //    bfl.disableCommand("select-page");
+            //    bfl.disableCommand("add-new-page");
+            //    bfl.show(function (f) {
+            //        loadTreeViewItem(null, data);
+            //    });
+            //});
+        };
     };
     $.core$editor = {
+        control: [],
         cm: null,
         isOpen: false,
         Init: function () {
@@ -210,7 +454,7 @@
             $TV = $.fastnet$treeview;
             //$U.Debug("");
             $T.cm = $.fastnet$contextmenu.GetContextMenu();
-            $cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
+            $T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
             $(".edit-panel").on("click", function (e) {
                 var cmd = $(e.target).attr("data-cmd");
                 if (typeof cmd === "undefined" || cmd === false) {
@@ -227,16 +471,32 @@
         CloseEditors: function (okcallback) {
             //var result = false;
             if ($T.IsDirty()) {
-                $U.MessageBox("There are unsaved changes. Closing edit mode will discard these changes!", {
-                    enableSystemCancel: true,
-                    enableCancelButton: true,
-                    OKFunction: function () {
-                        tinymce.remove();
-                        //result = true;
-                        okcallback();
-                    },
-                    okButtonLabel: "Yes", cancelButtonLabel: "No"
+                var mb = new $.fastnet$messageBox({
+                    CancelButton: true
                 });
+                var message = "There are unsaved changes. Closing edit mode will discard these changes! Please confirm.";
+                mb.show(message, function (cmd) {
+                    $U.Debug("message box returned command {0}", cmd);
+                    if (cmd === "ok") {
+                        tinymce.remove();
+                        $.each($T.control, function (index, item) {
+                            var ps = $U.Format(".{0}", item.panel);
+                            $(ps).html(item.savedContent);
+                        });
+                        $T.savedContent = [];
+                        okcallback();
+                    }
+                });
+                //$U.MessageBox("There are unsaved changes. Closing edit mode will discard these changes!", {
+                //    enableSystemCancel: true,
+                //    enableCancelButton: true,
+                //    OKFunction: function () {
+                //        tinymce.remove();
+                //        //result = true;
+                //        okcallback();
+                //    },
+                //    okButtonLabel: "Yes", cancelButtonLabel: "No"
+                //});
             } else {
                 tinymce.remove();
                 //result = true;
@@ -245,11 +505,6 @@
             //return result;
         },
         InsertLink: {
-            browserState: {
-                currentDirectoryId: null
-            },
-            treeview: null,
-            //treePanel: null,
             currentEditor: null,
             Start: function () {
                 var $this = this;
@@ -258,7 +513,7 @@
                 var url = "";
                 var htmlText = $this.currentEditor.selection.getContent({ format: 'html' });
                 htmlText = $("<textarea/>").html(htmlText).text();
-                try{
+                try {
                     if ($(htmlText).prop("tagName") === "A") {
                         text = $(htmlText).text();
                         url = $(htmlText).attr("href");
@@ -269,12 +524,23 @@
                     text = htmlText;
                 }
 
-                var f = new $.fastnet$form("template/form/inserthyperlink", {
+                var ilf = new $.fastnet$forms.CreateForm("template/form/inserthyperlink", {
                     Title: "Insert Link",
-                    OnCommand: function (form, cmd) {
+                    //IsResizable: true,
+                    AfterItemValidation: function (f, result) {
+                        if (result.success) {
+                            f.enableCommand("insertlink");
+                        } else {
+                            f.disableCommand("insertlink");
+                        }
+                    },
+                    OnCommand: function (f, cmd) {
                         switch (cmd) {
                             case "find-link":
-                                $T.BrowseForLink.Start();
+                                $T.BrowseForLink.Start(f, function () {
+                                    $T.cm = $.fastnet$contextmenu.GetContextMenu();
+                                    $T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
+                                });
                                 break;
                             case "insertlink":
                                 var data = f.getData();
@@ -287,39 +553,34 @@
                                 break;
                         }
                     },
-                    AfterItemValidation: function (form, result) {
-                        if (result.success) {
-                            f.enableCommand("insertlink");
+                }, {
+                    LinkUrl: url,
+                    LinkText: text
+                });
+
+                ilf.addIsRequiredValidator("linkurl", "A link url is required");
+                ilf.disableCommand("insertlink");
+                ilf.show();
+            },
+        },
+        BrowseForLink: {
+            Start: function (ctx, onClose) {
+                var pb = new pageBrowser({
+                    Context: ctx,
+                    OnClose: onClose,
+                    OnCancel: function () {
+                        $U.Debug("Page browser closed with a cancel/system-close");
+                    },
+                    OnSelect: function (ctx, selectedItem) {
+                        $U.Debug("selected url {0}", selectedItem.Url);
+                        ctx.setData("linkurl", selectedItem.Url);
+                        if (ctx.isValid()) {
+                            ctx.enableCommand("insertlink");
                         } else {
-                            f.disableCommand("insertlink");
+                            ctx.disableCommand("insertlink");
                         }
                     }
                 });
-
-                f.fill({
-                    "linkurl": url,
-                    "linktext": text
-                });
-                f.addIsRequiredValidator("linkurl");
-                f.disableCommand("insertlink");
-                f.show();
-                
-                //$.when($F.LoadForm($this, "Insert Link", "template/form/inserthyperlink", "editor-dialog insert-link", { ClientAction: { IsModal: true } })
-                //    ).then(function () {
-                //        var form = $F.GetForm();
-                //        $(form).find("#linkurl").val(url);
-                //        $(form).find("#linktext").val(text);
-                //        $F.AddIsRequiredValidation("linkurl", "Link url is required");
-                //        $F.AddIsRequiredValidation("linktext", "Some link text is required");
-                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                //        $F.DisableCommand("insertlink");
-                //        $F.Show();
-                //    });
-            },
-        },
-        BrowseForLink : {
-            Start: function() {
-                var pb = new pageBrowser();
                 pb.Show();
             }
         },
@@ -334,10 +595,10 @@
             return result;
         },
 
-        OnBeforeContextMenuOpen: function (src) {
-            $cm.ClearMenuItems();
-            $cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
-            $cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
+        OnBeforeContextMenuOpen: function (cm, src) {
+            //$cm.ClearMenuItems();
+            cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
+            cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
             var panel = $(src).closest(".editable-content");
             if (typeof panel !== "undefined" && panel !== null) {
                 //if ($(panel).hasClass("editor-open")) {
@@ -362,6 +623,9 @@
                     //    break;
                 case "insert-link":
                     $T.InsertLink.Start();
+                    break;
+                case "save-changes":
+                    $T.SavePageChanges();
                     break;
                 case "insert-image":
                     //break;
@@ -396,6 +660,7 @@
         },
         OpenEditor: function (panelName) {
             var selector = "." + panelName;
+            var originalHtml = $(selector).html();
             tinymce.init({
                 selector: selector,
                 browser_spellcheck: true,
@@ -408,10 +673,36 @@
                           "bold italic | forecolor backcolor | bullist numlist outdent indent | table | link image | code"],
                 //fixed_toolbar_container: "#mceToolBar"//,
                 setup: function (editor) {
+                    $T.control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
                     editor.on('change', function (e) {
                         $T.OnContentChange(editor);
                     });
                 }
+            });
+        },
+        SavePageChanges: function () {
+            var postData = {
+                BannerPanel: { PageId: null },
+                LeftPanel: { PageId: null },
+                RightPanel: { PageId: null }
+            };
+            $.each(tinymce.EditorManager.editors, function (index, ed) {
+                var panelElement = $(ed.getElement());
+                var pageId = panelElement.attr("data-page-id");
+                if (typeof pageId !== "undefined") {
+                    var panelName = panelElement.attr("data-panel");
+                    postData[panelName] = { PageId: pageId, HtmlText: ed.getContent(), HasChanged: ed.isDirty() };
+                }
+            });
+            var url = "store/update/page/content";
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
+                $.each($T.control, function (index, item) {
+                    if (item.editor.isDirty()) {
+                        item.editor.isNotDirty = true;
+                        item.savedContent = item.editor.getContent();
+                    }
+                });
+                $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
             });
         },
         Start: function () {
@@ -425,13 +716,25 @@
             $.each(eps, function (index, ep) {
                 $T.cm.AttachTo($(ep));
             });
-            $T.StartEditors();
+            var centrePageId = $(".CentrePanel").attr("data-page-id");
+            var url = $U.Format("store/panelinfo/{0}", centrePageId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                //debugger;
+                $T.StartEditors(r);
+            });
+
         },
-        StartEditors: function () {
-            $T.OpenEditor("BannerPanel");
-            $T.OpenEditor("LeftPanel");
+        StartEditors: function (r) {
+            if (r.BannerPanel.PageId !== null) {
+                $T.OpenEditor("BannerPanel");
+            }
+            if (r.LeftPanel.PageId !== null) {
+                $T.OpenEditor("LeftPanel");
+            }
             $T.OpenEditor("CentrePanel");
-            $T.OpenEditor("RightPanel");
+            if (r.RightPanel.PageId !== null) {
+                $T.OpenEditor("RightPanel");
+            }
             setTimeout(function () {
                 var ed = tinymce.editors[$(".CentrePanel").attr("id")];
                 ed.execCommand("mceAddControl", false, $(".CentrePanel"));

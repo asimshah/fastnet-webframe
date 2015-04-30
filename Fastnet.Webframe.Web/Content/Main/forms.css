@@ -12,6 +12,13 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
+.modal-dialog .modal-content .modal-header .form-trace,
+.modal-dialog .modal-content .modal-footer .form-trace,
+.modal-dialog .modal-content .modal-body .form-trace {
+  display: none;
+  font-size: 8pt;
+  color: #946713;
+}
 .modal-dialog .modal-content .modal-header.resizable {
   border-top: 4px solid #04b01b;
   border-radius: 4px;
