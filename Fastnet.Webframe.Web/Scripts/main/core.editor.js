@@ -445,6 +445,7 @@
         };
     };
     $.core$editor = {
+        tinymceUrl: null,
         control: [],
         cm: null,
         isOpen: false,
@@ -453,6 +454,8 @@
             $U = $.fastnet$utilities;
             $TV = $.fastnet$treeview;
             //$U.Debug("");
+            var baseUrl = $("head base").prop("href");
+            $T.tinymceUrl = baseUrl + "Scripts/tinymce/";
             $T.cm = $.fastnet$contextmenu.GetContextMenu();
             $T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
             $(".edit-panel").on("click", function (e) {
@@ -661,6 +664,7 @@
         OpenEditor: function (panelName) {
             var selector = "." + panelName;
             var originalHtml = $(selector).html();
+            tinymce.baseURL = $T.tinymceUrl;
             tinymce.init({
                 selector: selector,
                 browser_spellcheck: true,
