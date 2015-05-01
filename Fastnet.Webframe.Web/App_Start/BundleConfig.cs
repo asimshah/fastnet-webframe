@@ -8,6 +8,11 @@ namespace Fastnet.Webframe.Web
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
+#if DEBUG
+            BundleTable.EnableOptimizations = false;
+#else
+            BundleTable.EnableOptimizations = true;
+#endif
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 
@@ -83,30 +88,30 @@ namespace Fastnet.Webframe.Web
                 "~/Content/bootstrap-datetimepicker.css"
                 ));
 
-            bundles.Add(new Bundle("~/Content/site/css")
+            bundles.Add(new StyleBundle("~/Content/site/css")
                  .Include(
                  "~/Content/main/DefaultCSS/browserpanel.css",
-                 "~/Content/main/CustomCSS/browserpanel.css",
+                 "~/Content/main/DefaultCSS/browserpanel.user.css",
                  "~/Content/main/DefaultCSS/sitepanel.css",
-                 "~/Content/main/CustomCSS/sitepanel.css",
+                 "~/Content/main/DefaultCSS/sitepanel.user.css",
                  "~/Content/main/DefaultCSS/bannerpanel.css",
-                 "~/Content/main/CustomCSS/bannerpanel.css"
+                 "~/Content/main/DefaultCSS/bannerpanel.user.css"
                  ));
 
-            bundles.Add(new Bundle("~/Content/page/css")
+            bundles.Add(new StyleBundle("~/Content/page/css")
                 .Include(
                 "~/Content/main/DefaultCSS/menupanel.css",
-                "~/Content/main/CustomCSS/menupanel.css",
+                "~/Content/main/DefaultCSS/menupanel.user.css",
                 "~/Content/main/DefaultCSS/contentpanel.css",
-                "~/Content/main/CustomCSS/contentpanel.css",
+                "~/Content/main/DefaultCSS/contentpanel.user.css",
                 "~/Content/main/DefaultCSS/leftpanel.css",
-                "~/Content/main/CustomCSS/leftpanel.css",
+                "~/Content/main/DefaultCSS/leftpanel.user.css",
                 "~/Content/main/DefaultCSS/centrepanel.css",
-                "~/Content/main/CustomCSS/centrepanel.css",
+                "~/Content/main/DefaultCSS/centrepanel.user.css",
                 "~/Content/main/DefaultCSS/rightpanel.css",
-                "~/Content/main/CustomCSS/rightpanel.css",
+                "~/Content/main/DefaultCSS/rightpanel.user.css",
                 "~/Content/main/DefaultCSS/menu.css",
-                "~/Content/main/CustomCSS/menu.css"
+                "~/Content/main/DefaultCSS/menu.user.css"
                 ));
 
 

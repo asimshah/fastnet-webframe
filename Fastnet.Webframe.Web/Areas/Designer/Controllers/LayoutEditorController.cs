@@ -22,16 +22,19 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
             // convert the panel name to the CSS filename
             // get the contents of the DefaultCSS and any CustomCSS
             // add some help text
-            string panelCSSFilename = GetCSSFilename(panel);
-            string filename = Path.Combine(CSSRule.GetDefaultCSSFolder(), panelCSSFilename);
-            string defaultCSS = File.ReadAllText(filename);
-            string customLess = string.Empty;
-            filename = Path.Combine(CSSRule.GetCustomCSSFolder(), GetLessFilename(panel));
-            if(File.Exists(filename))
-            {
-                customLess = File.ReadAllText(filename);
-            }
-            string helpText = GetHelpText(panel);
+            //string panelCSSFilename = GetCSSFilename(panel);
+            //string filename = Path.Combine(CSSRule.GetDefaultCSSFolder(), panelCSSFilename);
+            //string defaultCSS = File.ReadAllText(filename);
+            //string customLess = string.Empty;
+            //filename = Path.Combine(CSSRule.GetCustomCSSFolder(), GetLessFilename(panel));
+            //if(File.Exists(filename))
+            //{
+            //    customLess = File.ReadAllText(filename);
+            //}
+            string defaultCSS = LayoutFiles.GetDefaultCSS(panel);
+            string customLess = LayoutFiles.GetCustomLess(panel);
+            string helpText = LayoutFiles.GetHelpText(panel);// GetHelpText(panel);
+
             string displayName = string.Empty;
             switch (panel)
             {
@@ -65,107 +68,108 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
         public HttpResponseMessage SaveCSS(SavePanelCSS model)
         {
             Debug.Print("Post recd: SaveCSS");
-            string panelCSSFilename = GetCSSFilename(model.Panel);
-            string filename = Path.Combine(CSSRule.GetCustomCSSFolder(), panelCSSFilename);
-            File.WriteAllText(filename, model.CSSText);
-            string panelLessFilename = GetLessFilename(model.Panel);
-            filename = Path.Combine(CSSRule.GetCustomCSSFolder(), panelLessFilename);
-            File.WriteAllText(filename, model.LessText);
+            LayoutFiles.SaveCustomLess(model.Panel, model.LessText, model.CSSText);
+            //string panelCSSFilename = GetCSSFilename(model.Panel);
+            //string filename = Path.Combine(CSSRule.GetCustomCSSFolder(), panelCSSFilename);
+            //File.WriteAllText(filename, model.CSSText);
+            //string panelLessFilename = GetLessFilename(model.Panel);
+            //filename = Path.Combine(CSSRule.GetCustomCSSFolder(), panelLessFilename);
+            //File.WriteAllText(filename, model.LessText);
             Debug.Print("returning: SaveCSS");
             return this.Request.CreateResponse(HttpStatusCode.OK, new  { Success = true });
         }
-        private string GetLessFilename(string cmd)
-        {
-            string name = "";
-            switch (cmd)
-            {
-                case "site-panel":
-                    name = "SitePanel.less";
-                    break;
-                case "banner-panel":
-                    name = "BannerPanel.less";
-                    break;
-                case "menu-panel":
-                    name = "MenuPanel.less";
-                    break;
-                case "content-panel":
-                    name = "ContentPanel.less";
-                    break;
-                case "left-panel":
-                    name = "LeftPanel.less";
-                    break;
-                case "centre-panel":
-                    name = "CentrePanel.less";
-                    break;
-                case "right-panel":
-                    name = "RightPanel.less";
-                    break;
-                default:
-                    break;
-            }
-            return name;
-        }
-        private string GetCSSFilename(string cmd)
-        {
-            string name = "";
-            switch (cmd)
-            {
-                case "site-panel":
-                    name = "SitePanel.css";
-                    break;
-                case "banner-panel":
-                    name = "BannerPanel.css";
-                    break;
-                case "menu-panel":
-                    name = "MenuPanel.css";
-                    break;
-                case "content-panel":
-                    name = "ContentPanel.css";
-                    break;
-                case "left-panel":
-                    name = "LeftPanel.css";
-                    break;
-                case "centre-panel":
-                    name = "CentrePanel.css";
-                    break;
-                case "right-panel":
-                    name = "RightPanel.css";
-                    break;
-                default:
-                    break;
-            }
-            return name;
-        }
-        private string GetHelpText(string cmd)
-        {
-            string text = "";
-            switch (cmd)
-            {
-                case "site-panel":
-                    text = "These rules can be inherited by the entire site (if appropriate). Use width or max-width to control the width of the content. This is also a place to set global values such as font, background colour, foreground colour";
-                    break;
-                case "banner-panel":
-                    text = "For a banner to be displayed it must have a height. Display of the banner panel can be turned off";
-                    break;
-                case "menu-panel":
-                    text = "For a menu to be displayed it must have a height. Display of the menu panel can be turned off";
-                    break;
-                case "content-panel":
-                    text = "These rules can be inherited by the three child panels, left, centre and right (if appropriate). Do not set height or width";
-                    break;
-                case "left-panel":
-                    text = "For left panel to be displayed it must have a width. Do not set height. Display of the left panel can be turned off";
-                    break;
-                case "centre-panel":
-                    text = "Do not set the width of the centre panel and do not turn off its display. Site width is best controlled vis the Site panel.";
-                    break;
-                case "right-panel":
-                    text = "For right panel to be displayed it must have a width. Do not set height. Display of the right panel can be turned off";
-                    break;
-                default:
-                    break;
-            }
-            return text;
-        }
+        //private string GetLessFilename(string cmd)
+        //{
+        //    string name = "";
+        //    switch (cmd)
+        //    {
+        //        case "site-panel":
+        //            name = "SitePanel.less";
+        //            break;
+        //        case "banner-panel":
+        //            name = "BannerPanel.less";
+        //            break;
+        //        case "menu-panel":
+        //            name = "MenuPanel.less";
+        //            break;
+        //        case "content-panel":
+        //            name = "ContentPanel.less";
+        //            break;
+        //        case "left-panel":
+        //            name = "LeftPanel.less";
+        //            break;
+        //        case "centre-panel":
+        //            name = "CentrePanel.less";
+        //            break;
+        //        case "right-panel":
+        //            name = "RightPanel.less";
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    return name;
+        //}
+        //private string GetCSSFilename(string cmd)
+        //{
+        //    string name = "";
+        //    switch (cmd)
+        //    {
+        //        case "site-panel":
+        //            name = "SitePanel.css";
+        //            break;
+        //        case "banner-panel":
+        //            name = "BannerPanel.css";
+        //            break;
+        //        case "menu-panel":
+        //            name = "MenuPanel.css";
+        //            break;
+        //        case "content-panel":
+        //            name = "ContentPanel.css";
+        //            break;
+        //        case "left-panel":
+        //            name = "LeftPanel.css";
+        //            break;
+        //        case "centre-panel":
+        //            name = "CentrePanel.css";
+        //            break;
+        //        case "right-panel":
+        //            name = "RightPanel.css";
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    return name;
+        //}
+        //private string GetHelpText(string cmd)
+        //{
+        //    string text = "";
+        //    switch (cmd)
+        //    {
+        //        case "site-panel":
+        //            text = "These rules can be inherited by the entire site (if appropriate). Use width or max-width to control the width of the content. This is also a place to set global values such as font, background colour, foreground colour";
+        //            break;
+        //        case "banner-panel":
+        //            text = "For a banner to be displayed it must have a height. Display of the banner panel can be turned off";
+        //            break;
+        //        case "menu-panel":
+        //            text = "For a menu to be displayed it must have a height. Display of the menu panel can be turned off";
+        //            break;
+        //        case "content-panel":
+        //            text = "These rules can be inherited by the three child panels, left, centre and right (if appropriate). Do not set height or width";
+        //            break;
+        //        case "left-panel":
+        //            text = "For left panel to be displayed it must have a width. Do not set height. Display of the left panel can be turned off";
+        //            break;
+        //        case "centre-panel":
+        //            text = "Do not set the width of the centre panel and do not turn off its display. Site width is best controlled vis the Site panel.";
+        //            break;
+        //        case "right-panel":
+        //            text = "For right panel to be displayed it must have a width. Do not set height. Display of the right panel can be turned off";
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    return text;
+        //}
     }
 }

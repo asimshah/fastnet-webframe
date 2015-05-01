@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,6 +22,98 @@ namespace Fastnet.Webframe.CoreData
         Visibility = 128,
         Height = 256,
         Width = 512 
+    }
+    public static class LayoutFiles
+    {
+        public static string GetDefaultCSS(string panelName)
+        {
+            panelName = NormalizePanelName(panelName);
+            string filename = Path.Combine(GetDefaultCSSFolder(), panelName + ".css");
+            return File.ReadAllText(filename);
+        }
+        public static string GetCustomLess(string panelName)
+        {
+            panelName = NormalizePanelName(panelName);
+            string filename = Path.Combine(GetCustomLessFolder(), panelName + ".less");
+            return File.ReadAllText(filename);
+        }
+        public static string GetHelpText(string cmd)
+        {
+            string text = "";
+            switch (cmd.ToLower())
+            {
+                case "sitepanel":
+                    text = "These rules can be inherited by the entire site (if appropriate). Use width or max-width to control the width of the content. This is also a place to set global values such as font, background colour, foreground colour";
+                    break;
+                case "bannerpanel":
+                    text = "For a banner to be displayed it must have a height. Display of the banner panel can be turned off";
+                    break;
+                case "menupanel":
+                    text = "For a menu to be displayed it must have a height. Display of the menu panel can be turned off";
+                    break;
+                case "contentpanel":
+                    text = "These rules can be inherited by the three child panels, left, centre and right (if appropriate). Do not set height or width";
+                    break;
+                case "leftpanel":
+                    text = "For left panel to be displayed it must have a width. Do not set height. Display of the left panel can be turned off";
+                    break;
+                case "centrepanel":
+                    text = "Do not set the width of the centre panel and do not turn off its display. Site width is best controlled vis the Site panel.";
+                    break;
+                case "rightpanel":
+                    text = "For right panel to be displayed it must have a width. Do not set height. Display of the right panel can be turned off";
+                    break;
+                default:
+                    break;
+            }
+            return text;
+        }
+        public static void SaveCustomLess(string panelName, string lessText, string cssText)
+        {
+            panelName = NormalizePanelName(panelName);
+            string filename = Path.Combine(GetCustomLessFolder(), panelName + ".less");
+            File.WriteAllText(filename, lessText);
+            filename = Path.Combine(GetDefaultCSSFolder(), panelName + ".user.css");
+            File.WriteAllText(filename, cssText);
+        }
+        private static string NormalizePanelName(string name)
+        {
+            switch (name.ToLower())
+            {
+                case "site-panel":
+                    name = "SitePanel";
+                    break;
+                case "banner-panel":
+                    name = "BannerPanel";
+                    break;
+                case "menu-panel":
+                    name = "MenuPanel";
+                    break;
+                case "content-panel":
+                    name = "ContentPanel";
+                    break;
+                case "left-panel":
+                    name = "LeftPanel";
+                    break;
+                case "centre-panel":
+                    name = "CentrePanel";
+                    break;
+                case "right-panel":
+                    name = "RightPanel";
+                    break;
+                default:
+                    break;
+            }
+            return name;
+        }
+        private static string GetDefaultCSSFolder()
+        {
+            return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
+        }
+        private static string GetCustomLessFolder()
+        {
+            return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
+        }
     }
     public class CSSRule
     {
@@ -55,7 +148,7 @@ namespace Fastnet.Webframe.CoreData
         }
         public static string GetCustomCSSFolder()
         {
-            return HostingEnvironment.MapPath("~/Content/Main/CustomCSS");
+            return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
         }
         public static string GetUserImagesRelativePath()
         {
@@ -144,11 +237,11 @@ namespace Fastnet.Webframe.CoreData
                     default:
                         throw new ApplicationException("CreateCSSFiles(): unknown panel");
                 }
-                string cssFileName = System.IO.Path.Combine(folder, panel + ".css");
+                string cssFileName = System.IO.Path.Combine(folder, panel + ".user" + ".css");
                 System.IO.File.WriteAllText(cssFileName, cssText);
             }
             string menuCssText = Menu.GetCSSString();
-            string menuCssFile = System.IO.Path.Combine(folder, "Menu.css");
+            string menuCssFile = System.IO.Path.Combine(folder, "Menu.user.css");
             System.IO.File.WriteAllText(menuCssFile, menuCssText);
         }
     }
