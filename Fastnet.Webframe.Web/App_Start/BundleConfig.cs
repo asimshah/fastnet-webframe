@@ -78,8 +78,8 @@ namespace Fastnet.Webframe.Web
             //     "~/Content/themes/base/theme.css"
             //     ));
             bundles.Add(new StyleBundle("~/Content/css").Include(
-                  "~/Content/font-awesome/css/font-awesome.min.css",
-                  "~/Content/bootstrap.css",
+                  "~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
+                  .Include("~/Content/bootstrap.css",
                   "~/Content/main/treeview.css",
                   "~/Content/main/forms.css",
                   "~/Content/main/main.css"));
