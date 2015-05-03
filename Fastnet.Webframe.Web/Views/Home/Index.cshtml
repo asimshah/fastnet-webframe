@@ -8,7 +8,10 @@
 @section styles {
     @if (Model.CanEditPages)
     {
-        @Styles.Render("~/Content/editor/css");
+        // I think that I may not need any of the jquery ui css for the tinymce editor
+        // because I am not using any tinymce dialogs. I may be wrong so I am
+        // leaving this commented for now.
+        @*@Styles.Render("~/Content/themes/base/editorcss");*@
     }
     @if (Model.Features.HasFlag(Features.DateCapture))
     {

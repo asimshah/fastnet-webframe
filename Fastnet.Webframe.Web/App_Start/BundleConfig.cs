@@ -119,10 +119,14 @@ namespace Fastnet.Webframe.Web
                 "~/Content/main/identity.css"
                 ));
 
-            bundles.Add(new StyleBundle("~/Content/editor/css").Include(
+            bundles.Add(new StyleBundle("~/Content/themes/base/editorcss").Include(
                 "~/Content/themes/base/all.css"
+                //"~/Content/themes/base/base.css",
+                //"~/Content/themes/base/theme.css"
                 //"~/Content/datatables/css/jquery.datatables.css"
                 ));
+            //bundles.Add(new StyleBundle("~/Content/themes/base/editorcss")
+            //    .IncludeDirectory("~/Content/themes/base", "*.css"));
         }
     }
 }
