@@ -169,6 +169,7 @@
             var me = this;
             var container = me.options._container;
             $(container).append(me.options._froot);
+           
             _bindCommands.call(me);
             _bindLeaveFocus.call(me);
             _bindDataChange.call(me);
@@ -178,6 +179,7 @@
                     backdrop: 'static',
                     keyboard: false
                 });
+                
                 if (me.options.IsResizable) {
                     _addResizability.call(me);
                 }
@@ -187,6 +189,9 @@
             if ($.isFunction(onload)) {
                 onload(me);
             }
+            setTimeout(function () {
+                $(container).find("[data-focus]")[0].focus();
+            }, 750);
         };
         function _close() {
             var me = this;
