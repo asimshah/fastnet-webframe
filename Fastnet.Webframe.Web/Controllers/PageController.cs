@@ -115,8 +115,9 @@ using System.IO;
         [Route("~/image/{id}")]
         public HttpResponseMessage GetImage(long id)
         {
-            Data.ImageInformation image = DataContext.ImageInformata.Find(id);
-            MemoryStream ms = new MemoryStream(image.Image);
+            //Data.ImageInformation image = DataContext.ImageInformata.Find(id);
+            Data.Image image = DataContext.Images.Find(id);
+            MemoryStream ms = new MemoryStream(image.Data);
             HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StreamContent(ms);
             response.Content.Headers.ContentType = new MediaTypeHeaderValue(image.MimeType);            

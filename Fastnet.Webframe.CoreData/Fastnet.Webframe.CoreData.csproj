@@ -155,6 +155,7 @@
     <Compile Include="Group.cs" />
     <Compile Include="GroupRegistrationKey.cs" />
     <Compile Include="IdentityModels.cs" />
+    <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
     <Compile Include="MarkupDocumentLink.cs" />
     <Compile Include="MarkupPageLink.cs" />

@@ -64,6 +64,7 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/jquery-ui-{version}.js",
                     //"~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
+                    "~/Scripts/dropzone/dropzone.js",
                     "~/Scripts/fastnet/fastnet.contextmenu.js",
                     "~/Scripts/fastnet/fastnet.treeview.js",
                     "~/Scripts/main/core.editor.js"
@@ -117,6 +118,11 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new StyleBundle("~/Content/identity/css").Include(
                 "~/Content/main/identity.css"
+                ));
+
+            bundles.Add(new StyleBundle("~/Content/dropzonecss").Include(
+                "~/Scripts/dropzone/basic.css",
+                "~/Scripts/dropzone/dropzone.css"
                 ));
 
             bundles.Add(new StyleBundle("~/Content/themes/base/editorcss").Include(

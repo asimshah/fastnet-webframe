@@ -1,16 +1,18 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.Common;
+using Fastnet.EventSystem;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web;
 using System.Text;
-using System.Diagnostics;
-using Fastnet.EventSystem;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Hosting;
+using System.Web.Http;
+using CD = Fastnet.Webframe.CoreData;
 
 
 namespace Fastnet.Webframe.Web.Controllers
@@ -19,7 +21,7 @@ namespace Fastnet.Webframe.Web.Controllers
     //[Authorize]
     public class StoreController : ApiController
     {
-        private CoreDataContext DataContext = Core.GetDataContext();
+        private CD.CoreDataContext DataContext = CD.Core.GetDataContext();
         private string CurrentMemberId
         {
             get
@@ -52,28 +54,28 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("content/{id}")]
         public Task<HttpResponseMessage> GetDirectoryContent(long id)
         {
-            var allPages = DataContext.Pages.Where(p => p.DirectoryId == id)
-                .OrderBy(x => x.PageId);
+            //var allPages = DataContext.Pages.Where(p => p.DirectoryId == id)
+            //    .OrderBy(x => x.PageId);
+            var directory = DataContext.Directories.Find(id);
+            //var allPages = directory.Pages.OrderBy(x => x.PageId);
             List<dynamic> folderContent = new List<dynamic>();
-            foreach (var page in allPages)
+            foreach (var page in directory.Pages.OrderBy(x => x.PageId))
             {
                 if (page.CentrePanelPages.Count() == 0)
                 {
-                    bool bp = false; // banner panel
-                    bool lp = false; // left panel
-                    bool rp = false; // right panel
+                    string remarks = string.Empty;
                     foreach (var pp in page.SidePanelPages)
                     {
                         switch (pp.Panel.Name)
                         {
                             case "BannerPanel":
-                                bp = true;
+                                remarks += "B";
                                 break;
                             case "LeftPanel":
-                                lp = true;
+                                remarks += "L";
                                 break;
                             case "RightPanel":
-                                rp = true;
+                                remarks += "R";
                                 break;
                         }
                     }
@@ -83,12 +85,32 @@ namespace Fastnet.Webframe.Web.Controllers
                         Id = page.PageId,
                         Url = page.Url,
                         Name = page.Name,
-                        HasBanner = bp,
-                        HasLeft = lp,
-                        HasRight = rp,
+                        Remarks = remarks,
                         LandingPage = page.IsLandingPage
                     });
                 }
+            }
+            foreach(var image in directory.Images.OrderBy(x => x.ImageId))
+            {
+                folderContent.Add(new
+                {
+                    Type = "image",
+                    Id = image.ImageId,
+                    Url = image.Url,
+                    Name = image.Name,
+                    Remarks = string.Format("{1}w x {0}w", image.Height, image.Width),
+                });
+            }
+            foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
+            {
+                folderContent.Add(new
+                {
+                    Type = "document",
+                    Id = document.DocumentId,
+                    Url = document.Url,
+                    Name = document.Name,
+                    Remarks = string.Empty,
+                });
             }
             return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, folderContent));
         }
@@ -102,8 +124,8 @@ namespace Fastnet.Webframe.Web.Controllers
                 try
                 {
                     long directoryId = data.directoryId;
-                    Directory parent = DataContext.Directories.Find(directoryId);
-                    Directory dir = new Directory();
+                    CD.Directory parent = DataContext.Directories.Find(directoryId);
+                    CD.Directory dir = new CD.Directory();
                     dir.Name = GetUniqueDirectoryName(parent);
                     dir.ParentDirectory = parent;
                     DataContext.Directories.Add(dir);
@@ -124,38 +146,26 @@ namespace Fastnet.Webframe.Web.Controllers
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
-        [Route("createpage")]
-        public async Task<HttpResponseMessage> CreateNewPage(dynamic data)
+        [Route("createpage/{refpageid?}")]
+        public async Task<HttpResponseMessage> CreateNewPage(dynamic data, long? refpageid = null)
         {
             if (CurrentMemberId != null)
             {
                 bool result = true;
                 try
                 {
-                    long directoryId = data.directoryId;
-                    Member m = DataContext.Members.Find(CurrentMemberId);
-                    Directory dir = DataContext.Directories.Find(directoryId);
-                    Page page = DataContext.CreateNewPage();
-                    PageMarkup pm = page.PageMarkup;
-                    pm.CreatedBy = m.Fullname;
-                    pm.CreatedOn = DateTime.UtcNow;
-                    pm.TimeStamp = BitConverter.GetBytes(-1);
-
-
-                    page.TimeStamp = BitConverter.GetBytes(-1);
-                    page.Visible = true;
-                    page.VersionCount = 0;
-                    page.Name = GetUniquePageName(dir);
-                    page.Directory = dir;
-                    page.MarkupType = MarkupType.Html;
-                    page.PageMarkup = pm;
-                    string defaultPagesFolder = HttpContext.Current.Server.MapPath("~/Default Pages");
-                    string blankHtmlFile = System.IO.Path.Combine(defaultPagesFolder, "Blank Page.html");
-                    byte[] htmlData = System.IO.File.ReadAllBytes(blankHtmlFile);
-                    pm.HtmlText = Encoding.Default.GetString(htmlData);
-                    await DataContext.SaveChangesAsync();
+                    long directoryId;
+                    if (refpageid.HasValue)
+                    {
+                        directoryId = DataContext.Pages.Find(refpageid.Value).Directory.DirectoryId;
+                    }
+                    else
+                    {
+                        directoryId = data.directoryId;
+                    }
+                    CD.Page page = await CreatePageInternal(directoryId);
                     //long pageId = page.PageId;
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url }));
+                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url, Name = page.Name }));
                 }
                 catch (Exception xe)
                 {
@@ -170,6 +180,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
+       
         [HttpPost]
         [Route("delete")]
         public async Task<HttpResponseMessage> DeleteItem(dynamic data)
@@ -210,7 +221,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (CurrentMemberId != null)
             {
-                Directory d = DataContext.Directories.Find(id);
+                CD.Directory d = DataContext.Directories.Find(id);
                 var data = new
                 {
                     Id = d.DirectoryId,
@@ -227,7 +238,7 @@ namespace Fastnet.Webframe.Web.Controllers
             if (CurrentMemberId != null)
             {
                 long id = data.id;
-                Directory d = DataContext.Directories.Find(id);
+                CD.Directory d = DataContext.Directories.Find(id);
                 d.Name = data.name;
                 await DataContext.SaveChangesAsync();
                 return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
@@ -240,7 +251,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (CurrentMemberId != null)
             {
-                Page p = DataContext.Pages.Find(id);
+                CD.Page p = DataContext.Pages.Find(id);
                 var data = new
                 {
                     Id = p.PageId,
@@ -260,7 +271,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("panelinfo/{id}")]
         public HttpResponseMessage GetSidePanelInformation(string id)
         {
-            Func<Page, long?> getPageId = (p) =>
+            Func<CD.Page, long?> getPageId = (p) =>
                 {
                     if (p == null)
                     {
@@ -271,20 +282,20 @@ namespace Fastnet.Webframe.Web.Controllers
                         return p.PageId;
                     }
                 };
-            Func<Page, Panel, Page> sidePanelPage = (cp, panel) =>
+            Func<CD.Page, CD.Panel, CD.Page> sidePanelPage = (cp, panel) =>
             {
-                Page sp = null;
+                CD.Page sp = null;
                 if (panel.Visible)
                 {
-                    PanelPage panelPage = cp.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
+                    CD.PanelPage panelPage = cp.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
                     sp = panelPage != null ? panelPage.Page : null;
                 }
                 return sp;
             };
-            Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
-            Page bp = sidePanelPage(centrePage, Panel.BannerPanel);
-            Page lp = sidePanelPage(centrePage, Panel.LeftPanel);
-            Page rp = sidePanelPage(centrePage, Panel.RightPanel);
+            CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
+            CD.Page bp = sidePanelPage(centrePage, CD.Panel.BannerPanel);
+            CD.Page lp = sidePanelPage(centrePage, CD.Panel.LeftPanel);
+            CD.Page rp = sidePanelPage(centrePage, CD.Panel.RightPanel);
             var result = new
             {
                 BannerPanel = new { PageId = getPageId(bp) },
@@ -301,7 +312,7 @@ namespace Fastnet.Webframe.Web.Controllers
             {
 
                 long id = data.id;
-                Page p = DataContext.Pages.Find(id);
+                CD.Page p = DataContext.Pages.Find(id);
                 p.Name = data.name;
                 await DataContext.SaveChangesAsync();
                 return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
@@ -314,7 +325,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (CurrentMemberId != null)
             {
-                Member m = DataContext.Members.Find(CurrentMemberId);
+                CD.Member m = DataContext.Members.Find(CurrentMemberId);
 
                 //Action<long, string> updatePage = (id, htmlText) =>
                 //    {
@@ -329,20 +340,20 @@ namespace Fastnet.Webframe.Web.Controllers
                 Action<dynamic> update = (p) =>
                 {
                     string pageId = p.PageId;
-                    if(pageId != null)                    
+                    if (pageId != null)
                     {
                         bool changed = (bool)p.HasChanged;
                         if (changed)
                         {
                             long id = Convert.ToInt64(pageId);
                             string htmlText = (string)p.HtmlText;
-                            Page page = DataContext.Pages.Find(id);
-                            PageMarkup pm = page.PageMarkup;
+                            CD.Page page = DataContext.Pages.Find(id);
+                            CD.PageMarkup pm = page.PageMarkup;
                             pm.HtmlText = htmlText;
                             pm.HtmlTextLength = htmlText.Length;
                             pm.ModifiedBy = m.Fullname;
                             pm.ModifiedOn = DateTime.UtcNow;
-                            page.MarkupType = MarkupType.Html;
+                            page.MarkupType = CD.MarkupType.Html;
                         }
                     }
                 };
@@ -358,15 +369,141 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
         }
+        [HttpPost]
+        [Route("upload/file")]
+        public async Task<HttpResponseMessage> UploadFile(dynamic data)
+        {
+            if (CurrentMemberId != null)
+            {
+                long directoryid = Convert.ToInt64((string)data.directoryId);
+                CD.Directory d = DataContext.Directories.Find(directoryid);
+
+                string filename = data.filename;
+                string mimetype = data.mimetype;
+                long binaryLength = data.binaryLength;
+                string base64String = data.base64;
+                long base64Length = data.base64Length;
+                byte[] fileData = Convert.FromBase64String(base64String);
+                if (ApplicationSettings.Key("SaveDocumentsToDisk", false))
+                {
+                    SaveDocumentToDisk(d.Fullpath, filename, fileData);
+                }
+                string url = string.Empty;
+                bool result = true;
+                try
+                {
+                    switch (mimetype)
+                    {
+                        case "image/jpeg":
+                        case "image/png":
+                        case "image/gif":
+                            CD.Image image = CreateImage(d, filename, fileData, mimetype);
+                            url = image.Url;
+                            break;
+                        default:
+                            CD.Document document = CreateDocument(d, filename, fileData, mimetype);
+                            url = document.Url;
+                            break;
+                    }
+                    await DataContext.SaveChangesAsync();
+                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, url));
+                }
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
+                    result = false;                    
+                }
+                if (!result)
+                {
+                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
+                }
+                else
+                {
+                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+                }
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+        }
         //
         //
+        private async Task<CD.Page> CreatePageInternal(long directoryId)
+        {
+            CD.Member m = DataContext.Members.Find(CurrentMemberId);
+            CD.Directory dir = DataContext.Directories.Find(directoryId);
+            CD.Page page = DataContext.CreateNewPage();
+            CD.PageMarkup pm = page.PageMarkup;
+            pm.CreatedBy = m.Fullname;
+            pm.CreatedOn = DateTime.UtcNow;
+            pm.TimeStamp = BitConverter.GetBytes(-1);
+
+
+            page.TimeStamp = BitConverter.GetBytes(-1);
+            page.Visible = true;
+            page.VersionCount = 0;
+            page.Name = GetUniquePageName(dir);
+            page.Directory = dir;
+            page.MarkupType = CD.MarkupType.Html;
+            page.PageMarkup = pm;
+            string defaultPagesFolder = HttpContext.Current.Server.MapPath("~/Default Pages");
+            string blankHtmlFile = System.IO.Path.Combine(defaultPagesFolder, "Blank Page.html");
+            byte[] htmlData = System.IO.File.ReadAllBytes(blankHtmlFile);
+            pm.HtmlText = Encoding.Default.GetString(htmlData);
+            await DataContext.SaveChangesAsync();
+            return page;
+        }
+        private CD.Document CreateDocument(CD.Directory d, string filename, byte[] fileData, string mimetype)
+        {
+            CD.Member cm = DataContext.Members.Find(CurrentMemberId);
+            CD.Document document = DataContext.CreateNewDocument();
+            document.CreatedBy = cm.Fullname;
+            document.CreatedOn = DateTime.UtcNow;
+            document.Directory = d;
+            document.Data = fileData;
+            document.Extension = System.IO.Path.GetExtension(filename);
+            document.Length = fileData.Length;
+            document.Name = filename;
+            document.MimeType = mimetype;
+            document.TimeStamp = BitConverter.GetBytes(-1);
+            DataContext.Documents.Add(document);
+            return document;
+        }
+        private CD.Image CreateImage(CD.Directory d, string filename, byte[] fileData, string mimetype)
+        {
+            CD.Member cm = DataContext.Members.Find(CurrentMemberId);
+            var dimensions = GetDimensions(fileData);
+            CD.Image image = DataContext.CreateNewImage();
+            image.CreatedBy = cm.Fullname;
+            image.CreatedOn = DateTime.UtcNow;
+            image.Directory = d;
+            image.Data = fileData;
+            image.Height = dimensions.Height;
+            image.Width = dimensions.Width;
+            image.Name = filename;
+            switch (mimetype)
+            {
+                case "image/jpeg":
+                    image.ImageType = CD.ImageType.Jpeg;
+                    break;
+                case "image/png":
+                    image.ImageType = CD.ImageType.Png;
+                    break;
+                case "image/gif":
+                    image.ImageType = CD.ImageType.Gif;
+                    break;
+                default:
+                    break;
+            }
+            image.TimeStamp = BitConverter.GetBytes(-1);
+            DataContext.Images.Add(image);
+            return image;
+        }
         private async Task DeleteDirectory(long id)
         {
             using (var tran = DataContext.Database.BeginTransaction())
             {
                 try
                 {
-                    Directory d = DataContext.Directories.Find(id);
+                    CD.Directory d = DataContext.Directories.Find(id);
                     await DeleteDirectory(d);
                     tran.Commit();
                 }
@@ -378,14 +515,13 @@ namespace Fastnet.Webframe.Web.Controllers
                 }
             }
         }
-
-        private async Task DeleteDirectory(Directory dir)
+        private async Task DeleteDirectory(CD.Directory dir)
         {
-            foreach (Page p in dir.Pages.ToArray())
+            foreach (CD.Page p in dir.Pages.ToArray())
             {
                 DeletePage(p);
             }
-            foreach (Directory d in dir.SubDirectories.ToArray())
+            foreach (CD.Directory d in dir.SubDirectories.ToArray())
             {
                 await DeleteDirectory(d);
             }
@@ -394,18 +530,17 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private async Task DeletePage(long id)
         {
-            Page p = DataContext.Pages.Find(id);
+            CD.Page p = DataContext.Pages.Find(id);
             DeletePage(p);
             await DataContext.SaveChangesAsync();
         }
-
-        private void DeletePage(Page p)
+        private void DeletePage(CD.Page p)
         {
-            PageMarkup pm = p.PageMarkup;
+            CD.PageMarkup pm = p.PageMarkup;
             DataContext.PageMarkups.Remove(pm);
             DataContext.Pages.Remove(p);
         }
-        private string GetUniquePageName(Directory dir)
+        private string GetUniquePageName(CD.Directory dir)
         {
             string proposedName = "New Page";
             Func<string, bool> nameExists = (name) =>
@@ -420,7 +555,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return newName;
         }
-        private string GetUniqueDirectoryName(Directory dir)
+        private string GetUniqueDirectoryName(CD.Directory dir)
         {
             string proposedName = "New Folder";
             Func<string, bool> nameExists = (name) =>
@@ -434,6 +569,25 @@ namespace Fastnet.Webframe.Web.Controllers
                 newName = string.Format("{0} ({1})", proposedName, ++index);
             }
             return newName;
+        }
+        private dynamic GetDimensions(byte[] image)
+        {
+            using (var ms = new System.IO.MemoryStream(image))
+            {
+                var img = System.Drawing.Image.FromStream(ms);
+                return new { Height = img.Height, Width = img.Width };
+            }
+        }
+        private void SaveDocumentToDisk(string folder, string filename, byte[] data)
+        {
+            string rootFolder = HostingEnvironment.MapPath("~/App_Data/documents");
+            string targetFolder = System.IO.Path.Combine(rootFolder, folder.Replace("/", "\\"));
+            if (!System.IO.Directory.Exists(targetFolder))
+            {
+                System.IO.Directory.CreateDirectory(targetFolder);
+            }
+            string outputFile = System.IO.Path.Combine(targetFolder, filename);
+            System.IO.File.WriteAllBytes(outputFile, data);
         }
     }
 }

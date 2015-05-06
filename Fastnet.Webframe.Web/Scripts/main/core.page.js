@@ -28,6 +28,7 @@
     var $T;
     var $U;
     $.core$page = {
+        isEditing: false,
         options: null,
         currentPages: { centreId: null, bannerId: null, leftId: null, rightId: null },
         Init: function () {
@@ -63,9 +64,9 @@
                     $T.ShowDialog("userprofile");
                     break;
                 default:
-                    if (url.startsWith("/page")) {
-                        var id = parseInt(url.substring(6));
-                        $T.SetPage(url.substring(6));
+                    if (url.startsWith("page/")) {
+                        //var id = parseInt(url.substring(6));
+                        $T.SetPage(url.substring(5));
                         window.history.pushState({ href: url }, null, url);
                     }
                     break;
@@ -94,7 +95,7 @@
                 if (isBuiltIn(url)) {
                     result = true;
                 } else {
-                    result = url.startsWith("/page") || url.startsWith("/document") || url.startsWith("/video");
+                    result = url.startsWith("page/") || url.startsWith("document/") || url.startsWith("video/");
                 }
             }
             return result;
@@ -114,8 +115,8 @@
                 url = url.substring(thisSite.length, url.length - thisSite.length)
             }
             if (!(url.startsWith("http") || url.startsWith("file") || url.startsWith("mailto"))) {
-                if (!url.startsWith("/")) {
-                    url = "/" + url;
+                if (url.startsWith("/")) {
+                    url = url.substring(1);
                 }
             }
             return url;
@@ -183,6 +184,10 @@
                         //alert("Load user profile");
                         $T.GotoInternalLink("/userprofile");
                     });
+                    if ($T.isEditing) {
+                        //alert("set page while editing");
+                        $.core$editor.PageChanged();
+                    }
                 });
         },
         SetContent: function (panelName, pageInfo) {

@@ -75,6 +75,7 @@ body {
 }
 [contenteditable=true] {
   resize: none;
+  overflow-y: auto;
   outline: 0 solid transparent;
   border: none;
 }
@@ -181,6 +182,10 @@ body {
 .editor-dialog {
   font-size: small;
 }
+.editor-dialog.store-browser {
+  min-width: 600px;
+  min-height: 300px;
+}
 .editor-dialog.store-browser div[class*='col-xs'] {
   padding-left: 8px;
   padding-right: 8px;
@@ -237,8 +242,11 @@ body {
 .editor-dialog.store-browser .browser-folder-content table td.name {
   width: 100%;
 }
-.editor-dialog.store-browser .browser-folder-content table td.side-content div {
-  width: 32px;
+.editor-dialog.store-browser .browser-folder-content table td.remarks {
+  font-size: smaller;
+}
+.editor-dialog.store-browser .browser-folder-content table td.remarks div {
+  width: 80px;
 }
 .editor-dialog.store-browser .browser-folder-content table td.buttons {
   width: auto;
@@ -268,5 +276,8 @@ body {
 .field-validation-error {
   font-style: italic;
   color: #f82727;
+}
+i.mce-i-wflink:before {
+  content: "\e011";
 }
 /*# sourceMappingURL=main.css.map */

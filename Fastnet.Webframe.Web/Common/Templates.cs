@@ -76,6 +76,7 @@ namespace Fastnet.Webframe.Web.Common
             PageProperties,
             DirectoryProperties,
             DocumentProperties,
+            UploadFile,
             //
             TestForm
         }
@@ -99,6 +100,7 @@ namespace Fastnet.Webframe.Web.Common
         public static readonly FormTemplate DirectoryProperties = new FormTemplate(formTypes.DirectoryProperties);
         public static readonly FormTemplate DocumentProperties = new FormTemplate(formTypes.DocumentProperties);
         public static readonly FormTemplate MessageBox = new FormTemplate(formTypes.MessageBox);
+        public static readonly FormTemplate UploadFile = new FormTemplate(formTypes.UploadFile);
         public static readonly FormTemplate TestForm = new FormTemplate(formTypes.TestForm);
         private FormTemplate(formTypes ft)
         {
@@ -130,6 +132,7 @@ namespace Fastnet.Webframe.Web.Common
                 case formTypes.PageProperties:
                 case formTypes.DirectoryProperties:
                 case formTypes.DocumentProperties:
+                case formTypes.UploadFile:
                     return Path.Combine(templateFolder, "Forms", "Editor");
                 default:
                     throw new ApplicationException("No root for form");
@@ -180,6 +183,8 @@ namespace Fastnet.Webframe.Web.Common
                     return DirectoryProperties;
                 case formTypes.DocumentProperties:
                     return DocumentProperties;
+                case formTypes.UploadFile:
+                    return UploadFile;
                 case formTypes.TestForm:
                     return TestForm;
             }

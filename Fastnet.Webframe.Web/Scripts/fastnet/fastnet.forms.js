@@ -89,18 +89,20 @@
             if (typeof onClose !== "undefined") {
                 _onClose = onClose;
             }
-            var f_options = $.extend({
-                //Message: message,
-                OnClose: _onClose,
+            $.extend(this.options, { OnClose: _onClose });
+            //this.options = $.extend({ OnClose: _onClose }, this.options);
+            //var f_options = $.extend({
+            //    //Message: message,
+            //    OnClose: _onClose,
 
-            }, this.options);
+            //}, this.options);
             var data = {
                 Message: message,
-                OKLabel: f_options.OKLabel,
-                CancelLabel: f_options.CancelLabel,
+                OKLabel: this.options.OKLabel,
+                CancelLabel: this.options.CancelLabel,
             };
             //var mb = new $.fastnet$form("template/form/messagebox", f_options);
-            var mb = new $.fastnet$forms.CreateForm("template/form/messagebox", f_options, data);
+            var mb = new $.fastnet$forms.CreateForm("template/form/messagebox", this.options, data);
             mb.show(function () {
                 if (self.options.CancelButton === false) {
                     mb.find("button[data-cmd='cancel'], button[data-cmd='system-close']").addClass("hidden");
@@ -125,6 +127,7 @@
             IsModal: true,
             IsResizable: false,
             AfterItemValidation: null,
+            OnChange: null,
             OnCommand: null,
         }, options);
         this.data = $.extend({
@@ -169,17 +172,18 @@
             var me = this;
             var container = me.options._container;
             $(container).append(me.options._froot);
-           
+            _saveOriginalData();
             _bindCommands.call(me);
             _bindLeaveFocus.call(me);
             _bindDataChange.call(me);
+            _bindFileButtons.call(me);
             if (me.options.IsModal) {
                 //$(id).modal({
                 me.options._froot.modal({
                     backdrop: 'static',
                     keyboard: false
                 });
-                
+
                 if (me.options.IsResizable) {
                     _addResizability.call(me);
                 }
@@ -190,7 +194,10 @@
                 onload(me);
             }
             setTimeout(function () {
-                $(container).find("[data-focus]")[0].focus();
+                var f_elements = $(container).find("[data-focus]");
+                if (f_elements.length > 0) {
+                    f_elements[0].focus();
+                }
             }, 750);
         };
         function _close() {
@@ -315,6 +322,35 @@
             resizeGrip.css("cursor", "default");
             resizeGrip.addClass("hidden");
         };
+        function _saveOriginalData() {
+            var lfSelector = "input[type=text], input[type=password], input[type=email]";
+            $(lfSelector).each(function (index, element) {
+                var val = $(element).val();
+                $(element).attr("data-original", val);
+            });
+        };
+        function _bindFileButtons() {
+            var me = this;
+            $(".btn-file :file").on("change", function () {
+                var input = $(this);
+                var dataItem = input.attr("data-item");
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+                input.trigger('fileselect', [numFiles, label, dataItem]);
+            });
+            $(".btn-file :file").on("fileselect", function (event, numFiles, label, dataItem) {
+                var input = $(this).parents('.input-group').find(':text'),
+                    log = numFiles > 1 ? numFiles + ' files selected' : label;
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+                if (me.options.OnChange !== null) {
+                    me.options.OnChange(me, dataItem);
+                }
+            });
+        };
         function _bindCommands() {
             var me = this;
             if (me.options.IsModal) {
@@ -341,32 +377,47 @@
         function _bindLeaveFocus() {
             var me = this;
             var lfSelector = "input[type=text], input[type=password], input[type=email]";
+            me.options._froot.find(lfSelector).on("focus", function (e) {
+                var dataItem = $(this).attr("data-item");
+                $U.Debug("got focus for {0}", dataItem);
+            });
             me.options._froot.find(lfSelector).on("blur", function (e) {
                 var dataItem = $(this).attr("data-item");
-                var validations = me.options._validators[dataItem];
-                if (typeof validations !== "undefined" && validations !== null) {
-                    $.when(_validateItem(me.options._id,dataItem, validations)).then(function (r) {
-                        $U.Debug("_validateItem: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
-                        var dp = me.options._froot.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
-                        dp.attr("data-validation-state", r.success ? "valid" : "error");
-                        if (me.options.AfterItemValidation !== null) {
-                            me.options.AfterItemValidation(me, r);
-                        }
-                    });
+                // so far only input tags
+                var val = $(this).val();
+                var original = $(this).attr("data-original");
+                var hasChanged = val !== original;
+                $U.Debug("leave focus for {0}", dataItem);
+                if (hasChanged) {
+                    var validations = me.options._validators[dataItem];
+                    if (typeof validations !== "undefined" && validations !== null) {
+                        $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
+                            $U.Debug("_validateItem: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
+                            var dp = me.options._froot.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
+                            dp.attr("data-validation-state", r.success ? "valid" : "error");
+                            if (me.options.AfterItemValidation !== null) {
+                                me.options.AfterItemValidation(me, r);
+                            }
+                        });
+                    }
                 }
-
+                //$(this).removeAttr("data-changed");
             });
         };
         function _bindDataChange() {
             var me = this;
             var dcSelector = "input[type=text], input[type=password], input[type=email]";
             me.options._froot.find(dcSelector).on("input", function (e) {
-                //var item = $(this).attr("data-item");
+                var item = $(this).attr("data-item");
+                //$(this).attr("data-changed", "true");
                 //var value = $(this).val();
                 //if (typeof value === 'string') {
                 //    value = value.trim();
                 //}
                 $(this).closest("[data-property]").find(".message").html("");
+                if (me.options.OnChange !== null) {
+                    me.options.OnChange(me, item);
+                }
             });
         };
         function _commandEnable(command, enable) {
@@ -439,11 +490,15 @@
             });
             me.options._froot.find("[data-item='" + dataItem + "']").closest("[data-property]").find(".message").html(text);
         };
+        frm.prototype.clearMessages = function () {
+            var me = this;
+            me.options._froot.find("[data-property] .message").html('');
+        };
         frm.prototype.find = function (selector) {
             var me = this;
             return me.options._froot.find(selector);
         };
-        frm.prototype.enableCommand = function (command) {            
+        frm.prototype.enableCommand = function (command) {
             var me = this;
             _commandEnable.call(me, command, true);
         };

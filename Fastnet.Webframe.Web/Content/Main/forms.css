@@ -1,4 +1,26 @@
-﻿.modal-dialog .modal-content {
+﻿.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: red;
+  cursor: inherit;
+  display: block;
+}
+input[readonly] {
+  background-color: white !important;
+  cursor: text !important;
+}
+.modal-dialog .modal-content {
   display: table;
   width: 100%;
 }
@@ -54,5 +76,23 @@
   float: right;
   height: 11px;
   width: 11px;
+}
+.upload-file #previews.table .file-row {
+  display: table-row;
+  border-collapse: collapse;
+}
+.upload-file #previews.table .file-row > div {
+  padding: 4px;
+  display: table-cell;
+  /*padding-right: 8px;*/
+  border-bottom: 1px solid #b0afaf;
+}
+.upload-file #previews.table .file-row div.name {
+  vertical-align: top;
+  width: 100%;
+}
+.upload-file #previews.table .file-row div.size {
+  vertical-align: top;
+  min-width: 80px;
 }
 /*# sourceMappingURL=forms.css.map */

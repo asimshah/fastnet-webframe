@@ -49,21 +49,22 @@ namespace Fastnet.Webframe.CoreData
         [NotMapped]
         public string Url
         {
-            get { return string.Format("/page/{0}", PageId); }
+            get { return string.Format("page/{0}", PageId); }
         }
         public virtual ICollection<Page> BackLinks { get; set; } // this page is hyperlinked from these pages
         public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
     }
     public partial class CoreDataContext
     {
-        long largest = 0;
+        
         public Page CreateNewPage()
         {
+            long largest = 0;
             if((this.Pages.Count() + this.Pages.Local.Count()) > 0)
             { 
                 largest = this.Pages.Select(x => x.PageId).Union(this.Pages.Local.Select(x => x.PageId)).Max(x => x);
             }
-            Debug.Print("Page: largest pk = {0}", largest);
+            //Debug.Print("Page: largest pk = {0}", largest);
             Page p = new Page { PageId = largest + 1 };
             p.PageMarkup = new PageMarkup();
             

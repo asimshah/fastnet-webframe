@@ -79,10 +79,10 @@ namespace Fastnet.Webframe.CoreData
     }
     public enum ImageType
     {
-        Jpg = 0,
+        Jpeg = 0,
         Png,
         Gif,
-        Emz,
+        //Emz,
         Unknown = 64
     }
 
@@ -113,7 +113,8 @@ namespace Fastnet.Webframe.CoreData
         //public DbSet<GroupClientApp> GroupClientApps { get; set; }
         //public DbSet<GroupMember> GroupMembers { get; set; }
         //public DbSet<GroupRegistrationKey> GroupRegistrationKeys { get; set; }
-        public DbSet<ImageInformation> ImageInformata { get; set; }
+        //public DbSet<ImageInformation> ImageInformata { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         //public DbSet<MarkupDocumentLink> MarkupDocumentLinks { get; set; }
         //public DbSet<MarkupPageLink> MarkupPageLinks { get; set; }
@@ -965,7 +966,7 @@ namespace Fastnet.Webframe.CoreData
                     Extension = item.Extension,
                     CreatedOn = item.CreatedOn,
                     CreatedBy = item.CreatedBy,
-                    Type = (DocumentType)item.Type,
+                    //Type = (DocumentType)item.Type,
                     Visible = item.Visible,
                     Deleted = item.Deleted,
                     Data = item.Data
@@ -1176,19 +1177,19 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadImages()
         {
-            foreach (var item in wde.TopicImages)
-            {
-                ImageInformation image = new ImageInformation
-                {
-                    ImageInformationId = item.TopicImageId,
-                    Height = item.Height,
-                    Image = item.Image,
-                    Width = item.Width,
-                    ImageType = (ImageType)item.ImageTypeCode
-                };
-                coreDb.ImageInformata.Add(image);
-            }
-            coreDb.SaveChanges();
+            //foreach (var item in wde.TopicImages)
+            //{
+            //    ImageInformation image = new ImageInformation
+            //    {
+            //        ImageInformationId = item.TopicImageId,
+            //        Height = item.Height,
+            //        Image = item.Image,
+            //        Width = item.Width,
+            //        ImageType = (ImageType)item.ImageTypeCode
+            //    };
+            //    coreDb.ImageInformata.Add(image);
+            //}
+            //coreDb.SaveChanges();
         }
         internal void LoadMenus()
         {

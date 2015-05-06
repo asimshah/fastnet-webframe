@@ -1,24 +1,54 @@
-﻿.modal-dialog {
+﻿.btn-file {
+    position: relative;
+    overflow: hidden;
+
+    input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        background: red;
+        cursor: inherit;
+        display: block;
+    }
+}
+
+input[readonly] {
+    background-color: white !important;
+    cursor: text !important;
+}
+
+.modal-dialog {
     .modal-content {
         display: table;
         width: 100%;
+
         .modal-section {
             display: table-row;
         }
+
         .modal-header, .modal-footer, .modal-body {
             display: table-cell;
             padding-top: 10px;
             padding-bottom: 10px;
+
             .form-trace {
                 display: none;
                 font-size: 8pt;
                 color: #946713;
             }
         }
+
         .modal-header.resizable {
             border-top: 4px solid #04b01b;
             border-radius: 4px;
         }
+
         .modal-body {
             //background-color: yellowgreen;
             textarea.form-control {
@@ -26,6 +56,7 @@
                 border-style: none;
             }
         }
+
         .modal-footer {
             .form-group {
                 margin-bottom: auto;
@@ -60,10 +91,39 @@
 
 
 .resize-grip {
-   
     //background-color: red;
     margin-top: -12px;
     float: right;
     height: 11px;
     width: 11px;
+}
+
+.upload-file {
+    #previews.table {
+        .file-row {
+            display: table-row;
+            border-collapse: collapse;
+           
+            &:nth-child(odd) {
+                //background-color: #f9f9f9;
+            }
+
+            > div {
+                padding: 4px;
+                display: table-cell;
+                /*padding-right: 8px;*/
+                border-bottom: 1px solid rgb(176, 175, 175);
+            }
+
+            div.name {
+                vertical-align: top;
+                width: 100%;
+            }
+
+            div.size {
+                vertical-align: top;
+                min-width: 80px;
+            }
+        }
+    }
 }

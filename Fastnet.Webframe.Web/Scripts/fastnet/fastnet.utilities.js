@@ -331,8 +331,8 @@
             var args = Array.prototype.slice.call(arguments);
             var message = $T.Format(str, args.slice(1));
             var now = $T.GetDateTime();
-            if (message.length > 80) {
-                message = message.substring(0, 79) + "...[ total " + message.length + " chars]";
+            if (message.length > 200) {
+                message = message.substring(0, 199) + "...[ total " + message.length + " chars]";
             }
             var text = $T.Format("{0} [ js] {1}", $T.FormatDate(now, "HH:MM:ss"), message);
             $T.record(text);

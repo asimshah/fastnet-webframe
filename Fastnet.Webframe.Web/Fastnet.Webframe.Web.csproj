@@ -786,6 +786,14 @@
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.min.js" />
+    <Content Include="Scripts\dropzone\basic.css" />
+    <Content Include="Scripts\dropzone\basic.min.css" />
+    <Content Include="Scripts\dropzone\dropzone-amd-module.js" />
+    <Content Include="Scripts\dropzone\dropzone-amd-module.min.js" />
+    <Content Include="Scripts\dropzone\dropzone.css" />
+    <Content Include="Scripts\dropzone\dropzone.js" />
+    <Content Include="Scripts\dropzone\dropzone.min.css" />
+    <Content Include="Scripts\dropzone\dropzone.min.js" />
     <Content Include="Scripts\fastnet\fastnet.account.js" />
     <Content Include="Scripts\fastnet\fastnet.contextmenu.js" />
     <Content Include="Scripts\fastnet\fastnet.forms.js" />
@@ -986,6 +994,8 @@
     <Content Include="Templates\Forms\Account\UserProfile.html" />
     <Content Include="Templates\Forms\Editor\DirectoryProperties.html" />
     <Content Include="Templates\Forms\Editor\PageProperties.html" />
+    <Content Include="Templates\Forms\Editor\UploadFile-v0.html" />
+    <Content Include="Templates\Forms\Editor\UploadFile.html" />
     <Content Include="Templates\Forms\MessageBox.html" />
     <Content Include="Templates\Forms\TestForm.html" />
     <Content Include="Templates\Forms\Editor\BrowseForLink.html" />

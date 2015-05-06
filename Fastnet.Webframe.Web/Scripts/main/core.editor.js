@@ -26,7 +26,7 @@
             "            <tr>" +
             "                <th class='url'>Url</th>" +
             "                <th class='name'>Name</th>" +
-            "                <th class='side-content'></th>" +
+            "                <th class='remarks'></th>" +
             "                <th class='edit-button'></th>" +
             "                <th class='delete-button'></th>" +
             "            </tr>" +
@@ -36,7 +36,7 @@
             "            <tr data-id='{{Id}}' data-type='{{Type}}' data-url='{{Url}}' data-landing-page='{{LandingPage}}'>" +
             "                <td class='url'><div>{{Url}}</div></td>" +
             "                <td class='name'><div>{{Name}}</div></td>" +
-            "                <td class='side-content'><div>{{SC}}</div></td>" +
+            "                <td class='remarks'><div>{{Remarks}}</div></td>" +
             "                <td class='edit-button buttons'><div><span class='fa fa-pencil-square-o edit' title='Edit properties'></span></div></td>" +
             "                <td class='delete-button buttons'><div><span class='fa fa-times delete' title='Delete'></span></div></td>" +
             "            </tr>" +
@@ -68,6 +68,9 @@
                     break;
                 case "add-new-page":
                     createNewPage();
+                    break;
+                case "upload-files":
+                    showUploadForm();
                     break;
                 default:
                     $U.Debug("browser cmd: {0}", cmd);
@@ -237,6 +240,77 @@
                 $U.Debug("Selected item:  {0}/{1}", pb.SelectedItem.Type, pb.SelectedItem.Id);
             }
         };
+        function showUploadForm() {
+
+            //function uploadFiles(files, onComplete) {
+            //    $.each(files, function (index, file) {
+            //        var dateUtc = moment(file.lastModifiedDate).utc().format("DDMMMYYYY HH:mm:ss");
+            //        var postData = { name: file.name, mimeType: file.type, lastModifiedUtc: dateUtc, length: file.size };
+            //        $U.Debug("{0}, {1}, {2}, {3}, {4}", file.name, file.type, file.size, dateUtc, file.lastModifiedDate);
+            //    });
+            //    onComplete();
+            //};
+            var currentDirectoryId = pb.options.currentDirectoryId;
+            var ulf = new $.fastnet$forms.CreateForm("template/form/uploadfile", {
+                Title: "File Upload",
+                OnCommand: function (f, cmd) {
+                    switch (cmd) {
+                        case "start-upload":
+                            pb.myDropzone.enqueueFiles(pb.myDropzone.getFilesWithStatus(Dropzone.ADDED));
+                            break;
+                    }
+                },
+                //OnChange: function (f, dataItem) {
+                //    switch(dataItem) {
+                //        case "files-to-upload":
+                //            var files = ulf.find("[data-item='files-to-upload']").get(0).files;
+                //            if (files.length > 0) {
+                //                ulf.enableCommand("upload-files");
+                //            } else {
+                //                ulf.disableCommand("upload-files");
+                //            }
+                //            break;
+                //    }
+                //}
+            }, {});
+            //ulf.disableCommand("upload-files");
+            ulf.show(function () {
+                var previewNode = document.querySelector("#template");
+                previewNode.id = "";
+                var previewTemplate = previewNode.parentNode.innerHTML;
+                previewNode.parentNode.removeChild(previewNode);
+                var form = ulf.find(".modal-content").get(0);
+                pb.myDropzone = new Dropzone(form, {
+                    url: "/target-url", // Set the url
+                    thumbnailWidth: 80,
+                    thumbnailHeight: 80,
+                    parallelUploads: 20,
+                    previewTemplate: previewTemplate,
+                    autoQueue: false, // Make sure the files aren't queued until manually added
+                    previewsContainer: "#previews", // Define the container to display the previews
+                    clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+                });
+                pb.myDropzone.uploadFiles = function (files) {
+                    $.each(files, function (index, file) {
+                        //$U.Debug("Uploading file {0}, {1}", file.name, file.type);
+                        var fr = new FileReader();
+                        fr.onload = function (event) {
+                            $U.Debug("Uploading file {0} ...", file.name);
+                            var height = 0;
+                            var width = 0;
+                            var string = event.target.result;
+                            var base64Data = string.substr(string.indexOf('base64') + 7);
+                            var postData = { directoryId: currentDirectoryId, filename: file.name, mimetype: file.type, binaryLength: file.size, base64: base64Data, base64Length: base64Data.length };
+                            var url = "store/upload/file";
+                            $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
+                                $U.Debug("Uploaded file {0}, {1}, dataUrl length {2}", file.name, file.type, event.target.result.length);
+                            });
+                        }
+                        fr.readAsDataURL(file);
+                    });
+                };
+            });
+        }
         function onExpandCollapse(data) {
             $U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
             if (!data.isLoaded) {
@@ -258,9 +332,11 @@
             }
             if (data.isSelected) {
                 pb.forms.bfl.enableCommand("add-new-page");
+                pb.forms.bfl.enableCommand("upload-files");
                 folderContent.show();
             } else {
                 pb.forms.bfl.disableCommand("add-new-page");
+                pb.forms.bfl.disableCommand("upload-files");
                 folderContent.hide();
             }
         };
@@ -289,26 +365,39 @@
                 if (data.length > 0) {
                     var content = { data: [] };
                     $.each(data, function (index, item) {
-                        if (item.Type === "page") {
-                            var sc = "";
-                            if (item.HasBanner) {
-                                sc += "B";
-                            }
-                            if (item.HasLeft) {
-                                sc += "L";
-                            }
-                            if (item.HasRight) {
-                                sc += "R";
-                            }
-                            content.data.push({
-                                Type: item.Type,
-                                Id: item.Id,
-                                Url: item.Url,
-                                Name: item.Name,
-                                LandingPage: item.LandingPage ? "true" : "false",
-                                SC: sc
-                            });
+                        switch (item.Type) {
+                            case "page":
+                                content.data.push({
+                                    Type: item.Type,
+                                    Id: item.Id,
+                                    Url: item.Url,
+                                    Name: item.Name,
+                                    LandingPage: item.LandingPage ? "true" : "false",
+                                    Remarks: item.Remarks
+                                });
+                                break;
+                            case "image":
+                            case "document":
+                                content.data.push({
+                                    Type: item.Type,
+                                    Id: item.Id,
+                                    Url: item.Url,
+                                    Name: item.Name,
+                                    LandingPage: false,
+                                    Remarks: item.Remarks
+                                });
+                                break;
                         }
+                        //if (item.Type === "page") {
+                        //    content.data.push({
+                        //        Type: item.Type,
+                        //        Id: item.Id,
+                        //        Url: item.Url,
+                        //        Name: item.Name,
+                        //        LandingPage: item.LandingPage ? "true" : "false",
+                        //        Remarks: item.Remarks
+                        //    });
+                        //}
                     });
                     var dataTable = $(Mustache.to_html(contentTemplate, content));
                     $(".browser-folder-content").empty().append(dataTable);
@@ -415,6 +504,7 @@
             $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
                 pb.forms.bfl.disableCommand("select-page");
                 pb.forms.bfl.disableCommand("add-new-page");
+                pb.forms.bfl.disableCommand("upload-files");
                 pb.forms.bfl.show(function (f) {
                     // I am assuming here that on this first call for directories
                     // I will always get an array of one entry and that
@@ -445,8 +535,53 @@
         };
     };
     $.core$editor = {
+        manager: {
+            //control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
+            control: [],
+            add: function (panelName, editor, originalHtml) {
+                this.control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
+            },
+            getControlForEditor: function (ed) {
+                var ctrl = null;
+                $.each(this.control, function (index, item) {
+                    if (item.editor === ed) {
+                        ctrl = item;
+                        return false;
+                    }
+                });
+                return ctrl;
+            },
+            getControlForPanel: function (name) {
+                var ctrl = null;
+                $.each(this.control, function (index, item) {
+                    if (item.panel === name) {
+                        ctrl = item;
+                        return false;
+                    }
+                });
+                return ctrl;
+            },
+            remove: function (name) {
+                $.each(this.control, function (index, item) {
+                    if (item.panel === name) {
+                        $T.manager.control.splice(index, 1);
+                        return false;
+                    }
+                });
+            },
+            restoreAllContent: function () {
+                $.each(this.control, function (index, item) {
+                    var ps = $U.Format(".{0}", item.panel);
+                    $(ps).html(item.savedContent);
+                });
+            },
+            updateSavedContent: function (ed) {
+                var ctrl = this.getControlForEditor(ed);
+                ctrl.savedContent = ed.getContent();
+            }
+        },
         tinymceUrl: null,
-        control: [],
+
         cm: null,
         isOpen: false,
         Init: function () {
@@ -456,62 +591,81 @@
             //$U.Debug("");
             var baseUrl = $("head base").prop("href");
             $T.tinymceUrl = baseUrl + "Scripts/tinymce/";
-            $T.cm = $.fastnet$contextmenu.GetContextMenu();
-            $T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
             $(".edit-panel").on("click", function (e) {
-                var cmd = $(e.target).attr("data-cmd");
-                if (typeof cmd === "undefined" || cmd === false) {
-                    $T.Start();
-                }
+                $T.Start();
             });
             $(".edit-panel").addClass("closed");//.height(8);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
-            $(".edit-toolbar button").on("click", function () {
+            $(".edit-toolbar button").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var cmd = $(this).attr("data-cmd");
                 $T.OnCommand(cmd, null);
             });
         },
         CloseEditors: function (okcallback) {
-            //var result = false;
+            function afterClose() {
+                $.core$page.isEditing = false;
+                okcallback();
+            };
             if ($T.IsDirty()) {
                 var mb = new $.fastnet$messageBox({
                     CancelButton: true
+                    
                 });
                 var message = "There are unsaved changes. Closing edit mode will discard these changes! Please confirm.";
                 mb.show(message, function (cmd) {
                     $U.Debug("message box returned command {0}", cmd);
                     if (cmd === "ok") {
                         tinymce.remove();
-                        $.each($T.control, function (index, item) {
-                            var ps = $U.Format(".{0}", item.panel);
-                            $(ps).html(item.savedContent);
-                        });
-                        $T.savedContent = [];
-                        okcallback();
+                        $T.manager.restoreAllContent();
+                        //$.each($T.manager.control, function (index, item) {
+                        //    var ps = $U.Format(".{0}", item.panel);
+                        //    $(ps).html(item.savedContent);
+
+                        //});
+                        //$T.savedContent = [];
+                        afterClose();
                     }
                 });
-                //$U.MessageBox("There are unsaved changes. Closing edit mode will discard these changes!", {
-                //    enableSystemCancel: true,
-                //    enableCancelButton: true,
-                //    OKFunction: function () {
-                //        tinymce.remove();
-                //        //result = true;
-                //        okcallback();
-                //    },
-                //    okButtonLabel: "Yes", cancelButtonLabel: "No"
-                //});
             } else {
                 tinymce.remove();
                 //result = true;
-                okcallback();
+                afterClose();
             }
             //return result;
         },
         InsertLink: {
             currentEditor: null,
-            Start: function () {
+            options: {
+                mode: 'prompt'
+            },
+            Start: function (options) {
                 var $this = this;
+                $.extend($this.options, options);
                 $this.currentEditor = tinymce.EditorManager.activeEditor;
+                function pasteLink(linkurl, linktext) {
+                    var content = null;
+                    if (linkurl.indexOf("image/") === 0) {
+                        content = $U.Format('<img src="{0}" alt="{1}">', linkurl, linktext);
+                    } else {
+                        content = $U.Format('<a href="{0}">{1}</a>', linkurl, linktext);
+                    }
+                    //var content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
+                    $this.currentEditor.focus();
+                    //$this.currentEditor.setContent(content);
+                    $this.currentEditor.execCommand("mceReplaceContent", 0, content);
+                };
+                //function getControl() {
+                //    var ctrl = null;
+                //    $.each($T.control, function (index, item) {
+                //        if (item.editor === $this.currentEditor) {
+                //            ctrl = item;
+                //            return false;
+                //        }
+                //    });
+                //    return ctrl;
+                //};
                 var text = "";
                 var url = "";
                 var htmlText = $this.currentEditor.selection.getContent({ format: 'html' });
@@ -526,44 +680,76 @@
                 } catch (e) {
                     text = htmlText;
                 }
-
-                var ilf = new $.fastnet$forms.CreateForm("template/form/inserthyperlink", {
-                    Title: "Insert Link",
-                    //IsResizable: true,
-                    AfterItemValidation: function (f, result) {
-                        if (result.success) {
-                            f.enableCommand("insertlink");
-                        } else {
-                            f.disableCommand("insertlink");
-                        }
-                    },
-                    OnCommand: function (f, cmd) {
-                        switch (cmd) {
-                            case "find-link":
-                                $T.BrowseForLink.Start(f, function () {
-                                    $T.cm = $.fastnet$contextmenu.GetContextMenu();
-                                    $T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
-                                });
-                                break;
-                            case "insertlink":
-                                var data = f.getData();
-                                if (data.linktext === null || data.linktext === "") {
-                                    data.linktext = data.linkurl;
+                var editAfterCreate = $this.options.mode === "createandedit";
+                switch ($this.options.mode) {
+                    case "prompt":
+                        var ilf = new $.fastnet$forms.CreateForm("template/form/inserthyperlink", {
+                            Title: "Insert Link",
+                            //IsResizable: true,
+                            AfterItemValidation: function (f, result) {
+                                if (result.success) {
+                                    f.enableCommand("insertlink");
+                                } else {
+                                    f.disableCommand("insertlink");
                                 }
-                                var content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
-                                $this.currentEditor.execCommand("mceReplaceContent", 0, content);
-                                f.close();
-                                break;
-                        }
-                    },
-                }, {
-                    LinkUrl: url,
-                    LinkText: text
-                });
+                            },
+                            OnCommand: function (f, cmd) {
+                                switch (cmd) {
+                                    case "find-link":
+                                        f.clearMessages();
+                                        $T.BrowseForLink.Start(f, function () {
+                                            //$T.cm = $.fastnet$contextmenu.GetContextMenu();
+                                            //$T.cm.BeforeOpen = $T.OnBeforeContextMenuOpen;
+                                        });
+                                        break;
+                                    case "insertlink":
+                                        var data = f.getData();
+                                        if (data.linktext === null || data.linktext === "") {
+                                            data.linktext = data.linkurl;
+                                        }
+                                        pasteLink(data.linkurl, data.linktext);
+                                        //var content = null;
+                                        //if (data.linkurl.indexOf("image/") === 0) {
+                                        //    content = $U.Format('<img src="{0}" alt="{1}">', data.linkurl, data.linktext);
+                                        //} else {
+                                        //    content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
+                                        //}
+                                        ////var content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
+                                        //$this.currentEditor.execCommand("mceReplaceContent", 0, content);
+                                        f.close();
+                                        break;
+                                }
+                            },
+                        }, {
+                            LinkUrl: url,
+                            LinkText: text
+                        });
 
-                ilf.addIsRequiredValidator("linkurl", "A link url is required");
-                ilf.disableCommand("insertlink");
-                ilf.show();
+                        ilf.addIsRequiredValidator("linkurl", "A link url is required");
+                        ilf.disableCommand("insertlink");
+                        ilf.show();
+                        break;
+                    case "createandedit":
+                    case 'createnew':
+                        //$T.control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
+                        var ctrl = $T.manager.getControlForEditor($this.currentEditor);// getControl();
+                        var panelSelector = "." + ctrl.panel;
+                        var pageId = parseInt($(panelSelector).attr("data-page-id"));
+                        var url = $U.Format("store/createpage/{0}", pageId);
+                        $.when($U.AjaxPost({ url: url, data: null })).then(function (r) {
+                            var newPageId = r.PageId;
+                            var pageUrl = r.Url;
+                            var pageName = r.Name;
+                            if (text === "") {
+                                text = pageName;
+                            }
+                            pasteLink(pageUrl, text);
+                            if (editAfterCreate) {
+                                $.core$page.GotoInternalLink(pageUrl);
+                            }
+                        });
+                        break;
+                }
             },
         },
         BrowseForLink: {
@@ -598,65 +784,59 @@
             return result;
         },
 
-        OnBeforeContextMenuOpen: function (cm, src) {
-            //$cm.ClearMenuItems();
-            cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
-            cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
-            var panel = $(src).closest(".editable-content");
-            if (typeof panel !== "undefined" && panel !== null) {
-                //if ($(panel).hasClass("editor-open")) {
-                //    $T.cm.DisableMenuItem("open-editor");
-                //    $T.cm.EnableMenuItem("close-editor");
-                //} else {
-                //    $T.cm.DisableMenuItem("close-editor");
-                //    $T.cm.EnableMenuItem("open-editor");
-                //}
-            }
-        },
+        //OnBeforeContextMenuOpen: function (cm, src) {
+        //    //$cm.ClearMenuItems();
+        //    cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
+        //    cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
+        //    var panel = $(src).closest(".editable-content");
+        //    if (typeof panel !== "undefined" && panel !== null) {
+        //        //if ($(panel).hasClass("editor-open")) {
+        //        //    $T.cm.DisableMenuItem("open-editor");
+        //        //    $T.cm.EnableMenuItem("close-editor");
+        //        //} else {
+        //        //    $T.cm.DisableMenuItem("close-editor");
+        //        //    $T.cm.EnableMenuItem("open-editor");
+        //        //}
+        //    }
+        //},
         OnCommand: function (cmd, data) {
             switch (cmd) {
                 case "exit-edit-mode":
                     $T.Stop();
                     break;
-                    //case "open-editor":
-                    //case "close-editor":
-                    //    //var panelName = $T.getPanelName(data.panel);
-                    //    //alert($U.Format("Command {0} for {1}", cmd, panelName));
-                    //    //$T.OpenEditor(panelName);
+                    //case "insert-link":
+                    //    $T.InsertLink.Start();
                     //    break;
-                case "insert-link":
-                    $T.InsertLink.Start();
-                    break;
                 case "save-changes":
                     $T.SavePageChanges();
                     break;
-                case "insert-image":
-                    //break;
+                    //case "insert-image":
+                    //    //break;
                 default:
                     alert("This feature is not implemented");
                     break;
             }
         },
-        OnContextMenu: function (src, index, cmd, data) {
-            switch (cmd) {
-                //case "open-editor":
-                //case "close-editor":
-                default:
-                    var panel = $(src).closest(".editable-content");
-                    $T.OnCommand(cmd, { panel: panel });
-                    break;
-                case "test":
-                    if ($T.cm.IsMenuItemDisabled(1)) {
-                        $T.cm.EnableMenuItem(1);
-                    } else {
-                        $T.cm.DisableMenuItem(1);
-                    }
-                    break;
-                    //default:
-                    //    alert("context menu cmd = " + cmd);
-                    //    break;
-            }
-        },
+        //OnContextMenu: function (src, index, cmd, data) {
+        //    switch (cmd) {
+        //        //case "open-editor":
+        //        //case "close-editor":
+        //        default:
+        //            var panel = $(src).closest(".editable-content");
+        //            $T.OnCommand(cmd, { panel: panel });
+        //            break;
+        //        case "test":
+        //            if ($T.cm.IsMenuItemDisabled(1)) {
+        //                $T.cm.EnableMenuItem(1);
+        //            } else {
+        //                $T.cm.DisableMenuItem(1);
+        //            }
+        //            break;
+        //            //default:
+        //            //    alert("context menu cmd = " + cmd);
+        //            //    break;
+        //    }
+        //},
         OnContentChange: function (ed) {
             $U.Debug("text change ({0})", ed.settings.selector);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), true);
@@ -669,15 +849,28 @@
                 selector: selector,
                 browser_spellcheck: true,
                 visual_table_class: "",
+                paste_data_images: true,
                 plugins: "textcolor colorpicker visualblocks table link image code",
                 menubar: false,
                 inline: true,
                 toolbar_items_size: 'small',
-                toolbar: ["undo redo | styleselect | fontselect fontsizeselect | alignleft aligncenter alignright | visualblocks",
-                          "bold italic | forecolor backcolor | bullist numlist outdent indent | table | link image | code"],
-                //fixed_toolbar_container: "#mceToolBar"//,
+                toolbar: ["undo redo | cut copy paste | styleselect | fontselect fontsizeselect | visualblocks code",
+                          "bold italic forecolor backcolor | bullist numlist | alignleft aligncenter alignright outdent indent | insertlinks | table"],
                 setup: function (editor) {
-                    $T.control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
+                    $T.manager.add(panelName, editor, originalHtml);
+                    //$T.control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
+                    editor.addButton('insertlinks', {
+                        type: 'menubutton',
+                        text: 'Links|Images',
+                        title: "insert links & images",
+                        icon: 'link',
+                        menu: [
+                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start(); } },
+                            { text: 'Insert link to new page', onclick: function () { $T.InsertLink.Start({ mode: 'createnew' }); } },
+                            { text: 'Insert link & edit new page ...', onclick: function () { $T.InsertLink.Start({ mode: 'createandedit' }); } }
+                            //,{ text: 'break ...', onclick: function () { debugger; } }
+                        ]
+                    });
                     editor.on('change', function (e) {
                         $T.OnContentChange(editor);
                     });
@@ -700,10 +893,11 @@
             });
             var url = "store/update/page/content";
             $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
-                $.each($T.control, function (index, item) {
+                $.each($T.manager.control, function (index, item) {
                     if (item.editor.isDirty()) {
                         item.editor.isNotDirty = true;
-                        item.savedContent = item.editor.getContent();
+                        $T.manager.updateSavedContent(item.editor);
+                        //item.savedContent = item.editor.getContent();
                     }
                 });
                 $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
@@ -716,17 +910,46 @@
                 $T.isOpen = true;
             }
             //$T.cm.AttachTo($(".edit-panel"));
-            var eps = $(".editable-content");
-            $.each(eps, function (index, ep) {
-                $T.cm.AttachTo($(ep));
-            });
+            //var eps = $(".editable-content");
+            //$.each(eps, function (index, ep) {
+            //    $T.cm.AttachTo($(ep));
+            //});
             var centrePageId = $(".CentrePanel").attr("data-page-id");
             var url = $U.Format("store/panelinfo/{0}", centrePageId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
                 //debugger;
                 $T.StartEditors(r);
+                $.core$page.isEditing = true;
+                $(window).on("resize.editor", function () { $T.onwindowresize(); });
             });
 
+        },
+        PageChanged: function () {
+            function update(panelName, pageId) {
+                var ctrl = $T.manager.getControlForPanel(panelName);
+                if (ctrl !== null) {
+                    if (pageId === null) {
+                        ctrl.editor.remove();
+                        $T.manager.remove(panelName);
+                    } else {
+                        $T.manager.updateSavedContent(ctrl.editor);
+                    }
+                } else {
+                    if (pageId !== null) {
+                        $T.OpenEditor(panelName);
+                    }
+                }
+            };
+            setTimeout(function () {
+                var centrePageId = $(".CentrePanel").attr("data-page-id");
+                var url = $U.Format("store/panelinfo/{0}", centrePageId);
+                $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                    update("BannerPanel", r.BannerPanel.PageId);
+                    update("LeftPanel", r.LeftPanel.PageId);
+                    update("RightPanel", r.RightPanel.PageId);
+                    update("CentrePanel", centrePageId);
+                });
+            }, 300);
         },
         StartEditors: function (r) {
             if (r.BannerPanel.PageId !== null) {
@@ -745,18 +968,21 @@
             }, 500);
         },
         Stop: function () {
-            //$T.cm.DetachFrom($(".edit-panel"));
             $T.CloseEditors(function () {
-                var eps = $(".editable-content");
-                $.each(eps, function (index, ep) {
-                    $T.cm.DetachFrom($(ep));
-                });
                 $T.isOpen = false;
                 $(".edit-toolbar").removeClass("opaque");
                 $(".edit-panel").removeClass("open").addClass("closed");
                 $T.cleanupTinymce();
-
+                $(window).off(".editor");
             })
+        },
+        onwindowresize: function () {
+            var totalHeight = $(window).height();
+            var panel = ".CentrePanel";
+            var panelTop = $(panel).offset().top;
+            var availableHeight = totalHeight - panelTop;
+            $(panel).css("max-height", availableHeight + "px");
+            //debugger;
         },
         getPanelName: function (element) {
             var list = $(element)[0].classList;

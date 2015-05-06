@@ -92,6 +92,7 @@ body {
 
 [contenteditable=true] {
     resize: none;
+    overflow-y: auto;
     //background-color: ActiveCaption;
     outline: 0 solid transparent;
     border: none;
@@ -228,7 +229,8 @@ body {
     font-size: small;
 
     &.store-browser {
-
+        min-width: 600px;
+        min-height: 300px;
         div[class*='col-xs'] {
             padding-left: 8px;
             padding-right: 8px;
@@ -302,9 +304,10 @@ body {
                     width: 100%; //70%;
                 }
 
-                td.side-content {
+                td.remarks {
+                    font-size:smaller;
                     div {
-                        width: 32px; // 10%;
+                        width: 80px; // 10%;
                     }
                 }
 
@@ -358,7 +361,9 @@ body {
     color: @error-message-text;
 }
 
-
+i.mce-i-wflink:before {
+    content: "\e011";
+}
 /*.login-status {
     display:none;
 }*/

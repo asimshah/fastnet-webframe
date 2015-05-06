@@ -7,6 +7,7 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
+
     public partial class Directory
     {
         public long DirectoryId { get; set; }
@@ -47,6 +48,12 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return documents ?? (documents = new HashSet<Document>()); }
             set { documents = value; }
+        }
+        private ICollection<Image> images;
+        public virtual ICollection<Image> Images
+        {
+            get { return images ?? (images = new HashSet<Image>()); }
+            set { images = value; }
         }
         [NotMapped]
         public string Fullpath
