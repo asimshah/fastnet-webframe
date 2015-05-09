@@ -90,7 +90,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     });
                 }
             }
-            foreach(var image in directory.Images.OrderBy(x => x.ImageId))
+            foreach (var image in directory.Images.OrderBy(x => x.ImageId))
             {
                 folderContent.Add(new
                 {
@@ -98,7 +98,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     Id = image.ImageId,
                     Url = image.Url,
                     Name = image.Name,
-                    Remarks = string.Format("{1}w x {0}w", image.Height, image.Width),
+                    Size = string.Format("{1}w x {0}h", image.Height, image.Width),
                 });
             }
             foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
@@ -180,7 +180,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
-       
+
         [HttpPost]
         [Route("delete")]
         public async Task<HttpResponseMessage> DeleteItem(dynamic data)
@@ -375,54 +375,147 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (CurrentMemberId != null)
             {
-                long directoryid = Convert.ToInt64((string)data.directoryId);
-                CD.Directory d = DataContext.Directories.Find(directoryid);
-
-                string filename = data.filename;
-                string mimetype = data.mimetype;
-                long binaryLength = data.binaryLength;
-                string base64String = data.base64;
-                long base64Length = data.base64Length;
-                byte[] fileData = Convert.FromBase64String(base64String);
-                if (ApplicationSettings.Key("SaveDocumentsToDisk", false))
+                // data properties:
+                // chunkNumber: number of this chunk (zero based)
+                // totalChunks: total chunks for this transfer
+                // updateKey: a guid originally provided by the server - see notes
+                // directoryId: directory in which to store the uploaded file
+                // filename: full filename (incl extension but no path(s))
+                // mimetype:
+                // binaryLength: binary length once chunks are assembled and converted to byte[]
+                // base64: base64 string data
+                // base64Length: length of base64
+                //
+                // Notes:
+                // 1. a new update starts with chunkNumber == 0
+                //    a. this causes a new upload to start
+                //    b. a guid is created that will identify subsequent uploads
+                //    c. properties directoryid, filename, and mimetype, binaryLength, chunkNumber, totalChunks, base64 and base64Length are valid
+                //    d. updatekey is not valid
+                // 2. calls continue for each chunk
+                //    a. only updateKey, chunkNumber, totalChunks, base64 and base64Length are valid
+                // 3. final chunk is when chunkNumber == (totalChunks - 1)
+                //    a. file is reassembled from base64 strings and saved in the required directory
+                Action<CD.UploadFile, int, string> saveChunk = (uf, cn, bs) =>
                 {
-                    SaveDocumentToDisk(d.Fullpath, filename, fileData);
-                }
-                string url = string.Empty;
+                    CD.FileChunk fc = new CD.FileChunk
+                    {
+                        UploadFile = uf,
+                        ChunkNumber = cn,
+                        //Length = len,
+                        Base64String = bs
+                    };
+                    DataContext.FileChunks.Add(fc);
+                    DataContext.SaveChanges();
+                };
                 bool result = true;
+                int chunkNumber = data.chunkNumber;
+                long totalChunks = data.totalChunks;
+                string base64String = data.base64;
+                int base64StringLength = data.base64Length;
+                string key = null;
+                CD.UploadFile uploadFile = null;
+                Debug.Assert(base64StringLength == base64String.Length);
                 try
                 {
-                    switch (mimetype)
+                    if (chunkNumber == 0)
                     {
-                        case "image/jpeg":
-                        case "image/png":
-                        case "image/gif":
-                            CD.Image image = CreateImage(d, filename, fileData, mimetype);
-                            url = image.Url;
-                            break;
-                        default:
-                            CD.Document document = CreateDocument(d, filename, fileData, mimetype);
-                            url = document.Url;
-                            break;
+                        long directoryid = Convert.ToInt64((string)data.directoryId);
+                        CD.Directory d = DataContext.Directories.Find(directoryid);
+                        string filename = data.filename;
+                        string mimetype = data.mimetype;
+                        long binaryLength = data.binaryLength;
+                        uploadFile = new CD.UploadFile
+                        {
+                            Name = filename,
+                            MimeType = mimetype,
+                            DirectoryId = directoryid,
+                            Guid = Guid.NewGuid().ToString(),
+                            TotalChunks = totalChunks,
+                            BinaryLength = binaryLength
+                        };
+                        key = uploadFile.Guid;
+                        DataContext.UploadFiles.Add(uploadFile);
+                        //saveChunk(uploadFile, chunkNumber, base64String);
+                        //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, uploadFile.Guid));
                     }
-                    await DataContext.SaveChangesAsync();
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, url));
+                    else
+                    {
+                        key = data.updateKey;
+                        uploadFile = DataContext.UploadFiles.Single(x => x.Guid == key);
+                    }
+                    saveChunk(uploadFile, chunkNumber, base64String);
+                    if (chunkNumber < (totalChunks - 1))
+                    {
+                        //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
+                    }
+                    else
+                    {
+                        await SaveUploadedFile(uploadFile);
+                        
+                    }
+                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
                 }
                 catch (Exception xe)
                 {
                     Log.Write(xe);
-                    result = false;                    
+                    result = false;
                 }
                 if (!result)
                 {
                     return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
                 }
-                else
-                {
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
-                }
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+        }
+
+        private async Task SaveUploadedFile(CD.UploadFile uploadFile)
+        {
+            long directoryid = uploadFile.DirectoryId;
+            CD.Directory d = DataContext.Directories.Find(directoryid);
+
+            string filename = uploadFile.Name;
+            string mimetype = uploadFile.MimeType;
+            long binaryLength = uploadFile.BinaryLength;
+            var chunks = uploadFile.FileChunks.OrderBy(fc => fc.ChunkNumber).ToArray();
+            StringBuilder sb = new StringBuilder();
+            foreach (CD.FileChunk fc in chunks)
+            {
+                sb.Append(fc.Base64String);
+            }
+            string base64String = sb.ToString();
+            byte[] fileData = Convert.FromBase64String(base64String);
+            Debug.Assert(fileData.Length == uploadFile.BinaryLength);
+            if (ApplicationSettings.Key("SaveDocumentsToDisk", false))
+            {
+                SaveDocumentToDisk(d.Fullpath, filename, fileData);
+            }
+            string url = string.Empty;
+            try
+            {
+                switch (mimetype)
+                {
+                    case "image/jpeg":
+                    case "image/png":
+                    case "image/gif":
+                        CD.Image image = CreateImage(d, filename, fileData, mimetype);
+                        url = image.Url;
+                        break;
+                    default:
+                        CD.Document document = CreateDocument(d, filename, fileData, mimetype);
+                        url = document.Url;
+                        break;
+                }
+                await DataContext.SaveChangesAsync();
+                DataContext.FileChunks.RemoveRange(chunks);
+                DataContext.UploadFiles.Remove(uploadFile);
+                return;// await Task.FromResult(url);
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                throw;
+            }
         }
         //
         //

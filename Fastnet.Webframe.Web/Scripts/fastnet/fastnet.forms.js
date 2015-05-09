@@ -39,19 +39,23 @@
 "<div class='modal fade' id='{{Id}}' tabindex='-1'>" +
 "    <div class='modal-dialog container'>" +
 "        <div class='modal-content'>" +
-"            <div class='modal-section'>" +
+"            <div class='modal-section sh'>" +
 "                <div class='modal-header'>" +
-"                    <div>" +
-"                       <div class='form-trace'>{{Id}}</div>" +
-"                    </div>" +
+//"                    <div>" +
+//"                       <div class='form-trace'>{{Id}}</div>" +
+//"                    </div>" +
 "                    <div>" +
 "                        <button type='button' class='close' data-dismiss='modal' data-cmd='system-close'><span>&times;</span></button>" +
 "                        <h4 class='modal-title'>{{Title}}</h4>" +
 "                    </div>" +
 "                </div>" +
 "            </div>" +
-"            <div class='modal-section'>{{{BodyHtml}}}</div>" +
-"            <div class='modal-section'>{{{FooterHtml}}}</div>" +
+"            <div class='modal-section sb'>" +
+"            <div class='modal-body'><div class='body-content'>{{{BodyHtml}}}</div></div>" +
+"            </div>" +
+"            <div class='modal-section sf'>" +
+"            <div class='modal-footer'>{{{FooterHtml}}}</div>" +
+"            </div>" +
 "            <span class='resize-grip hidden'></span>" +
 "        </div>" +
 "        <div class='block-outer hidden'>" +
@@ -123,12 +127,15 @@
             _pendingSetEnableds: [],
             _froot: null, //current form's root element, i.e with an Id of _id
             _validators: {},
+            DisableSystemClose: false,
             Title: "Form Title",
             IsModal: true,
             IsResizable: false,
             AfterItemValidation: null,
             OnChange: null,
             OnCommand: null,
+            OnResize: null,
+            resizeControl: null
         }, options);
         this.data = $.extend({
             Id: this.options._id, // so I can trace the form id visually in the form!
@@ -153,8 +160,8 @@
                     var template = me.options.IsModal ? modalTemplate : modelessTemplate;
                     me.options._froot = $(Mustache.to_html(template, me.data));
                     if (me.options.IsModal) {
-                        me.options._froot.find(".form-body").addClass("modal-body");
-                        me.options._froot.find(".form-footer").addClass("modal-footer");
+                        //me.options._froot.find(".form-body").addClass("modal-body");
+                        //me.options._froot.find(".form-footer").addClass("modal-footer");
                     }
                     $.each(me.options._pendingSetEnableds, function (index, item) {
                         if (item.action === "disable") {
@@ -172,6 +179,9 @@
             var me = this;
             var container = me.options._container;
             $(container).append(me.options._froot);
+            if (me.options.DisableSystemClose) {
+                me.hideCommand("system-close");
+            }
             _saveOriginalData();
             _bindCommands.call(me);
             _bindLeaveFocus.call(me);
@@ -185,7 +195,7 @@
                 });
 
                 if (me.options.IsResizable) {
-                    _addResizability.call(me);
+                    _addResizability2.call(me);
                 }
             } else {
                 me.options._froot.removeClass("hide");
@@ -221,6 +231,100 @@
                 me.options.OnCommand(f, cmd);
             }
         };
+        function _addResizability2() {
+            var me = this;
+            var f = me.options._froot;
+            me.options.resizeControl = { para: null };
+            me.options.resizeControl.modalDialog = f.find(".modal-dialog");
+            me.options.resizeControl.resizeGrip = f.find(".resize-grip");
+            me.options.resizeControl.modalHeader = f.find(".modal-header");
+            //me.options.resizeControl.modalContent = f.find(".modal-content");
+            me.options.resizeControl.modalBody = f.find(".modal-body");
+            me.options.resizeControl.onresize = me.options.OnResize;
+            // 
+            var rc = me.options.resizeControl;
+            rc.modalHeader.css({ "cursor": "move" });
+            rc.resizeGrip.removeClass("hidden");
+            rc.resizeGrip.css({ "cursor": "nwse-resize" });
+            //
+            function stopTracking() {
+                rc.para = null;
+                $(window).off(".formsdynamic");
+            }
+            function startTracking() {
+                $(window).on("mousemove.formsdynamic", function (e) {
+                    if (rc.para !== null) {
+                        var delta = { xoffset: e.pageX - rc.para.startX, yoffset: e.pageY - rc.para.startY };
+                        //$U.Debug("resizability: {0} delta ({1}, {2})", rc.para.action, delta.xoffset, delta.yoffset);
+                        //$U.Debug("mb: {0}w x {1}h, md: {2}w x {3}h", rc.modalBody.width(), rc.modalBody.height(),
+                        //     rc.modalDialog.outerWidth(), rc.modalDialog.outerHeight());
+                        switch (rc.para.action) {
+                            case 'r': // resize it
+                                var nw = rc.para.start.dialogWidth + delta.xoffset;
+                                var nh = rc.para.start.dialogHeight + delta.yoffset;
+                                rc.modalDialog.width(nw);
+                                rc.modalDialog.height(nh);
+                                setTimeout(function ( ) {
+                                    if (rc.onresize !== null) {
+                                        rc.onresize({ width: rc.modalBody.width(), height: rc.modalBody.height() });
+                                    }
+                                }, 100);
+                                break;
+                            case 'm': // move it
+                                var nlm = rc.para.start.dialogMarginLeft + delta.xoffset;
+                                var ntm = rc.para.start.dialogMarginTop + delta.yoffset;
+                                if (nlm < 0) {
+                                    nlm = 0;
+                                }
+                                if (ntm < 0) {
+                                    ntm = 0;
+                                }
+                                rc.modalDialog.css("margin-left", nlm);
+                                rc.modalDialog.css("margin-top", ntm);
+                                break;
+                        }
+                    }
+                });
+            }
+            function getCurrentPosition () {
+                var result = {};
+                result.windowWidth = $(window).width();
+                result.windowHeight = $(window).height();
+                result.dialogTotalWidth = rc.modalDialog.outerWidth(); // incl padding
+                result.dialogWidth = rc.modalDialog.width(); // excl padding
+                result.dialogTotalHeight = rc.modalDialog.outerHeight(); // incl padding
+                result.dialogHeight = rc.modalDialog.height(); // excl padding
+                result.dialogMarginLeft = parseFloat(rc.modalDialog.css("margin-left"));
+                result.dialogMarginTop = parseFloat(rc.modalDialog.css("margin-top"));
+                $U.Debug("resizability: start position captured");
+                return result;
+            }
+            $(window).on("mouseup.forms", function (e) {
+                stopTracking();
+            });
+            rc.resizeGrip.on("mousedown.forms", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (rc.para !== null) {
+                    stopTracking();
+                }
+                rc.para = { action: 'r', start: getCurrentPosition(), startX: e.pageX, startY: e.pageY }; // action = 'r' for resizing
+                startTracking();
+            });
+            rc.modalHeader.on("mousedown.forms", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (rc.para !== null) {
+                    stopTracking();
+                }
+                rc.para = { action: 'm', start: getCurrentPosition(), startX: e.pageX, startY: e.pageY }; // action = 'm' for moving
+                startTracking();
+            });
+            rc.modalHeader.addClass("resizable");
+            //rc.modalContent.on("resize", function (e) {
+            //    $U.Debug("modal-content resize");
+            //});
+        }
         function _addResizability() {
             var me = this;
             // this also makes the form movable
@@ -268,9 +372,13 @@
                             if (changes.marginRight < 0) {
                                 changes.marginRight = 0;
                             }
+                            if (changes.marginBottom < 0) {
+                                changes.marginBottom = 0;
+                            }
                             //$U.Debug("rs({3}, {4}): ({0}, {1}), mr: {2}", changes.width, changes.height, changes.marginRight, xoffset, yoffset);
                             modalDialog.css("margin-right", changes.marginRight + "px");
-                            modalBody.height(changes.height);
+                            //modalBody.height(changes.height);
+                            modalDialog.height(changes.height);
                             modalDialog.width(changes.width);
                         }
                     }
@@ -429,9 +537,20 @@
                 var selector = $U.Format("button[data-cmd='{0}'], input[type=button][data-cmd='{0}']", command);
                 me.options._froot.find(selector).each(function () {
                     $U.SetEnabled(this, enable);
-                    $U.Debug("{0}: command {1} disabled", me.options._id, command);
                 });
             }
+        };
+        function _commandShow(command, show) {
+            // show = true to show, false to hide
+            var me = this;
+            var selector = $U.Format("button[data-cmd='{0}'], input[type=button][data-cmd='{0}']", command);
+            me.options._froot.find(selector).each(function () {
+                if (show) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
         };
         function _validateItem(id, dataItem, validations) {
             // I don't use this to set me because I have not been able to 
@@ -518,7 +637,10 @@
         };
         frm.prototype.close = function () {
             var me = this;
-            _close.call(me);
+            if (me.options.IsModal) {
+                me.options._froot.modal('hide');
+                //_close.call(me);
+            }
         };
         frm.prototype.getData = function (dataItem) {
             var me = this;
@@ -593,6 +715,14 @@
             var validCount = me.options._froot.find("[data-validation-state='valid']").length;
             var errorCount = me.options._froot.find("[data-validation-state='error']").length;
             return errorCount === 0;//validCount === fieldCount;
+        };
+        frm.prototype.hideCommand = function (command) {
+            var me = this;
+            _commandShow.call(me, command, false);
+        };
+        frm.prototype.showCommand = function (command) {
+            var me = this;
+            _commandShow.call(me, command, true);
         };
     }
     //$.fastnet$form = function (templateUrl, options) {

@@ -1,4 +1,5 @@
-﻿/*@-ms-viewport {
+﻿@import "../bootstrap.css";
+/*@-ms-viewport {
     width: device-width;
 }*/
 body {
@@ -183,8 +184,7 @@ body {
   font-size: small;
 }
 .editor-dialog.store-browser {
-  min-width: 600px;
-  min-height: 300px;
+  width: 650px;
 }
 .editor-dialog.store-browser div[class*='col-xs'] {
   padding-left: 8px;
@@ -197,73 +197,198 @@ body {
   height: 80px;
 }
 .editor-dialog.store-browser .browser-folder-content {
-  padding: 8px;
+  max-height: 400px;
+  height: 400px;
+  overflow: hidden;
+  border: 1px solid #aaaaaa;
+  border-radius: 3px;
+  /*table {
+                td, th {
+                    padding-left: 2px;
+                    vertical-align: top;
+                }
+
+                thead {
+                    tr {
+                        border-bottom: 2px solid #444444;
+                        background-color: #aaaaaa;
+                        color: white;
+                    }
+                }
+
+                tbody {
+                    &:before {
+                        content: "-";
+                        display: block;
+                        line-height: 0.25em;
+                        color: transparent;
+                    }
+
+                    tr:nth-child(even) {
+                        background-color: #eeeeee;
+                    }
+
+                    td div {
+                        padding: 2px;
+                    }
+                }
+
+                margin-top: -12px;
+                width: 100%;
+
+                td.url {
+                    width: auto; //20%;
+                    div {
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        border-radius: 2px;
+
+                        &:hover {
+                            //border: 1px solid hsl(207.7, 56.4%, 45.9%);
+                            border: 2px solid hsl(207.7, 100%, 45.9%);
+                        }
+
+                        &.selected {
+                            //background-color: #337ab7;
+                            background-color: hsl(207, 75%, 64%);
+                            color: white;
+                        }
+                    }
+                }
+
+                td.name {
+                    width: 100%; //70%;
+                    div:nth-child(2) {
+                        font-size: x-small;
+
+                    }
+                }
+
+                td.remarks {
+                    font-size: smaller;
+
+                    div {
+                        width: 10%;
+                    }
+                }
+
+                td.buttons {
+                    width: auto;
+
+                    span {
+                        cursor: pointer;
+                    }
+                }
+
+                td.edit-button {
+                    &:hover {
+                        color: hsl(207.7, 100%, 45.9%);
+                    }
+                }
+
+                td.delete-button {
+                    &:hover {
+                        color: red;
+                    }
+                }
+
+                tr[data-landing-page='true'] {
+                    td.delete-button div {
+                        display: none;
+                    }
+                }
+            }*/
 }
-.editor-dialog.store-browser .browser-folder-content table {
-  margin-top: -12px;
-  width: 100%;
+.editor-dialog.store-browser .browser-folder-content div.data {
+  max-height: 370px;
+  height: 370px;
+  overflow-x: hidden;
 }
-.editor-dialog.store-browser .browser-folder-content table td,
-.editor-dialog.store-browser .browser-folder-content table th {
-  padding-left: 2px;
+.editor-dialog.store-browser .browser-folder-content div.header {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  font-weight: bold;
+  border-bottom: 1px solid #aaaaaa;
 }
-.editor-dialog.store-browser .browser-folder-content table thead tr {
-  border-bottom: 2px solid #444444;
-  background-color: #aaaaaa;
-  color: white;
+.editor-dialog.store-browser .browser-folder-content div.data > div:nth-child(odd) {
+  background-color: lightgray;
 }
-.editor-dialog.store-browser .browser-folder-content table tbody:before {
-  content: "-";
-  display: block;
-  line-height: 0.25em;
-  color: transparent;
+.editor-dialog.store-browser .browser-folder-content div:not([data-type='page']) .edit-button {
+  display: none;
 }
-.editor-dialog.store-browser .browser-folder-content table tbody tr:nth-child(even) {
-  background-color: #eeeeee;
+.editor-dialog.store-browser .browser-folder-content div[data-landing-page='true'] .delete-button {
+  display: none;
 }
-.editor-dialog.store-browser .browser-folder-content table tbody td div {
-  padding: 2px;
+.editor-dialog.store-browser .browser-folder-content div.buttons span {
+  cursor: pointer;
 }
-.editor-dialog.store-browser .browser-folder-content table td.url {
-  width: auto;
+.editor-dialog.store-browser .browser-folder-content div.edit-button {
+  position: relative;
+  float: left;
+  width: 4.16666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
-.editor-dialog.store-browser .browser-folder-content table td.url div {
+.editor-dialog.store-browser .browser-folder-content div.edit-button:hover {
+  color: #007eea;
+}
+.editor-dialog.store-browser .browser-folder-content div.delete-button {
+  position: relative;
+  float: left;
+  width: 4.16666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.editor-dialog.store-browser .browser-folder-content div.delete-button:hover {
+  color: red;
+}
+.editor-dialog.store-browser .browser-folder-content div.url {
+  margin-left: 4px;
+  position: relative;
+  float: left;
+  width: 25%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.editor-dialog.store-browser .browser-folder-content div.url div {
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 2px;
+  padding-left: 2px;
 }
-.editor-dialog.store-browser .browser-folder-content table td.url div:hover {
+.editor-dialog.store-browser .browser-folder-content div.url div:hover {
   border: 2px solid #007eea;
 }
-.editor-dialog.store-browser .browser-folder-content table td.url div.selected {
+.editor-dialog.store-browser .browser-folder-content div.url div.selected {
   background-color: #5eaae8;
   color: white;
 }
-.editor-dialog.store-browser .browser-folder-content table td.name {
-  width: 100%;
+.editor-dialog.store-browser .browser-folder-content div.remarks {
+  position: relative;
+  float: left;
+  width: 16.66666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
-.editor-dialog.store-browser .browser-folder-content table td.remarks {
-  font-size: smaller;
+.editor-dialog.store-browser .browser-folder-content div.name {
+  position: relative;
+  float: left;
+  width: 41.66666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
 }
-.editor-dialog.store-browser .browser-folder-content table td.remarks div {
-  width: 80px;
-}
-.editor-dialog.store-browser .browser-folder-content table td.buttons {
-  width: auto;
-}
-.editor-dialog.store-browser .browser-folder-content table td.buttons span {
-  cursor: pointer;
-}
-.editor-dialog.store-browser .browser-folder-content table td.edit-button:hover {
-  color: #007eea;
-}
-.editor-dialog.store-browser .browser-folder-content table td.delete-button:hover {
-  color: red;
-}
-.editor-dialog.store-browser .browser-folder-content table tr[data-landing-page='true'] td.delete-button div {
-  display: none;
+.editor-dialog.store-browser .browser-folder-content div.name .size {
+  font-size: x-small;
 }
 .editor-dialog.store-browser .browser-tree {
+  max-height: 400px;
+  height: 400px;
+  width: auto;
   white-space: nowrap;
   overflow: auto;
   padding-right: 8px;

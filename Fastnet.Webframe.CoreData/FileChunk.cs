@@ -9,11 +9,11 @@ namespace Fastnet.Webframe.CoreData
     {
         public long FileChunkId { get; set; }
         public long UploadFileId { get; set; }
-        public int ChunkIndex { get; set; }
-        public long Length { get; set; }
-        public byte[] Data { get; set; }
-        public byte[] TimeStamp { get; set; }
+        public int ChunkNumber { get; set; }
+        //public long Length { get; set; }
+        public string Base64String { get; set; }
+        //public byte[] TimeStamp { get; set; }
 
-        public virtual UploadFile UpploadFile { get; set; }
+        public virtual UploadFile UploadFile { get; set; }
     }
 }

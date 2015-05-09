@@ -10,15 +10,15 @@ namespace Fastnet.Webframe.CoreData
     {
         public long UploadFileId { get; set; }
         public string Name { get; set; }
-        public string Extension { get; set; }
-        public long Length { get; set; }
-        public System.DateTime CreatedOn { get; set; }
+        public string MimeType { get; set; }
+        public long DirectoryId { get; set;}
+        //public System.DateTime CreatedOn { get; set; }
         public string Guid { get; set; }
-        public long ChunkCount { get; set; }
-        public bool Complete { get; set; }
-        [Timestamp]
-        public byte[] TimeStamp { get; set; }
-
+        public long TotalChunks{ get; set; }
+        public long BinaryLength { get; set; }
+        //public bool Complete { get; set; }
+        //[Timestamp]
+        //public byte[] TimeStamp { get; set; }
         public virtual ICollection<FileChunk> FileChunks { get; set; }
     }
 }

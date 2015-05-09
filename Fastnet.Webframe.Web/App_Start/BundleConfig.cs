@@ -62,7 +62,7 @@ namespace Fastnet.Webframe.Web
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
                 .Include(
                     "~/Scripts/jquery-ui-{version}.js",
-                    //"~/Scripts/datatables/jquery.datatables.js",
+                    "~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/dropzone/dropzone.js",
                     "~/Scripts/fastnet/fastnet.contextmenu.js",
@@ -125,11 +125,11 @@ namespace Fastnet.Webframe.Web
                 "~/Scripts/dropzone/dropzone.css"
                 ));
 
-            bundles.Add(new StyleBundle("~/Content/themes/base/editorcss").Include(
-                "~/Content/themes/base/all.css"
+            bundles.Add(new StyleBundle("~/Content/editorcss").Include(
+                //"~/Content/themes/base/all.css",
                 //"~/Content/themes/base/base.css",
                 //"~/Content/themes/base/theme.css"
-                //"~/Content/datatables/css/jquery.datatables.css"
+                "~/Content/datatables/css/jquery.datatables.css"
                 ));
             //bundles.Add(new StyleBundle("~/Content/themes/base/editorcss")
             //    .IncludeDirectory("~/Content/themes/base", "*.css"));

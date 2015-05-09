@@ -20,6 +20,29 @@
             OnCancel: null,
             OnSelect: null
         }, options);
+        var contentTemplate2 =
+            "        <div class='folder-content' >" +
+            "          <div class='header'>" +
+            "            <div class='row'>" +
+            "                <div class='url'>Url</div>" +
+            "                <div class='name'>Name</div>" +
+            "                <div class='remarks'></div>" +
+            "                <div class='edit-button'></div>" +
+            "                <div class='delete-button'></div>" +
+            "            </div>" +
+            "          </div>" +
+            "          <div class='data'>" +
+            "            {{#data}}" +
+            "            <div class='row' data-id='{{Id}}' data-type='{{Type}}' data-url='{{Url}}' data-landing-page='{{LandingPage}}'>" +
+            "                <div class='url'><div>{{Url}}</div></div>" +
+            "                <div class='name'><div>{{Name}}</div><div class='size' >{{Size}}</div></div>" +
+            "                <div class='remarks'><div>{{Remarks}}</div></div>" +
+            "                <div class='edit-button buttons'><div><span class='fa fa-pencil-square-o edit' title='Edit properties'></span></div></div>" +
+            "                <div class='delete-button buttons'><div><span class='fa fa-times delete' title='Delete'></span></div></div>" +
+            "            </div>" +
+            "            {{/data}}" +
+            "          </div>" +
+            "        </div>";
         var contentTemplate =
             "        <table  cellpadding='0' cellspacing='0' border='0' id='folder-content'>" +
             "          <thead>" +
@@ -35,7 +58,7 @@
             "            {{#data}}" +
             "            <tr data-id='{{Id}}' data-type='{{Type}}' data-url='{{Url}}' data-landing-page='{{LandingPage}}'>" +
             "                <td class='url'><div>{{Url}}</div></td>" +
-            "                <td class='name'><div>{{Name}}</div></td>" +
+            "                <td class='name'><div>{{Name}}</div><div>{{Size}}</div></td>" +
             "                <td class='remarks'><div>{{Remarks}}</div></td>" +
             "                <td class='edit-button buttons'><div><span class='fa fa-pencil-square-o edit' title='Edit properties'></span></div></td>" +
             "                <td class='delete-button buttons'><div><span class='fa fa-times delete' title='Delete'></span></div></td>" +
@@ -241,40 +264,108 @@
             }
         };
         function showUploadForm() {
-
-            //function uploadFiles(files, onComplete) {
-            //    $.each(files, function (index, file) {
-            //        var dateUtc = moment(file.lastModifiedDate).utc().format("DDMMMYYYY HH:mm:ss");
-            //        var postData = { name: file.name, mimeType: file.type, lastModifiedUtc: dateUtc, length: file.size };
-            //        $U.Debug("{0}, {1}, {2}, {3}, {4}", file.name, file.type, file.size, dateUtc, file.lastModifiedDate);
-            //    });
-            //    onComplete();
-            //};
+            var chunkSize = 1024 * 10;
+            var keyCount = 0;
+            var uploadCount = 0;
+            function sendChunk(bufctl) {
+                var postdata = {
+                    chunkNumber: bufctl.chunkNumber,
+                    totalChunks: bufctl.totalChunks,
+                    base64: bufctl.buffer[bufctl.chunkNumber],
+                    base64Length: bufctl.buffer[bufctl.chunkNumber].length
+                };
+                if (bufctl.chunkNumber == 0) {
+                    $.extend(postdata, {
+                        directoryId: bufctl.directoryId,
+                        filename: bufctl.filename,
+                        mimetype: bufctl.mimetype,
+                        binaryLength: bufctl.binaryLength
+                    });
+                } else {
+                    $.extend(postdata, { updateKey: bufctl.key });
+                }
+                var url = "store/upload/file";
+                //setTimeout(function () {
+                //    if (bufctl.chunkNumber == 0) {
+                //        bufctl.key = $U.Format("some-key-{0}", keyCount++);
+                //    }
+                //    $U.Debug("Uploaded {0} key {1}, {2}/{3} length {4}", bufctl.filename, bufctl.key, bufctl.chunkNumber, bufctl.totalChunks, postdata.base64Length);
+                //    bufctl.chunkNumber++;
+                //    if (bufctl.chunkNumber < bufctl.totalChunks) {
+                //        sendChunk(bufctl);
+                //    }
+                //}, 500);
+                $.when($U.AjaxPost({ url: url, data: postdata })).then(function (r) {
+                    if (bufctl.chunkNumber == 0) {
+                        bufctl.key = r;
+                    }
+                    $U.Debug("Uploaded {0} key {1}, {2}/{3} length {4}", bufctl.filename, bufctl.key, bufctl.chunkNumber, bufctl.totalChunks, postdata.base64Length);
+                    if (bufctl.progessElement !== null) {
+                        var percentComplete = ((bufctl.chunkNumber + 1) / (bufctl.totalChunks)) * 100.0;
+                        $(bufctl.progressElement).find(".progress-bar").css("width", percentComplete + "%");
+                    }
+                    bufctl.chunkNumber++;
+                    if (bufctl.chunkNumber < bufctl.totalChunks) {
+                        sendChunk(bufctl);
+                    } else {
+                        // here this upload is finished
+                        uploadCount--;
+                        if (uploadCount === 0) {
+                            ulf.disableCommand("cancel-upload");
+                            ulf.enableCommand("close");
+                        }
+                    }
+                });
+            };
+            function bufferedUpload(fileInfo) {
+                var bufctl = {
+                    buffer: [],
+                    totalChunks: 0,
+                    directoryId: 0,
+                    chunkNumber: 0,
+                    filename: null,
+                    mimetype: null,
+                    binaryLength: 0,
+                    key: null,
+                    progressElement: null
+                };
+                bufctl.totalChunks = Math.floor(fileInfo.base64Length / chunkSize);
+                var remainder = fileInfo.base64Length % chunkSize;
+                if (remainder > 0) {
+                    bufctl.totalChunks++;
+                }
+                for (var i = 0; i < bufctl.totalChunks; i++) {
+                    var offset = i * chunkSize;
+                    var text = fileInfo.base64.substr(offset, chunkSize);
+                    bufctl.buffer.push(text);
+                }
+                bufctl.directoryId = fileInfo.directoryId;
+                bufctl.filename = fileInfo.filename;
+                bufctl.mimetype = fileInfo.mimetype;
+                bufctl.binaryLength = fileInfo.binaryLength;
+                bufctl.progressElement = fileInfo.progressElement;
+                sendChunk(bufctl);
+            };
             var currentDirectoryId = pb.options.currentDirectoryId;
             var ulf = new $.fastnet$forms.CreateForm("template/form/uploadfile", {
                 Title: "File Upload",
+                DisableSystemClose: true,
                 OnCommand: function (f, cmd) {
                     switch (cmd) {
                         case "start-upload":
                             pb.myDropzone.enqueueFiles(pb.myDropzone.getFilesWithStatus(Dropzone.ADDED));
                             break;
+                        case "close":
+                            ulf.close();
+                            loadDirectoryContent();
+                            break;
                     }
                 },
-                //OnChange: function (f, dataItem) {
-                //    switch(dataItem) {
-                //        case "files-to-upload":
-                //            var files = ulf.find("[data-item='files-to-upload']").get(0).files;
-                //            if (files.length > 0) {
-                //                ulf.enableCommand("upload-files");
-                //            } else {
-                //                ulf.disableCommand("upload-files");
-                //            }
-                //            break;
-                //    }
-                //}
             }, {});
             //ulf.disableCommand("upload-files");
             ulf.show(function () {
+                ulf.disableCommand("cancel-upload");
+                ulf.hideCommand("close");
                 var previewNode = document.querySelector("#template");
                 previewNode.id = "";
                 var previewTemplate = previewNode.parentNode.innerHTML;
@@ -291,6 +382,12 @@
                     clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
                 });
                 pb.myDropzone.uploadFiles = function (files) {
+                    uploadCount = files.length;
+                    ulf.hideCommand("add-files");
+                    ulf.disableCommand("start-upload");
+                    ulf.disableCommand("close");
+                    ulf.enableCommand("cancel-upload");
+                    ulf.showCommand("close");
                     $.each(files, function (index, file) {
                         //$U.Debug("Uploading file {0}, {1}", file.name, file.type);
                         var fr = new FileReader();
@@ -300,16 +397,13 @@
                             var width = 0;
                             var string = event.target.result;
                             var base64Data = string.substr(string.indexOf('base64') + 7);
-                            var postData = { directoryId: currentDirectoryId, filename: file.name, mimetype: file.type, binaryLength: file.size, base64: base64Data, base64Length: base64Data.length };
-                            var url = "store/upload/file";
-                            $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
-                                $U.Debug("Uploaded file {0}, {1}, dataUrl length {2}", file.name, file.type, event.target.result.length);
-                            });
+                            bufferedUpload({ directoryId: currentDirectoryId, filename: file.name, mimetype: file.type, binaryLength: file.size, base64: base64Data, base64Length: base64Data.length, progressElement: file.previewElement });
                         }
                         fr.readAsDataURL(file);
                     });
                 };
             });
+
         }
         function onExpandCollapse(data) {
             $U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
@@ -384,6 +478,7 @@
                                     Url: item.Url,
                                     Name: item.Name,
                                     LandingPage: false,
+                                    Size: item.Size,
                                     Remarks: item.Remarks
                                 });
                                 break;
@@ -399,9 +494,17 @@
                         //    });
                         //}
                     });
-                    var dataTable = $(Mustache.to_html(contentTemplate, content));
+                    var dataTable = $(Mustache.to_html(contentTemplate2, content));
                     $(".browser-folder-content").empty().append(dataTable);
-                    $(".browser-folder-content table td.url div").on("click", function (e) {
+                    //$(".browser-folder-content table").DataTable({
+                    //    "scrollY": "200px",
+                    //    "scrollCollapse": true,
+                    //    "paging": false,
+                    //    "searching": false,
+                    //    "info": false
+                    //});
+                   // pb.forms.bfl.find(".browser-folder-content table").css("max-height", "200px");
+                    $(".browser-folder-content .data .url div").on("click", function (e) {
                         //debugger;
                         var target = $(e.currentTarget);
                         if (target.hasClass("selected")) {
@@ -409,28 +512,31 @@
                             selectItem(null);
                             //selectPage(null);
                         } else {
-                            $(".browser-folder-content table td.url div").removeClass("selected");
+                            $(".browser-folder-content .data .url div").removeClass("selected");
                             target.addClass("selected");
-                            var id = parseInt(target.closest("tr").attr("data-id"));
-                            var type = target.closest("tr").attr("data-type");
-                            var url = target.closest("tr").attr("data-url");
+                            var dataRow = target.closest("div[data-id]");
+                            var id = parseInt(dataRow.attr("data-id"));
+                            var type = dataRow.attr("data-type");
+                            var url = dataRow.attr("data-url");
                             selectItem(type, id, url);
                             // selectPage(target.closest("tr").attr("data-id"));
                         }
 
                     });
-                    $(".browser-folder-content table td.edit-button span").on("click", function (e) {
+                    $(".browser-folder-content .data .edit-button span").on("click", function (e) {
                         var target = $(e.currentTarget);
-                        var id = parseInt(target.closest("tr").attr("data-id"));
-                        var type = target.closest("tr").attr("data-type");
+                        var dataRow = target.closest("div[data-id]");
+                        var id = parseInt(dataRow.attr("data-id"));
+                        var type = dataRow.attr("data-type");
                         if (type === "page") {
                             showPageProperties(id);
                         }
                     });
-                    $(".browser-folder-content table td.delete-button span").on("click", function (e) {
+                    $(".browser-folder-content .data .delete-button span").on("click", function (e) {
                         var target = $(e.currentTarget);
-                        var id = parseInt(target.closest("tr").attr("data-id"));
-                        var type = target.closest("tr").attr("data-type");
+                        var dataRow = target.closest("div[data-id]");
+                        var id = parseInt(dataRow.attr("data-id"));
+                        var type = dataRow.attr("data-type");
                         $U.Debug("delete button on {0}/{1}", type, id);
                         var mb = new $.fastnet$messageBox({
                             CancelButton: true
@@ -444,7 +550,7 @@
                         });
                     });
                 } else {
-                    $(".browser-folder-content table").off();
+                    $(".browser-folder-content .data").off();
                     $(".browser-folder-content").empty().html("<div>Folder is empty</div>")
                 }
             });
@@ -476,10 +582,26 @@
             var pb = this;
             pb.forms.bfl = new $.fastnet$forms.CreateForm("template/form/BrowseForLink", {
                 Title: "Store Browser",
-                IsResizable: true,
+                //IsResizable: true,
                 OnCommand: function (f, cmd) {
                     onCommand(cmd);
-                } // onCommand
+                }, // onCommand
+                //OnResize: function (rect) {
+                //    var bfc = pb.forms.bfl.find(".browser-folder-content");
+                //    //var tvContainerOuter = pb.forms.bfl.find(".browser-tree").parent().outerWidth();
+                //    var tvContainerWidth = pb.forms.bfl.find(".browser-tree").parent().outerWidth();
+                //    var folderContentOuterWidth = bfc.parent().outerWidth();
+                //    var folderContentWidth = bfc.parent().width();
+                //    var folderContentOuterHeight = bfc.parent().outerHeight();
+                //    var folderContentHeight = bfc.parent().height();
+                //    var gutterWidth = folderContentOuterWidth - folderContentWidth;
+                //    var topAndBottom = folderContentOuterHeight - folderContentHeight;
+                //    var requiredWidth = rect.width - tvContainerWidth - gutterWidth;
+                //    var requiredHeight = rect.height - topAndBottom;
+                //    $U.Debug("rect: {0}w x {1}h, resize: {2}w x {3}h", rect.width, rect.height, requiredWidth, requiredHeight);
+                //    bfc.width(requiredWidth);
+                //    bfc.height(requiredHeight - 8);
+                //}
             }, {});
             //var osc = onFolderSelectChanged.bind(browser);
             pb.forms.tv = $TV.NewTreeview({
@@ -506,9 +628,11 @@
                 pb.forms.bfl.disableCommand("add-new-page");
                 pb.forms.bfl.disableCommand("upload-files");
                 pb.forms.bfl.show(function (f) {
+                    //$(".store-browser").width(600).height(300);
                     // I am assuming here that on this first call for directories
                     // I will always get an array of one entry and that
                     // entry is the $root directory (renamed by the server to Store)
+                    
                     pb.options.rootDirectoryId = data[0].Id;
                     loadTreeViewItem(null, data);
                 });
@@ -611,7 +735,7 @@
             if ($T.IsDirty()) {
                 var mb = new $.fastnet$messageBox({
                     CancelButton: true
-                    
+
                 });
                 var message = "There are unsaved changes. Closing edit mode will discard these changes! Please confirm.";
                 mb.show(message, function (cmd) {
@@ -684,8 +808,7 @@
                 switch ($this.options.mode) {
                     case "prompt":
                         var ilf = new $.fastnet$forms.CreateForm("template/form/inserthyperlink", {
-                            Title: "Insert Link",
-                            //IsResizable: true,
+                            Title: "Insert Link",                            
                             AfterItemValidation: function (f, result) {
                                 if (result.success) {
                                     f.enableCommand("insertlink");

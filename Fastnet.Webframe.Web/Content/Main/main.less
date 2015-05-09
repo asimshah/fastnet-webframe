@@ -1,4 +1,6 @@
-﻿//@import (reference) "../bootstrap.css";
+﻿@import (reference) "../bootstrap/variables.less";
+@import (reference) "../bootstrap/mixins.less";
+@import (reference) "../bootstrap.css";
 @import (reference) "constants.less";
 
 /*@-ms-viewport {
@@ -229,8 +231,10 @@ body {
     font-size: small;
 
     &.store-browser {
-        min-width: 600px;
-        min-height: 300px;
+        @totalHeight: 400px;
+        @dataHeight: @totalHeight - 30px;
+        width: 650px;
+
         div[class*='col-xs'] {
             padding-left: 8px;
             padding-right: 8px;
@@ -244,12 +248,103 @@ body {
         }
 
         .browser-folder-content {
-            // background-color: lightgray;
-            padding: 8px;
-            //border: 1px solid red;
-            table {
+            //background-color: hsl(207.7, 100%, 45.9%);
+            max-height: @totalHeight;
+            height: @totalHeight;
+            overflow: hidden;
+            //padding-left: 8px;
+            border: 1px solid #aaaaaa;
+            border-radius: 3px;
+
+            div.data {
+                max-height: @dataHeight;
+                height: @dataHeight;
+                overflow-x: hidden;
+            }
+
+            div.header {
+                margin-top: 2px;
+                margin-bottom: 2px;
+                font-weight: bold;
+                border-bottom: 1px solid #aaaaaa;
+            }
+
+            div.data > div:nth-child(odd) {
+                background-color: lightgray;
+            }
+            div:not([data-type='page']) {
+                .edit-button {
+                    display:none;
+                }
+            }
+            div[data-landing-page='true'] {
+                .delete-button {
+                    display: none;
+                }
+            }
+
+            div {
+                &.buttons {
+                    span {
+                        cursor: pointer;
+                    }
+                }
+
+                &.edit-button {
+                    .make-xs-column(0.5);
+
+                    &:hover {
+                        color: hsl(207.7, 100%, 45.9%);
+                    }
+                }
+
+                &.delete-button {
+                    .make-xs-column(0.5);
+
+                    &:hover {
+                        color: red;
+                    }
+                }
+
+                &.url {
+                    margin-left: 4px;
+                    .make-xs-column(3);
+
+                    div {
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        border-radius: 2px;
+                        padding-left: 2px;
+
+                        &:hover {
+                            //border: 1px solid hsl(207.7, 56.4%, 45.9%);
+                            border: 2px solid hsl(207.7, 100%, 45.9%);
+                        }
+
+                        &.selected {
+                            //background-color: #337ab7;
+                            background-color: hsl(207, 75%, 64%);
+                            color: white;
+                        }
+                    }
+                }
+
+                &.remarks {
+                    .make-xs-column(2.0);
+                }
+
+                &.name {
+                    .make-xs-column(5);
+
+                    .size {
+                        font-size: x-small;
+                    }
+                }
+            }
+            /*table {
                 td, th {
                     padding-left: 2px;
+                    vertical-align: top;
                 }
 
                 thead {
@@ -302,12 +397,17 @@ body {
 
                 td.name {
                     width: 100%; //70%;
+                    div:nth-child(2) {
+                        font-size: x-small;
+
+                    }
                 }
 
                 td.remarks {
-                    font-size:smaller;
+                    font-size: smaller;
+
                     div {
-                        width: 80px; // 10%;
+                        width: 10%;
                     }
                 }
 
@@ -330,15 +430,19 @@ body {
                         color: red;
                     }
                 }
+
                 tr[data-landing-page='true'] {
                     td.delete-button div {
                         display: none;
                     }
                 }
-            }
+            }*/
         }
 
         .browser-tree {
+            max-height: @totalHeight;
+            height: @totalHeight;
+            width: auto;
             white-space: nowrap;
             overflow: auto;
             padding-right: 8px;

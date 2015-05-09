@@ -24,18 +24,33 @@ input[readonly] {
 }
 
 .modal-dialog {
+    @strip-height: 42px;
+    @narrow-gutter-width: 10px;
+
     .modal-content {
         display: table;
         width: 100%;
+        height: 100%;
+
+        .narrow-gutter {
+            padding-top: @narrow-gutter-width;
+            padding-bottom: @narrow-gutter-width;
+        }
 
         .modal-section {
             display: table-row;
         }
 
-        .modal-header, .modal-footer, .modal-body {
+        .modal-header {
+            line-height: 1em;
             display: table-cell;
-            padding-top: 10px;
-            padding-bottom: 10px;
+            height: @strip-height;
+            .narrow-gutter;
+
+            &.resizable {
+                border-top: 4px solid #04b01b;
+                border-radius: 4px;
+            }
 
             .form-trace {
                 display: none;
@@ -44,13 +59,18 @@ input[readonly] {
             }
         }
 
-        .modal-header.resizable {
-            border-top: 4px solid #04b01b;
-            border-radius: 4px;
-        }
-
         .modal-body {
-            //background-color: yellowgreen;
+            //background-color: lightcoral;
+            display: table-cell;
+            .narrow-gutter;
+            height: 100%;
+            padding-left: 0;
+            padding-right: 0;
+            .body-content {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
             textarea.form-control {
                 box-shadow: none;
                 border-style: none;
@@ -58,8 +78,18 @@ input[readonly] {
         }
 
         .modal-footer {
+            line-height: 1em;
+            display: table-cell;
+            height: @strip-height;
+            .narrow-gutter;
+
             .form-group {
                 margin-bottom: auto;
+            }
+
+            .btn-sm {
+                line-height: 1em;
+                padding: 4px;
             }
         }
     }
@@ -103,7 +133,7 @@ input[readonly] {
         .file-row {
             display: table-row;
             border-collapse: collapse;
-           
+
             &:nth-child(odd) {
                 //background-color: #f9f9f9;
             }
