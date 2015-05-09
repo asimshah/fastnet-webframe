@@ -41,7 +41,7 @@
         var deferred = new $.Deferred();
         $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
             ).then(function (data) {
-                $U.Debug("validator with message \"{0}\" called", errorMessage);
+                //$U.Debug("validator with message \"{0}\" called", errorMessage);
                 if (data.InUse) {
                     errors.push(errorMessage);
                     deferred.reject(false);
@@ -55,7 +55,7 @@
         var deferred = new $.Deferred();
         $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
             ).then(function (data) {
-                $U.Debug("validator with message \"{0}\" called", errorMessage);
+                //$U.Debug("validator with message \"{0}\" called", errorMessage);
                 if (data.InUse) {
                     deferred.resolve(true);
                 } else {
@@ -541,7 +541,7 @@
                     var firstName = data["first-name"];//$F.GetFormData("first-name");
                     var lastName = data["last-name"];//$F.GetFormData("last-name");
                     var emailAddress = $T.options.ClientAction.EmailAddress;//ctx.emailAddress;
-                    $U.Debug("save {0} {1} {2}", emailAddress, firstName, lastName);
+                    //$U.Debug("save {0} {1} {2}", emailAddress, firstName, lastName);
                     var postData = { emailAddress: emailAddress, firstName: firstName, lastName: lastName };
                     $.when(
                         $U.AjaxPost({ url: "account/updateuser", data: postData })

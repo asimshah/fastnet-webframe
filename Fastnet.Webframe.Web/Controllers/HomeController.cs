@@ -153,12 +153,14 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         [AllowAnonymous]
         [Route("login")]
+        [Route("logon")]
         public ActionResult Login()
         {
             PageModel pm = GetPageModel(ClientSideActions.login);// new PageModel(id);
             return View("Index", pm);
         }
         [AllowAnonymous]
+        [Route("logout")]
         [Route("logoff")]
         public ActionResult Logoff()
         {

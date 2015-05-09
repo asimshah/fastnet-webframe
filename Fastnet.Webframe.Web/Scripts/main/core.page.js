@@ -52,14 +52,16 @@
         },
         GotoInternalLink: function (url) {
             switch (url) {
-                //case "/home":
-                //case "/login":
-                //case "/register":
-                //case "/recoverpassword":
-                //case "/studio":
-                //case "/membership":
-                //    $.fastnet$account.AccountOperation(url.substring(1));
-                //    break;
+                case "/home":
+                case "login":
+                    $T.ShowDialog("login");
+                    break;
+                case "/register":
+                case "/recoverpassword":
+                case "/studio":
+                case "/membership":
+                    $.fastnet$account.AccountOperation(url);
+                    break;
                 case "/userprofile":
                     $T.ShowDialog("userprofile");
                     break;
@@ -75,19 +77,17 @@
         IsLinkInternal: function (url) {
             var result = false;
             url = $T.StandardiseUrl(url);
-            var builtIn = ["/home", "/login", "/register", "/recoverpassword",
-                                "/studio", "/membership"];
+            var builtIn = [
+                "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
+                "studio", "membership"];
             function isBuiltIn(url) {
                 var r = false;
-                var parts = url.split("/");
-                if (parts.length === 2) {
-                    $.each(builtIn, function (i, item) {
-                        r = item === parts[1];// url.endsWith(item);
-                        if (r) {
-                            return false; // breaks out .each loop
-                        }
-                    });
-                }
+                $.each(builtIn, function (i, item) {
+                    r = url === item;
+                    if (r) {
+                        return false; // breaks out .each loop
+                    }
+                });
                 return r;
             };
             var internalUrl = !(url.startsWith("http") || url.startsWith("file") || url.startsWith("mailto"));
@@ -121,12 +121,33 @@
             }
             return url;
         },
+        LoadStartPage: function (startPage) {
+            var startUrl = "";
+            if (typeof startPage === "undefined" || startPage === null || startPage === "") {
+                startUrl = "pageapi/home";
+            } else {
+                startUrl = $U.Format("pageapi/page/{0}", startPage);
+            }
+            var homeUrl = "pageapi/home";
+            $.when(
+                $U.AjaxGet({ url: "pageapi/menuinfo" }),
+                $U.AjaxGet({ url: startUrl })
+                ).then(function (menuInfo, urlResult) {
+                    var menuInfoResult = menuInfo[0];
+                    var pageResult = urlResult[0];
+                    var menuVisible = menuInfoResult.Visible;
+                    if (menuVisible) {
+                        var menuHtml = menuInfoResult.MenuHtml;
+                        $T.CreateMenus(menuHtml);
+                    }
+                    var pageId = pageResult.PageId;
+                    $T.SetPage(pageId);
+                    $T.QueryAuthentication();
+                });
+        },
         LoadHomePage: function () {
             //LoadHomePage: function (sa) {
             var homeUrl = "pageapi/home";
-            //if (sa != null && sa !== "") {
-            //    homeUrl = homeUrl + "/" + sa;
-            //}
             $.when(
                 $U.AjaxGet({ url: "pageapi/menuinfo" }),
                 $U.AjaxGet({ url: homeUrl })
@@ -155,6 +176,7 @@
             });
         },
         QueryAuthentication: function () {
+            //window.history.pushState({ href: url }, null, url);
             $.when(
                 $U.AjaxGet({ url: "account/currentuser" }, true)
                 ).then(function (r) {
@@ -222,12 +244,15 @@
             $(panelSelector).attr("data-panel", panelName);
         },
         Start: function (options) {
-            //test();
+            $U.Debug("pathname = {0}, {1}", location.pathname, location.href);
             $T.options = options;
-            //$T.LoadHomePage(options.StartPage);
-            $T.LoadHomePage();
+            //$T.LoadHomePage();
+            $T.LoadStartPage(options.StartPage);
             if (options.HasAction) {
                 if (options.ShowDialog) {
+                    var url = location.href;
+                    var changeTo = $U.Format("{0}//{1}", location.protocol, location.host);
+                    window.history.pushState({ href: url }, null, changeTo);
                     // for now the only dialogue actions are in $.fastnet$account
                     $.fastnet$account.Start(options, function () {
                         $T.QueryAuthentication();

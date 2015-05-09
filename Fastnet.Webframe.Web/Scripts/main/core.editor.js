@@ -213,7 +213,7 @@
             $.when(
                 $U.AjaxPost({ url: url, data: postData })
                 ).then(function (result) {
-                    $U.Debug("deleted {0}/{1}", type, id);
+                    //$U.Debug("deleted {0}/{1}", type, id);
                     if (type === "directory") {
                         removeDirectoryNode(id);
                     } else {
@@ -235,7 +235,7 @@
                 $U.AjaxPost({ url: url, data: postData })
                 ).then(function (result) {
                     var pageId = result.PageId;
-                    $U.Debug("created new page {0}", result.Url);
+                    //$U.Debug("created new page {0}", result.Url);
                     loadDirectoryContent();
                 });
         };
@@ -247,7 +247,7 @@
                 ).then(function (result) {
                     var directoryId = result.DirectoryId;
                     var name = result.Name;
-                    $U.Debug("created new directory {0}", directoryId);
+                    //$U.Debug("created new directory {0}", directoryId);
                     var parentNode = findDirectoryNode(parentDirectoryId);// pb.forms.tv.FindNode({ UserData: parentDirectoryId })
                     loadTreeViewItem(parentNode, [{ Name: name, Id: directoryId, SubdirectoryCount: 0 }]);
                 });
@@ -256,11 +256,11 @@
             if (type === null) {
                 pb.SelectedItem = {};
                 pb.forms.bfl.disableCommand("select-page");
-                $U.Debug("Selected item cleared");
+                //$U.Debug("Selected item cleared");
             } else {
                 pb.SelectedItem = { Type: type, Id: id, Url: url };
                 pb.forms.bfl.enableCommand("select-page");
-                $U.Debug("Selected item:  {0}/{1}", pb.SelectedItem.Type, pb.SelectedItem.Id);
+                //$U.Debug("Selected item:  {0}/{1}", pb.SelectedItem.Type, pb.SelectedItem.Id);
             }
         };
         function showUploadForm() {
@@ -299,7 +299,7 @@
                     if (bufctl.chunkNumber == 0) {
                         bufctl.key = r;
                     }
-                    $U.Debug("Uploaded {0} key {1}, {2}/{3} length {4}", bufctl.filename, bufctl.key, bufctl.chunkNumber, bufctl.totalChunks, postdata.base64Length);
+                    //$U.Debug("Uploaded {0} key {1}, {2}/{3} length {4}", bufctl.filename, bufctl.key, bufctl.chunkNumber, bufctl.totalChunks, postdata.base64Length);
                     if (bufctl.progessElement !== null) {
                         var percentComplete = ((bufctl.chunkNumber + 1) / (bufctl.totalChunks)) * 100.0;
                         $(bufctl.progressElement).find(".progress-bar").css("width", percentComplete + "%");
@@ -392,7 +392,7 @@
                         //$U.Debug("Uploading file {0}, {1}", file.name, file.type);
                         var fr = new FileReader();
                         fr.onload = function (event) {
-                            $U.Debug("Uploading file {0} ...", file.name);
+                            //$U.Debug("Uploading file {0} ...", file.name);
                             var height = 0;
                             var width = 0;
                             var string = event.target.result;
@@ -406,14 +406,14 @@
 
         }
         function onExpandCollapse(data) {
-            $U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
+            //$U.Debug("+/- for {0}, closed = {1}, loaded = {2}, child count = {3}", data.userData, data.isClosed, data.isLoaded, data.childCount);
             if (!data.isLoaded) {
                 loadSubdirectories(data.node, parseInt(data.userData));
             }
         };
         function onFolderSelectChanged(data) {
             var browser = this;
-            $U.Debug("de(select) for {0}, closed = {1}, selected = {2}, child count = {3}", data.userData, data.isClosed, data.isSelected, data.childCount);
+            //$U.Debug("de(select) for {0}, closed = {1}, selected = {2}, child count = {3}", data.userData, data.isClosed, data.isSelected, data.childCount);
             var directoryId = parseInt(data.userData);
             var folderContent = pb.forms.bfl.find(".browser-folder-content");
             //if (currentDirectoryId !== directoryId) {
@@ -537,13 +537,13 @@
                         var dataRow = target.closest("div[data-id]");
                         var id = parseInt(dataRow.attr("data-id"));
                         var type = dataRow.attr("data-type");
-                        $U.Debug("delete button on {0}/{1}", type, id);
+                        //$U.Debug("delete button on {0}/{1}", type, id);
                         var mb = new $.fastnet$messageBox({
                             CancelButton: true
                         });
                         var message = $U.Format("Please confirm that <b>/{0}/{1}</b> should be deleted", type, id);
                         mb.show(message, function (cmd) {
-                            $U.Debug("message box returned command {0}", cmd);
+                            //$U.Debug("message box returned command {0}", cmd);
                             if (cmd === "ok") {
                                 deleteItem(type, id);
                             }
@@ -566,7 +566,7 @@
                     });
                     var message = $U.Format("Deleting a folder will also delete its content and all sub-folders. Please confirm.");
                     mb.show(message, function (cmd) {
-                        $U.Debug("message box returned command {0}", cmd);
+                        //$U.Debug("message box returned command {0}", cmd);
                         if (cmd === "ok") {
                             deleteItem("directory", data.DirectoryId);
                         }
@@ -739,7 +739,7 @@
                 });
                 var message = "There are unsaved changes. Closing edit mode will discard these changes! Please confirm.";
                 mb.show(message, function (cmd) {
-                    $U.Debug("message box returned command {0}", cmd);
+                    //$U.Debug("message box returned command {0}", cmd);
                     if (cmd === "ok") {
                         tinymce.remove();
                         $T.manager.restoreAllContent();
@@ -881,10 +881,10 @@
                     Context: ctx,
                     OnClose: onClose,
                     OnCancel: function () {
-                        $U.Debug("Page browser closed with a cancel/system-close");
+                        //$U.Debug("Page browser closed with a cancel/system-close");
                     },
                     OnSelect: function (ctx, selectedItem) {
-                        $U.Debug("selected url {0}", selectedItem.Url);
+                        //$U.Debug("selected url {0}", selectedItem.Url);
                         ctx.setData("linkurl", selectedItem.Url);
                         if (ctx.isValid()) {
                             ctx.enableCommand("insertlink");
@@ -961,7 +961,7 @@
         //    }
         //},
         OnContentChange: function (ed) {
-            $U.Debug("text change ({0})", ed.settings.selector);
+            //$U.Debug("text change ({0})", ed.settings.selector);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), true);
         },
         OpenEditor: function (panelName) {

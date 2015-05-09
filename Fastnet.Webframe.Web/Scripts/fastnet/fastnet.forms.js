@@ -296,7 +296,7 @@
                 result.dialogHeight = rc.modalDialog.height(); // excl padding
                 result.dialogMarginLeft = parseFloat(rc.modalDialog.css("margin-left"));
                 result.dialogMarginTop = parseFloat(rc.modalDialog.css("margin-top"));
-                $U.Debug("resizability: start position captured");
+                //$U.Debug("resizability: start position captured");
                 return result;
             }
             $(window).on("mouseup.forms", function (e) {
@@ -467,13 +467,13 @@
                     $(this).css('z-index', zIndex);
                 });
                 me.options._froot.on("hidden.bs.modal", function (e) {
-                    $U.Debug("form {0} closed", me.options._id);
+                    //$U.Debug("form {0} closed", me.options._id);
                     _close.bind(me)();
                 });
             }
             me.options._froot.find("button, input[type=button]").on("click", function (e) {
                 var cmd = $(this).attr("data-cmd");
-                $U.Debug("{0} click", cmd);
+                //$U.Debug("{0} click", cmd);
                 if (cmd === "cancel") {
                     me.options._froot.modal('hide');
                     //$(id).modal('hide');
@@ -487,7 +487,7 @@
             var lfSelector = "input[type=text], input[type=password], input[type=email]";
             me.options._froot.find(lfSelector).on("focus", function (e) {
                 var dataItem = $(this).attr("data-item");
-                $U.Debug("got focus for {0}", dataItem);
+                //$U.Debug("got focus for {0}", dataItem);
             });
             me.options._froot.find(lfSelector).on("blur", function (e) {
                 var dataItem = $(this).attr("data-item");
@@ -495,12 +495,12 @@
                 var val = $(this).val();
                 var original = $(this).attr("data-original");
                 var hasChanged = val !== original;
-                $U.Debug("leave focus for {0}", dataItem);
+                //$U.Debug("leave focus for {0}", dataItem);
                 if (hasChanged) {
                     var validations = me.options._validators[dataItem];
                     if (typeof validations !== "undefined" && validations !== null) {
                         $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
-                            $U.Debug("_validateItem: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
+                            //$U.Debug("_validateItem: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
                             var dp = me.options._froot.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
                             dp.attr("data-validation-state", r.success ? "valid" : "error");
                             if (me.options.AfterItemValidation !== null) {
@@ -565,7 +565,7 @@
             $.each(validations, function (index, validation) {
                 if (validation.isDeferred === false) {
                     var r = validation.validator(me, itemData, validation.message, errors);
-                    $U.Debug("validator with message \"{0}\" called", validation.message);
+                    //$U.Debug("validator with message \"{0}\" called", validation.message);
                     if (r == false) {
                         result = false;
                         return false;
