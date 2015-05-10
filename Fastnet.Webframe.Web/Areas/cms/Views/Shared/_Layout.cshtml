@@ -1,0 +1,35 @@
+﻿@using Fastnet.Common
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/cms/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <div class="fastnet-error-panel hide">
+
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <div id="form" class="forms-container">
+
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/fastnet/utils")
+    @RenderSection("scripts", required: false)
+    @if (ApplicationSettings.Key("ClientSideLog", false) == true)
+    {
+        <script>
+            $(function () {
+                $.fastnet$utilities.EnableClientSideLog();
+            });
+        </script>
+    }
+</body>
+</html>
