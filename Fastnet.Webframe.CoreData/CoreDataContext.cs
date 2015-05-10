@@ -133,6 +133,9 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<Style> Styles { get; set; }
         public DbSet<UploadFile> UploadFiles { get; set; }
 
+        public DbSet<Recorder> Recorders { get; set; }
+        public DbSet<Record> Records { get; set;}
+
         //public virtual DbSet<UserClaim> UserClaims { get; set; }
         //public virtual DbSet<UserLogin> UserLogins { get; set; }
 

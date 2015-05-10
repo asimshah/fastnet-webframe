@@ -3,6 +3,7 @@
     // 1. moment.js is required (to mark log/debug with date time info)
     var $T;
     $.fastnet$utilities = {
+        clientSideLog: false,
         rootUrl: "/",
         messageBoxElementId: "#message-box",
         localPlayerName: "",
@@ -103,7 +104,7 @@
             }
             $(selector).block(options);
         },
-        UnBlock: function(selector) {
+        UnBlock: function (selector) {
             $(selector).unblock();
         },
         BlockUI: function (message) {
@@ -320,12 +321,29 @@
             }
             return dateTime.format(format);
         },
-        Log: function (str) {
-            var args = Array.prototype.slice.call(arguments);
-            var message = $T.Format(str, args.slice(1));
-            var now = $T.GetDateTime();
-            var text = $T.Format("{0} [ js] {1}", $T.FormatDate(now, "HH:MM:ss"), message);
-            $T.record(text);
+        //Log: function (str) {
+        //    var args = Array.prototype.slice.call(arguments);
+        //    var message = $T.Format(str, args.slice(1));
+        //    var now = $T.GetDateTime();
+        //    var text = $T.Format("{0} [ js] {1}", $T.FormatDate(now, "HH:MM:ss"), message);
+        //    $T.record(text);
+        //},
+        GetUniqueId: function () {
+            var key = $T.GetData("uuid");
+            if (key === null) {
+                key = $T.NewGuid();
+                $T.SetData("uuid", key);
+            }
+            return key;
+        },
+        NewGuid: function () {
+            var d = new Date().getTime();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+            return uuid;
         },
         Debug: function (str) {
             var args = Array.prototype.slice.call(arguments);
@@ -334,8 +352,26 @@
             if (message.length > 200) {
                 message = message.substring(0, 199) + "...[ total " + message.length + " chars]";
             }
-            var text = $T.Format("{0} [ js] {1}", $T.FormatDate(now, "HH:MM:ss"), message);
+            var text = $T.Format("{0} {1}", $T.FormatDate(now, "HH:mm:ss.SSS"), message);
             $T.record(text);
+        },
+        EnableClientSideLog: function () {
+            $T.clientSideLog = true;
+            var key = $T.GetUniqueId();
+            $(".fastnet-error-panel").removeClass("hide");
+            var url = $T.Format("recorder/read/{0}", key)
+            $.when($T.AjaxGet({ url: url }, true)).then(function (r) {
+                $.each(r, function (i, item) {
+                    var message = $T.Format("<div>{0}</div>", item);
+                    $(".fastnet-error-panel").prepend($(message));
+                    //$T.writeToErrorPanel(item);
+                });
+            });
+        },
+        writeToErrorPanel: function(text) {
+            var message = $T.Format("<div>{0}</div>", text);
+            $(".fastnet-error-panel").append($(message));
+            $(".fastnet-error-panel").scrollTop($(".fastnet-error-panel")[0].scrollHeight);
         },
         record: function (text) {
             //console.log(text);
@@ -343,6 +379,19 @@
                 Debug.writeln(text);
             } else {
                 console.log(text);
+            }
+            if ($T.clientSideLog) {
+                var url = "recorder/write";
+                var key = $T.GetUniqueId();
+                if (typeof key === "undefined" || key === null || key === "undefined") {
+                    debugger;
+                }
+                var postData = { key: key, text: text };
+                $T.AjaxPost({ url: url, data: postData });
+                $T.writeToErrorPanel(text);
+                //var message = $T.Format("<div>{0}</div>", text);
+                //$(".fastnet-error-panel").append($(message));
+                //$(".fastnet-error-panel").scrollTop($(".fastnet-error-panel")[0].scrollHeight);
             }
         },
         ToMinutes: function (seconds) {

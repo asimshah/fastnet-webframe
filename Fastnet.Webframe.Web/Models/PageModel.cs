@@ -163,6 +163,7 @@ namespace Fastnet.Webframe.Web.Models
 
     public class PageModel
     {
+        public bool ClientSideLog { get; set; }
         public bool CanEditPages { get; set; }
         public string StartPage { get; set; }
         public bool ShowDialog
@@ -176,6 +177,7 @@ namespace Fastnet.Webframe.Web.Models
         // public PageModel(long? pageId, Member member = null)
         public PageModel(string pageId, Member member = null)
         {
+            ClientSideLog = ApplicationSettings.Key("ClientSideLog", false);
             if (member != null)
             {
                 CanEditPages = Group.Editors.Members.Contains(member);

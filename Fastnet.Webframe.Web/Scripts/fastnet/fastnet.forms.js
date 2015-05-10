@@ -172,7 +172,7 @@
                     });
                     me.options._pendingSetEnableds.length = 0;
                     me.options._froot.find("[data-property]").attr("data-validation-state", "unknown")
-                    $U.Debug("form id {0} created", me.options._id);
+                    //$U.Debug("form id {0} created", me.options._id);
                 });
         }
         function _show(onload) {
@@ -640,6 +640,9 @@
             if (me.options.IsModal) {
                 me.options._froot.modal('hide');
                 //_close.call(me);
+            }
+            else {
+                _close.call(me);
             }
         };
         frm.prototype.getData = function (dataItem) {

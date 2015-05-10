@@ -13,6 +13,9 @@
     @RenderSection("styles", required: false)
 </head>
 <body>
+    <div class="fastnet-error-panel hide">
+
+    </div>
     <div class="SitePanel">
         <div class="edit-panel">
             <div class="edit-toolbar">
@@ -27,7 +30,9 @@
         @RenderBody()
         <div class="forms-container">
         </div>
+
     </div>
+    @*</div>*@
     <div class="modal fade" id="message-box" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

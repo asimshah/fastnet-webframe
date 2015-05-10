@@ -42,6 +42,12 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/fastnet/fastnet.utilities.js"
                 ));
 
+            bundles.Add(new ScriptBundle("~/bundles/fastnet/utils")
+                .Include(
+                    "~/Scripts/moment.js",
+                    "~/Scripts/fastnet/fastnet.utilities.js"
+                ));
+
             //bundles.Add(new ScriptBundle("~/bundles/main/adminsetup")
             //    .Include(
             //        "~/Scripts/main/core.admin.setup.js"

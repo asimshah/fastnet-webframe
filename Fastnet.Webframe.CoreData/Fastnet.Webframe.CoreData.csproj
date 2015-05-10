@@ -157,6 +157,7 @@
     <Compile Include="IdentityModels.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
+    <Compile Include="Logs.cs" />
     <Compile Include="MarkupDocumentLink.cs" />
     <Compile Include="MarkupPageLink.cs" />
     <Compile Include="Member.cs" />

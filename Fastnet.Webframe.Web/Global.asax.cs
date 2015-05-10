@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -41,6 +42,11 @@ namespace Fastnet.Webframe.Web
         }
         protected void Application_Start()
         {
+            string appDataFolder = HostingEnvironment.MapPath("~/App_Data");
+            if (!System.IO.Directory.Exists(appDataFolder))
+            {
+                System.IO.Directory.CreateDirectory(appDataFolder);
+            }
             AutofacConfig.ConfigureContainer();
             dynamic version = VersionInfo.Get(typeof(MvcApplication));
 

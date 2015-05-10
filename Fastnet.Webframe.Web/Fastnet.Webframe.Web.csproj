@@ -262,6 +262,7 @@
     <Compile Include="Controllers\Extensions.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PageController.cs" />
+    <Compile Include="Controllers\RecordController.cs" />
     <Compile Include="Controllers\SpecialController.cs" />
     <Compile Include="Controllers\StoreController.cs" />
     <Compile Include="Controllers\TemplateController.cs" />

@@ -34,10 +34,9 @@ namespace Fastnet.Webframe.Web.Areas.Designer
 
 
             bundles.Add(new ScriptBundle("~/bundles/designer").Include(
-                "~/Scripts/moment.js",
+                //"~/Scripts/moment.js",
                 "~/Scripts/mustache.js",
-
-                "~/Scripts/fastnet/fastnet.utilities.js",
+                //"~/Scripts/fastnet/fastnet.utilities.js",
                 "~/Scripts/fastnet/fastnet.forms.js",
                 "~/Areas/Designer/Scripts/webframe.designer.js"
                 ));

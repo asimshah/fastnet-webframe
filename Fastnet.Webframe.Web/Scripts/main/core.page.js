@@ -246,7 +246,13 @@
         Start: function (options) {
             $U.Debug("pathname = {0}, {1}", location.pathname, location.href);
             $T.options = options;
-            //$T.LoadHomePage();
+            if ($T.options.ClientSideLog) {
+                $.fastnet$utilities.EnableClientSideLog();
+                //$.fastnet$utilities.clientSideLog = $T.options.ClientSideLog;
+                //if ($T.options.ClientSideLog) {
+                //    $(".fastnet-error-panel").removeClass("hide");
+                //}
+            }
             $T.LoadStartPage(options.StartPage);
             if (options.HasAction) {
                 if (options.ShowDialog) {

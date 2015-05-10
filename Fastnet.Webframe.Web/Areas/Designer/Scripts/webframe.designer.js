@@ -7,6 +7,7 @@
             $T = this;
             $U = $.fastnet$utilities;
             $F = $.fastnet$forms;
+            //$.fastnet$utilities.EnableClientSideLog();
             //alert("designer script loaded");
         },
         //StartLayout: function () {
@@ -147,6 +148,7 @@
                         cef.show(function () {
                             $(".default-css pre").text(panelInfo.DefaultCSS);
                             $T.aceEditor = ace.edit("less-editor");
+                            ace.config.set('basePath', '/areas/designer/scripts/ace editor/src');
                             $T.aceEditor.setTheme("ace/theme/cobalt");
                             $T.aceEditor.setValue(panelInfo.CustomLess);
                             $T.aceEditor.getSession().setMode("ace/mode/less");
@@ -174,7 +176,7 @@
                     });
             },
             OnCommand: function (f, cmd) {
-                $U.Debug("OnCommand");
+                //$U.Debug("OnCommand");
                 switch (cmd) {
                     //case "save-css":
                     //    var lessText = $T.aceEditor.getValue();
