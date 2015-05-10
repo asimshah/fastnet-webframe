@@ -5,16 +5,15 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
+namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
-    [RouteArea("designer")]
-    //[RoutePrefix("designer")]
+    [RouteArea("cms")]
     public class HomeController : Controller
     {
         private CoreDataContext DataContext = Core.GetDataContext();
-        // GET: Designer/Home
         [Route("home")]
         [Route("")]
+        //[Route("asimx")]
         public ActionResult Index()
         {
             if (!IsPermitted())
@@ -34,7 +33,7 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
             {
                 //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
                 Member member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
-                return Group.Designers.Members.Contains(member);
+                return Group.Editors.Members.Contains(member);
             }
             else
             {
