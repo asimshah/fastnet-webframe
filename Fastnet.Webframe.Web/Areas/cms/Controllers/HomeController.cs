@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Fastnet.Webframe.Web.Common;
 
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
@@ -20,6 +21,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             {
                 return RedirectToAction("PermissionDenied");
             }
+            PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
             return View();
         }
         [Route("permissiondenied")]
@@ -39,6 +41,12 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             {
                 return false;
             }
+        }
+        private void xxx()
+        {
+            Page home = DataContext.GetDefaultLandingPage();
+            PanelPage bannerpp = home.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == Panel.BannerPanel.PanelId);
+            Page bannerPage = bannerpp != null ? bannerpp.Page : null;
         }
     }
 }

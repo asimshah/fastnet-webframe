@@ -61,24 +61,25 @@ namespace Fastnet.Webframe.Web.Controllers
             List<dynamic> folderContent = new List<dynamic>();
             foreach (var page in directory.Pages.OrderBy(x => x.PageId))
             {
-                if (page.CentrePanelPages.Count() == 0)
+                //if (page.CentrePanelPages.Count() == 0)
+                if (page.IsCentrePage)
                 {
-                    string remarks = string.Empty;
-                    foreach (var pp in page.SidePanelPages)
-                    {
-                        switch (pp.Panel.Name)
-                        {
-                            case "BannerPanel":
-                                remarks += "B";
-                                break;
-                            case "LeftPanel":
-                                remarks += "L";
-                                break;
-                            case "RightPanel":
-                                remarks += "R";
-                                break;
-                        }
-                    }
+                    string remarks = page.SidePageInfo;
+                    //foreach (var pp in page.SidePanelPages)
+                    //{
+                    //    switch (pp.Panel.Name)
+                    //    {
+                    //        case "BannerPanel":
+                    //            remarks += "B";
+                    //            break;
+                    //        case "LeftPanel":
+                    //            remarks += "L";
+                    //            break;
+                    //        case "RightPanel":
+                    //            remarks += "R";
+                    //            break;
+                    //    }
+                    //}
                     folderContent.Add(new
                     {
                         Type = "page",
@@ -98,7 +99,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     Id = image.ImageId,
                     Url = image.Url,
                     Name = image.Name,
-                    Size = string.Format("{1}w x {0}h", image.Height, image.Width),
+                    Size = image.Size // string.Format("{1}w x {0}h", image.Height, image.Width),
                 });
             }
             foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))

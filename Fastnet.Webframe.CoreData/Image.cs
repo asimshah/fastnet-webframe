@@ -43,7 +43,12 @@ namespace Fastnet.Webframe.CoreData
         public string Url
         {
             get { return string.Format("image/{0}", ImageId); }
-        }       
+        }
+        [NotMapped]
+        public string Size
+        {
+            get { return string.Format("{0}w x {1}h", this.Width, this.Height); }
+        } 
     }
     public partial class CoreDataContext
     {

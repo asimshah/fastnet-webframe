@@ -39,13 +39,19 @@ namespace Fastnet.Webframe.Web.Common
             }
             return new List<Page>() { ctx.GetDefaultLandingPage() };
         }
-        public static Page GetDefaultLandingPage(this CoreDataContext ctx)
-        {
-            Group everyone = Group.Everyone;
-            PageAccessRule par = ctx.PageAccessRules.Where(x => x.Group.GroupId == everyone.GroupId)
-                .First(p => p.AccessRule.Allow == true && p.AccessRule.Permission == Permission.ViewPages);
-            return par.Page;
-        }
+        //public static Page GetDefaultLandingPage(this CoreDataContext ctx)
+        //{
+        //    Group everyone = Group.Everyone;
+        //    PageAccessRule par = ctx.PageAccessRules.Where(x => x.Group.GroupId == everyone.GroupId)
+        //        .First(p => p.AccessRule.Allow == true && p.AccessRule.Permission == Permission.ViewPages);
+        //    return par.Page;
+        //}
+        //public static Page GetDefaultBannerPage(this CoreDataContext ctx)
+        //{
+        //    Page home = ctx.GetDefaultLandingPage();
+        //    PanelPage bannerpp = home.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == Panel.BannerPanel.PanelId);
+        //    return bannerpp != null ? bannerpp.Page : null;
+        //}
         public static bool CanBeAccessedBy(this Page page, Member m)
         {
             var groups = Core.GetDataContext().GetGroupsForMember(m);

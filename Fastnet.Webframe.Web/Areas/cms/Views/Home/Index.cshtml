@@ -1,17 +1,22 @@
 ﻿@{
     ViewBag.Title = "CMS";
 }
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>CMS Index</title>
-</head>
-<body>
-    <div>
-        CMS
+<div class="row">
+    <div class="cms-heading">
+        Site Content
     </div>
-</body>
-</html>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="cms-content"></div>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/cms")
+    <script>
+        $(function () {
+            var cms = new $.webframe$cms();
+            cms.start();
+        });
+    </script>
+}

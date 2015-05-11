@@ -22,7 +22,7 @@
 (function ($) {
     var $T;
     var $U;
-    var formCount = 0;
+    //var formCount = 0;
     var modelessTemplate =
 "<div class='modeless hide' >" +
 "    <div class='modeless-content'>" +
@@ -159,10 +159,10 @@
                     }, me.data);
                     var template = me.options.IsModal ? modalTemplate : modelessTemplate;
                     me.options._froot = $(Mustache.to_html(template, me.data));
-                    if (me.options.IsModal) {
-                        //me.options._froot.find(".form-body").addClass("modal-body");
-                        //me.options._froot.find(".form-footer").addClass("modal-footer");
-                    }
+                    //if (me.options.IsModal) {
+                    //    //me.options._froot.find(".form-body").addClass("modal-body");
+                    //    //me.options._froot.find(".form-footer").addClass("modal-footer");
+                    //}
                     $.each(me.options._pendingSetEnableds, function (index, item) {
                         if (item.action === "disable") {
                             me.disableCommand(item.cmd);
@@ -171,7 +171,7 @@
                         }
                     });
                     me.options._pendingSetEnableds.length = 0;
-                    me.options._froot.find("[data-property]").attr("data-validation-state", "unknown")
+                    me.options._froot.find("[data-property]").attr("data-validation-state", "unknown");
                     //$U.Debug("form id {0} created", me.options._id);
                 });
         }
@@ -209,7 +209,7 @@
                     f_elements[0].focus();
                 }
             }, 750);
-        };
+        }
         function _close() {
             var me = this;
             var id = "#" + me.options._id;
@@ -230,7 +230,7 @@
                 var f = formList[me.options._id];
                 me.options.OnCommand(f, cmd);
             }
-        };
+        }
         function _addResizability2() {
             var me = this;
             var f = me.options._froot;
@@ -299,7 +299,7 @@
                 //$U.Debug("resizability: start position captured");
                 return result;
             }
-            $(window).on("mouseup.forms", function (e) {
+            $(window).on("mouseup.forms", function () {
                 stopTracking();
             });
             rc.resizeGrip.on("mousedown.forms", function (e) {
@@ -325,102 +325,102 @@
             //    $U.Debug("modal-content resize");
             //});
         }
-        function _addResizability() {
-            var me = this;
-            // this also makes the form movable
-            //var f = $($T.form);
-            var rm = {
-                resizing: false, moving: false,
-                sp: { x: 0, y: 0 }, // sp = start position
-                sm: { l: 0, t: 0, r: 0, b: 0 }, // sm = start margin
-                ss: { w: 0, h: 0 }, // ss = start size
-            }; // rm == resizability and movement
-            var f = me.options._froot;
-            var resizeGrip = f.find(".resize-grip");
-            var modalHeader = f.find(".modal-header");
-            var modalDialog = f.find(".modal-dialog");
-            var modalBody = f.find(".modal-body");
-            var grabStartInfo = function (e) {
-                rm.sp.x = e.pageX;
-                rm.sp.y = e.pageY;
-                rm.sm.l = parseInt(modalDialog.css("margin-left"));
-                rm.sm.t = parseInt(modalDialog.css("margin-top"));
-                rm.sm.r = parseInt(modalDialog.css("margin-right"));
-                rm.sm.b = parseInt(modalDialog.css("margin-bottom"));
-            }
-            resizeGrip.removeClass("hidden");
-            modalHeader.css({ "cursor": "move" });
-            resizeGrip.css({ "cursor": "nwse-resize" });
-            resizeGrip.on("mousedown.forms", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                rm.resizing = true;
-                grabStartInfo(e);
-                rm.ss.h = modalBody.height();
-                rm.ss.w = modalDialog.width();
-                $(window).on("mousemove.formsdynamic", function (e) {
-                    if (rm.resizing) {
-                        var xoffset = e.pageX - rm.sp.x;
-                        var yoffset = e.pageY - rm.sp.y;
-                        if (xoffset !== 0 || yoffset !== 0) {
-                            var changes = {
-                                height: rm.ss.h + yoffset,
-                                width: rm.ss.w + xoffset,
-                                marginRight: rm.sm.r - xoffset,
-                                marginBottom: rm.sm.b - yoffset
-                            };
-                            if (changes.marginRight < 0) {
-                                changes.marginRight = 0;
-                            }
-                            if (changes.marginBottom < 0) {
-                                changes.marginBottom = 0;
-                            }
-                            //$U.Debug("rs({3}, {4}): ({0}, {1}), mr: {2}", changes.width, changes.height, changes.marginRight, xoffset, yoffset);
-                            modalDialog.css("margin-right", changes.marginRight + "px");
-                            //modalBody.height(changes.height);
-                            modalDialog.height(changes.height);
-                            modalDialog.width(changes.width);
-                        }
-                    }
-                });
-            });
-            modalHeader.on("mousedown.forms", function (e) {
-                rm.moving = true;
-                grabStartInfo(e);
-                $(window).on("mousemove.formsdynamic", function (e) {
-                    if (rm.moving) {
-                        var xoffset = e.pageX - rm.sp.x;
-                        var yoffset = e.pageY - rm.sp.y;
-                        var margin = {
-                            left: rm.sm.l + xoffset,
-                            top: rm.sm.t + yoffset,
-                            right: rm.sm.r - xoffset,
-                            bottom: rm.sm.b - yoffset
-                        };
-                        if (margin.top < 0) {
-                            margin.top = 0;
-                        }
-                        modalDialog.css("margin-left", margin.left + "px");
-                        modalDialog.css("margin-right", margin.right + "px");
-                        modalDialog.css("margin-top", margin.top + "px");
-                    }
-                })
+        //function _addResizability() {
+        //    var me = this;
+        //    // this also makes the form movable
+        //    //var f = $($T.form);
+        //    var rm = {
+        //        resizing: false, moving: false,
+        //        sp: { x: 0, y: 0 }, // sp = start position
+        //        sm: { l: 0, t: 0, r: 0, b: 0 }, // sm = start margin
+        //        ss: { w: 0, h: 0 }, // ss = start size
+        //    }; // rm == resizability and movement
+        //    var f = me.options._froot;
+        //    var resizeGrip = f.find(".resize-grip");
+        //    var modalHeader = f.find(".modal-header");
+        //    var modalDialog = f.find(".modal-dialog");
+        //    var modalBody = f.find(".modal-body");
+        //    var grabStartInfo = function (e) {
+        //        rm.sp.x = e.pageX;
+        //        rm.sp.y = e.pageY;
+        //        rm.sm.l = parseInt(modalDialog.css("margin-left"));
+        //        rm.sm.t = parseInt(modalDialog.css("margin-top"));
+        //        rm.sm.r = parseInt(modalDialog.css("margin-right"));
+        //        rm.sm.b = parseInt(modalDialog.css("margin-bottom"));
+        //    };
+        //    resizeGrip.removeClass("hidden");
+        //    modalHeader.css({ "cursor": "move" });
+        //    resizeGrip.css({ "cursor": "nwse-resize" });
+        //    resizeGrip.on("mousedown.forms", function (e) {
+        //        e.preventDefault();
+        //        e.stopPropagation();
+        //        rm.resizing = true;
+        //        grabStartInfo(e);
+        //        rm.ss.h = modalBody.height();
+        //        rm.ss.w = modalDialog.width();
+        //        $(window).on("mousemove.formsdynamic", function (e) {
+        //            if (rm.resizing) {
+        //                var xoffset = e.pageX - rm.sp.x;
+        //                var yoffset = e.pageY - rm.sp.y;
+        //                if (xoffset !== 0 || yoffset !== 0) {
+        //                    var changes = {
+        //                        height: rm.ss.h + yoffset,
+        //                        width: rm.ss.w + xoffset,
+        //                        marginRight: rm.sm.r - xoffset,
+        //                        marginBottom: rm.sm.b - yoffset
+        //                    };
+        //                    if (changes.marginRight < 0) {
+        //                        changes.marginRight = 0;
+        //                    }
+        //                    if (changes.marginBottom < 0) {
+        //                        changes.marginBottom = 0;
+        //                    }
+        //                    //$U.Debug("rs({3}, {4}): ({0}, {1}), mr: {2}", changes.width, changes.height, changes.marginRight, xoffset, yoffset);
+        //                    modalDialog.css("margin-right", changes.marginRight + "px");
+        //                    //modalBody.height(changes.height);
+        //                    modalDialog.height(changes.height);
+        //                    modalDialog.width(changes.width);
+        //                }
+        //            }
+        //        });
+        //    });
+        //    modalHeader.on("mousedown.forms", function (e) {
+        //        rm.moving = true;
+        //        grabStartInfo(e);
+        //        $(window).on("mousemove.formsdynamic", function (e) {
+        //            if (rm.moving) {
+        //                var xoffset = e.pageX - rm.sp.x;
+        //                var yoffset = e.pageY - rm.sp.y;
+        //                var margin = {
+        //                    left: rm.sm.l + xoffset,
+        //                    top: rm.sm.t + yoffset,
+        //                    right: rm.sm.r - xoffset,
+        //                    bottom: rm.sm.b - yoffset
+        //                };
+        //                if (margin.top < 0) {
+        //                    margin.top = 0;
+        //                }
+        //                modalDialog.css("margin-left", margin.left + "px");
+        //                modalDialog.css("margin-right", margin.right + "px");
+        //                modalDialog.css("margin-top", margin.top + "px");
+        //            }
+        //        });
 
-            });
-            $(window).on("mouseup.forms", function (e) {
-                rm.moving = false;
-                rm.resizing = false;
-                $(window).off(".formsdynamic");
-            });
-            f.find(".modal-header").addClass("resizable");
-        };
+        //    });
+        //    $(window).on("mouseup.forms", function (e) {
+        //        rm.moving = false;
+        //        rm.resizing = false;
+        //        $(window).off(".formsdynamic");
+        //    });
+        //    f.find(".modal-header").addClass("resizable");
+        //}
         function _removeResizability() {
             var me = this;
             var f = me.options._froot;
             var resizeGrip = f.find(".resize-grip");
             var modalHeader = f.find(".modal-header");
-            var modalDialog = f.find(".modal-dialog");
-            var modalBody = f.find(".modal-body");
+            //var modalDialog = f.find(".modal-dialog");
+            //var modalBody = f.find(".modal-body");
             $(window).off(".formsdynamic");
             $(window).off(".forms");
             modalHeader.removeClass("resizable");
@@ -429,21 +429,21 @@
             resizeGrip.off(".forms");
             resizeGrip.css("cursor", "default");
             resizeGrip.addClass("hidden");
-        };
+        }
         function _saveOriginalData() {
             var lfSelector = "input[type=text], input[type=password], input[type=email]";
             $(lfSelector).each(function (index, element) {
                 var val = $(element).val();
                 $(element).attr("data-original", val);
             });
-        };
+        }
         function _bindFileButtons() {
             var me = this;
             $(".btn-file :file").on("change", function () {
                 var input = $(this);
                 var dataItem = input.attr("data-item");
-                numFiles = input.get(0).files ? input.get(0).files.length : 1,
-                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+                var numFiles = input.get(0).files ? input.get(0).files.length : 1;
+                var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
                 input.trigger('fileselect', [numFiles, label, dataItem]);
             });
             $(".btn-file :file").on("fileselect", function (event, numFiles, label, dataItem) {
@@ -458,15 +458,15 @@
                     me.options.OnChange(me, dataItem);
                 }
             });
-        };
+        }
         function _bindCommands() {
             var me = this;
             if (me.options.IsModal) {
-                me.options._froot.on("shown.bs.modal", function (e) {
+                me.options._froot.on("shown.bs.modal", function () {
                     var zIndex = 1040 + ((formList.length) * 10);
                     $(this).css('z-index', zIndex);
                 });
-                me.options._froot.on("hidden.bs.modal", function (e) {
+                me.options._froot.on("hidden.bs.modal", function () {
                     //$U.Debug("form {0} closed", me.options._id);
                     _close.bind(me)();
                 });
@@ -481,15 +481,15 @@
                 e.preventDefault();
                 _onCommand.call(me, cmd);
             });
-        };
+        }
         function _bindLeaveFocus() {
             var me = this;
             var lfSelector = "input[type=text], input[type=password], input[type=email]";
-            me.options._froot.find(lfSelector).on("focus", function (e) {
-                var dataItem = $(this).attr("data-item");
-                //$U.Debug("got focus for {0}", dataItem);
-            });
-            me.options._froot.find(lfSelector).on("blur", function (e) {
+            //me.options._froot.find(lfSelector).on("focus", function (e) {
+            //    var dataItem = $(this).attr("data-item");
+            //    //$U.Debug("got focus for {0}", dataItem);
+            //});
+            me.options._froot.find(lfSelector).on("blur", function () {
                 var dataItem = $(this).attr("data-item");
                 // so far only input tags
                 var val = $(this).val();
@@ -511,11 +511,11 @@
                 }
                 //$(this).removeAttr("data-changed");
             });
-        };
+        }
         function _bindDataChange() {
             var me = this;
             var dcSelector = "input[type=text], input[type=password], input[type=email]";
-            me.options._froot.find(dcSelector).on("input", function (e) {
+            me.options._froot.find(dcSelector).on("input", function () {
                 var item = $(this).attr("data-item");
                 //$(this).attr("data-changed", "true");
                 //var value = $(this).val();
@@ -527,7 +527,7 @@
                     me.options.OnChange(me, item);
                 }
             });
-        };
+        }
         function _commandEnable(command, enable) {
             // enable = true to enable, false to disable
             var me = this;
@@ -539,7 +539,7 @@
                     $U.SetEnabled(this, enable);
                 });
             }
-        };
+        }
         function _commandShow(command, show) {
             // show = true to show, false to hide
             var me = this;
@@ -551,7 +551,7 @@
                     $(this).hide();
                 }
             });
-        };
+        }
         function _validateItem(id, dataItem, validations) {
             // I don't use this to set me because I have not been able to 
             // use bind() with a $.when call
@@ -566,13 +566,13 @@
                 if (validation.isDeferred === false) {
                     var r = validation.validator(me, itemData, validation.message, errors);
                     //$U.Debug("validator with message \"{0}\" called", validation.message);
-                    if (r == false) {
+                    if (r === false) {
                         result = false;
                         return false;
                     }
                 }
             });
-            if (result == true) {
+            if (result === true) {
                 // local validations have been performed
                 // now do deferred ones in parallel
                 // (these are probably ajax calls)
@@ -597,7 +597,7 @@
                 deferred.resolve({ dataItem: dataItem, success: false, errorCount: errors.length });
             }
             return deferred.promise();
-        };
+        }
         function _displayErrors(dataItem, errors) {
             var me = this;
             var text = "";
@@ -608,7 +608,7 @@
                 text += message;
             });
             me.options._froot.find("[data-item='" + dataItem + "']").closest("[data-property]").find(".message").html(text);
-        };
+        }
         frm.prototype.clearMessages = function () {
             var me = this;
             me.options._froot.find("[data-property] .message").html('');
@@ -714,8 +714,8 @@
         };
         frm.prototype.isValid = function () {
             var me = this;
-            var fieldCount = me.options._froot.find("[data-property]").length;
-            var validCount = me.options._froot.find("[data-validation-state='valid']").length;
+            //var fieldCount = me.options._froot.find("[data-property]").length;
+            //var validCount = me.options._froot.find("[data-validation-state='valid']").length;
             var errorCount = me.options._froot.find("[data-validation-state='error']").length;
             return errorCount === 0;//validCount === fieldCount;
         };
@@ -1117,7 +1117,7 @@
     //};
     $.fastnet$forms = {
         CreateForm: frm
-    }
+    };
     $(function () {
         $T = this;
         $U = $.fastnet$utilities;

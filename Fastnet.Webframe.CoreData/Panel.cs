@@ -8,6 +8,7 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
+
     public partial class Panel
     {
         public long PanelId { get; set; }

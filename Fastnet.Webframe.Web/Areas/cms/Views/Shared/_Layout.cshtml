@@ -6,19 +6,25 @@
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
-    @Styles.Render("~/Content/cms/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/site/css")
+    @Styles.Render("~/Content/cms/css")
+
 </head>
 <body>
     <div class="fastnet-error-panel hide">
 
     </div>
-    <div class="container body-content">
-        @RenderBody()
-        <div id="form" class="forms-container">
-
+    <div class="SitePanel">
+        <div class="BannerPanel"></div>
+        <div class="AppPanel container">
+            @RenderBody()
         </div>
+        </div>
+    <div class="forms-container">
+
     </div>
+
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/fastnet/utils")

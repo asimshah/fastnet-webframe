@@ -102,32 +102,8 @@
             },
             Edit: function(panel) {
                 var $this = this;
-                var displayname = null;
+                //var displayname = null;
                 $this.currentPanel = panel;
-                //switch (panel) {
-                //    case "site-panel":
-                //        displayName = "Site Panel";
-                //        break;
-                //    case "banner-panel":
-                //        displayName = "Banner Panel";
-                //        break;
-                //    case "menu-panel":
-                //        displayName = "Menu Panel";
-                //        break;
-                //    case "content-panel":
-                //        displayName = "Content Panel";
-                //        break;
-                //    case "left-panel":
-                //        displayName = "Left Panel";
-                //        break;
-                //    case "centre-panel":
-                //        displayName =  "Centre Panel";
-                //        break;
-                //    case "right-panel":
-                //        displayName = "Right Panel";
-                //        break;
-                //}
-                //var options = { ClientAction: { IsModal: false, Panel: displayName } };
                 var url = $U.Format("designer/layouteditor/get/{0}", panel);
                 $.when($U.AjaxGet({ url: url }, true)
                     ).done(function (panelInfo) {
@@ -157,22 +133,6 @@
                                 cef.enableCommand("save-css");
                             });
                         });
-                        //$.extend(options.ClientAction, panelInfo);
-                        //$.when($F.LoadForm($this, "CSS Editor", "designer/template/form/layoutcsseditor", "designer-form layout-less-editor", options)
-                        //    ).then(function () {
-                        //        $(".default-css pre").text(panelInfo.DefaultCSS);
-                        //        $T.aceEditor = ace.edit("less-editor");
-                        //        $T.aceEditor.setTheme("ace/theme/cobalt");
-                        //        $T.aceEditor.setValue(panelInfo.CustomLess);
-                        //        $T.aceEditor.getSession().setMode("ace/mode/less");
-                        //        $T.aceEditor.on("change", function () {
-                        //            $F.GetForm().find(".message").text("");
-                        //            $F.EnableCommand("save-css");
-                        //        });
-                        //        $F.Bind({ afterItemValidation: null, onCommand: $this.OnCommand });
-                        //        $F.DisableCommand("save-css");
-                        //        $F.Show();
-                        //    });
                     });
             },
             OnCommand: function (f, cmd) {

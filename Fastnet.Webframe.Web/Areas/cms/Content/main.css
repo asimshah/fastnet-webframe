@@ -1,4 +1,76 @@
-﻿@import "../../../Content/bootstrap.css";
+﻿.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.btn-group-lg > .btn {
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.3333333;
+  border-radius: 6px;
+}
+.btn-group-sm > .btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.dl-horizontal dd:before,
+.dl-horizontal dd:after,
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after,
+.row:before,
+.row:after,
+.form-horizontal .form-group:before,
+.form-horizontal .form-group:after,
+.btn-toolbar:before,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:before,
+.btn-group-vertical > .btn-group:after,
+.nav:before,
+.nav:after,
+.navbar:before,
+.navbar:after,
+.navbar-header:before,
+.navbar-header:after,
+.navbar-collapse:before,
+.navbar-collapse:after,
+.pager:before,
+.pager:after,
+.panel-body:before,
+.panel-body:after,
+.modal-footer:before,
+.modal-footer:after {
+  content: " ";
+  display: table;
+}
+.dl-horizontal dd:after,
+.container:after,
+.container-fluid:after,
+.row:after,
+.form-horizontal .form-group:after,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:after,
+.nav:after,
+.navbar:after,
+.navbar-header:after,
+.navbar-collapse:after,
+.pager:after,
+.panel-body:after,
+.modal-footer:after {
+  clear: both;
+}
 .body-content {
   width: 80%;
 }
@@ -13,5 +85,101 @@
   height: 100px;
   overflow-y: scroll;
   color: white;
+}
+.AppPanel {
+  width: 100%;
+}
+.cms-heading {
+  font-size: large;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.cms-content .cms-folder .folder-name {
+  margin-bottom: 8px;
+  border-top: 1px solid #a7a7a7;
+  font-size: smaller;
+}
+.cms-content .cms-folder .folder-name span.fa-folder {
+  color: orange;
+  margin-right: 4px;
+}
+.cms-content .cms-folder .folder-name .row:not(:last-child) {
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eeeeee;
+}
+.cms-content .cms-folder .folder-item {
+  font-size: small;
+  /*.additional-info {
+                .make-xs-column(2);
+            }*/
+}
+.cms-content .cms-folder .folder-item.document .name div:nth-child(2n) {
+  font-size: x-small;
+  color: #0094ff;
+}
+.cms-content .cms-folder .folder-item.image .name div:nth-child(2n) {
+  font-size: x-small;
+  /*color: #0094ff;*/
+}
+.cms-content .cms-folder .folder-item.image .name div:nth-child(3n) {
+  font-size: x-small;
+  color: #902a12;
+}
+.cms-content .cms-folder .folder-item .name {
+  position: relative;
+  float: left;
+  width: 33.33333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.cms-content .cms-folder .folder-item .modification-info {
+  position: relative;
+  float: left;
+  width: 25%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: x-small;
+}
+.cms-content .cms-folder .folder-item .modification-info > span {
+  margin-right: 2px;
+}
+.cms-content .cms-folder .folder-item .picture {
+  position: relative;
+  float: left;
+  width: 8.33333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 300px;
+}
+.cms-content .cms-folder .folder-item .picture img {
+  width: 200px;
+  border: 2px solid #808080;
+  margin-bottom: 4px;
+  border-radius: 2px;
+}
+.cms-content .cms-folder .folder-item .picture .iframe-container {
+  overflow: hidden;
+  height: 200px;
+}
+.cms-content .cms-folder .folder-item .picture iframe {
+  margin-left: -12px;
+  z-index: -2;
+  height: 600px;
+  width: 900px;
+  border: none;
+  -moz-transform: scale(0.3);
+  -ms-transform: scale(0.3);
+  -o-transform: scale(0.3);
+  -webkit-transform: scale(0.3);
+  transform: scale(0.3);
+  -moz-transform-origin: left top;
+  -ms-transform-origin: left top;
+  -o-transform-origin: left top;
+  -webkit-transform-origin: left top;
+  transform-origin: left top;
 }
 /*# sourceMappingURL=main.css.map */

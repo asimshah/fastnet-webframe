@@ -29,6 +29,12 @@ namespace Fastnet.Webframe.Web.Areas.cms
             .Include(
                 "~/Areas/cms/Content/main.css"
             ));
+
+            bundles.Add(new ScriptBundle("~/bundles/cms").Include(
+                "~/Scripts/mustache.js",
+                //"~/Scripts/fastnet/fastnet.forms.js",
+                "~/Areas/cms/Scripts/webframe.cms.js"
+                ));
         }
     }
 }
