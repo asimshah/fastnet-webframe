@@ -30,13 +30,15 @@
     margin-bottom: 10px;
 }
 
+
+
 .cms-content {
     //.make-row();
     .cms-folder {
         //.make-xs-column(12);
         .folder-name {
             margin-bottom: 8px;
-            border-top: 1px solid #a7a7a7;
+            border-top: 1px solid @border-colour;
             font-size: smaller;
             //.make-xs-column(12);
             span.fa-folder {
@@ -46,7 +48,7 @@
 
             .row:not(:last-child) {
                 margin-bottom: 8px;
-                border-bottom: 1px solid #eeeeee;
+                border-bottom: 1px solid @light-border-colour;// #eeeeee;
             }
         }
 
@@ -56,7 +58,7 @@
             &.document {
                 .name div:nth-child(2n) {
                     font-size: x-small;
-                    color: #0094ff;
+                    color: @document-name-colour;
                 }
             }
 
@@ -68,7 +70,7 @@
 
                 .name div:nth-child(3n) {
                     font-size: x-small;
-                    color: #902a12;
+                    color: @image-size-colour;
                 }
             }
 
@@ -94,7 +96,7 @@
 
                 img {
                     width: 200px;
-                    border: 2px solid #808080;
+                    border: 2px solid @image-border-colour;
                     //margin-top: 4px;
                     margin-bottom: 4px;
                     border-radius: 2px;
