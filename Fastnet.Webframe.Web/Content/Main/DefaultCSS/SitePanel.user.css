@@ -1,10 +1,6 @@
-.SitePanel {
-  font-family: verdana;
-  font-size: 10.5pt;
-  width: 930px;
-}
-.SitePanel .login-status div {
-  background-color: blue;
-  top: 20px;
-  padding: 4px;
+.SitePanel
+{
+    font-family: verdana;
+    font-size: 10.5pt;
+    width: 930px;
 }
