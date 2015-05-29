@@ -400,11 +400,11 @@ body {
 .editor-dialog.store-browser .browser-folder-content div.data > div:nth-child(odd) {
   background-color: lightgray;
 }
-.editor-dialog.store-browser .browser-folder-content div:not([data-type='page']) .edit-button {
-  display: none;
+.editor-dialog.store-browser .browser-folder-content div.data div:not([data-type='page']) .edit-button {
+  visibility: hidden;
 }
-.editor-dialog.store-browser .browser-folder-content div[data-landing-page='true'] .delete-button {
-  display: none;
+.editor-dialog.store-browser .browser-folder-content div.data div[data-landing-page='true'] .delete-button {
+  visibility: hidden;
 }
 .editor-dialog.store-browser .browser-folder-content div.buttons span {
   cursor: pointer;

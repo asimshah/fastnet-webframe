@@ -1,0 +1,27 @@
+﻿<div>
+    <div class="form-body mail-test">
+        <div class="form-group-sm" data-property>
+            <label for="mail-to">To:</label>
+            <input type="email" class="form-control" id="mail-to" placeholder="Mail to" data-item="mail-to" data-focus>
+            <div class="message"></div>
+        </div>
+        <div class="form-group-sm" data-property>
+            <label for="subject">Subject:</label>
+            <input type="text" class="form-control" id="subject" placeholder="Subject" data-item="subject">
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="body-text">Message:</label>
+            <textarea class="form-control" id="body-text"  data-item="body-text"></textarea>
+            <!--<input type="text" class="form-control" id="body-text" placeholder="Message" data-item="body-text">-->
+            <div class="message"></div>
+        </div>
+
+    </div>
+    <div class="form-footer">
+        <div class="form-group command-strip btn-group">
+            <button class="btn btn-primary" data-cmd="send-mail">Send</button>
+            <button class="btn btn-default" data-cmd="cancel">Cancel</button>
+        </div>
+    </div>
+</div>

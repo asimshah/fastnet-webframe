@@ -35,7 +35,7 @@
             $T = this;
             $U = $.fastnet$utilities;
             $(window).bind('popstate', function (event) {
-                Debug.writeln(location.href);
+                //Debug.writeln(location.href);
                 location.href = location.href;
             });
         },

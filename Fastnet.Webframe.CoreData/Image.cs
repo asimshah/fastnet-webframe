@@ -14,7 +14,7 @@ namespace Fastnet.Webframe.CoreData
         public long ImageId { get; set; }
         public string Name { get; set; }
         public byte[] Data { get; set; }
-        public System.DateTime CreatedOn { get; set; }
+        public System.DateTimeOffset CreatedOn { get; set; }
         public string CreatedBy { get; set; }
         public ImageType ImageType { get; set; }
         public int Height { get; set; }

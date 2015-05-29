@@ -1,4 +1,5 @@
-﻿using Fastnet.Webframe;
+﻿using Fastnet.EventSystem;
+using Fastnet.Webframe;
 using Microsoft.AspNet.Identity;
 //using Microsoft.AspNet.Identity;
 using System;
@@ -12,7 +13,7 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
-    public partial class Member 
+    public partial class Member
     {
         // I do not use the Email Confirmation scheme that ias part of the Asp.Net Identity system
         // because the UserManager.GenerateEmailConfirmationTokenAsync method produces a ridiculously
@@ -35,7 +36,7 @@ namespace Fastnet.Webframe.CoreData
         public bool Disabled { get; set; }
         [MaxLength(128)]
         public string ActivationCode { get; set; }
-        public DateTime? ActivationEmailSentDate { get; set; }                
+        public DateTime? ActivationEmailSentDate { get; set; }
         public string PasswordResetCode { get; set; }
         public DateTime? PasswordResetEmailSentDate { get; set; }
         public string PlainPassword { get; set; }
@@ -142,6 +143,87 @@ namespace Fastnet.Webframe.CoreData
             }
 
             return byteArraysEqual(buffer3, buffer4);
+        }
+        //public void RecordNewMember(string actionBy = null)
+        //{
+        //    CoreDataContext DataContext = Core.GetDataContext();
+        //    MembershipAction ma = new MembershipAction
+        //    {
+        //        MemberId = this.Id,
+        //        EmailAddress = this.EmailAddress,
+        //        FullName = this.Fullname,
+        //        ActionBy = actionBy ?? this.Fullname,
+        //        Action = MembershipAction.ActionTypes.New,
+        //    };
+        //    DataContext.Actions.Add(ma);
+        //}
+        public void RecordChanges(string actionBy = null, MembershipAction.ActionTypes actionType = MembershipAction.ActionTypes.Modification)
+        {
+            CoreDataContext DataContext = Core.GetDataContext();
+            switch (actionType)
+            {
+                default:
+                case MembershipAction.ActionTypes.New:
+                case MembershipAction.ActionTypes.Activation:
+                case MembershipAction.ActionTypes.PasswordResetRequest:
+                case MembershipAction.ActionTypes.PasswordReset:
+                case MembershipAction.ActionTypes.Deactivation:
+                case MembershipAction.ActionTypes.Deletion:
+                    MembershipAction ma = new MembershipAction
+                    {
+                        MemberId = this.Id,
+                        EmailAddress = this.EmailAddress,
+                        FullName = this.Fullname,
+                        ActionBy = actionBy ?? this.Fullname,
+                        Action = actionType,
+                    };
+                    DataContext.Actions.Add(ma);
+                    return;
+                case MembershipAction.ActionTypes.Modification:
+                    break;
+            }
+            var entry = DataContext.Entry(this);
+            foreach (var p in entry.CurrentValues.PropertyNames)
+            {
+                switch (p)
+                {
+                    case "EmailAddressConfirmed":
+                    case "ActivationCode":
+                    case "ActivationEmailSentDate":
+                    case "PasswordResetCode":
+                    case "PasswordResetEmailSentDate":
+                    case "PlainPassword":
+                        break;
+                    default:
+                        try
+                        {
+                            if (entry.Property(p).IsModified)
+                            {
+                                object ov = entry.Property(p).OriginalValue;
+                                object cv = entry.Property(p).CurrentValue;
+                                MembershipAction ma = new MembershipAction
+                                {
+                                    MemberId = this.Id,
+                                    EmailAddress = this.EmailAddress,
+                                    FullName = this.Fullname,
+                                    ActionBy = actionBy ?? this.Fullname,
+                                    Action = actionType,// MembershipAction.MembershipActionTypes.Modification,
+                                    PropertyChanged = p,
+                                    OldValue = ov == null ? "<null>" : ov.ToString(),
+                                    NewValue = cv == null ? "<null>" : cv.ToString()
+                                };
+                                DataContext.Actions.Add(ma);
+                            }
+                        }
+                        catch (Exception xe)
+                        {
+                            //Debugger.Break();
+                            Log.Write(xe);
+                            throw;
+                        }
+                        break;
+                }
+            }
         }
     }
     //public class DWHMember : Member

@@ -4,86 +4,276 @@ using Fastnet.Webframe.CoreData;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Configuration;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Mvc.Async;
 
 
 namespace Fastnet.Webframe.Web.Common
 {
     public class MailHelper
     {
-        //private static string siteUrl = null;
-        //private static string SiteUrl
-        //{
-        //    get
-        //    {
-        //        if (siteUrl == null)
-        //        {
-        //            siteUrl = NameValueSettings.Key("SiteUrl", "");
-        //        }
-        //        return siteUrl;
-        //    }
-        //}
-        //private static string adminEmailAddress = null;
-        //private static string AdminEmailAddress
-        //{
-        //    get
-        //    {
-        //        if(adminEmailAddress == null)
-        //        {
-        //            adminEmailAddress = GetAdminEmailAddress();
-        //        }
-        //        return adminEmailAddress;
-        //    }
-        //}
+        private static HttpContext httpCtx;
+        private CoreDataContext DataContext;// = Core.GetDataContext();
+        public static bool sendInProgress
+        {
+            get
+            {
+                var app = httpCtx.Application;
+                return (bool)app["sending-email"];
+            }
+            set
+            {
+                var app = httpCtx.Application;
+                app["sending-email"] = value;
+            }
+        }
+        static MailHelper()
+        {
+            httpCtx = HttpContext.Current;
+            var app = httpCtx.Application;
+            if (app["sending-email"] == null)
+            {
+                app["sending-email"] = false;
+                Debug.Print("app[\"sending-email\"] initialised");
+            }
+        }
+        public MailHelper()
+        {
+            DataContext = new CoreDataContext();
+        }
+         ~MailHelper()
+        {
+            DataContext.Dispose();
+        }
         public async Task SendPasswordResetAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string code)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
             string subject = string.Format("Password Reset for {0}", siteUrl);
             string callbackUrl = string.Format("{0}/passwordreset/{1}/{2}", siteUrl, userId, code);
-            string text = EmailTemplate.PasswordReset.GetTemplate();
-            //var tf = new TemplateFactory { EmailType = EmailTypes.PasswordReset };
-            //string text = tf.GetEmailTemplate();
-            //string text = TemplateFactory.GetEmailTemplate(EmailTypes.PasswordReset);// .GetTemplate(EmailTemplates.AccountActivation);            
+            var tl = TemplateLibrary.GetInstance();
+            string text = tl.GetTemplate("main-emails", "PasswordReset");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            await SendMailAsync(destination, subject, body);
+            await SendMailAsync(destination, subject, body, "PasswordReset");
+        }
+        public async Task SendEmailAddressChangedAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
+        {
+            string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
+            string subject = string.Format("New email address for {0}", siteUrl);
+            string callbackUrl = string.Format("{0}/activate/{1}/{2}", siteUrl, userId, activationCode);
+            var tl = TemplateLibrary.GetInstance();
+            string text = tl.GetTemplate("main-emails", "EmailAddressChanged");
+            string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
+            await SendMailAsync(destination, subject, body, "EmailAddressChanged");
+
         }
         public async Task SendAccountActivationAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
             string subject = string.Format("Welcome to {0}", siteUrl);
             string callbackUrl = string.Format("{0}/activate/{1}/{2}", siteUrl, userId, activationCode);
-            string text = EmailTemplate.AccountActivation.GetTemplate();
-            //var tf = new TemplateFactory { EmailType = EmailTypes.AccountActivation };
-            //string text = tf.GetEmailTemplate();
-            //string text = TemplateFactory.GetEmailTemplate(EmailTypes.AccountActivation);// .GetTemplate(EmailTemplates.AccountActivation);            
+            var tl = TemplateLibrary.GetInstance();
+            string text = tl.GetTemplate("main-emails", "AccountActivation");
+            //string text = EmailTemplate.AccountActivation.GetTemplate();
+
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            await SendMailAsync(destination, subject, body);
-            //MailMessage mail = new MailMessage("noreply@webframe.co.uk", destination, subject, body);
-            //mail.IsBodyHtml = true;
-            //var isRedirected = PostprocessAddresses(mail);
-            //await SendMailAsync(mail, isRedirected);
+            await SendMailAsync(destination, subject, body, "AccountActivation");
+
         }
-        private async Task SendMailAsync(string destination, string subject, string body)
+        public async Task SendMailAsync(string destination, string subject, string body)
         {
-            //string text = TemplateFactory.GetEmailTemplate(EmailTypes.AccountActivation);// .GetTemplate(EmailTemplates.AccountActivation);
-            //string subject = string.Format("Welcome to {0}", siteUrl);
-            //string body = string.Format(text, siteUrl, callbackUrl, AdminEmailAddress);
+            await SendMailAsync(destination, subject, body, null);
+        }
+        private class SendMailObject
+        {
+            public MailMessage MailMessage { get; set; }
+            public string Template { get; set; }
+            public bool Redirected { get; set; }
+            public string OriginalAddress { get; set; }
+            public int RetryCount { get; set; }
+        }
+        private async Task SendMailAsync(string destination, string subject, string body, string templateName)
+        {
             MailMessage mail = new MailMessage("noreply@webframe.co.uk", destination, subject, body);
             mail.IsBodyHtml = true;
-            var isRedirected = PostprocessAddresses(mail);
-            await SendMailAsync(mail, isRedirected);
+            SendMailObject smo = new SendMailObject { MailMessage = mail, Template = templateName };
+            PostprocessAddresses(smo);
+            //dynamic redirectionResult = PostprocessAddresses(mail);
+            // detach send task to another thread
+            await Task.Run(async () =>
+            {
+                await SendMailAsync(smo);
+            });
+
+            //RecordMail(mail, templateName, redirectionResult);
+        }
+        private async Task SendMailAsync(SendMailObject smo)
+        //private async Task SendMailAsync(MailMessage mail, string templateName, dynamic redirectionResult)
+        {
+            bool mailEnabled = ApplicationSettings.Key("MailEnabled", true);
+            if (mailEnabled)
+            {
+                while (sendInProgress)
+                {
+                    Log.Write("Waiting to send email ...");
+                    await Task.Delay(1000);
+                }
+                try
+                {
+                    SmtpClient client = new SmtpClient();// new SmtpClient(smtpHost);
+                    client.SendCompleted += (s, e) =>
+                    {
+                        SendMailObject mo = e.UserState as SendMailObject;
+                        sendInProgress = false;
+                        if (e.Cancelled)
+                        {
+                            Log.Write("SendMailAsync: mail cancelled - how?");
+                        }
+                        if (e.Error != null)
+                        {
+                            RecordMailException(mo, e.Error);
+                        }
+                        else
+                        {
+                            RecordMail(smo);
+                        }
+
+                    };
+                    sendInProgress = true;
+                    client.SendAsync(smo.MailMessage, smo);
+
+                }
+                catch (Exception xe)
+                {
+                    RecordMailException(smo, xe);
+                    sendInProgress = false;
+                }
+            }
+            else
+            {
+                RecordMail(smo, true);
+            }
+            //LogMail(mail, mailEnabled, isRedirected);
+        }
+        private void RecordMailException(SendMailObject smo, Exception mailError)
+        {
+            Log.Write(mailError); // temporary?
+            Action<SmtpFailedRecipientException> handleFailedRecipient = (fre) =>
+            {
+                SmtpStatusCode status = fre.StatusCode;
+                if (status == SmtpStatusCode.MailboxBusy ||
+                    status == SmtpStatusCode.MailboxUnavailable)
+                {
+                    if (smo.RetryCount == 0)
+                    {
+                        //var ctx = Core.GetDataContext();
+                        MailAction ma = GetBaseRecord(smo);
+                        ma.To = fre.FailedRecipient;
+                        ma.Failure = string.Format("Mailbox busy or unavailable, mail delayed");
+                        DataContext.Actions.Add(ma);
+                        DataContext.SaveChanges();
+                    }
+                    smo.RetryCount++;
+                    if (smo.RetryCount < ApplicationSettings.Key("MailNonDeliveryRetryMax", 5))
+                    {
+                        Task.Run(async () =>
+                        {
+                            Log.Write("Delivery to: {0} failed (mailbox busy or unavailable), retry in 15 minutes", smo.MailMessage.To.First().Address);
+                            await Task.Delay(TimeSpan.FromMinutes(15));
+                            await SendMailAsync(smo);
+                        });
+                    }
+                    else
+                    {
+                        //var ctx = Core.GetDataContext();
+                        MailAction ma = GetBaseRecord(smo);
+                        ma.To = fre.FailedRecipient;
+                        ma.Failure = string.Format("Delivery failed after {0} retries - mail cancelled", smo.RetryCount);
+                        DataContext.Actions.Add(ma);
+                        DataContext.SaveChanges();
+                    }
+                    //System.Threading.Thread.Sleep(5000);
+                    //client.Send(message);
+                }
+                else
+                {
+                    //var ctx = Core.GetDataContext();
+                    MailAction ma = GetBaseRecord(smo);
+                    ma.To = fre.FailedRecipient;
+                    ma.Failure = string.Format("Delivery failed - status {0}", status.ToString());
+                    DataContext.Actions.Add(ma);
+                    DataContext.SaveChanges();
+                    //Console.WriteLine("Failed to deliver message to {0}",
+                    //    fre.FailedRecipient);
+                }
+            };
+            if (mailError is SmtpFailedRecipientException)
+            {
+                handleFailedRecipient(mailError as SmtpFailedRecipientException);
+            }
+            else if (mailError is SmtpFailedRecipientsException)
+            {
+                SmtpFailedRecipientsException ex = (SmtpFailedRecipientsException)mailError;
+                for (int i = 0; i < ex.InnerExceptions.Length; i++)
+                {
+                    SmtpFailedRecipientException fre = ex.InnerExceptions[i];
+                    handleFailedRecipient(fre);
+                }
+            }
+            else
+            {
+                Log.Write("RecordMailException: what does being here mean?");
+            }
+        }
+        private MailAction GetBaseRecord(SendMailObject smo)
+        {
+            MailAction ma = new MailAction
+            {
+                Subject = smo.MailMessage.Subject,
+                To = smo.Redirected ? smo.OriginalAddress : smo.MailMessage.To.First().Address,
+                From = smo.MailMessage.From.Address,
+                MailTemplate = smo.Template,
+                MailBody = smo.MailMessage.Body,
+                Redirected = smo.Redirected,
+                RedirectedTo = smo.Redirected ? smo.MailMessage.To.First().Address : ""
+            };
+            return ma;
+        }
+        private void RecordMail(SendMailObject smo, bool mailDisabled = false)
+        //private void RecordMail(MailMessage mail, string templateName,  dynamic redirectionResult, bool mailDisabled = false)
+        {
+            MailMessage mail = smo.MailMessage;
+            string templateName = smo.Template;
+
+            //var ctx = Core.GetDataContext();
+            MailAction ma = GetBaseRecord(smo);
+            ma.MailDisabled = mailDisabled;
+            //MailAction ma = new MailAction
+            //{
+            //    Subject = mail.Subject,
+            //    To = smo.Redirected ? smo.OriginalAddress :  mail.To.First().Address,
+            //    From = mail.From.Address,
+            //    MailTemplate = templateName,
+            //    MailBody = mail.Body,
+            //    Redirected = smo.Redirected,
+            //    RedirectedTo = smo.Redirected ? mail.To.First().Address : "",
+            //    MailDisabled = mailDisabled
+            //};
+            DataContext.Actions.Add(ma);
+            DataContext.SaveChanges();
         }
         private string GetSiteUrl(string UrlScheme, string UrlAuthority)
         {
             return string.Format("{0}://{1}", UrlScheme, UrlAuthority);
         }
-        private bool PostprocessAddresses(MailMessage mail)
+        private void PostprocessAddresses(SendMailObject smo)
         {
+            MailMessage mail = smo.MailMessage;
             SmtpSection section = (SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
             MailAddress originalAddress = mail.To.First();
             string toAddress = originalAddress.Address;
@@ -106,25 +296,9 @@ namespace Fastnet.Webframe.Web.Common
                 }
             }
             mail.From = new MailAddress(fromAddress);// new MailAddress(section.From);
-            return redirected;
-        }
-        //private static string GetAdminEmailAddress()
-        //{
-        //    using (CoreDataReadOnly DataContext = new CoreDataReadOnly())
-        //    {
-        //        Member adminMember = DataContext.Members.Single(m => m.IsAdministrator);
-        //        return adminMember.EmailAddress;
-        //    }
-        //}
-        private async Task SendMailAsync(MailMessage mail, bool isRedirected)
-        {
-            bool mailEnabled = ApplicationSettings.Key("MailEnabled", true);
-            if (mailEnabled)
-            {
-                SmtpClient client = new SmtpClient();// new SmtpClient(smtpHost);
-                await client.SendMailAsync(mail);
-            }
-            LogMail(mail, mailEnabled, isRedirected);
+            smo.Redirected = redirected;
+            smo.OriginalAddress = originalAddress.Address;
+            return;// new { Redirected = redirected, OriginalAddress = originalAddress.Address };
         }
         private void LogMail(MailMessage mail, bool mailEnabled, bool isRedirected)
         {

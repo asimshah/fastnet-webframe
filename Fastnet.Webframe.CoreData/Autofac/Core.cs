@@ -7,6 +7,8 @@ using System.Web.Mvc;
 using Autofac;
 //using Microsoft.Owin;
 using Microsoft.AspNet.Identity.Owin;
+using Fastnet.EventSystem;
+using System.Diagnostics;
 
 namespace Fastnet.Webframe.CoreData
 {
@@ -25,9 +27,18 @@ namespace Fastnet.Webframe.CoreData
         }
         public static CoreDataContext GetDataContext()
         {
-            var dr = DependencyResolver.Current as Autofac.Integration.Mvc.AutofacDependencyResolver;
-            CoreDataContext cdc = dr.RequestLifetimeScope.Resolve<CoreDataContext>();
-            return cdc;
+            try
+            {
+                var dr = DependencyResolver.Current as Autofac.Integration.Mvc.AutofacDependencyResolver;
+                CoreDataContext cdc = dr.RequestLifetimeScope.Resolve<CoreDataContext>();
+                return cdc;
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                Debugger.Break();
+                throw;
+            }
         }
         public static ApplicationDbContext GetApplicationDbContext()
         {

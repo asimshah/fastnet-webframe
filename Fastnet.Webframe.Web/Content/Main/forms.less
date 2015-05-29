@@ -22,11 +22,17 @@ input[readonly] {
     background-color: white !important;
     cursor: text !important;
 }
-
+.modeless {
+    .form-footer {
+        float: right;
+        margin-top: 12px;
+    }
+}
 .modal-dialog {
     @strip-height: 42px;
     @narrow-gutter-width: 10px;
-
+    //margin-top: 64px;
+    z-index: 6666;
     .modal-content {
         display: table;
         width: 100%;

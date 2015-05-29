@@ -3,6 +3,7 @@
     // 1. moment.js is required (to mark log/debug with date time info)
     var $T;
     $.fastnet$utilities = {
+        options: {},
         clientSideLog: false,
         rootUrl: "/",
         messageBoxElementId: "#message-box",
@@ -40,6 +41,9 @@
             });
             $(document).ajaxError($T.AjaxCallFailed);
         },
+        AddOptions: function(options) {
+            $.extend($T.options, options);
+        },
         //
         AjaxPost: function (args) {
 
@@ -58,6 +62,7 @@
             }
             $(".ajax-error-message").empty();
             $T.Debug("AjaxGet: {0}", args.url);
+            //var url = encodeURIComponent(args.url);
             return $.ajax({
                 url: $T.rootUrl + args.url,
                 contentType: "application/json",
@@ -128,51 +133,52 @@
         },
         //,
         MessageBox: function (text, options) {
-            function _mbox(text, options) {
-                var runtimeOptions = {
-                    title: 'System Message',
-                    enableSystemCancel: false, // i.e. modal-header x box
-                    enableOKButton: true,
-                    enableCancelButton: false,
-                    okButtonLabel: 'Close',
-                    cancelButtonLabel: 'Cancel',
-                    OKFunction: null
-                };
-                if (typeof options !== "undefined" && options !== null) {
-                    $.extend(runtimeOptions, options);
-                }
-                var mb = $($T.messageBoxElementId);
-                mb.find("#message-text").text(text);
-                mb.find(".modal-footer button[data-cmd='ok']").text(runtimeOptions.okButtonLabel);
-                mb.find(".modal-footer button[data-cmd='cancel']").text(runtimeOptions.cancelButtonLabel);
-                if (!runtimeOptions.enableSystemCancel) {
-                    mb.find(".modal-header button").hide();
-                }
-                if (!runtimeOptions.enableOKButton) {
-                    mb.find(".modal-footer button[data-cmd='ok']").hide();
-                } else {
-                    mb.find(".modal-footer button[data-cmd='ok']").on('click', function () {
-                        $T.Debug("OK button click");
-                        $($T.messageBoxElementId).modal('hide');
-                        if (runtimeOptions.OKFunction !== null) {
-                            runtimeOptions.OKFunction();
-                        }
-                    });
-                }
-                if (!runtimeOptions.enableCancelButton) {
-                    mb.find(".modal-header button[data-cmd='cancel']").hide();
-                }
-                $($T.messageBoxElementId).modal();
-            }
-            if (typeof $.fastnet$form === "function") {
-                var mb = new $.fastnet$messageBox({
+            //function _mbox(text, options) {
+            //    var runtimeOptions = {
+            //        title: 'System Message',
+            //        enableSystemCancel: false, // i.e. modal-header x box
+            //        enableOKButton: true,
+            //        enableCancelButton: false,
+            //        okButtonLabel: 'Close',
+            //        cancelButtonLabel: 'Cancel',
+            //        OKFunction: null
+            //    };
+            //    if (typeof options !== "undefined" && options !== null) {
+            //        $.extend(runtimeOptions, options);
+            //    }
+            //    var mb = $($T.messageBoxElementId);
+            //    mb.find("#message-text").text(text);
+            //    mb.find(".modal-footer button[data-cmd='ok']").text(runtimeOptions.okButtonLabel);
+            //    mb.find(".modal-footer button[data-cmd='cancel']").text(runtimeOptions.cancelButtonLabel);
+            //    if (!runtimeOptions.enableSystemCancel) {
+            //        mb.find(".modal-header button").hide();
+            //    }
+            //    if (!runtimeOptions.enableOKButton) {
+            //        mb.find(".modal-footer button[data-cmd='ok']").hide();
+            //    } else {
+            //        mb.find(".modal-footer button[data-cmd='ok']").on('click', function () {
+            //            $T.Debug("OK button click");
+            //            $($T.messageBoxElementId).modal('hide');
+            //            if (runtimeOptions.OKFunction !== null) {
+            //                runtimeOptions.OKFunction();
+            //            }
+            //        });
+            //    }
+            //    if (!runtimeOptions.enableCancelButton) {
+            //        mb.find(".modal-header button[data-cmd='cancel']").hide();
+            //    }
+            //    $($T.messageBoxElementId).modal();
+            //}
+            if (typeof $.fastnet$forms !== "undefined") {
+                var _options = $.extend({
                     Title: "System Message",
                     OKLabel: "Close"
-                });
+                }, options);
+                var mb = new $.fastnet$messageBox(_options);
                 mb.show(text);
-            } else {
+            } /*else {
                 _mbox(text, options);
-            }
+            }*/
         },
         messageBoxWithOptions: function (message, options) {
             //var wWidth = $(window).width();

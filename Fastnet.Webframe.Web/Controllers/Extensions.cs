@@ -1,17 +1,90 @@
 ﻿using Fastnet.Common;
+using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Web.Common;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
+using System.Web.Http;
+using System.Web.Mvc;
+using System.Web.SessionState;
 //using System.Web.Mvc;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
     public static class Extensions
     {
+        public static void SetCurrentPage(this ApiController controller, Page page)
+        {
+            SetPage(page);
+        }
+        public static void SetCurrentPage(this Controller controller, Page page)
+        {
+            SetPage(page);
+        }
+        public static Page GetCurrentPage(this ApiController controller)
+        {
+            return GetPage();
+        }
+        public static Page GetCurrentPage(this Controller controller)
+        {
+            return GetPage();
+        }
+        public static void SetCurrentMember(this ApiController controller, Member member)
+        {
+            SetMember(member);
+        }
+        public static void SetCurrentMember(this Controller controller, Member member)
+        {
+            SetMember(member);
+        }
+        public static Member GetCurrentMember(this ApiController controller)
+        {
+            return GetMember();
+        }
+        public static Member GetCurrentMember(this Controller controller)
+        {
+            return GetMember();
+        }
+        private static void SetMember(Member member)
+        {
+            
+            // store the id not the object so that we are syncornised with
+            // the current datacontext
+            var session = HttpContext.Current.Session;
+            session["current-member"] = member == null ? null : member.Id;
+            //Debug.Print("Recorded member {0}", member == null ? "null" : member.Fullname);
+        }
+        private static Member GetMember()
+        {
+            // store the id not the object so that we are syncornised with
+            // the current datacontext
+            var session = HttpContext.Current.Session;
+            string id = (string)(session["current-member"] ?? null);
+            return id == null ? null : Core.GetDataContext().Members.Single(m => m.Id == id);
+            //Debug.Print("Recorded member {0}", member.Fullname);
+        }
+        private static void SetPage(Page page)
+        {
+            // store the id not the object so that we are syncornised with
+            // the current datacontext
+            var session = HttpContext.Current.Session;
+            session["current-page"] = page == null ? (long?)null : (long?)page.PageId;
+            //Debug.Print("Recorded page {0}", page == null ? "null" : page.PageId);
+        }
+        private static Page GetPage()
+        {
+            // store the id not the object so that we are syncornised with
+            // the current datacontext
+            var session = HttpContext.Current.Session;
+            long? id = (long?)(session["current-page"] ?? null);
+            return id.HasValue ? Core.GetDataContext().Pages.Single(m => m.PageId == id.Value) : null;
+            //Debug.Print("Recorded member {0}", member.Fullname);
+        }
         /// <summary>
         /// Specifies caching with MaxAge from ApplicationSettings Cache:MaxAge, default 5.0 minutes
         /// </summary>
@@ -65,6 +138,50 @@ namespace Fastnet.Webframe.Web.Controllers
             response.Headers.CacheControl = cchv;
             return response;           
         }
+        //public static HttpResponseMessage GetTemplate(this HttpRequestMessage request, TemplateBase template)
+        //{
+        //    System.IO.FileInfo file;
+
+        //    var text = template.GetTemplate(out file);
+
+        //    if (file != null)
+        //    {
+        //        return request.CreateCacheableResponse(HttpStatusCode.OK, new { Template = text }, file.LastWriteTime, file.FullName);
+        //    }
+        //    else
+        //    {
+        //        return request.CreateResponse(HttpStatusCode.NotFound);
+        //    }
+        //}
+        public static HttpResponseMessage GetTemplate(this HttpRequestMessage request, string location, string name)
+        {
+            System.IO.FileInfo file;
+            var tl = TemplateLibrary.GetInstance();
+            string text = tl.GetTemplate(location, name, out file);
+            if (text != null)
+            {
+                return request.CreateCacheableResponse(HttpStatusCode.OK, new { Template = text }, file.LastWriteTime, file.FullName);
+            }
+            else
+            {
+                return request.CreateResponse(HttpStatusCode.NotFound);
+            }
+        }
+        //public static HttpResponseMessage GetTemplate(this HttpRequestMessage request, string templateFile)
+        //{
+        //    System.IO.FileInfo file;
+
+        //    var text = TemplateLibrary.GetTemplate(templateFile, out file);
+
+        //    if (file != null)
+        //    {
+        //        return request.CreateCacheableResponse(HttpStatusCode.OK, new { Template = text }, file.LastWriteTime, file.FullName);
+        //    }
+        //    else
+        //    {
+        //        return request.CreateResponse(HttpStatusCode.NotFound);
+        //    }
+        //}
         private static string CreateEtag(DateTime modified, params object[] args)
         {
             string t = string.Format("{0:x}", modified.GetHashCode());// "";

@@ -1,10 +1,15 @@
 ﻿using Fastnet.Webframe.CoreData;
 using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
+using Fastnet.Webframe.Web.Common;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Core.Objects;
 
 
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
@@ -12,13 +17,22 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
     [RoutePrefix("cmsapi")]
     public class CMSController : ApiController
     {
+
         private CoreDataContext DataContext = Core.GetDataContext();
         [HttpGet]
         [Route("banner")]
         public HttpResponseMessage GetBannerHtml()
         {
             PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });
+            if (bannerContent != null)
+            {
+                return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });
+            }
+            else
+            {
+                return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false });
+            }
+            //return this.Request.CreateResponse(HttpStatusCode.OK, new { Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });
         }
         [HttpGet]
         [Route("get/folders")]
@@ -68,6 +82,40 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 LastModifiedBy = x.CreatedBy
             }));
             return this.Request.CreateResponse(HttpStatusCode.OK, list);
+        }
+        [HttpGet]
+        [Route("get/sessionhistory")]
+        public async Task<HttpResponseMessage> GetSessionHistory()
+        {
+            var data = await DataContext.Actions.OfType<SessionAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("get/membershiphistory")]
+        public async Task<HttpResponseMessage> GetMembershipHistory()
+        {
+            var data = await DataContext.Actions.OfType<MembershipAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("get/mailhistory")]
+        public async Task<HttpResponseMessage> GetMailHistory()
+        {
+            var ctx = ((IObjectContextAdapter)DataContext).ObjectContext;
+            var data = await DataContext.Actions.OfType<MailAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            await ctx.RefreshAsync(RefreshMode.StoreWins, data);
+            return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpPost]
+        [Route("sendmail")]
+        public async Task<HttpResponseMessage> SendEmail(dynamic data)
+        {
+            string to = data.to;
+            string subject = data.subject;
+            string body = data.body;
+            MailHelper mh = new MailHelper();
+            await mh.SendMailAsync(to, subject, body);
+            return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         private IEnumerable<Directory> GetFlattenedDirectories()
         {

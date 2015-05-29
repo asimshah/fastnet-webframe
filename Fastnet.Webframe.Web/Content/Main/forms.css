@@ -20,6 +20,13 @@ input[readonly] {
   background-color: white !important;
   cursor: text !important;
 }
+.modeless .form-footer {
+  float: right;
+  margin-top: 12px;
+}
+.modal-dialog {
+  z-index: 6666;
+}
 .modal-dialog .modal-content {
   display: table;
   width: 100%;

@@ -1,0 +1,74 @@
+﻿@using Fastnet.Common
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/site/css")
+    @Styles.Render("~/Content/membership/css")
+
+</head>
+<body>
+    <div class="fastnet-error-panel hide">
+
+    </div>
+    @*<span id="mq-detector">
+        <span class="visible-xs"></span>
+        <span class="visible-sm"></span>
+        <span class="visible-md"></span>
+        <span class="visible-lg"></span>
+    </span>*@
+    <div class="SitePanel container">
+        @*<div class="BannerContent">
+            <div class="BannerPanel"></div>
+            <div class="menu-overlay">
+                <div class="drop-down-style">
+                    <button type="button" class="menu-controller" data-cmd="toggle-dropdown">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <div class="menu-dropdown btn-group-vertical hide">
+                        <button type="button" class="btn btn-primary menu-button" data-cmd="members-mode">Members</button>
+                        <button type="button" class="btn btn-success menu-button" data-cmd="groups-mode">Groups</button>
+                        <button type="button" class="btn btn-default menu-button" data-cmd="go-back">Back</button>
+                    </div>
+                </div>
+                <div class="standard-style">
+                    <div class="menu-strip">
+                        <button type="button" class="btn btn-primary menu-button" data-cmd="members-mode">Members</button>
+                        <button type="button" class="btn btn-success menu-button" data-cmd="groups-mode">Groups</button>
+                        <button type="button" class="btn btn-default menu-button" data-cmd="go-back">Back</button>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-title">Membership</div>
+        </div>*@
+        <div class="AppPanel">
+            @RenderBody()
+        </div>
+        <div class="forms-container">
+
+        </div>
+    </div>
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/fastnet/utils")
+    @RenderSection("scripts", required: false)
+    @if (ApplicationSettings.Key("ClientSideLog", false) == true)
+    {
+        <script>
+            $(function () {
+                $.fastnet$utilities.EnableClientSideLog();
+            });
+        </script>
+    }
+</body>
+</html>
+
+

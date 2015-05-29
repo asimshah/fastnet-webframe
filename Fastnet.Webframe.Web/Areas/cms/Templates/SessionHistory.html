@@ -1,0 +1,31 @@
+﻿<div class="session-history">
+    <div class="report-title">Session History</div>
+    <table class="table table-bordered table-striped" >
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Browser</th>
+                <th>Version</th>
+                <th>IpAddress</th>
+                <th>Screen Width</th>
+                <th>Screen Height</th>
+                <th>Can Touch</th>
+                <th>SessionId</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#data}}
+            <tr>
+                <td><div class="recordedOn">{{RecordedOn}}</div></td>
+                <td><div class="browser">{{Browser}}</div></td>
+                <td><div class="version">{{Version}}</div></td>
+                <td><div class="ipAddress">{{IpAddress}}</div></td>
+                <td><div class="screenWidth">{{ScreenWidth}}</div></td>
+                <td><div class="screenHeight">{{ScreenHeight}}</div></td>
+                <td><div class="CanTouch">{{CanTouch}}</div></td>
+                <td><div class="sessionId">{{SessionId}}</div></td>
+            </tr>
+            {{/data}}
+        </tbody>
+    </table>
+</div>

@@ -2,15 +2,49 @@
     ViewBag.Title = "CMS";
 }
 <div class="row">
-    <div class="cms-heading">
-        Site Content
+    <div class="toolbar">
+        <div class="col-xs-10">
+            <div class="title ">Site Content &amp; History</div>
+        </div>
+        <div class="col-xs-2">
+            <button class="btn btn-primary btn-xs pull-right" data-cmd="back-to-cms">Back</button>
+        </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-xs-12">
-        <div class="cms-content"></div>
-    </div>
+    <table class="navigation-table table">
+        <tr>
+            <td><button class="btn btn-primary btn-xs" data-cmd="site-content">Page List</button></td>
+            <td>A list of all the pages, documents and images in folder order</td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-xs" data-cmd="member-list">Member List</button></td>
+            <td>A list of all registered members</td>
+        </tr>
+        <tr class="hide">
+            <td><button class="btn btn-primary btn-xs" data-cmd="content-changes">Content Changes</button></td>
+            <td>A history of all changes to content, i.e new pages, deletions and modifications</td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-xs" data-cmd="mail-history">Mail History</button></td>
+            <td>A history of all email sent by the site</td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-xs" data-cmd="membership-history">Membership History</button></td>
+            <td>A history of all registrations and changes to members records</td>
+        </tr>
+        <tr >
+            <td><button class="btn btn-primary btn-xs" data-cmd="session-history">Session History</button></td>
+            <td>A history a browser sessions</td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-xs" data-cmd="test-mail">Test Mail</button></td>
+            <td>Mail testing form</td>
+        </tr>
+    </table>
+    <div class="report-container"></div>
 </div>
+
 @section scripts {
     @Scripts.Render("~/bundles/cms")
     <script>

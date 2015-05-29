@@ -22,17 +22,17 @@ namespace Fastnet.Webframe.Web.Controllers
     public class StoreController : ApiController
     {
         private CD.CoreDataContext DataContext = CD.Core.GetDataContext();
-        private string CurrentMemberId
-        {
-            get
-            {
-                if (HttpContext.Current.Session["member-id"] == null)
-                {
-                    return null;
-                }
-                return (string)HttpContext.Current.Session["member-id"];
-            }
-        }
+        //private string CurrentMemberId
+        //{
+        //    get
+        //    {
+        //        if (HttpContext.Current.Session["member-id"] == null)
+        //        {
+        //            return null;
+        //        }
+        //        return (string)HttpContext.Current.Session["member-id"];
+        //    }
+        //}
         [HttpGet]
         [Route("directories/{id?}")]
         public Task<HttpResponseMessage> GetDirectories(long? id = null)
@@ -119,7 +119,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("createdirectory")]
         public async Task<HttpResponseMessage> CreateNewDirectory(dynamic data)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 bool result = true;
                 try
@@ -150,7 +150,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("createpage/{refpageid?}")]
         public async Task<HttpResponseMessage> CreateNewPage(dynamic data, long? refpageid = null)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 bool result = true;
                 try
@@ -186,7 +186,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("delete")]
         public async Task<HttpResponseMessage> DeleteItem(dynamic data)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 bool result = true;
                 try
@@ -220,7 +220,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("get/directory/{id}")]
         public async Task<HttpResponseMessage> GetDirectoryDetails(long id)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 CD.Directory d = DataContext.Directories.Find(id);
                 var data = new
@@ -236,7 +236,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/directory")]
         public async Task<HttpResponseMessage> UpdateDirectory(dynamic data)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 long id = data.id;
                 CD.Directory d = DataContext.Directories.Find(id);
@@ -250,7 +250,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("get/page/{id}")]
         public async Task<HttpResponseMessage> GetPageDetails(long id)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 CD.Page p = DataContext.Pages.Find(id);
                 var data = new
@@ -309,7 +309,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/page")]
         public async Task<HttpResponseMessage> UpdatePage(dynamic data)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
 
                 long id = data.id;
@@ -324,9 +324,10 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/page/content")]
         public async Task<HttpResponseMessage> UpdatePageContent(dynamic data)
         {
-            if (CurrentMemberId != null)
+            CD.Member m = this.GetCurrentMember();
+            if (m != null)
             {
-                CD.Member m = DataContext.Members.Find(CurrentMemberId);
+                //CD.Member m = DataContext.Members.Find(CurrentMemberId);
 
                 //Action<long, string> updatePage = (id, htmlText) =>
                 //    {
@@ -374,7 +375,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("upload/file")]
         public async Task<HttpResponseMessage> UploadFile(dynamic data)
         {
-            if (CurrentMemberId != null)
+            if (this.GetCurrentMember() != null)
             {
                 // data properties:
                 // chunkNumber: number of this chunk (zero based)
@@ -522,7 +523,7 @@ namespace Fastnet.Webframe.Web.Controllers
         //
         private async Task<CD.Page> CreatePageInternal(long directoryId)
         {
-            CD.Member m = DataContext.Members.Find(CurrentMemberId);
+            CD.Member m = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             CD.Directory dir = DataContext.Directories.Find(directoryId);
             CD.Page page = DataContext.CreateNewPage();
             CD.PageMarkup pm = page.PageMarkup;
@@ -547,7 +548,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private CD.Document CreateDocument(CD.Directory d, string filename, byte[] fileData, string mimetype)
         {
-            CD.Member cm = DataContext.Members.Find(CurrentMemberId);
+            CD.Member cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             CD.Document document = DataContext.CreateNewDocument();
             document.CreatedBy = cm.Fullname;
             document.CreatedOn = DateTime.UtcNow;
@@ -563,7 +564,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private CD.Image CreateImage(CD.Directory d, string filename, byte[] fileData, string mimetype)
         {
-            CD.Member cm = DataContext.Members.Find(CurrentMemberId);
+            CD.Member cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             var dimensions = GetDimensions(fileData);
             CD.Image image = DataContext.CreateNewImage();
             image.CreatedBy = cm.Fullname;

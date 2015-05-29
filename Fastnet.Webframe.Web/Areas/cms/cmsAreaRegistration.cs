@@ -27,12 +27,17 @@ namespace Fastnet.Webframe.Web.Areas.cms
             BundleCollection bundles = BundleTable.Bundles;
             bundles.Add(new StyleBundle("~/Content/cms/css")
             .Include(
+                "~/Content/datatables/css/jquery.datatables.css",
+                "~/Content/datatables/css/datatables.bootstrap.css",
                 "~/Areas/cms/Content/main.css"
             ));
 
             bundles.Add(new ScriptBundle("~/bundles/cms").Include(
                 "~/Scripts/mustache.js",
-                //"~/Scripts/fastnet/fastnet.forms.js",
+                "~/Scripts/datatables/jquery.dataTables.js",
+                "~/Scripts/datatables/dataTables.bootstrap.js",
+                "~/Scripts/fastnet/fastnet.validators.js",
+                "~/Scripts/fastnet/fastnet.forms.js",
                 "~/Areas/cms/Scripts/webframe.cms.js"
                 ));
         }

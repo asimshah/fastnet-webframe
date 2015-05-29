@@ -9,6 +9,9 @@ namespace Fastnet.Webframe.CoreData
 {
     public partial class Group //: IHierarchical<Group>
     {
+        private ICollection<Member> members;
+        private ICollection<RegistrationKey> registrationKeys;
+        //
         public long GroupId { get; set; }
         [ForeignKey("ParentGroup")]
         public long? ParentGroupId { get; set; }
@@ -22,9 +25,13 @@ namespace Fastnet.Webframe.CoreData
 
         public virtual Group ParentGroup { get; set; }
         public virtual ICollection<Group> Children { get; set; }
-        public virtual ICollection<Member> Members { get; set; }
 
-        private ICollection<RegistrationKey> registrationKeys;
+        public virtual ICollection<Member> Members
+        {
+            get { return members ?? (members = new HashSet<Member>()); }
+            set { members = value; }
+        }
+
         public virtual ICollection<RegistrationKey> RegistrationKeys // this page hyperlinks to this document
         {
             get { return registrationKeys ?? (registrationKeys = new HashSet<RegistrationKey>()); }

@@ -1,0 +1,29 @@
+﻿<div class="member-list">
+    <div class="report-title">Member List</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th><div class="email-address">Email</div></th>
+                <th><div class="firstname">First Name</div></th>
+                <th><div class="lastname">Last Name</div></th>
+                <th><div class="creation-date">Created On</div></th>
+                <th><div class="lastlogin-date">Last Login On</div></th>
+                <th><div class="is-disabled"></div></th>
+                <th><div class="email-confirmed"></div></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#data}}
+            <tr class="{{#Disabled}}disabled{{/Disabled}} {{^EmailConfirmed}}waiting-activation{{/EmailConfirmed}}" data-id="{{Id}}">
+                <td><div class="email-address">{{EmailAddress}}</div></td>
+                <td><div class="firstname">{{FirstName}}</div></td>
+                <td><div class="lastname">{{LastName}}</div></td>
+                <td><div class="creation-date">{{CreationDate}}</div></td>
+                <td><div class="lastlogin-date">{{LastLoginDate}}</div></td>
+                <td><div class="is-disabled">{{#Disabled}}Disabled{{/Disabled}}</div></td>
+                <td><div class="email-confirmed">{{^EmailConfirmed}}waiting activation{{/EmailConfirmed}}</div></td>
+            </tr>
+            {{/data}}
+        </tbody>
+    </table>
+</div>

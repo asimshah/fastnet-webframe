@@ -113,24 +113,6 @@
             }
             var url = $U.Format("store/get/directory/{0}", id);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
-                //var options = $.extend({
-                //    Title: $U.Format("Folder Properties"),
-                //    AfterItemValidation: function () {
-                //        if (dpf.isValid()) {
-                //            dpf.enableCommand("save-changes");
-                //        } else {
-                //            dpf.disableCommand("save-changes");
-                //        }
-                //    },
-                //    OnCommand: function (f, cmd) {
-                //        switch (cmd) {
-                //            case "save-changes":
-                //                saveDirectory(f);
-                //                break;
-                //        }
-                //    }
-                //}, r);
-                //var dpf = new $.fastnet$form("template/form/directoryproperties", options);
                 var options = {
                     Title: $U.Format("Folder Properties"),
                     AfterItemValidation: function () {
@@ -148,8 +130,10 @@
                         }
                     }
                 };
-                var dpf = new $.fastnet$forms.CreateForm("template/form/directoryproperties", options, r);
-                dpf.addIsRequiredValidator("name", "A folder name is required")
+                var dpf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/directoryproperties", options, r);
+                var validator = new $.fastnet$validators.Create(dpf);
+                //dpf.addIsRequiredValidator("name", "A folder name is required")
+                validator.AddIsRequired("name", "A folder name is required")
                 dpf.disableCommand("save-changes");
                 dpf.show();
             });
@@ -166,24 +150,6 @@
             }
             var url = $U.Format("store/get/page/{0}", id);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
-                //var options = $.extend({
-                //    Title: $U.Format("{0} Properties", r.Url),
-                //    AfterItemValidation: function () {
-                //        if (ppf.isValid()) {
-                //            ppf.enableCommand("save-changes");
-                //        } else {
-                //            ppf.disableCommand("save-changes");
-                //        }
-                //    },
-                //    OnCommand: function (f, cmd) {
-                //        switch (cmd) {
-                //            case "save-changes":
-                //                savePage(f);
-                //                break;
-                //        }
-                //    }
-                //}, r);
-                //var ppf = new $.fastnet$form("template/form/pageproperties", options);
                 var options = {
                     Title: $U.Format("{0} Properties", r.Url),
                     AfterItemValidation: function () {
@@ -201,8 +167,10 @@
                         }
                     }
                 };
-                var ppf = new $.fastnet$forms.CreateForm("template/form/pageproperties", options, r);
-                ppf.addIsRequiredValidator("name", "A page name is required")
+                var ppf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/pageproperties", options, r);
+                var validator = new $.fastnet$validators.Create(ppf);
+                validator.AddIsRequired("name", "A page name is required");
+                //ppf.addIsRequiredValidator("name", "A page name is required")
                 ppf.disableCommand("save-changes");
                 ppf.show();
             });
@@ -347,7 +315,7 @@
                 sendChunk(bufctl);
             };
             var currentDirectoryId = pb.options.currentDirectoryId;
-            var ulf = new $.fastnet$forms.CreateForm("template/form/uploadfile", {
+            var ulf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/uploadfile", {
                 Title: "File Upload",
                 DisableSystemClose: true,
                 OnCommand: function (f, cmd) {
@@ -496,14 +464,7 @@
                     });
                     var dataTable = $(Mustache.to_html(contentTemplate2, content));
                     $(".browser-folder-content").empty().append(dataTable);
-                    //$(".browser-folder-content table").DataTable({
-                    //    "scrollY": "200px",
-                    //    "scrollCollapse": true,
-                    //    "paging": false,
-                    //    "searching": false,
-                    //    "info": false
-                    //});
-                   // pb.forms.bfl.find(".browser-folder-content table").css("max-height", "200px");
+
                     $(".browser-folder-content .data .url div").on("click", function (e) {
                         //debugger;
                         var target = $(e.currentTarget);
@@ -580,7 +541,7 @@
         pageBrowser.prototype.SelectedItem = {};
         pageBrowser.prototype.Show = function () {
             var pb = this;
-            pb.forms.bfl = new $.fastnet$forms.CreateForm("template/form/BrowseForLink", {
+            pb.forms.bfl = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/BrowseForLink", {
                 Title: "Store Browser",
                 //IsResizable: true,
                 OnCommand: function (f, cmd) {
@@ -807,7 +768,7 @@
                 var editAfterCreate = $this.options.mode === "createandedit";
                 switch ($this.options.mode) {
                     case "prompt":
-                        var ilf = new $.fastnet$forms.CreateForm("template/form/inserthyperlink", {
+                        var ilf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/inserthyperlink", {
                             Title: "Insert Link",                            
                             AfterItemValidation: function (f, result) {
                                 if (result.success) {
@@ -847,8 +808,9 @@
                             LinkUrl: url,
                             LinkText: text
                         });
-
-                        ilf.addIsRequiredValidator("linkurl", "A link url is required");
+                        var validator = new $.fastnet$validators(ilf);
+                        validator.AddIsRequired("linkurl", "A link url is required");
+                        //ilf.addIsRequiredValidator("linkurl", "A link url is required");
                         ilf.disableCommand("insertlink");
                         ilf.show();
                         break;
@@ -988,7 +950,7 @@
                         title: "insert links & images",
                         icon: 'link',
                         menu: [
-                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start(); } },
+                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start({mode: 'prompt'}); } },
                             { text: 'Insert link to new page', onclick: function () { $T.InsertLink.Start({ mode: 'createnew' }); } },
                             { text: 'Insert link & edit new page ...', onclick: function () { $T.InsertLink.Start({ mode: 'createandedit' }); } }
                             //,{ text: 'break ...', onclick: function () { debugger; } }

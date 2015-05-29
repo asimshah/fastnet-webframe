@@ -18,7 +18,7 @@ namespace Fastnet.Webframe.Web.Controllers
     using System.Diagnostics;
     using System.Net.Http.Headers;
     using Fastnet.Webframe.Web.Common;
-using System.IO;
+    using System.IO;
     [RoutePrefix("pageapi")]
     public class PageController : ApiController
     {
@@ -48,7 +48,7 @@ using System.IO;
                 page = allLandingPages.First();
             }
             return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId.ToString() });
-  
+
         }
         [HttpGet]
         [Route("page/{id}")]
@@ -58,7 +58,7 @@ using System.IO;
             //HttpContext.Current.Session["CurrentPage"] = pageId;
             Data.Page page = DataContext.Pages.Find(pageId);
             object data = null;
-            if(this.Request.IsModified(page.PageMarkup.LastModifiedOn, page.PageId))
+            if (this.Request.IsModified(page.PageMarkup.LastModifiedOn, page.PageId))
             {
                 if (page.MarkupType == MarkupType.DocX)
                 {
@@ -69,6 +69,7 @@ using System.IO;
                     data = PrepareHTMLPage(page);
                 }
             }
+            this.SetCurrentPage(page);
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
             //if (th
             //{
@@ -120,7 +121,7 @@ using System.IO;
             MemoryStream ms = new MemoryStream(image.Data);
             HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StreamContent(ms);
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue(image.MimeType);            
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue(image.MimeType);
             CacheControlHeaderValue cchv = new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromDays(30) };
             response.Headers.CacheControl = cchv;
             return response;
@@ -230,7 +231,7 @@ using System.IO;
         {
             if (User.Identity.IsAuthenticated)
             {
-                var userId = Convert.ToInt64( User.Identity.GetUserId());
+                var userId = Convert.ToInt64(User.Identity.GetUserId());
                 return DataContext.Members.Find(userId);
             }
             return null;

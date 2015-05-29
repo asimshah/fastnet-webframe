@@ -22,7 +22,6 @@
 (function ($) {
     var $T;
     var $U;
-    //var formCount = 0;
     var modelessTemplate =
 "<div class='modeless hide' >" +
 "    <div class='modeless-content'>" +
@@ -41,9 +40,6 @@
 "        <div class='modal-content'>" +
 "            <div class='modal-section sh'>" +
 "                <div class='modal-header'>" +
-//"                    <div>" +
-//"                       <div class='form-trace'>{{Id}}</div>" +
-//"                    </div>" +
 "                    <div>" +
 "                        <button type='button' class='close' data-dismiss='modal' data-cmd='system-close'><span>&times;</span></button>" +
 "                        <h4 class='modal-title'>{{Title}}</h4>" +
@@ -106,7 +102,7 @@
                 CancelLabel: this.options.CancelLabel,
             };
             //var mb = new $.fastnet$form("template/form/messagebox", f_options);
-            var mb = new $.fastnet$forms.CreateForm("template/form/messagebox", this.options, data);
+            var mb = new $.fastnet$forms.CreateForm("template/get/main-forms/messagebox", this.options, data);
             mb.show(function () {
                 if (self.options.CancelButton === false) {
                     mb.find("button[data-cmd='cancel'], button[data-cmd='system-close']").addClass("hidden");
@@ -127,6 +123,7 @@
             _pendingSetEnableds: [],
             _froot: null, //current form's root element, i.e with an Id of _id
             _validators: {},
+            _validationStateUpdated: false,
             DisableSystemClose: false,
             Title: "Form Title",
             IsModal: true,
@@ -135,7 +132,8 @@
             OnChange: null,
             OnCommand: null,
             OnResize: null,
-            resizeControl: null
+            resizeControl: null,
+            allControlsSelector: "input, button, textarea, select" // DONT USE ":input" as it throws javascript syntax errors from jquery code when using IE
         }, options);
         this.data = $.extend({
             Id: this.options._id, // so I can trace the form id visually in the form!
@@ -143,7 +141,74 @@
         }, data);
 
         formList[this.options._id] = this;
+        function _checkForm() {
+            // DONT USE ":input" as it throws javascript syntax errors from jquery code when using IE
+            //var allInputSelector = "input, button, textarea, select";
+            function isdefined(item) {
+                return typeof item !== "undefined" && item !== null;
+            }
+            function listPropertyDetails(me, fr) {
+                fr.find("[data-property]").each(function (i, item) {
+                    var itemElements = [];
+                    var controls = $(item).find(me.options.allControlsSelector).each(function (j, ctrl) {
+                        var tag = ctrl.tagName.toLowerCase();
+                        if (tag === "input") {
+                            tag += "[type=" + ctrl.type + "]";
+                            var dataItem = $(ctrl).attr("data-item");
+                            itemElements.push(tag + " data-item=" + dataItem);
+                            var validators = me.options._validators[dataItem];
+                            if (isdefined(validators)) {
+                                itemElements.push(validators.length + " validators");
+                            } else {
+                                itemElements.push("0 validators");
+                            }
+                        } else if (tag === 'button') {
+                            var dataCommand = $(ctrl).attr("data-cmd");
+                            itemElements.push(tag + " data-cmd=" + dataCommand);
+                        }
+                    });
+                    var text = itemElements.join(', ');
+                    $U.Debug("                : {0}", text);
+                });
+            }
+            try {
+                var me = this;
+                if (!isdefined(me.options) || !isdefined(me.options._froot)) {
+                    alert("fastnet.forms: checkform context is invalid");
+                } else {
 
+                    var froot = me.options._froot;
+                    var allControls = froot.find(me.options.allControlsSelector).length;
+                    var commandControls = froot.find("[data-cmd]").length;
+                    var propertyControls = froot.find("[data-property]").length;
+                    var totalControls = commandControls + propertyControls;
+                    var controlsMatched = allControls === totalControls;
+                    var validatable = froot.find("[data-validation-state]").length;
+                    var allValidatable = validatable === propertyControls;
+                    var initialCount = froot.find("[data-validation-state='initial']").length;
+                    var validCount = froot.find("[data-validation-state='valid']").length;
+                    var errorCount = froot.find("[data-validation-state='error']").length;
+                    var requiredCount = froot.find("[data-value-required='true']").length;
+                    var originalValuesCount = froot.find("[data-original]").length;
+                    var validationState = me.options._validationStateUpdated;
+                    $U.Debug("checkform.1 {0}: {1} controls, {2} participating, match = {3}, {4} commands, {5} properties",
+                        me.options._id, allControls, totalControls, controlsMatched,
+                        commandControls, propertyControls);
+                    $U.Debug("checkform.2 {0}: {1} validatable {2} {7} original values{8} :: {3} initial, {4} valid, {5} error, {6} required",
+                        me.options._id, validatable, allValidatable ? "(all)" : "(" + (propertyControls - validatable) + " missing)",
+                        initialCount, validCount, errorCount, requiredCount, originalValuesCount,
+                        validationState ? "" : " update required!"
+                        );
+                    listPropertyDetails(me, froot);
+                    //if (!allValidatable) {
+                    //    listPropertyDetails(me.options._id, froot);
+                    //}
+                    //$U.Debug("done");
+                }
+            } catch (xe) {
+                debugger;
+            }
+        }
         function _load() {
             var me = this;
             return $.when(
@@ -159,10 +224,6 @@
                     }, me.data);
                     var template = me.options.IsModal ? modalTemplate : modelessTemplate;
                     me.options._froot = $(Mustache.to_html(template, me.data));
-                    //if (me.options.IsModal) {
-                    //    //me.options._froot.find(".form-body").addClass("modal-body");
-                    //    //me.options._froot.find(".form-footer").addClass("modal-footer");
-                    //}
                     $.each(me.options._pendingSetEnableds, function (index, item) {
                         if (item.action === "disable") {
                             me.disableCommand(item.cmd);
@@ -171,8 +232,8 @@
                         }
                     });
                     me.options._pendingSetEnableds.length = 0;
-                    me.options._froot.find("[data-property]").attr("data-validation-state", "unknown");
-                    //$U.Debug("form id {0} created", me.options._id);
+                    me.options._froot.find("[data-property]").attr("data-validation-state", "initial");
+                    _checkForm.call(me);
                 });
         }
         function _show(onload) {
@@ -182,7 +243,7 @@
             if (me.options.DisableSystemClose) {
                 me.hideCommand("system-close");
             }
-            _saveOriginalData();
+            _saveOriginalData.call(me);
             _bindCommands.call(me);
             _bindLeaveFocus.call(me);
             _bindDataChange.call(me);
@@ -224,11 +285,11 @@
             $(id).remove();
             delete formList[me.options._id];
         }
-        function _onCommand(cmd) {
+        function _onCommand(cmd, srcElement) {
             var me = this;
             if ($.isFunction(me.options.OnCommand)) {
                 var f = formList[me.options._id];
-                me.options.OnCommand(f, cmd);
+                me.options.OnCommand(f, cmd, srcElement);
             }
         }
         function _addResizability2() {
@@ -264,7 +325,7 @@
                                 var nh = rc.para.start.dialogHeight + delta.yoffset;
                                 rc.modalDialog.width(nw);
                                 rc.modalDialog.height(nh);
-                                setTimeout(function ( ) {
+                                setTimeout(function () {
                                     if (rc.onresize !== null) {
                                         rc.onresize({ width: rc.modalBody.width(), height: rc.modalBody.height() });
                                     }
@@ -286,7 +347,7 @@
                     }
                 });
             }
-            function getCurrentPosition () {
+            function getCurrentPosition() {
                 var result = {};
                 result.windowWidth = $(window).width();
                 result.windowHeight = $(window).height();
@@ -325,95 +386,7 @@
             //    $U.Debug("modal-content resize");
             //});
         }
-        //function _addResizability() {
-        //    var me = this;
-        //    // this also makes the form movable
-        //    //var f = $($T.form);
-        //    var rm = {
-        //        resizing: false, moving: false,
-        //        sp: { x: 0, y: 0 }, // sp = start position
-        //        sm: { l: 0, t: 0, r: 0, b: 0 }, // sm = start margin
-        //        ss: { w: 0, h: 0 }, // ss = start size
-        //    }; // rm == resizability and movement
-        //    var f = me.options._froot;
-        //    var resizeGrip = f.find(".resize-grip");
-        //    var modalHeader = f.find(".modal-header");
-        //    var modalDialog = f.find(".modal-dialog");
-        //    var modalBody = f.find(".modal-body");
-        //    var grabStartInfo = function (e) {
-        //        rm.sp.x = e.pageX;
-        //        rm.sp.y = e.pageY;
-        //        rm.sm.l = parseInt(modalDialog.css("margin-left"));
-        //        rm.sm.t = parseInt(modalDialog.css("margin-top"));
-        //        rm.sm.r = parseInt(modalDialog.css("margin-right"));
-        //        rm.sm.b = parseInt(modalDialog.css("margin-bottom"));
-        //    };
-        //    resizeGrip.removeClass("hidden");
-        //    modalHeader.css({ "cursor": "move" });
-        //    resizeGrip.css({ "cursor": "nwse-resize" });
-        //    resizeGrip.on("mousedown.forms", function (e) {
-        //        e.preventDefault();
-        //        e.stopPropagation();
-        //        rm.resizing = true;
-        //        grabStartInfo(e);
-        //        rm.ss.h = modalBody.height();
-        //        rm.ss.w = modalDialog.width();
-        //        $(window).on("mousemove.formsdynamic", function (e) {
-        //            if (rm.resizing) {
-        //                var xoffset = e.pageX - rm.sp.x;
-        //                var yoffset = e.pageY - rm.sp.y;
-        //                if (xoffset !== 0 || yoffset !== 0) {
-        //                    var changes = {
-        //                        height: rm.ss.h + yoffset,
-        //                        width: rm.ss.w + xoffset,
-        //                        marginRight: rm.sm.r - xoffset,
-        //                        marginBottom: rm.sm.b - yoffset
-        //                    };
-        //                    if (changes.marginRight < 0) {
-        //                        changes.marginRight = 0;
-        //                    }
-        //                    if (changes.marginBottom < 0) {
-        //                        changes.marginBottom = 0;
-        //                    }
-        //                    //$U.Debug("rs({3}, {4}): ({0}, {1}), mr: {2}", changes.width, changes.height, changes.marginRight, xoffset, yoffset);
-        //                    modalDialog.css("margin-right", changes.marginRight + "px");
-        //                    //modalBody.height(changes.height);
-        //                    modalDialog.height(changes.height);
-        //                    modalDialog.width(changes.width);
-        //                }
-        //            }
-        //        });
-        //    });
-        //    modalHeader.on("mousedown.forms", function (e) {
-        //        rm.moving = true;
-        //        grabStartInfo(e);
-        //        $(window).on("mousemove.formsdynamic", function (e) {
-        //            if (rm.moving) {
-        //                var xoffset = e.pageX - rm.sp.x;
-        //                var yoffset = e.pageY - rm.sp.y;
-        //                var margin = {
-        //                    left: rm.sm.l + xoffset,
-        //                    top: rm.sm.t + yoffset,
-        //                    right: rm.sm.r - xoffset,
-        //                    bottom: rm.sm.b - yoffset
-        //                };
-        //                if (margin.top < 0) {
-        //                    margin.top = 0;
-        //                }
-        //                modalDialog.css("margin-left", margin.left + "px");
-        //                modalDialog.css("margin-right", margin.right + "px");
-        //                modalDialog.css("margin-top", margin.top + "px");
-        //            }
-        //        });
 
-        //    });
-        //    $(window).on("mouseup.forms", function (e) {
-        //        rm.moving = false;
-        //        rm.resizing = false;
-        //        $(window).off(".formsdynamic");
-        //    });
-        //    f.find(".modal-header").addClass("resizable");
-        //}
         function _removeResizability() {
             var me = this;
             var f = me.options._froot;
@@ -430,12 +403,66 @@
             resizeGrip.css("cursor", "default");
             resizeGrip.addClass("hidden");
         }
-        function _saveOriginalData() {
-            var lfSelector = "input[type=text], input[type=password], input[type=email]";
-            $(lfSelector).each(function (index, element) {
-                var val = $(element).val();
-                $(element).attr("data-original", val);
+        function _saveOriginalData(target) {
+            var me = this;
+            var t = _getroot(me, target);
+            var root = t.root;
+            root.find(me.options.allControlsSelector).each(function (index, element) {
+                var tag = $(element).prop("tagName").toLowerCase();
+                switch (tag) {
+                    case "input":
+                        var inputType = $(element).attr("type").toLowerCase();
+                        switch (inputType) {
+                            case "checkbox":
+                                var val = $(element).prop('checked');
+                                $(element).attr("data-original", val);
+                                break;
+                            default:
+                                var val = $(element).val();
+                                $(element).attr("data-original", val);
+                                break;
+                        }
+                        break;
+                    case "textarea":
+                        var val = $(element).val();
+                        if ($(element).prop("placeholder") === val) {
+                            val = "";
+                        }
+                        $(element).attr("data-original", val);
+                        break;
+                    case "select":
+                        $U.Debug("_saveOriginalData: select not yet implemented");
+                        break;
+                }
             });
+            ////me.options.allControlsSelector
+            //var selector = "input[type=text], input[type=password], input[type=email]";
+            //root.find(selector).each(function (index, element) {
+            //    var val = $(element).val();
+            //    $(element).attr("data-original", val);
+            //});
+            //selector = "input[type=checkbox]";
+            //root.find(selector).each(function (index, element) {
+            //    var val = $(element).is(":checked") ? true : false;
+            //    $(element).attr("data-original", val);
+            //});
+            //selector = "textarea";
+            //root.find(selector).each(function (index, element) {
+            //    var val = $(this).val();
+            //    if ($(this).prop("placeholder") === val) {
+            //        val = "";
+            //    }
+            //    $(element).attr("data-original", val);
+            //});
+        }
+        function _getroot(me, target) {
+            var rootIsMainForm = false;
+            var root = $(target);
+            if (typeof target === "undefined") {
+                root = me.options._froot;
+                rootIsMainForm = true;
+            }
+            return { root: root, isMainForm: rootIsMainForm };
         }
         function _bindFileButtons() {
             var me = this;
@@ -459,73 +486,185 @@
                 }
             });
         }
-        function _bindCommands() {
+        function _bindCommands(target) {
             var me = this;
-            if (me.options.IsModal) {
-                me.options._froot.on("shown.bs.modal", function () {
-                    var zIndex = 1040 + ((formList.length) * 10);
-                    $(this).css('z-index', zIndex);
-                });
-                me.options._froot.on("hidden.bs.modal", function () {
-                    //$U.Debug("form {0} closed", me.options._id);
-                    _close.bind(me)();
-                });
-            }
-            me.options._froot.find("button, input[type=button]").on("click", function (e) {
-                var cmd = $(this).attr("data-cmd");
-                //$U.Debug("{0} click", cmd);
-                if (cmd === "cancel") {
-                    me.options._froot.modal('hide');
-                    //$(id).modal('hide');
+            var t = _getroot(me, target);
+            var root = t.root;
+            //$U.Debug("_bindCommands: root is {0}, isMainForm: {1}", t.root[0].outerHTML, t.isMainForm);
+            if (t.isMainForm) {
+                if (me.options.IsModal) {
+                    me.options._froot.on("shown.bs.modal", function () {
+                        var zIndex = 1040 + ((formList.length) * 10);
+                        $(this).css('z-index', zIndex);
+                    });
+                    me.options._froot.on("hidden.bs.modal", function () {
+                        //$U.Debug("form {0} closed", me.options._id);
+                        _close.bind(me)();
+                    });
                 }
-                e.preventDefault();
-                _onCommand.call(me, cmd);
-            });
-        }
-        function _bindLeaveFocus() {
-            var me = this;
-            var lfSelector = "input[type=text], input[type=password], input[type=email]";
-            //me.options._froot.find(lfSelector).on("focus", function (e) {
-            //    var dataItem = $(this).attr("data-item");
-            //    //$U.Debug("got focus for {0}", dataItem);
-            //});
-            me.options._froot.find(lfSelector).on("blur", function () {
-                var dataItem = $(this).attr("data-item");
-                // so far only input tags
-                var val = $(this).val();
-                var original = $(this).attr("data-original");
-                var hasChanged = val !== original;
-                //$U.Debug("leave focus for {0}", dataItem);
-                if (hasChanged) {
-                    var validations = me.options._validators[dataItem];
-                    if (typeof validations !== "undefined" && validations !== null) {
-                        $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
-                            //$U.Debug("_validateItem: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
-                            var dp = me.options._froot.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
-                            dp.attr("data-validation-state", r.success ? "valid" : "error");
-                            if (me.options.AfterItemValidation !== null) {
-                                me.options.AfterItemValidation(me, r);
-                            }
-                        });
+            }
+
+            root.find("button, input[type=button]").on("click", function (e) {
+                var cmd = $(this).attr("data-cmd");
+                if (cmd === "cancel") {
+                    if (me.options.IsModal) {
+                        me.options._froot.modal('hide');
+                    } else {
+                        //_close();
+                        _close.call(me);
                     }
                 }
-                //$(this).removeAttr("data-changed");
+                e.preventDefault();
+                _onCommand.call(me, cmd, this);
             });
         }
-        function _bindDataChange() {
+        function _bindLeaveFocus(target) {
             var me = this;
-            var dcSelector = "input[type=text], input[type=password], input[type=email]";
-            me.options._froot.find(dcSelector).on("input", function () {
-                var item = $(this).attr("data-item");
-                //$(this).attr("data-changed", "true");
-                //var value = $(this).val();
-                //if (typeof value === 'string') {
-                //    value = value.trim();
-                //}
-                $(this).closest("[data-property]").find(".message").html("");
-                if (me.options.OnChange !== null) {
-                    me.options.OnChange(me, item);
+            var t = _getroot(me, target);
+            var root = t.root;
+            //var selector = "textarea, input[type=text], input[type=password], input[type=email], input[type=checkbox]";
+            root.find(me.options.allControlsSelector).on("blur", function (e) {
+                function getValue(element) {
+                    var tag = element.tagName.toLowerCase();
+                    //var inputType = $(element).attr("type");
+                    var val;
+                    var dataItem = $(element).attr("data-item");
+                    //input, button, textarea, select
+                    switch (tag) {
+                        case "input":
+                            var inputType = $(element).attr("type").toLowerCase();
+                            switch (inputType) {
+                                case "checkbox":
+                                    val = $(element).prop('checked');
+                                    break;
+                                default:
+                                    val = $(element).val();
+                                    break;
+                            }
+                            break;
+                        case "textarea":
+                            val = $(element).val();
+                            if ($(element).prop("placeholder") === val) {
+                                // workaround for IE textarea placeholder bug
+                                val = "";
+                            }
+                            break;
+                        case "select":
+                            $U.Debug("getValue: select not yet implemented");
+                            break;
+                        default:
+                            break;
+                    }
+                    //// so far only input tags
+                    //if (inputType === "checkbox") {
+                    //    val = $(element).is(":checked");
+                    //} else {
+                    //    val = $(element).val();
+                    //    if (tag === "textarea" && $(element).prop("placeholder") === val) {
+                    //        // workaround for IE textarea placeholder bug
+                    //        val = "";
+                    //    }
+                    //}
+                    return val;
                 }
+                function afterItemValidation(me, result) {
+                    if (me.options.AfterItemValidation !== null) {
+                        result.totalErrors = root.find("[data-validation-state='error']").length;
+                        result.totalValid = root.find("[data-validation-state='valid']").length;
+                        result.totalInitial = root.find("[data-validation-state='initial']").length;
+                        $U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
+                            result.totalValid, result.totalInitial,
+                            result.totalErrors + result.totalValid + result.totalInitial);
+                        me.options.AfterItemValidation(me, result);
+                    }
+                }
+                if (me.options._validationStateUpdated === false) {
+                    $("[data-property]").find("[data-item]").each(function (i, item) {
+                        var element = item;
+                        var dataItem = $(element).attr("data-item");
+                        var validations = me.options._validators[dataItem];
+                        if (typeof validations === "undefined") {
+                            validations = null;
+                        }
+                        if (validations != null) {
+                            $.each(validations, function (i, item) {
+                                if (item.setIsRequired) {
+                                    var propElement = $(element).closest("[data-property");
+                                    $(propElement).attr("data-value-required", "true");
+                                    var val = getValue(element);
+                                    if (val === "") {
+                                        $(propElement).attr("data-validation-state", "error");
+                                    }
+                                    return false;
+                                }
+                            });
+                        }
+                    });
+                    me.options._validationStateUpdated = true;
+                    _checkForm.call(me);
+                }
+
+                var val = getValue(this);
+                var dataItem = $(this).attr("data-item");
+
+                var original = $(this).attr("data-original");
+                var valueIsRequired = $(this).closest("[data-property]").attr("data-value-required") === "true";
+                var needsValidation = val !== original || val === "" && valueIsRequired;
+                //$U.Debug("leave focus for {0}", dataItem);
+                if (needsValidation) {
+                    var validations = me.options._validators[dataItem];
+                    if (typeof validations === "undefined") {
+                        validations = null;
+                    }
+                    if (validations !== null) {
+                        $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
+                            var dp = root.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
+                            dp.attr("data-validation-state", r.success ? "valid" : "error");
+                            afterItemValidation(me, r);
+                            //r.totalErrors = root.find("[data-validation-state='error']").length;
+                            //r.totalValid = root.find("[data-validation-state='valid']").length;
+                            //r.totalInitial = root.find("[data-validation-state='initial']").length;
+                            //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", r.totalErrors, r.totalValid, r.totalInitial, r.totalErrors + r.totalValid + r.totalInitial)
+                            //if (me.options.AfterItemValidation !== null) {
+                            //    me.options.AfterItemValidation(me, r);
+                            //}
+                        });
+                    } else {
+                        afterItemValidation(me, { success: true, dataItem: dataItem });
+                        //if (me.options.AfterItemValidation !== null) {
+                        //    me.options.AfterItemValidation(me, { success: true, dataItem: dataItem });
+                        //}
+                    }
+                }
+            });
+        }
+        function _bindDataChange(target) {
+            var me = this;
+            var t = _getroot(me, target);
+            var root = t.root;
+            //var dcSelector = "input[type=text], input[type=password], input[type=email], textarea";
+           root.find(me.options.allControlsSelector).on("input", function () {
+                var tag = this.tagName.toLowerCase();
+                switch (tag) {
+                    case "input":
+                    case "textarea":
+                        var item = $(this).attr("data-item");
+                        $(this).closest("[data-property]").find(".message").html("");
+                        if (me.options.OnChange !== null) {
+                            me.options.OnChange(me, item);
+                        }
+                        break;
+                }
+                //var item = $(this).attr("data-item");
+                ////$(this).attr("data-changed", "true");
+                ////var value = $(this).val();
+                ////if (typeof value === 'string') {
+                ////    value = value.trim();
+                ////}
+                //$(this).closest("[data-property]").find(".message").html("");
+                //if (me.options.OnChange !== null) {
+                //    me.options.OnChange(me, item);
+                //}
             });
         }
         function _commandEnable(command, enable) {
@@ -564,7 +703,7 @@
             var itemData = me.getData(dataItem);// self.getData(dataItem);// _getItemData(dataItem);
             $.each(validations, function (index, validation) {
                 if (validation.isDeferred === false) {
-                    var r = validation.validator(me, itemData, validation.message, errors);
+                    var r = validation.validator(me, itemData, validation.message, errors, validation);
                     //$U.Debug("validator with message \"{0}\" called", validation.message);
                     if (r === false) {
                         result = false;
@@ -579,7 +718,7 @@
                 var functions = [];
                 $.each(validations, function (index, validation) {
                     if (validation.isDeferred === true) {
-                        functions.push(validation.validator(me, itemData, validation.message, errors));
+                        functions.push(validation.validator(me, itemData, validation.message, errors, validation));
                     }
                 });
                 $.when.apply($, functions).then(function () {
@@ -645,19 +784,48 @@
                 _close.call(me);
             }
         };
-        frm.prototype.getData = function (dataItem) {
+        frm.prototype.getOriginalData = function (dataItem) {
             var me = this;
             if (typeof dataItem === "undefined") {
                 var result = {};
                 me.options._froot.find("[data-item]").each(function (index, element) {
                     var name = $(this).attr("data-item");
-                    var val = $(this).val().trim();
+                    var val = $(this).attr("data-original");
                     result[name] = val;
                 });
                 return result;
             } else {
-                // assume val() will do it all for now
-                return me.options._froot.find("[data-item='" + dataItem + "']").val();
+                return me.options._froot.find("[data-item='" + dataItem + "']").attr("data-original");
+            }
+        };
+        frm.prototype.getData = function (dataItem) {
+            var me = this;
+            function getElementData(element) {
+                var val = null;
+                var tagname = $(element).prop("tagName").toLowerCase();
+                var type = $(element).attr("type");
+                if (tagname === "input" && type === "checkbox") {
+                    val = $(element).is(":checked")
+                } else {
+                    val = $(element).val().trim();
+                    if (tagname === "textarea" && $(element).prop("placeholder") === val) {
+                        // IE textarea placeholder bug
+                        val = "";
+                    }
+                }
+                return val;
+            }
+            if (typeof dataItem === "undefined") {
+                var result = {};
+                me.options._froot.find("[data-item]").each(function (index, element) {
+                    var name = $(this).attr("data-item");
+                    var val = getElementData(this);// $(this).val().trim();
+                    result[name] = val;
+                });
+                return result;
+            } else {
+                var element = me.options._froot.find("[data-item='" + dataItem + "']");
+                return getElementData(element);
             }
         };
         frm.prototype.setData = function (dataItem, data) {
@@ -666,34 +834,15 @@
             // assume val() will do it all for now
             target.val(data);
         };
-        frm.prototype.addIsRequiredValidator = function (dataItem, errorMessage) {
+        frm.prototype.checkForm = function () {
             var me = this;
-            if (typeof errorMessage === "undefined" || errorMessage === null || errorMessage.trim() === "") {
-                errorMessage = "This field is required";
-            }
-            me.addValidator(dataItem, {
-                func: function (f, data, message, errors) {
-                    var r = !(data === null || data === "");
-                    if (!r) {
-                        errors.push(message);
-                    }
-                    return r;
-                },
-                isDeferred: false,
-                errorMessage: errorMessage
-            });
-        };
-        frm.prototype.addValidators = function (dataItem, validators) {
-            var me = this;
-            $.each(me.options._validators, function (index, validator) {
-                me.addValidator(dataItem, validator);
-            });
+            _checkForm.call(me);
         };
         frm.prototype.addValidator = function (dataItem, validator) {
             var me = this;
             // validator is an object with
-            // func = validationfunction - signature is  (currentForm , dataToValidate, errorMessage, errors) returning a bool
-            // or func = validationFunction - signature is  (current , dataToValidate, errorMessage, errors), returning a promise
+            // func = validationfunction - signature is  (currentForm , dataToValidate, errorMessage, errors, validator) returning a bool
+            // or func = validationFunction - signature is  (current , dataToValidate, errorMessage, errors, validator), returning a promise
             // isDeferred = true if func returns a promise
             // errorMessage = text to display if the validation fails
             // Notes:
@@ -702,7 +851,17 @@
             if (typeof me.options._validators[dataItem] === "undefined" || me.options._validators[dataItem] === null) {
                 me.options._validators[dataItem] = [];
             }
-            me.options._validators[dataItem].push({ validator: validator.func, isDeferred: validator.isDeferred, message: validator.errorMessage });
+            me.options._validators[dataItem].push({
+                validator: validator.func,
+                setIsRequired: validator.setIsRequired,
+                isDeferred: validator.isDeferred,
+                message: validator.errorMessage,
+                user: validator.user
+            });
+        };
+        frm.prototype.removeValidators = function (dataItem) {
+            var me = this;
+            me.options._validators[dataItem] = [];
         };
         frm.prototype.block = function () {
             var me = this;
@@ -727,394 +886,45 @@
             var me = this;
             _commandShow.call(me, command, true);
         };
+        frm.prototype.loadSubform = function (selector, templates, data, onload) {
+            var me = this;
+            // templates is
+            // { template:, templateUrl:}
+            // template takes precedence over templateUrl
+            function loadTemplate(templ) {
+                var loadTarget = me.options._froot.find(selector);
+                loadTarget.off();
+                loadTarget.empty();
+                var content = $(Mustache.to_html(templ, data));
+                loadTarget.append(content);
+                me.options._validationStateUpdated = false;
+                me.options._froot.find("[data-property]").attr("data-validation-state", "initial");
+                _saveOriginalData.call(me, content);
+                _bindCommands.call(me, content);
+                _bindLeaveFocus.call(me, content);
+                _bindDataChange.call(me, content);
+                _checkForm.call(me);
+            }
+            if (typeof templates.template != undefined && templates.template != null) {
+                // use local template
+
+            } else {
+                return $.when(
+                    $U.AjaxGet({ url: templates.templateUrl })
+                    ).then(function (r) {
+                        // use r.Template
+                        loadTemplate(r.Template);
+                        if ($.isFunction(onload)) {
+                            onload();
+                        }
+                    });
+            }
+        };
+        frm.prototype.resetOriginalData = function () {
+            var me = this;
+            _saveOriginalData.call(me);
+        }
     }
-    //$.fastnet$form = function (templateUrl, options) {
-    //    var self = this;
-    //    var validationFunctions = {};
-    //    var validators = {};
-    //    var tu = templateUrl;
-    //    var formElement = null;
-    //    var dfd = null;
-    //    var fillData = null;
-    //    var pendingSetEnableds = [];
-    //    this.options = $.extend({
-    //        Container: ".forms-container",
-    //        Id: $U.Format("fn-{0}", formCount++),
-    //        IsModal: true,
-    //        IsResizable: false,
-    //        BodyClasses: "",
-    //        Title: "Form Title",
-    //        OnCommand: null,
-    //        AfterItemValidation: null
-    //    }, options);
-    //    $.fastnet$form.prototype.isValid = function () {
-    //        var fieldCount = formElement.find("[data-property]").length;
-    //        var validCount = formElement.find("[data-validation-state='valid']").length;
-    //        var errorCount = formElement.find("[data-validation-state='error']").length;
-    //        return errorCount === 0;//validCount === fieldCount;
-    //    };
-    //    $.fastnet$form.prototype.getData = function (dataItem) {
-    //        if (typeof dataItem === "undefined") {
-    //            var result = {};
-    //            formElement.find("[data-item]").each(function (index, element) {
-    //                var name = $(this).attr("data-item");
-    //                var val = $(this).val().trim();
-    //                result[name] = val;
-    //            });
-    //            return result;
-    //        } else {
-    //            // assume val() will do it all for now
-    //            return formElement.find("[data-item='" + dataItem + "']").val();
-    //        }
-    //    }
-    //    $.fastnet$form.prototype.find = function (selector) {
-    //        return formElement.find(selector);
-    //    }
-    //    $.fastnet$form.prototype.fill = function (data) {
-    //        fillData = data;
-    //    };
-    //    $.fastnet$form.prototype.close = function () {
-    //        var id = "#" + self.options.Id;
-    //        if (self.options.IsModal) {
-    //            $(id).modal('hide');
-    //        }
-    //    };
-    //    $.fastnet$form.prototype.addValidator = function (dataItem, validator) {
-    //        // validator is an object with
-    //        // func = validationfunction - signature is  (currentForm , dataToValidate, errorMessage, errors) returning a bool
-    //        // or func = validationFunction - signature is  (current , dataToValidate, errorMessage, errors), returning a promise
-    //        // isDeferred = true if func returns a promise
-    //        // errorMessage = text to display if the validation fails
-    //        // Notes:
-    //        // 1. funcs returning a bool MUSt add the provided errorMessage to the errors array.
-    //        // 2. funcs returning a promise MUST either resolve(true) or reject(false) having added the provided errorMessage to the errors array
-    //        if (typeof validators[dataItem] === "undefined" || validators[dataItem] === null) {
-    //            validators[dataItem] = [];
-    //        }
-    //        validators[dataItem].push({ validator: validator.func, isDeferred: validator.isDeferred, message: validator.errorMessage });
-    //    }
-    //    $.fastnet$form.prototype.addValidators = function (dataItem, validators) {
-    //        $.each(validators, function (index, validator) {
-    //            self.addValidator(dataItem, validator);
-    //        });
-    //    };
-    //    $.fastnet$form.prototype.addIsRequiredValidator = function (dataItem, errorMessage) {
-    //        if (typeof errormessage === "undefined" || errormessage === null || errormessage.trim() === "") {
-    //            errormessage = "This field is required";
-    //        }
-    //        self.addValidator(dataItem, {
-    //            func: function (f, data, errorMessage, errors) {
-    //                var r = !(data === null || data === "");
-    //                if (!r) {
-    //                    errors.push(errorMessage);
-    //                }
-    //                return r;
-    //            },
-    //            isDeferred: false,
-    //            errorMessage: errorMessage
-    //        });
-    //    };
-    //    $.fastnet$form.prototype.show = function (onload) {
-    //        if (formElement === null) {
-    //            $.when(_load()).then(function () {
-    //                _show(onload);
-    //            });
-    //        } else {
-    //            _show();
-    //        }
-
-    //        function _validateForm() {
-
-    //        };
-
-    //        function _validateItem2(dataItem, validations) {
-    //            var deferred = new $.Deferred();
-    //            var errors = [];
-    //            // first perform validations that do not return a promise
-    //            // (these are presumed to be local validations!)
-    //            var result = true;
-    //            var itemData = self.getData(dataItem);// _getItemData(dataItem);
-    //            $.each(validations, function (index, validation) {
-    //                if (validation.isDeferred === false) {
-    //                    var r = validation.validator(self, itemData, validation.message, errors);
-    //                    $U.Debug("validator with message \"{0}\" called", validation.message);
-    //                    if (r == false) {
-    //                        result = false;
-    //                        return false;
-    //                    }
-    //                }
-    //            });
-    //            if (result == true) {
-    //                // local validations have been performed
-    //                // now do deferred ones in parallel
-    //                // (these are probably ajax calls)
-    //                var functions = [];
-    //                $.each(validations, function (index, validation) {
-    //                    if (validation.isDeferred === true) {
-    //                        functions.push(validation.validator(self, itemData, validation.message, errors));
-    //                    }
-    //                });
-    //                $.when.apply($, functions).then(function () {
-    //                    //deferred.resolve(true);
-    //                    deferred.resolve({ dataItem: dataItem, success: true, errorCount: 0 });
-    //                }).fail(function () {
-    //                    _displayErrors(dataItem, errors);
-    //                    //deferred.resolve(false);
-    //                    deferred.resolve({ dataItem: dataItem, success: false, errorCount: errors.length });
-    //                });
-    //            } else {
-    //                _displayErrors(dataItem, errors);
-    //                //deferred.resolve(false);
-    //                deferred.resolve({ dataItem: dataItem, success: false, errorCount: errors.length });
-    //            }
-    //            return deferred.promise();
-    //        }
-    //        function _displayErrors(dataItem, errors) {
-    //            var text = "";
-    //            $.each(errors, function (index, message) {
-    //                if (index > 0) {
-    //                    message = ". " + message;
-    //                }
-    //                text += message;
-    //            });
-    //            $("[data-item='" + dataItem + "']").closest("[data-property]").find(".message").html(text);
-    //        };
-    //        function _bindLeaveFocus() {
-    //            var lfSelector = "input[type=text], input[type=password], input[type=email]";
-    //            formElement.find(lfSelector).on("blur", function (e) {
-    //                var dataItem = $(this).attr("data-item");
-    //                var validations = validators[dataItem];
-    //                if (typeof validations !== "undefined" && validations !== null) {
-    //                    $.when(_validateItem2(dataItem, validations)).then(function (r) {
-    //                        $U.Debug("_validateItem2: dataItem: {0},  result = {1}", r.dataItem, r.success, r.errorCount);
-    //                        var dp = formElement.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
-    //                        dp.attr("data-validation-state", r.success ? "valid" : "error");
-    //                        if (self.options.AfterItemValidation !== null) {
-    //                            self.options.AfterItemValidation(r);
-    //                        }
-    //                    });
-    //                }
-    //                _validateForm();
-    //            });
-    //        };
-    //        function _bindDataChange() {
-    //            var dcSelector = "input[type=text], input[type=password], input[type=email]";
-    //            formElement.find(dcSelector).on("input", function (e) {
-    //                var item = $(this).attr("data-item");
-    //                var value = $(this).val();
-    //                if (typeof value === 'string') {
-    //                    value = value.trim();
-    //                }
-    //                $(this).closest("[data-property]").find(".message").html("");
-    //            });
-    //        }
-    //        function _bindCommands() {
-    //            if (self.options.IsModal) {
-    //                formElement.on("shown.bs.modal", function (e) {
-    //                    var zIndex = 1040 + ((formCount - 1) * 10);
-    //                    $(this).css('z-index', zIndex);
-    //                });
-    //                formElement.on("hidden.bs.modal", function (e) {
-    //                    $U.Debug("form {0} closed", self.options.Id);
-    //                    _close();
-    //                });
-    //            }
-    //            formElement.find("button, input[type=button]").on("click", function (e) {
-    //                var cmd = $(this).attr("data-cmd");
-    //                $U.Debug("{0} click", cmd);
-    //                if (cmd === "cancel") {
-    //                    formElement.modal('hide');
-    //                    //$(id).modal('hide');
-    //                }
-    //                e.preventDefault();
-    //                _onCommand(cmd);
-    //            });
-    //        }
-    //        function _close() {
-    //            var id = "#" + self.options.Id;
-    //            $(id).off();
-    //            $(id).remove();
-    //            formCount--;
-    //        }
-    //        function _show(onload) {
-    //            var container = self.options.Container;
-    //            var id = "#" + self.options.Id;
-    //            //$(container).find(id).remove();
-    //            $(container).append(formElement);
-    //            if (fillData !== null) {
-    //                $.each(fillData, function (index, item) {
-    //                    var di = "[data-item='" + index + "']";
-    //                    // input, checkbox, radio, datepicker - what else?
-    //                    // do I need code for each one?
-    //                    $(id).find(di).val(item);
-    //                });
-    //            }
-    //            _bindCommands();
-    //            _bindLeaveFocus();
-    //            _bindDataChange();
-    //            if (self.options.IsModal) {
-    //                //$(id).modal({
-    //                formElement.modal({
-    //                    backdrop: 'static',
-    //                    keyboard: false
-    //                });
-    //                if (self.options.IsResizable) {
-    //                    _addResizability();
-    //                }
-    //            }
-    //            if ($.isFunction(onload)) {
-    //                onload(self);
-    //            }
-    //        }
-    //        function _addResizability() {
-    //            // this also makes the form movable
-    //            //var f = $($T.form);
-    //            var rm = {
-    //                resizing: false, moving: false,
-    //                sp: { x: 0, y: 0 }, // sp = start position
-    //                sm: { l: 0, t: 0, r: 0, b: 0 }, // sm = start margin
-    //                ss: { w: 0, h: 0 }, // ss = start size
-    //            }; // rm == resizability and movement
-    //            var f = formElement;
-    //            var resizeGrip = f.find(".resize-grip");
-    //            var modalHeader = f.find(".modal-header");
-    //            var modalDialog = f.find(".modal-dialog");
-    //            var modalBody = f.find(".modal-body");
-    //            var grabStartInfo = function (e) {
-    //                rm.sp.x = e.pageX;
-    //                rm.sp.y = e.pageY;
-    //                rm.sm.l = parseInt(modalDialog.css("margin-left"));
-    //                rm.sm.t = parseInt(modalDialog.css("margin-top"));
-    //                rm.sm.r = parseInt(modalDialog.css("margin-right"));
-    //                rm.sm.b = parseInt(modalDialog.css("margin-bottom"));
-    //            }
-    //            resizeGrip.removeClass("hidden");
-    //            modalHeader.css({ "cursor": "move" });
-    //            resizeGrip.css({ "cursor": "nwse-resize" });
-    //            resizeGrip.on("mousedown.forms", function (e) {
-    //                e.preventDefault();
-    //                e.stopPropagation();
-    //                rm.resizing = true;
-    //                grabStartInfo(e);
-    //                rm.ss.h = modalBody.height();
-    //                rm.ss.w = modalDialog.width();
-    //                $(window).on("mousemove.formsdynamic", function (e) {
-    //                    if (rm.resizing) {
-    //                        var xoffset = e.pageX - rm.sp.x;
-    //                        var yoffset = e.pageY - rm.sp.y;
-    //                        if (xoffset !== 0 || yoffset !== 0) {
-    //                            var changes = {
-    //                                height: rm.ss.h + yoffset,
-    //                                width: rm.ss.w + xoffset,
-    //                                marginRight: rm.sm.r - xoffset,
-    //                                marginBottom: rm.sm.b - yoffset
-    //                            };
-    //                            if (changes.marginRight < 0) {
-    //                                changes.marginRight = 0;
-    //                            }
-    //                            //$U.Debug("rs({3}, {4}): ({0}, {1}), mr: {2}", changes.width, changes.height, changes.marginRight, xoffset, yoffset);
-    //                            modalDialog.css("margin-right", changes.marginRight + "px");
-    //                            modalBody.height(changes.height);
-    //                            modalDialog.width(changes.width);
-    //                        }
-    //                    }
-    //                });
-    //            });
-    //            modalHeader.on("mousedown.forms", function (e) {
-    //                rm.moving = true;
-    //                grabStartInfo(e);
-    //                $(window).on("mousemove.formsdynamic", function (e) {
-    //                    if (rm.moving) {
-    //                        var xoffset = e.pageX - rm.sp.x;
-    //                        var yoffset = e.pageY - rm.sp.y;
-    //                        var margin = {
-    //                            left: rm.sm.l + xoffset,
-    //                            top: rm.sm.t + yoffset,
-    //                            right: rm.sm.r - xoffset,
-    //                            bottom: rm.sm.b - yoffset
-    //                        };
-    //                        if (margin.top < 0) {
-    //                            margin.top = 0;
-    //                        }
-    //                        modalDialog.css("margin-left", margin.left + "px");
-    //                        modalDialog.css("margin-right", margin.right + "px");
-    //                        modalDialog.css("margin-top", margin.top + "px");
-    //                    }
-    //                })
-
-    //            });
-    //            $(window).on("mouseup.forms", function (e) {
-    //                rm.moving = false;
-    //                rm.resizing = false;
-    //                $(window).off(".formsdynamic");
-    //            });
-    //            f.find(".modal-header").addClass("resizable");
-    //        }
-    //        function _onCommand(cmd) {
-    //            $U.Debug("form {0} cmd {1}", self.options.Id, cmd);
-    //            if (self.options.OnCommand !== null) {
-    //                self.options.OnCommand(self, cmd);
-    //            }
-    //        }
-    //    };
-    //    $.fastnet$form.prototype.enableCommand = function (command) {
-    //        if (formElement === null) {
-    //            pendingSetEnableds.push({ action: "enable", cmd: command });
-    //        } else {
-    //            var selector = $U.Format("button[data-cmd='{0}'], input[type=button][data-cmd='{0}']", command);
-    //            formElement.find(selector).each(function () {
-    //                $U.SetEnabled(this, true);
-    //            });
-    //        }
-    //    };
-    //    $.fastnet$form.prototype.disableCommand = function (command) {
-    //        if (formElement === null) {
-    //            pendingSetEnableds.push({ action: "disable", cmd: command });
-    //        } else {
-    //            var selector = $U.Format("button[data-cmd='{0}'], input[type=button][data-cmd='{0}']", command);
-    //            formElement.find(selector).each(function () {
-    //                $U.SetEnabled(this, false);
-    //            });
-    //        }
-    //    };
-    //    $.fastnet$form.prototype.block = function () {
-    //        formElement.find(".modal-dialog .block-outer").removeClass("hidden");
-    //    };
-    //    $.fastnet$form.prototype.unBlock = function () {
-    //        formElement.find(".modal-dialog .block-outer").addClass("hidden");
-    //    };
-    //    function _load() {
-    //        return $.when(
-    //             $U.AjaxGet({ url: tu })
-    //            ).then(function (r) {
-    //                //var bodyTemplate = $(r.Template).find(".body");
-    //                var formBody = $(r.Template).find(".form-body");
-    //                formBody = Mustache.to_html(formBody[0].outerHTML, self.options);
-    //                var formFooter = $(r.Template).find(".form-footer");
-    //                formFooter = Mustache.to_html(formFooter[0].outerHTML, self.options);
-    //                var data = $.extend({
-    //                    BodyHtml: formBody,//formBody[0].outerHTML,
-    //                    FooterHtml: formFooter//formFooter[0].outerHTML
-    //                }, self.options);
-    //                var template = self.options.IsModal ? modalTemplate : modelessTemplate;
-    //                formElement = $(Mustache.to_html(template, data));
-    //                if (self.options.IsModal) {
-    //                    formElement.find(".form-body").addClass("modal-body");
-    //                    formElement.find(".form-footer").addClass("modal-footer");
-    //                }
-    //                $.each(pendingSetEnableds, function (index, item) {
-    //                    if (item.action === "disable") {
-    //                        self.disableCommand(item.cmd);
-    //                    } else {
-    //                        self.enableCommand(item.cmd);
-    //                    }
-    //                });
-    //                pendingSetEnableds.length = 0;
-    //                formElement.find("[data-property]").attr("data-validation-state", "unknown")
-    //                //formStack.push(self);
-    //            });
-    //    }
-    //};
     $.fastnet$forms = {
         CreateForm: frm
     };

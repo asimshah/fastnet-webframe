@@ -14,18 +14,18 @@ body {
     height: 100%;
     font-family: Calibri;
 }
+
 .fastnet-error-panel {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 12px;
-    padding:4px;
-    font-size:x-small;
+    padding: 4px;
+    font-size: x-small;
     background-color: #000000;
     width: 75%;
     height: 100px;
-    overflow-y:scroll;
+    overflow-y: scroll;
     color: white;
-
 }
 
 // now follow default values for all the panels
@@ -282,19 +282,25 @@ body {
                 border-bottom: 1px solid #aaaaaa;
             }
 
-            div.data > div:nth-child(odd) {
-                background-color: lightgray;
-            }
-            div:not([data-type='page']) {
-                .edit-button {
-                    display:none;
+            div.data {
+                > div:nth-child(odd) {
+                    background-color: lightgray;
+                }
+
+                div:not([data-type='page']) {
+                    .edit-button {
+                        visibility:hidden;
+                    }
+                }
+
+                div[data-landing-page='true'] {
+                    .delete-button {
+                        visibility:hidden;
+                        //display: none;
+                    }
                 }
             }
-            div[data-landing-page='true'] {
-                .delete-button {
-                    display: none;
-                }
-            }
+
 
             div {
                 &.buttons {

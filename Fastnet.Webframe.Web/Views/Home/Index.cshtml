@@ -41,6 +41,7 @@
     }
     <script>
         $(function () {
+            $.fastnet$utilities.AddOptions(@Html.Raw(@Model.Options.ToJson()));
             $.core$page.Start(@Html.Raw(@Model.ToJson()));
         });
     </script>

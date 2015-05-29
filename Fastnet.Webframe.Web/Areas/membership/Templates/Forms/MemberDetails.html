@@ -1,0 +1,53 @@
+﻿<div class="member-details" data-id="{{Id}}" data-active="{{EmailConfirmed}}">
+    <div class="form-group-sm" data-property>
+        <label for="email-address">Email Address</label>
+        <input type="email" class="form-control" id="email-address" placeholder="Email Address" data-item="email-address" value="{{EmailAddress}}" data-focus>
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
+        <label for="first-name">First Name</label>
+        <input type="text" class="form-control" id="first-name" placeholder="First Name" data-item="first-name" value="{{FirstName}}" data-focus>
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
+        <label for="last-name">Last Name</label>
+        <input type="text" class="form-control" id="last-name" placeholder="Last Name" data-item="last-name" value="{{LastName}}">
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm hide" data-property>
+        <label for="password">Password</label>
+        <input type="text" class="form-control" id="password" placeholder="Password" data-item="password" disabled value="{{PlainPassword}}">
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
+        <div class=" checkbox">
+            <label>
+                <input type="checkbox" value="" data-item="is-disabled" {{#IsDisabled}} checked {{/IsDisabled}}>
+                Disabled
+            </label>
+        </div>
+    </div>
+    <div class="date-time-info">
+        <span>Created:</span><span>{{CreationDate}}, </span>{{#LastLoginDate}}<span>Last logged in:</span><span>{{LastLoginDate}}</span>{{/LastLoginDate}}{{^LastLoginDate}}This member has not logged in.{{/LastLoginDate}}
+    </div>
+    {{^EmailConfirmed}}
+    <div class="activation-info">
+        <span>This email address is not confirmed. The member needs to respond to the activation email.</span>
+    </div>
+    {{/EmailConfirmed}}
+    <div class="form-group command-strip">
+        {{^IsAdministrator}}
+        <div class="existing-member-commands">
+            <div class="btn-group pull-left">
+                <button class="btn btn-sm  btn-danger" tabindex="-1" data-cmd="delete-member">Delete</button>
+                <button class="btn btn-sm btn-primary" tabindex="-1" data-cmd="send-activation-email" title="Deactivate member and send an activation email to the current email address">Send Activation Email</button>
+                <button class="btn btn-sm btn-primary" tabindex="-1" data-cmd="send-password-reset" title="Send an email with a change password link to the current email address">Send Password Reset</button>
+            </div>
+        </div>
+        {{/IsAdministrator}}
+        <div class="btn-group pull-right">
+            <button class="btn btn-primary" data-cmd="save-member-changes">Save Changes</button>
+            <button class="btn btn-default" data-cmd="close-form">Cancel</button>
+        </div>
+    </div>
+</div>

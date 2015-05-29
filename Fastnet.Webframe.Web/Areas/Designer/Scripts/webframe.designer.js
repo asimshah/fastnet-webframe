@@ -6,7 +6,7 @@
         Init: function () {
             $T = this;
             $U = $.fastnet$utilities;
-            $F = $.fastnet$forms;
+            //$F = $.fastnet$forms;
             //$.fastnet$utilities.EnableClientSideLog();
             //alert("designer script loaded");
         },
@@ -18,7 +18,8 @@
             aceEditor: null,
             currentPanel: null,
             Home: function () {
-                var ldf = new $.fastnet$forms.CreateForm("designer/template/form/layouthome", {
+                //var ldf = new $.fastnet$forms.CreateForm("designer/template/form/layouthome", {
+                var ldf = new $.fastnet$forms.CreateForm("template/get/designer-forms/layouthome", {
                     Title: "Layout Designer",
                     IsModal: false,
                     OnCommand: this.OnCommand
@@ -108,7 +109,8 @@
                 $.when($U.AjaxGet({ url: url }, true)
                     ).done(function (panelInfo) {
                         $U.Debug("back from {0}", url);
-                        var cef = new $.fastnet$forms.CreateForm("designer/template/form/layoutcsseditor", {
+                        //var cef = new $.fastnet$forms.CreateForm("designer/template/form/layoutcsseditor", {
+                        var cef = new $.fastnet$forms.CreateForm("template/get/designer-forms/layoutcsseditor", {
                             Title: "CSS Editor",
                             IsModal: false,
                             OnCommand: function (f, cmd) {

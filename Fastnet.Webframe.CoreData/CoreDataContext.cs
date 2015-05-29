@@ -98,7 +98,7 @@ namespace Fastnet.Webframe.CoreData
 
         }
         public DbSet<AccessRule> AccessRules { get; set; }
-        public DbSet<Activity> Activities { get; set; }
+        //public DbSet<Activity> Activities { get; set; }
         public DbSet<Background> Backgrounds { get; set; }
         public DbSet<ClientApp> ClientApps { get; set; }
         public DbSet<CloneInformation> CloneInformata { get; set; }
@@ -132,7 +132,7 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<SiteSetting> SiteSettings { get; set; }
         public DbSet<Style> Styles { get; set; }
         public DbSet<UploadFile> UploadFiles { get; set; }
-
+        public DbSet<ActionBase> Actions { get; set; }
         public DbSet<Recorder> Recorders { get; set; }
         public DbSet<Record> Records { get; set;}
 
@@ -229,23 +229,106 @@ namespace Fastnet.Webframe.CoreData
             if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
             {
                 LoadLegacyData();
+                EnsureRequiredGroups();
+                EnsureAdministratorsInAdditionalGroups();
+                SetSiteVersion("4.0.0.0");
+                WriteCustomCss();
             }
             else
             {
                 EnsureClientApplications();
-                EnsureRequiredRoles();
+                //EnsureRequiredRoles();
                 EnsureRequiredGroups();
                 // have to create administrator - how do we do it with asp.net identity?
                 EnsureRequiredPanels();
                 EnsureInitialPages();
                 SetSiteVersion("4.0.0.0");
-                EnsureCSSFiles();
+                EnsureDefaultCSS();
                 //RequestCSSRewrite();
             }
             //ctx.CreateCSSFromPanels();
         }
 
-        private void EnsureCSSFiles()
+        private void WriteCustomCss()
+        {
+            Func<string, int> getLeadingNumber = (s) =>
+            {
+                var chars = s.TakeWhile(c => char.IsDigit(c));//.ToString();
+                string text = new string(chars.ToArray());
+                return Convert.ToInt32(text);
+            };
+            Func<string, CSSRule, string> getRule = (name, rule) =>
+            {
+                string text = rule.Rules.SingleOrDefault(x => x.StartsWith(name));
+                //string text = set.SelectMany(x => x.Rules).SingleOrDefault(x => x.StartsWith(name));
+                if (text != null)
+                {
+                    string[] parts = text.Split(':');
+                    return parts[1].Trim();
+                }
+                return string.Empty;
+            };
+            var customLessFolder = CSSRule.GetCustomCSSFolder();
+            var defaultCssFolder = CSSRule.GetDefaultCSSFolder();
+            string siteCss = Panel.SitePanel.GetCSSString();
+            string bannerCss = Panel.BannerPanel.GetCSSString();
+            string menuCss = Panel.MenuPanel.GetCSSString();
+            string leftCss = Panel.LeftPanel.GetCSSString();
+            string centreCss = Panel.CentrePanel.GetCSSString();
+            string rightCss = Panel.RightPanel.GetCSSString();
+            CSSRule bannerRule = CSSRule.ParseForRules(bannerCss).First();
+            CSSRule menuRule = CSSRule.ParseForRules(menuCss).First();
+            CSSRule siteRule = CSSRule.ParseForRules(siteCss).First();
+            CSSRule centreRule = CSSRule.ParseForRules(centreCss).First();
+            CSSRule leftRule = CSSRule.ParseForRules(leftCss).First();
+            CSSRule rightRule = CSSRule.ParseForRules(rightCss).First();
+            string width = getRule("width", centreRule);
+            int cw = 0;
+            if(width == null || ((cw = getLeadingNumber(width)) == 0))
+            {
+                // centre panel has no width, i.e. fluid layout
+                siteRule.RemoveRule("width");
+            }
+            else
+            {
+                // centre panel has a width - fixed width
+                // we need to add up left + centre + right and make that the site panel
+                int lw = 0, rw = 0;
+                string leftDisplay = getRule("display", leftRule);
+                if (leftDisplay != "none")
+                {
+                    lw = getLeadingNumber(getRule("width", leftRule));
+                }
+                string rightDisplay = getRule("display", rightRule);
+                if (rightDisplay != "none")
+                {
+                    rw = getLeadingNumber(getRule("width", rightRule));
+                }
+                int sw = lw + cw + rw;
+                centreRule.RemoveRule("width");
+                siteRule.RemoveRule("width");
+                siteRule.AddRule("width: {0}px", sw);               
+            }
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "BannerPanel.less"), bannerRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "BannerPanel.user.css"), bannerRule.ToString());
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "MenuPanel.less"), menuRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "MenuPanel.user.css"), menuRule.ToString());
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "SitePanel.less"), siteRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "SitePanel.user.css"), siteRule.ToString());
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "LeftPanel.less"), leftRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "LeftPanel.user.css"), leftRule.ToString());
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "CentrePanel.less"), centreRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "CentrePanel.user.css"), centreRule.ToString());
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "RightPanel.less"), rightRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "RightPanel.user.css"), rightRule.ToString());
+        }
+
+        private void EnsureDefaultCSS()
         {
             var folder = CSSRule.GetDefaultCSSFolder();
             Dictionary<string, string> defaultCSS = new Dictionary<string, string>()
@@ -618,12 +701,12 @@ namespace Fastnet.Webframe.CoreData
                 {
                     using (LegacyLoader ll = new LegacyLoader(ctx, configConnectionString))
                     {
-                        ll.LoadClientApps();
-                        Log.Write("legacyData: ClientApps loaded");
-                        ll.LoadRoles();
-                        Log.Write("legacyData: Roles loaded");
-                        ll.LoadRegistrationKeys();
-                        Log.Write("legacyData: RegistrationKeys loaded");
+                        //ll.LoadClientApps();
+                        //Log.Write("legacyData: ClientApps loaded");
+                        //ll.LoadRoles();
+                        //Log.Write("legacyData: Roles loaded");
+                        //ll.LoadRegistrationKeys();
+                        //Log.Write("legacyData: RegistrationKeys loaded");
                         ll.LoadGroups();
                         Log.Write("legacyData: Groups loaded");
                         ll.LoadMembers();
@@ -689,19 +772,19 @@ namespace Fastnet.Webframe.CoreData
             ensureApplication("Membership Manager", false, "/membership");
             ctx.SaveChanges();
         }
-        private void EnsureRequiredRoles()
-        {
-            //Action<string> ensureRole = (name) =>
-            //{
-            //    if (ctx.Roles.SingleOrDefault(x => x.Name == name) == null)
-            //    {
-            //        ctx.Roles.Add(new Role { Name = name });
-            //        //Log.Debug("{0}: role {1} added", identifier, name);
-            //    }
-            //};
-            //ensureRole(Roles.Administrator.ToString());
-            //ctx.SaveChanges();
-        }
+        //private void EnsureRequiredRoles()
+        //{
+        //    //Action<string> ensureRole = (name) =>
+        //    //{
+        //    //    if (ctx.Roles.SingleOrDefault(x => x.Name == name) == null)
+        //    //    {
+        //    //        ctx.Roles.Add(new Role { Name = name });
+        //    //        //Log.Debug("{0}: role {1} added", identifier, name);
+        //    //    }
+        //    //};
+        //    //ensureRole(Roles.Administrator.ToString());
+        //    //ctx.SaveChanges();
+        //}
         private void EnsureRequiredGroups()
         {
             Func<string, Group, Group> findGroup = (name, parent) =>
@@ -733,6 +816,30 @@ namespace Fastnet.Webframe.CoreData
             Group admins = addgroup("Administrators", GroupTypes.System, all);
             Group designers = addgroup("Designers", GroupTypes.System, all);
             Group editors = addgroup("Editors", GroupTypes.System, all);
+            ctx.SaveChanges();
+        }
+        private void EnsureAdministratorsInAdditionalGroups()
+        {
+            var admingroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Administrators");
+            var adminMembers = admingroup.Members.ToList();
+            var originalAdmin = ctx.Members.Single(x => x.IsAdministrator);
+            if (!adminMembers.Contains(originalAdmin))
+            {
+                adminMembers.Add(originalAdmin);
+            }
+            var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Editors");
+            var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Designers");
+            foreach (Member m in adminMembers)
+            {
+                if (!editorsGroup.Members.Contains(m))
+                {
+                    editorsGroup.Members.Add(m);
+                }
+                if (!designersGroup.Members.Contains(m))
+                {
+                    designersGroup.Members.Add(m);
+                }
+            }
             ctx.SaveChanges();
         }
         private void SetSiteVersion(string version)
@@ -1012,11 +1119,11 @@ namespace Fastnet.Webframe.CoreData
             {
                 Group g = new Group { Name = item.Name, ParentGroup = parent, Description = item.Description, Type = (GroupTypes)(int)item.Type };
                 coreDb.Groups.Add(g);
-                foreach (var rk in item.GroupRegistrationKeys)
-                {
-                    RegistrationKey key = coreDb.RegistrationKeys.Single(x => x.Key == rk.RegistrationKey.Key);
-                    g.RegistrationKeys.Add(key);
-                }
+                //foreach (var rk in item.GroupRegistrationKeys)
+                //{
+                //    RegistrationKey key = coreDb.RegistrationKeys.Single(x => x.Key == rk.RegistrationKey.Key);
+                //    g.RegistrationKeys.Add(key);
+                //}
                 foreach (var child in item.Children)
                 {
                     addGroup(child, g);
@@ -1092,7 +1199,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadMembers()
         {
-            bool visiblePassword = SiteSetting.Get("VisiblePassword", false);
+            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
             using (var tran = appDb.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
             {
                 try
@@ -1174,12 +1281,81 @@ namespace Fastnet.Webframe.CoreData
             foreach (var item in wde.SiteSettings)
             {
                 SiteSetting ss = new SiteSetting { Name = item.Name, Value = item.Value };
-                coreDb.SiteSettings.Add(ss);
+                if (ss.Name == "OnLineBookingClosed")
+                {
+                    ss.Value = "False";
+                    coreDb.SiteSettings.Add(ss);
+                }
             }
             coreDb.SaveChanges();
         }
         internal void LoadImages()
         {
+            Func<Image, string> createName = (t) =>
+            {
+                string ext = string.Empty;
+                switch (t.ImageType)
+                {
+                    case ImageType.Gif:
+                        ext = ".gif";
+                        break;
+                    default:
+                    case ImageType.Jpeg:
+                        ext = ".jpg";
+                        break;
+                    case ImageType.Png:
+                        ext = ".png";
+                        break;
+                }
+                return string.Format("image-{0}{1}", t.ImageId, ext);
+            };
+            foreach (Page p in coreDb.Pages)
+            {
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(p.PageMarkup.HtmlText);
+                bool hasChanges = false;
+                HtmlNodeCollection imgNodes = doc.DocumentNode.SelectNodes("//img");
+                if (imgNodes != null)
+                {
+                    foreach (HtmlNode imgNode in imgNodes)
+                    {
+                        if (imgNode.Attributes.Contains("src"))
+                        {
+                            string srcValue = imgNode.Attributes["src"].Value.ToLower();
+                            if (srcValue.StartsWith("/"))
+                            {
+                                srcValue = srcValue.Substring(1);
+                            }
+                            if (srcValue.StartsWith("image/"))
+                            {
+                                long pk = Convert.ToInt64(srcValue.Substring(6));
+                                LDB.TopicImage ti = wde.TopicImages.SingleOrDefault(x => x.TopicImageId == pk);
+                                Image image = coreDb.CreateNewImage();
+                                image.CreatedBy = p.CreatedBy;
+                                image.CreatedOn = p.CreatedOn;
+                                image.Data = ti.ImageData;
+                                image.Directory = p.Directory;
+                                image.Height = ti.Height;                                
+                                image.ImageType = (ImageType)(int)ti.ImageType;
+                                image.Width = ti.Width;
+                                image.TimeStamp = BitConverter.GetBytes(-1);
+                                image.Name = createName(image);
+                                coreDb.Images.Add(image);
+                                pk = image.ImageId;
+                                imgNode.Attributes["src"].Value = string.Format("image/{0}", pk);
+                                hasChanges = true;
+                            }
+                        }
+                    }
+                    if (hasChanges)
+                    {
+                        var sw = new System.IO.StringWriter();
+                        doc.Save(sw);
+                        p.PageMarkup.HtmlText = sw.ToString();
+                        p.PageMarkup.HtmlTextLength = p.PageMarkup.HtmlText.Length;
+                    }
+                }
+            }
             //foreach (var item in wde.TopicImages)
             //{
             //    ImageInformation image = new ImageInformation
@@ -1192,7 +1368,7 @@ namespace Fastnet.Webframe.CoreData
             //    };
             //    coreDb.ImageInformata.Add(image);
             //}
-            //coreDb.SaveChanges();
+            coreDb.SaveChanges();
         }
         internal void LoadMenus()
         {

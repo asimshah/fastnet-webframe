@@ -20,47 +20,17 @@ namespace Fastnet.Webframe.Web.Controllers
     //[RoutePrefix("home")]
     public class HomeController : Controller
     {
-        private Member currentMember;
+        //private Member currentMember;
         private CoreDataContext DataContext = Core.GetDataContext();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-        private string CurrentMemberId
-        {
-            get
-            {
-                if (Session["member-id"] == null)
-                {
-                    return null;
-                }
-                return (string)Session["member-id"];
-            }
-            set
-            {
-                Session["member-id"] = value;
-                Debug.Print("recorded member {0}", value ?? "null");
-            }
-        }
-        private string CurrentPageId
-        {
-            get { return (string)Session["current-page-id"]; }
-            set { Session["current-page-id"] = value; }
-        }
+
         private bool InEditMode
         {
             get { return (bool)Session["edit-mode"]; }
             set { Session["edit-mode"] = value; }
         }
-        private Member CurrentMember
-        {
-            get
-            {
-                if (currentMember == null)
-                {
-                    currentMember = GetCurrentMember();
-                }
-                return currentMember;
-            }
-        }
+
         public ApplicationSignInManager SignInManager
         {
             get
@@ -110,7 +80,8 @@ namespace Fastnet.Webframe.Web.Controllers
                 Member admin = DataContext.Members.Single(m => m.IsAdministrator);
                 var user = await UserManager.FindByIdAsync(admin.Id);
                 await SignInManager.SignInAsync(user, false, false);
-                //RecordCurrentMember();
+                admin.LastLoginDate = DateTime.UtcNow;
+                await DataContext.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
             // **NB** I'm recording the member here because:
@@ -120,15 +91,15 @@ namespace Fastnet.Webframe.Web.Controllers
             //    true that I can remove the following call to RecordCurrentMember() if
             //    I decide to get rid of "AutologinAdmin" as it is done on login/logoff below)
             RecordCurrentMember();
-            if (id != null)
-            {
-                this.CurrentPageId = id;
-            }
+            //if (id != null)
+            //{
+            //    this.CurrentPageId = id;
+            //}
             PageModel pm = GetPageModel();// new PageModel(id);
 
 
             var homeNoCache = this.Request.Path.EndsWith("$home");
-            CurrentPageId = pm.StartPage;
+            //CurrentPageId = pm.StartPage;
             return View(pm);
         }
         [Route("enable/edit")]
@@ -136,7 +107,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             InEditMode = true;
             PageModel pm = GetPageModel(ClientSideActions.enabledit);// new PageModel(id);
-            return View("Index", pm);        
+            return View("Index", pm);
         }
         [Route("stop/edit")]
         public ActionResult StopEdit()
@@ -166,7 +137,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             AuthenticationManager.SignOut();
             this.InEditMode = false;
-            this.CurrentPageId = null;
+            //this.CurrentPageId = null;
             RecordCurrentMember();
             return RedirectToAction("Index");
             //PageModel pm = GetPageModel();// new PageModel(id);
@@ -206,6 +177,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             else
             {
+                Member CurrentMember = this.GetCurrentMember();
                 Member member = DataContext.Members.Single(m => m.Id == user.Id);
                 //if (member.IsAdministrator || await UserManager.IsEmailConfirmedAsync(user.Id))
                 if (member.IsAdministrator || (member.EmailAddressConfirmed && !member.Disabled))
@@ -218,7 +190,8 @@ namespace Fastnet.Webframe.Web.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
-                            RecordCurrentMember();
+                            member.LastLoginDate = DateTime.UtcNow;
+                            //RecordCurrentMember();
                             return Json(new { Success = true });
                         default:
                             return Json(new { Success = false, Error = statusToString(result) });
@@ -244,7 +217,7 @@ namespace Fastnet.Webframe.Web.Controllers
         public ActionResult Register()
         {
             PageModel pm = GetPageModel(ClientSideActions.register);// new PageModel(id);
-           // pm.ClientDialog = new RegistrationDialogue();
+            // pm.ClientDialog = new RegistrationDialogue();
             return View("Index", pm);
         }
         [AllowAnonymous]
@@ -256,30 +229,25 @@ namespace Fastnet.Webframe.Web.Controllers
             var result = await UserManager.CreateAsync(user, model.password);
             if (result.Succeeded)
             {
-                bool visiblePassword = SiteSetting.Get("VisiblePassword", false);
+                bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
                 Member member = new Member
                 {
                     Id = user.Id,
                     EmailAddress = model.emailAddress,
                     FirstName = model.firstName,
                     LastName = model.lastName,
-                    CreationDate = DateTime.Now
+                    CreationDate = DateTime.UtcNow
                 };
                 if (visiblePassword)
                 {
                     member.PlainPassword = model.password;
                 }
-                //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                //member.LastLoginDate = DateTime.Now;
                 DataContext.Members.Add(member);
                 Group.AllMembers.Members.Add(member);
                 member.ActivationCode = Guid.NewGuid().ToString();
-                member.ActivationEmailSentDate = DateTime.Now;
+                member.ActivationEmailSentDate = DateTime.UtcNow;
+                member.RecordChanges(null, MembershipAction.ActionTypes.New);
                 await DataContext.SaveChangesAsync();
-                //string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                //var callbackUrl = string.Format("{0}://{1}/activate/{2}/{3}",
-                //    this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);// Url.Action("ConfirmEmail", "Home", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);\
-                //await UserManager.SendEmailAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);
                 MailHelper mh = new MailHelper();
                 await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);
                 return Json(new { Success = true });
@@ -301,7 +269,8 @@ namespace Fastnet.Webframe.Web.Controllers
                     user.EmailConfirmed = true;
                 }
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                member.LastLoginDate = DateTime.Now;
+                member.LastLoginDate = DateTime.UtcNow;
+                member.RecordChanges(null, MembershipAction.ActionTypes.Activation);
                 await DataContext.SaveChangesAsync();
                 PageModel pm = GetPageModel(ClientSideActions.activationsuccessful, null);// new PageModel(null);
                 return View("Index", pm);
@@ -321,7 +290,8 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 Member member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
                 member.PasswordResetCode = Guid.NewGuid().ToString();
-                member.PasswordResetEmailSentDate = DateTime.Now;
+                member.PasswordResetEmailSentDate = DateTime.UtcNow;
+                member.RecordChanges(null, MembershipAction.ActionTypes.PasswordResetRequest);
                 await DataContext.SaveChangesAsync();
                 MailHelper mh = new MailHelper();
                 await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.PasswordResetCode);
@@ -360,11 +330,12 @@ namespace Fastnet.Webframe.Web.Controllers
                 string emailAddress = model.emailAddress;
                 string newPassword = model.password;
                 Member member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
-                bool visiblePassword = SiteSetting.Get("VisiblePassword", false);
+                bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false); //SiteSetting.Get("VisiblePassword", false);
                 if (visiblePassword)
                 {
                     member.PlainPassword = newPassword;
                 }
+                member.RecordChanges(null, MembershipAction.ActionTypes.PasswordReset);
                 await DataContext.SaveChangesAsync();
                 using (ApplicationDbContext appDb = new ApplicationDbContext())
                 {
@@ -374,7 +345,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     await appDb.SaveChangesAsync();
                     await SignInManager.SignInAsync(user, false, false);
                     return Json(new { Success = true });
-                }                                                
+                }
             }
             return Json(new { Success = false, Error = "System Error!" });
         }
@@ -401,7 +372,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     //var result = UserManager.CreateAsync(user, model.password).Result;
                     if (result.Succeeded)
                     {
-                        bool visiblePassword = SiteSetting.Get("VisiblePassword", false);
+                        bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
                         Member member = new Member
                         {
                             Id = user.Id,
@@ -410,7 +381,7 @@ namespace Fastnet.Webframe.Web.Controllers
                             FirstName = "",
                             LastName = "Administrator",
                             IsAdministrator = true,
-                            CreationDate = DateTime.Now
+                            CreationDate = DateTime.UtcNow
                         };
                         if (visiblePassword)
                         {
@@ -418,7 +389,7 @@ namespace Fastnet.Webframe.Web.Controllers
                         }
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                        member.LastLoginDate = DateTime.Now;
+                        member.LastLoginDate = DateTime.UtcNow;
                         DataContext.Members.Add(member);
                         Group.AllMembers.Members.Add(member);
                         Group.Administrators.Members.Add(member);
@@ -479,9 +450,10 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);                
+                var member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
                 member.FirstName = model.firstName;
                 member.LastName = model.lastName;
+                member.RecordChanges();
                 DataContext.SaveChanges();
                 return Json(new { Success = true });
             }
@@ -500,7 +472,7 @@ namespace Fastnet.Webframe.Web.Controllers
             // then the javascript needs the data from the corresponding page model, in particular the
             // ClientDialog (so that any data therein is available in the client)
             // this method helps achieve this.
-            ClientSideActions name = (ClientSideActions) Enum.Parse(typeof(ClientSideActions), dialogue);
+            ClientSideActions name = (ClientSideActions)Enum.Parse(typeof(ClientSideActions), dialogue);
             PageModel pm = GetPageModel(name);
             return Json(pm, JsonRequestBehavior.AllowGet);
         }
@@ -540,8 +512,8 @@ namespace Fastnet.Webframe.Web.Controllers
         //private PageModel GetPageModel(long? pageId)
         private PageModel GetPageModel()
         {
-            string pageId = this.CurrentPageId;
-            PageModel pm = new PageModel(pageId, CurrentMember);
+            Page page = this.GetCurrentPage();
+            PageModel pm = new PageModel(page, this.GetCurrentMember());
             return pm;
         }
         //private PageModel GetPageModel(ClientDialogNames name, long? pageId)
@@ -565,21 +537,25 @@ namespace Fastnet.Webframe.Web.Controllers
             pm.SetClientAction(name, member);
             return pm;
         }
-        private Member GetCurrentMember()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
-            }
-            else
-            {
-                return null;
-            }
-        }
+        //private Member GetCurrentMember()
+        //{
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        return DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
         private void RecordCurrentMember()
         {
-            Member m = GetCurrentMember();
-            CurrentMemberId = m == null ? null : m.Id;
+            Member member = null;
+            if (User.Identity.IsAuthenticated)
+            {
+                member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+            }
+            this.SetCurrentMember(member);
         }
     }
 

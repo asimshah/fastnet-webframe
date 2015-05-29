@@ -61,8 +61,9 @@ namespace Fastnet.Webframe.Web
             bundles.Add(new ScriptBundle("~/bundles/identity")
                 .Include(
                     "~/Scripts/jquery.blockUI.js",
-                    "~/Scripts/fastnet/fastnet.account.js",
-                    "~/Scripts/fastnet/fastnet.forms.js"
+                    "~/Scripts/fastnet/fastnet.validators.js",
+                    "~/Scripts/fastnet/fastnet.forms.js",
+                    "~/Scripts/fastnet/fastnet.account.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")

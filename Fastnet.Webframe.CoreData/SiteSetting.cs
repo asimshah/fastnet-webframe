@@ -1,12 +1,6 @@
-﻿using Autofac;
-using Autofac.Core;
-using Fastnet.Common;
-using Fastnet.Webframe;
+﻿using Fastnet.Common;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Web;
 
 
 namespace Fastnet.Webframe.CoreData

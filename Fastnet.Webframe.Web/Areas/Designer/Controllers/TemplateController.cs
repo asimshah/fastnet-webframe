@@ -12,32 +12,33 @@ using Fastnet.Webframe.Web.Common;
 
 namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
 {
-    [RoutePrefix("designer/template")]
-    public class DesignerTemplateController : ApiController
-    {
-        [HttpGet]
-        [Route("form/{type}")]
-        public HttpResponseMessage GetForm(string type)
-        {
-            DesignerFormTemplate ft = DesignerFormTemplate.FromString(type);
-            return GetTemplate(ft);
-        }
-        //private HttpResponseMessage GetTemplate(DesignerFormTemplate template)
-        private HttpResponseMessage GetTemplate(TemplateBase template)
-        {
-            FileInfo file;
+    //[RoutePrefix("designer/template")]
+    //public class DesignerTemplateController : ApiController
+    //{
+    //    [HttpGet]
+    //    [Route("form/{type}")]
+    //    public HttpResponseMessage GetForm(string type)
+    //    {
+    //        DesignerFormTemplate ft = DesignerFormTemplate.FromString(type);
+    //        //return GetTemplate(ft);
+    //        return this.Request.GetTemplate(ft);
+    //    }
+    //    [Obsolete]
+    //    private HttpResponseMessage GetTemplate(TemplateBase template)
+    //    {
+    //        FileInfo file;
 
-            var text = template.GetTemplate(out file);
+    //        var text = template.GetTemplate(out file);
 
-            if (file != null)
-            {
-                return this.Request.CreateCacheableResponse(HttpStatusCode.OK, new { Template = text }, file.LastWriteTime, file.FullName);
-            }
-            else
-            {
-                return this.Request.CreateResponse(HttpStatusCode.NotFound);
-            }
+    //        if (file != null)
+    //        {
+    //            return this.Request.CreateCacheableResponse(HttpStatusCode.OK, new { Template = text }, file.LastWriteTime, file.FullName);
+    //        }
+    //        else
+    //        {
+    //            return this.Request.CreateResponse(HttpStatusCode.NotFound);
+    //        }
 
-        }
-    }
+    //    }
+    //}
 }

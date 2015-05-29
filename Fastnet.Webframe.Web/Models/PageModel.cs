@@ -12,6 +12,18 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Models
 {
+    // 18May2015 - Note
+    // This approach (of sending a ClientSideAction) to the javascript client
+    // was the first one I devised as the account stuff was the first thing I
+    // implemented.
+    // Subsequently, I added other features 9such as the designer area, membership and so on
+    // and I did not use the ClientSideAction for those - just the templating stuff.
+    //
+    // The open question is whether, in the light of better understanding of the client side
+    // possibilities, this CLientSideAction design is a bit too complicated, or whether it is still
+    // neeeded (or something similar) because the login stuff runs alongside the page stuff
+    // users can login or out, etc at anytime as they browse the site so client side needs to know how to do this.
+    // I suspect that there may well be a much simpler way of doing this.
 
     public abstract class ClientSideAction
     {
@@ -161,8 +173,9 @@ namespace Fastnet.Webframe.Web.Models
         }
     }
 
-    public class PageModel
+    public class PageModel : ViewModelBase
     {
+        public OptionsModel Options { get; set; }
         public bool ClientSideLog { get; set; }
         public bool CanEditPages { get; set; }
         public string StartPage { get; set; }
@@ -175,14 +188,15 @@ namespace Fastnet.Webframe.Web.Models
         public string Customer { get; set; }
         public Features Features { get; set; }
         // public PageModel(long? pageId, Member member = null)
-        public PageModel(string pageId, Member member = null)
+        public PageModel(Page page, Member member = null)
         {
+            this.Options = new OptionsModel();
             ClientSideLog = ApplicationSettings.Key("ClientSideLog", false);
             if (member != null)
             {
                 CanEditPages = Group.Editors.Members.Contains(member);
             }
-            StartPage = pageId;
+            StartPage = page == null ? null : page.PageId.ToString();
             if (ApplicationSettings.Key("DonWhillansHut", false))
             {
                 Customer = "dwh";
@@ -197,10 +211,7 @@ namespace Fastnet.Webframe.Web.Models
         {
             this.ClientAction = ClientSideAction.GetAction(name, member);
         }
-        public string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
+
         public string FeaturesForJavascript()
         {
             List<string> list = new List<string>();

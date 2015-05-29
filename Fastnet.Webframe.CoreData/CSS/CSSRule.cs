@@ -129,6 +129,14 @@ namespace Fastnet.Webframe.CoreData
         {
             Rules.Add(string.Format(fmt, args));
         }
+        public void RemoveRule(string name)
+        {
+            string rule = Rules.SingleOrDefault(x => x.StartsWith(name.ToLower()));
+            if (rule != null)
+            {
+                Rules.Remove(rule);
+            }
+        }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

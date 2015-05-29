@@ -9,8 +9,10 @@ using Fastnet.Webframe.Web.Common;
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RouteArea("cms")]
+    //[RoutePrefix("reports")]
     public class HomeController : Controller
     {
+
         private CoreDataContext DataContext = Core.GetDataContext();
         [Route("home")]
         [Route("")]

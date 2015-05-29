@@ -213,10 +213,12 @@
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Areas\cms\Common\CMSTemplate.cs" />
     <Compile Include="Areas\cms\Controllers\CMSController.cs" />
     <Compile Include="Areas\cms\Controllers\HomeController.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Areas\cms\Controllers\TemplateController.cs" />
     <Compile Include="Areas\Designer\Common\Templates.cs" />
     <Compile Include="Areas\Designer\Controllers\HomeController.cs" />
     <Compile Include="Areas\Designer\Controllers\LayoutController.cs" />
@@ -252,11 +254,19 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Areas\membership\Common\MembershipFormTemplate.cs" />
+    <Compile Include="Areas\membership\Controllers\HomeController.cs" />
+    <Compile Include="Areas\membership\Controllers\MembershipController.cs" />
+    <Compile Include="Areas\membership\Controllers\TemplateController.cs" />
+    <Compile Include="Areas\membership\membershipAreaRegistration.cs" />
+    <Compile Include="Areas\membership\Models\MembershipModel.cs" />
     <Compile Include="Common\ActionLogging.cs" />
     <Compile Include="Common\AutofacConfig.cs" />
     <Compile Include="Common\CustomFactory.cs" />
+    <Compile Include="Common\DataModule.cs" />
     <Compile Include="Common\DirectoryExtensions.cs" />
     <Compile Include="Common\Enums.cs" />
+    <Compile Include="Common\FormTemplate.cs" />
     <Compile Include="Common\Globals.cs" />
     <Compile Include="Common\GroupExtensions.cs" />
     <Compile Include="Common\HtmlParser.cs" />
@@ -279,7 +289,9 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityViewModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\OptionsModel.cs" />
     <Compile Include="Models\PageModel.cs" />
+    <Compile Include="Models\ViewModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
@@ -295,6 +307,11 @@
       <DependentUpon>main.css</DependentUpon>
     </Content>
     <Content Include="Areas\cms\Scripts\webframe.cms.js" />
+    <Content Include="Areas\cms\Templates\MailHistory.html" />
+    <Content Include="Areas\cms\Templates\MailTester.html" />
+    <Content Include="Areas\cms\Templates\MemberList.html" />
+    <Content Include="Areas\cms\Templates\MembershipHistory.html" />
+    <Content Include="Areas\cms\Templates\SessionHistory.html" />
     <Content Include="Areas\cms\Views\Home\Index.cshtml">
       <SubType>Code</SubType>
     </Content>
@@ -631,6 +648,17 @@
     <Content Include="Areas\Designer\Templates\Forms\LayoutCSSEditor.html" />
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Areas\Designer\Templates\Forms\LayoutHome.html" />
+    <Content Include="Areas\membership\Content\bootstrap.vertical-tabs.css" />
+    <Content Include="Areas\membership\Content\main.css">
+      <DependentUpon>main.less</DependentUpon>
+    </Content>
+    <Content Include="Areas\membership\Content\main.min.css">
+      <DependentUpon>main.css</DependentUpon>
+    </Content>
+    <Content Include="Areas\membership\Scripts\webframe.membership.js" />
+    <Content Include="Areas\membership\Templates\Forms\GroupManager.html" />
+    <Content Include="Areas\membership\Templates\Forms\MemberDetails.html" />
+    <Content Include="Areas\membership\Templates\Forms\MemberManager.html" />
     <Content Include="Content\bootstrap-datetimepicker.css" />
     <Content Include="Content\bootstrap-datetimepicker.min.css" />
     <Content Include="Content\archive\bootstrap-theme.css" />
@@ -643,6 +671,7 @@
     <Content Include="Content\bootstrap.min.css">
       <DependentUpon>bootstrap.css</DependentUpon>
     </Content>
+    <Content Include="Content\datatables\css\datables.bootstrap.css" />
     <Content Include="Content\datatables\css\jquery.dataTables.css" />
     <Content Include="Content\datatables\css\jquery.dataTables.min.css" />
     <Content Include="Content\datatables\css\jquery.dataTables_themeroller.css" />
@@ -821,6 +850,7 @@
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
+    <Content Include="Scripts\datatables\datatables.bootstrap.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.min.js" />
     <Content Include="Scripts\dropzone\basic.css" />
@@ -837,6 +867,7 @@
     <Content Include="Scripts\fastnet\fastnet.forms.old.js" />
     <Content Include="Scripts\fastnet\fastnet.treeview.js" />
     <Content Include="Scripts\fastnet\fastnet.utilities.js" />
+    <Content Include="Scripts\fastnet\fastnet.validators.js" />
     <Content Include="Scripts\fastnet\HtmlPage1.html" />
     <Content Include="Scripts\fastnet\TextFile1.txt" />
     <Content Include="Scripts\jquery-ui-1.11.4.js" />
@@ -1017,6 +1048,7 @@
     <Content Include="Scripts\tinymce\tinymce.js" />
     <Content Include="Scripts\tinymce\tinymce.min.js" />
     <Content Include="Scripts\zebra\zebra_datepicker.js" />
+    <Content Include="Templates\Emails\EmailAddressChanged.html" />
     <Content Include="Templates\Emails\AccountActivation.html" />
     <Content Include="Templates\Emails\PasswordReset.html" />
     <Content Include="Templates\Forms\Account\ActivationFailed.html" />
@@ -1039,6 +1071,7 @@
     <Content Include="Templates\Forms\Form.html" />
     <Content Include="Templates\Forms\ModalForm.html" />
     <Content Include="Templates\Forms\Account\RegistrationConfirmation.html" />
+    <Content Include="tt.html" />
     <Content Include="webframelogo-16.16.ico" />
     <Content Include="Content\Main\main.less" />
     <Content Include="Content\Main\constants.less" />
@@ -1229,6 +1262,17 @@
     <Content Include="Areas\cms\Content\main.css.map">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\membership\Views\web.config" />
+    <Content Include="Areas\membership\Content\constants.less" />
+    <Content Include="Areas\membership\Content\main.less" />
+    <Content Include="Areas\membership\Content\main.css.map">
+      <DependentUpon>main.css</DependentUpon>
+    </Content>
+    <Content Include="Areas\membership\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\membership\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\membership\Views\Home\Index.cshtml" />
+    <Content Include="Areas\membership\Views\Home\PermissionDenied.cshtml" />
+    <Content Include="Areas\membership\Views\Shared\_Empty.cshtml" />
     <None Include="Properties\PublishProfiles\webframe4.pubxml" />
     <None Include="Scripts\jquery-2.1.3.intellisense.js" />
     <Content Include="Scripts\bootstrap.js" />

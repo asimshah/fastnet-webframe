@@ -15,7 +15,7 @@ namespace Fastnet.Webframe.CoreData
         public string Name { get; set; }
         public string Extension { get; set; }
         public long Length { get; set; }
-        public System.DateTime CreatedOn { get; set; }
+        public System.DateTimeOffset CreatedOn { get; set; }
         public string CreatedBy { get; set; }
         //public DocumentType Type { get; set; }
         public bool Visible { get; set; }

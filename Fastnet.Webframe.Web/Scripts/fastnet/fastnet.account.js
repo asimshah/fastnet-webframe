@@ -31,7 +31,7 @@
         // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
         //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
         var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
-        r = emailReg.test(email);
+        var r = emailReg.test(email);
         if (!r) {
             errors.push(errorMessage);
         }
@@ -83,7 +83,7 @@
     function validatePasswordLength(form, val, errorMessage, errors) {
         var minlength = $T.options.ClientAction.MinimumPasswordLength;
         var errorMessage = $U.Format(errorMessage, minlength);
-        r = val.length >= minlength;
+        var r = val.length >= minlength;
         if (!r) {
             errors.push(errorMessage);
         }
@@ -114,7 +114,7 @@
         Init: function () {
             $T = this;
             $U = $.fastnet$utilities;
-            $F = $.fastnet$forms;
+            //$F = $.fastnet$forms;
         },
         Start: function (options, onComplete) {
             $T.onComplete = onComplete;
@@ -149,7 +149,8 @@
         },
         ActivationSuccessful: {
             Start: function () {
-                var asf = new $.fastnet$forms.CreateForm("template/form/activationsuccessful", {
+                // var asf = new $.fastnet$forms.CreateForm("template/form/activationsuccessful", {
+                var asf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/activationsuccessful", {
                     Title: "Activation Successful",
                     OnCommand: function (f, cmd) {
                         switch (cmd) {
@@ -164,7 +165,7 @@
         },
         ActivationFailed: {
             Start: function () {
-                var aff = new $.fastnet$forms.CreateForm("template/form/activationfailed", {
+                var aff = new $.fastnet$forms.CreateForm("template/get/main-forms-account/activationfailed", {
                     Title: "Activation Failed",
                     //AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress,
                     OnCommand: function (f, cmd) {
@@ -197,7 +198,7 @@
                             }
                         });
                 }
-                var cpf = new $.fastnet$forms.CreateForm("template/form/changepassword", {
+                var cpf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/changepassword", {
                     Title: "Change Password",
                     //EmailAddress: $T.options.ClientAction.EmailAddress,
                     AfterItemValidation: function (r) {
@@ -214,27 +215,32 @@
                                 break;
                         }
                     }
-                }, { EmailAddress: $T.options.ClientAction.EmailAddress});
-                cpf.addIsRequiredValidator("password", "A password is required")
-                cpf.addValidators("password", [
-                    {
-                        func: validatePasswordLength,
-                        isDeferred: false,
-                        errorMessage: "Minimum length for a password is {0} chars"
-                    },
-                    {
-                        func: validatePasswordComplexity,
-                        isDeferred: true,
-                        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
-                    }
-                ]);
-                cpf.addValidator("confirm-password",
-                    {
-                        func: validateConfirmPassword,
-                        isDeferred: false,
-                        errorMessage: "Passwords do not match"
-                    }
-                );
+                }, { EmailAddress: $T.options.ClientAction.EmailAddress });
+                var validator = new $.fastnet$validators.Create(cpf);
+                validator.AddIsRequired("password", "A password is required");
+                //cpf.addIsRequiredValidator("password", "A password is required");
+                validator.AddPasswordLength("password", "Minimum length for a password is {0} chars");
+                validator.AddPasswordComplexity("password", "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
+                //cpf.addValidators("password", [
+                //    {
+                //        func: validatePasswordLength,
+                //        isDeferred: false,
+                //        errorMessage: "Minimum length for a password is {0} chars"
+                //    },
+                //    {
+                //        func: validatePasswordComplexity,
+                //        isDeferred: true,
+                //        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
+                //    }
+                //]);
+                validator.AddConfirmPassword("confirm-password", "Passwords do not match", "password");
+                //cpf.addValidator("confirm-password",
+                //    {
+                //        func: validateConfirmPassword,
+                //        isDeferred: false,
+                //        errorMessage: "Passwords do not match"
+                //    }
+                //);
                 cpf.disableCommand("save-changes");
                 cpf.show();
                 //var $this = this;
@@ -264,6 +270,7 @@
                             var success = result.Success;
                             if (success) {
                                 lf.close();
+                                location.reload(true);
                                 updateCurrentUserDisplay();
                                 //if ($.isFunction($T.onComplete)) {
                                 //    $T.onComplete();
@@ -273,7 +280,8 @@
                             }
                         });
                 };
-                var lf = new $.fastnet$forms.CreateForm("template/form/login", {
+                //var lf = new $.fastnet$forms.CreateForm("template/form/login", {
+                var lf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/login", {
                     Title: "Login",
                     OnCommand: function (f, cmd) {
                         switch (cmd) {
@@ -301,8 +309,11 @@
                         }
                     }
                 }, {});
-                lf.addIsRequiredValidator("email", "An email address is required");
-                lf.addIsRequiredValidator("password", "A password is required");
+                var validator = new $.fastnet$validators.Create(lf);
+                validator.AddIsRequired("email", "An email address is required");
+                //lf.addIsRequiredValidator("email", "An email address is required");
+                validator.AddIsRequired("password", "A password is required");
+                //lf.addIsRequiredValidator("password", "A password is required");
                 lf.disableCommand("login");
                 lf.show();
                 //var $this = this;
@@ -318,7 +329,7 @@
         },
         PasswordResetFailed: {
             Start: function () {
-                var prff = new $.fastnet$forms.CreateForm("template/form/passwordresetfailed", {
+                var prff = new $.fastnet$forms.CreateForm("template/get/main-forms-account/passwordresetfailed", {
                     Title: "Password Reset Failed"//,
                     //AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress
                 }, { AdminEmailAddress: $T.options.ClientAction.AdminEmailAddress });
@@ -358,7 +369,7 @@
                             var success = result.Success;
                             if (success) {
                                 f.close();
-                                var cf = new $.fastnet$forms.CreateForm("template/form/registrationconfirmation", {
+                                var cf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/registrationconfirmation", {
                                     Title: "Registration Confirmed",
                                     //EmailAddress: emailAddress,
                                     OnCommand: function (tf, cmd) {
@@ -397,7 +408,7 @@
                 //        }
                 //    }
                 //});
-                var rf = new $.fastnet$forms.CreateForm("template/form/register", {
+                var rf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/register", {
                     Title: "Registration",
                     AfterItemValidation: function (r) {
                         if (rf.isValid() === true) {
@@ -419,41 +430,51 @@
                         }
                     }
                 }, {});
-                rf.addIsRequiredValidator("email", "An email address is required");
-                rf.addValidators("email", [
-                    {
-                        func: validateEmailAddress,
-                        isDeferred: false,
-                        errorMessage: "This is not a valid email address"
-                    },
-                    {
-                        func: validEmailAddressNotInUse,
-                        isDeferred: true,
-                        errorMessage: "This email address is already in use"
-                    }
-                ]);
-                rf.addIsRequiredValidator("password", "A password is required");
-                rf.addValidators("password", [
-                    {
-                        func: validatePasswordLength,
-                        isDeferred: false,
-                        errorMessage: "Minimum length for a password is {0} chars"
-                    },
-                    {
-                        func: validatePasswordComplexity,
-                        isDeferred: true,
-                        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
-                    }
-                ])
-                rf.addValidator("confirm-password",
-                    {
-                        func: validateConfirmPassword,
-                        isDeferred: false,
-                        errorMessage: "Passwords do not match"
-                    }
-                );
-                rf.addIsRequiredValidator("first-name", "A first name is required");
-                rf.addIsRequiredValidator("last-name", "A last name is required");
+                var validator = new $.fastnet$validators.Create(rf);
+                validator.AddIsRequired("email", "An email address is required");
+                validator.AddEmailAddress("email", "This is not a valid email address");
+                validator.AddEmailAddressNotInUse("email", "This email address is already in use");
+                //rf.addIsRequiredValidator("email", "An email address is required");
+                //rf.addValidators("email", [
+                //    {
+                //        func: validateEmailAddress,
+                //        isDeferred: false,
+                //        errorMessage: "This is not a valid email address"
+                //    },
+                //    {
+                //        func: validEmailAddressNotInUse,
+                //        isDeferred: true,
+                //        errorMessage: "This email address is already in use"
+                //    }
+                //]);
+                validator.AddIsRequired("password", "A password is required");
+                //rf.addIsRequiredValidator("password", "A password is required");
+                validator.AddPasswordLength("password", "Minimum length for a password is {0} chars");
+                validator.AddPasswordComplexity("password", "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
+                //rf.addValidators("password", [
+                //    {
+                //        func: validatePasswordLength,
+                //        isDeferred: false,
+                //        errorMessage: "Minimum length for a password is {0} chars"
+                //    },
+                //    {
+                //        func: validatePasswordComplexity,
+                //        isDeferred: true,
+                //        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
+                //    }
+                //]);
+                validator.AddConfirmPassword("confirm-password", "Passwords do not match", "password");
+                //rf.addValidator("confirm-password",
+                //    {
+                //        func: validateConfirmPassword,
+                //        isDeferred: false,
+                //        errorMessage: "Passwords do not match"
+                //    }
+                //);
+                validator.AddIsRequired("first-name", "A first name is required");
+                //rf.addIsRequiredValidator("first-name", "A first name is required");
+                validator.AddIsRequired("last-name", "A last name is required");
+                //rf.addIsRequiredValidator("last-name", "A last name is required");
                 rf.disableCommand("register");
                 rf.show();
             },
@@ -472,7 +493,7 @@
                             if (success) {
                                 f.close();
                                 //ctx.Confirmation(emailAddress);
-                                var cf = new $.fastnet$forms.CreateForm("template/form/passwordresetconfirmation", {
+                                var cf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/passwordresetconfirmation", {
                                     Title: "Reset Email Sent",
                                     //EmailAddress: emailAddress,
                                     OnCommand: function (tf, cmd) {
@@ -489,7 +510,7 @@
                             }
                         });
                 };
-                var rpf = new $.fastnet$forms.CreateForm("template/form/passwordreset", {
+                var rpf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/passwordreset", {
                     Title: "Password Reset",
                     AfterItemValidation: function (r) {
                         if (rpf.isValid() === true) {
@@ -506,19 +527,23 @@
                         }
                     }
                 }, {});
-                rpf.addIsRequiredValidator("email", "An email address is required");
-                rpf.addValidators("email", [
-                    {
-                        func: validateEmailAddress,
-                        isDeferred: false,
-                        errorMessage: "This is not a valid email address"
-                    },
-                    {
-                        func: validEmailAddressInUse,
-                        isDeferred: true,
-                        errorMessage: "This email address not recognised"
-                    }
-                ]);
+                var validator = new $.fastnet$validators.Create(rpf);
+                validator.AddIsRequired("email", "An email address is required");
+                //rpf.addIsRequiredValidator("email", "An email address is required");
+                validator.AddEmailAddress("email", "This is not a valid email address");
+                validator.AddEmailAddressInUse("email", "This email address not recognised");
+                //rpf.addValidators("email", [
+                //    {
+                //        func: validateEmailAddress,
+                //        isDeferred: false,
+                //        errorMessage: "This is not a valid email address"
+                //    },
+                //    {
+                //        func: validEmailAddressInUse,
+                //        isDeferred: true,
+                //        errorMessage: "This email address not recognised"
+                //    }
+                //]);
                 rpf.disableCommand("request-reset");
                 rpf.show();
                 //var $this = this;
@@ -563,7 +588,7 @@
                     ).then(function (result) {
                         if (result.Permitted) {
                             _loadModel("userprofile", function () {
-                                var upf = new $.fastnet$forms.CreateForm("template/form/userprofile", {
+                                var upf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/userprofile", {
                                     Title: "User Profile",
                                     //EmailAddress: $T.options.ClientAction.EmailAddress,
                                     //FirstName: $T.options.ClientAction.FirstName,
@@ -587,8 +612,11 @@
                                     FirstName: $T.options.ClientAction.FirstName,
                                     LastName: $T.options.ClientAction.LastName
                                 });
-                                upf.addIsRequiredValidator("first-name", "A first name is required");
-                                upf.addIsRequiredValidator("last-name", "A last name is required");
+                                var validator = new $.fastnet$validators.Create(upf);
+                                validator.AddIsRequired("first-name", "A first name is required");
+                                //upf.addIsRequiredValidator("first-name", "A first name is required");
+                                validator.AddIsRequired("last-name", "A last name is required");
+                                //upf.addIsRequiredValidator("last-name", "A last name is required");
                                 upf.disableCommand("save-changes");
                                 upf.show();
                             });
