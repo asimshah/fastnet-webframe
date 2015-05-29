@@ -1225,7 +1225,7 @@ namespace Fastnet.Webframe.CoreData
                             FirstName = item.FirstName,
                             LastName = item.LastName,
                             CreationDate = item.CreationDate,
-                            LastLoginDate = item.LastLoginDate,
+                            LastLoginDate =  item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
                             Disabled = !item.Active,
                             //Disabled = item.Active,
                             //EmailValidated = item.EmailValidated,
