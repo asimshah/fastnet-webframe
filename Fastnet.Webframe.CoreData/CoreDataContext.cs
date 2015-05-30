@@ -237,16 +237,13 @@ namespace Fastnet.Webframe.CoreData
             else
             {
                 EnsureClientApplications();
-                //EnsureRequiredRoles();
                 EnsureRequiredGroups();
-                // have to create administrator - how do we do it with asp.net identity?
                 EnsureRequiredPanels();
                 EnsureInitialPages();
                 SetSiteVersion("4.0.0.0");
                 WriteMainStylesheets();
-                //RequestCSSRewrite();
+                ClearCustomStylesheets();
             }
-            //ctx.CreateCSSFromPanels();
         }
 
         private void WriteCustomCss()
@@ -268,7 +265,7 @@ namespace Fastnet.Webframe.CoreData
                 }
                 return string.Empty;
             };
-            var customLessFolder = CSSRule.GetCustomCSSFolder();
+            var customLessFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
             var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
             string siteCss = Panel.SitePanel.GetCSSString();
             string bannerCss = Panel.BannerPanel.GetCSSString();
@@ -327,7 +324,39 @@ namespace Fastnet.Webframe.CoreData
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "RightPanel.less"), rightRule.ToString());
             System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
         }
-
+        private void ClearCustomStylesheets()
+        {
+            Action<string, string> writeStylesheet = (sheetName, text) =>
+            {
+                string filename = System.IO.Path.Combine(sheetName + ".less");
+                System.IO.File.WriteAllText(filename, text);
+            };
+            Dictionary<string, string> emptyCSS = new Dictionary<string, string>()
+            {
+                //{"BrowserPanel", ".BrowserPanel\n{\n}\n"},
+                {"SitePanel", ".SitePanel\n{\n}\n"},
+                {"BannerPanel", ".BannerPanel\n{\n}\n"},
+                {"MenuPanel", ".MenuPanel\n{\n}\n"},
+                {"ContentPanel", ".ContentPanel\n{\n}\n"},
+                {"LeftPanel", ".LeftPanel\n{\n}\n"},
+                {"CentrePanel", ".CentrePanel\n{\n}\n"},
+                {"RightPanel", ".RightPanel\n{\n}\n"},
+            };
+            var folder = LayoutFiles.GetCustomStylesheetFolder();
+            foreach (var item in emptyCSS)
+            {
+                var panel = item.Key;
+                var cssText = item.Value;
+                string sheetName = System.IO.Path.Combine(folder, panel);
+                writeStylesheet(sheetName, cssText);
+            }
+            var userFiles = System.IO.Directory.EnumerateFiles(folder, "*.user.css");
+            foreach(var userFile in userFiles)
+            {
+                System.IO.File.Delete(userFile);
+                Log.Write("{0} deleted", userFile);
+            }
+        }
         private void WriteMainStylesheets()
         {
             Action<string, string> writeStylesheets = (sheetName, text) =>
@@ -337,14 +366,14 @@ namespace Fastnet.Webframe.CoreData
                 filename = System.IO.Path.Combine(sheetName + ".less");
                 System.IO.File.WriteAllText(filename, text);
             };
-            var folder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
+            var folder = LayoutFiles.GetMainStylesheetFolder();
             Dictionary<string, string> defaultCSS = new Dictionary<string, string>()
             {
                 {"BrowserPanel", ".BrowserPanel\n{\n}\n"},
                 {"SitePanel", ".SitePanel\n{\n    margin: 0 auto;\n    font-family: verdana;\n    font-size: 10.5pt;\n    width: 840px;\n}\n"},
                 {"BannerPanel", ".BannerPanel\n{\n    height: 90px;\n}\n"},
                 {"MenuPanel", ".MenuPanel\n{\n    background-color: #1b76bc;\n    color: #ffffff;\n    border: 0 none transparent;\n    display: none;\n}\n"},
-                {"ContentPanel", ".CentrePanel\n{\n}\n"},
+                {"ContentPanel", ".ContentPanel\n{\n}\n"},
                 {"LeftPanel", ".LeftPanel\n{\n    width: 210px;\n}\n"},
                 {"CentrePanel", ".CentrePanel\n{\n}\n"},
                 {"RightPanel", ".RightPanel\n{\n    display: none;\n}\n"},
@@ -359,10 +388,6 @@ namespace Fastnet.Webframe.CoreData
             var menuCssText = ".menu-normal\n{\n    font-family: Arial Black;\n    font-size: 10pt;\n    background-color: #1b76bc;\n    color: #ffffff;\n}\n\n.menu-hover:hover\n{\n    background-color: #28aae1;\n    color: #000000;\n}\n";
             string menuCssFile = System.IO.Path.Combine(folder, "Menu");
             writeStylesheets(menuCssFile, menuCssText);
-            //if (!System.IO.File.Exists(menuCssFile))
-            //{
-            //    System.IO.File.WriteAllText(menuCssFile, menuCssText);
-            //}
         }
 
         private void EnsureInitialPages()

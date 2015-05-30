@@ -34,7 +34,7 @@ namespace Fastnet.Webframe.CoreData
         public static string GetCustomLess(string panelName)
         {
             panelName = NormalizePanelName(panelName);
-            string filename = Path.Combine(GetCustomLessFolder(), panelName + ".less");
+            string filename = Path.Combine(GetCustomStylesheetFolder(), panelName + ".less");
             return File.ReadAllText(filename);
         }
         public static string GetHelpText(string cmd)
@@ -71,7 +71,7 @@ namespace Fastnet.Webframe.CoreData
         public static void SaveCustomLess(string panelName, string lessText, string cssText)
         {
             panelName = NormalizePanelName(panelName);
-            string filename = Path.Combine(GetCustomLessFolder(), panelName + ".less");
+            string filename = Path.Combine(GetCustomStylesheetFolder(), panelName + ".less");
             File.WriteAllText(filename, lessText);
             filename = Path.Combine(GetMainStylesheetFolder(), panelName + ".user.css");
             File.WriteAllText(filename, cssText);
@@ -110,7 +110,7 @@ namespace Fastnet.Webframe.CoreData
         {
             return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
         }
-        private static string GetCustomLessFolder()
+        public static string GetCustomStylesheetFolder()
         {
             return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
         }
@@ -154,10 +154,10 @@ namespace Fastnet.Webframe.CoreData
         //{
         //    return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
         //}
-        public static string GetCustomCSSFolder()
-        {
-            return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
-        }
+        //public static string GetCustomCSSFolder()
+        //{
+        //    return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
+        //}
         public static string GetUserImagesRelativePath()
         {
             string sitePath = LayoutFiles.GetMainStylesheetFolder();// GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/");
