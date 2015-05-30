@@ -232,7 +232,7 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredGroups();
                 EnsureAdministratorsInAdditionalGroups();
                 SetSiteVersion("4.0.0.0");
-                WriteCustomCss();
+                WriteCustomStylesheets();
             }
             else
             {
@@ -246,8 +246,19 @@ namespace Fastnet.Webframe.CoreData
             }
         }
 
-        private void WriteCustomCss()
+        private void WriteCustomStylesheets()
         {
+            var customStylesheetFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
+            var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
+            Action<string, string> writeStylesheets = (sheetName, text) =>
+            {
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
+                string filename = System.IO.Path.Combine(mainStylesheetFolder, sheetName + ".user.css");
+                System.IO.File.WriteAllText(filename, text);
+                filename = System.IO.Path.Combine(customStylesheetFolder, sheetName + ".less");// sheetName + ".less";
+                System.IO.File.WriteAllText(filename, text);
+            };
             Func<string, int> getLeadingNumber = (s) =>
             {
                 var chars = s.TakeWhile(c => char.IsDigit(c));//.ToString();
@@ -265,8 +276,7 @@ namespace Fastnet.Webframe.CoreData
                 }
                 return string.Empty;
             };
-            var customLessFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
-            var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
+
             string siteCss = Panel.SitePanel.GetCSSString();
             string bannerCss = Panel.BannerPanel.GetCSSString();
             string menuCss = Panel.MenuPanel.GetCSSString();
@@ -306,29 +316,36 @@ namespace Fastnet.Webframe.CoreData
                 siteRule.RemoveRule("width");
                 siteRule.AddRule("width: {0}px", sw);               
             }
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "BannerPanel.less"), bannerRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
+            writeStylesheets("BannerPanel", bannerRule.ToString());
+            writeStylesheets("MenuPanel", menuRule.ToString());
+            writeStylesheets("SitePanel", siteRule.ToString());
+            writeStylesheets("LeftPanel", leftRule.ToString());
+            writeStylesheets("CentrePanel", centreRule.ToString());
+            writeStylesheets("RightPanel", rightRule.ToString());
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "MenuPanel.less"), menuRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "SitePanel.less"), siteRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "MenuPanel.less"), menuRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "LeftPanel.less"), leftRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "SitePanel.less"), siteRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "CentrePanel.less"), centreRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "LeftPanel.less"), leftRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "RightPanel.less"), rightRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "CentrePanel.less"), centreRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
+
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "RightPanel.less"), rightRule.ToString());
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
         }
         private void ClearCustomStylesheets()
         {
             Action<string, string> writeStylesheet = (sheetName, text) =>
             {
-                string filename = System.IO.Path.Combine(sheetName + ".less");
+                string filename = sheetName + ".less";
                 System.IO.File.WriteAllText(filename, text);
             };
             Dictionary<string, string> emptyCSS = new Dictionary<string, string>()
@@ -361,9 +378,9 @@ namespace Fastnet.Webframe.CoreData
         {
             Action<string, string> writeStylesheets = (sheetName, text) =>
             {
-                string filename = System.IO.Path.Combine(sheetName + ".css");
+                string filename = sheetName + ".css";
                 System.IO.File.WriteAllText(filename, text);
-                filename = System.IO.Path.Combine(sheetName + ".less");
+                filename = sheetName + ".less";
                 System.IO.File.WriteAllText(filename, text);
             };
             var folder = LayoutFiles.GetMainStylesheetFolder();
@@ -389,7 +406,6 @@ namespace Fastnet.Webframe.CoreData
             string menuCssFile = System.IO.Path.Combine(folder, "Menu");
             writeStylesheets(menuCssFile, menuCssText);
         }
-
         private void EnsureInitialPages()
         {
             bool rootExists = ctx.Directories.SingleOrDefault(x => x.Name == "$root") != null;
@@ -782,7 +798,6 @@ namespace Fastnet.Webframe.CoreData
             }
             //}
         }
-
         private bool IsDatabaseCompletelyEmpty()
         {
             int c1 = ctx.ClientApps.Count();
@@ -1498,6 +1513,5 @@ namespace Fastnet.Webframe.CoreData
             ecb.Metadata = @"res://*/WebframeDataModel.csdl|res://*/WebframeDataModel.ssdl|res://*/WebframeDataModel.msl";
             return ecb.ToString();
         }
-
     }
 }
