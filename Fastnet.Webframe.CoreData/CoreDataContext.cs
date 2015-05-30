@@ -243,7 +243,7 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredPanels();
                 EnsureInitialPages();
                 SetSiteVersion("4.0.0.0");
-                EnsureDefaultCSS();
+                WriteMainStylesheets();
                 //RequestCSSRewrite();
             }
             //ctx.CreateCSSFromPanels();
@@ -269,7 +269,7 @@ namespace Fastnet.Webframe.CoreData
                 return string.Empty;
             };
             var customLessFolder = CSSRule.GetCustomCSSFolder();
-            var defaultCssFolder = CSSRule.GetDefaultCSSFolder();
+            var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
             string siteCss = Panel.SitePanel.GetCSSString();
             string bannerCss = Panel.BannerPanel.GetCSSString();
             string menuCss = Panel.MenuPanel.GetCSSString();
@@ -310,33 +310,41 @@ namespace Fastnet.Webframe.CoreData
                 siteRule.AddRule("width: {0}px", sw);               
             }
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "BannerPanel.less"), bannerRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "BannerPanel.user.css"), bannerRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "MenuPanel.less"), menuRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "MenuPanel.user.css"), menuRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "SitePanel.less"), siteRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "SitePanel.user.css"), siteRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "LeftPanel.less"), leftRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "LeftPanel.user.css"), leftRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "CentrePanel.less"), centreRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "CentrePanel.user.css"), centreRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
 
             System.IO.File.WriteAllText(System.IO.Path.Combine(customLessFolder, "RightPanel.less"), rightRule.ToString());
-            System.IO.File.WriteAllText(System.IO.Path.Combine(defaultCssFolder, "RightPanel.user.css"), rightRule.ToString());
+            System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
         }
 
-        private void EnsureDefaultCSS()
+        private void WriteMainStylesheets()
         {
-            var folder = CSSRule.GetDefaultCSSFolder();
+            Action<string, string> writeStylesheets = (sheetName, text) =>
+            {
+                string filename = System.IO.Path.Combine(sheetName + ".css");
+                System.IO.File.WriteAllText(filename, text);
+                filename = System.IO.Path.Combine(sheetName + ".less");
+                System.IO.File.WriteAllText(filename, text);
+            };
+            var folder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
             Dictionary<string, string> defaultCSS = new Dictionary<string, string>()
             {
                 {"BrowserPanel", ".BrowserPanel\n{\n}\n"},
                 {"SitePanel", ".SitePanel\n{\n    margin: 0 auto;\n    font-family: verdana;\n    font-size: 10.5pt;\n    width: 840px;\n}\n"},
                 {"BannerPanel", ".BannerPanel\n{\n    height: 90px;\n}\n"},
                 {"MenuPanel", ".MenuPanel\n{\n    background-color: #1b76bc;\n    color: #ffffff;\n    border: 0 none transparent;\n    display: none;\n}\n"},
+                {"ContentPanel", ".CentrePanel\n{\n}\n"},
                 {"LeftPanel", ".LeftPanel\n{\n    width: 210px;\n}\n"},
                 {"CentrePanel", ".CentrePanel\n{\n}\n"},
                 {"RightPanel", ".RightPanel\n{\n    display: none;\n}\n"},
@@ -345,18 +353,16 @@ namespace Fastnet.Webframe.CoreData
             {
                 var panel = item.Key;
                 var cssText = item.Value;
-                string cssFileName = System.IO.Path.Combine(folder, panel + ".css");
-                if (!System.IO.File.Exists(cssFileName))
-                {
-                    System.IO.File.WriteAllText(cssFileName, cssText);
-                }
+                string sheetName = System.IO.Path.Combine(folder, panel);
+                writeStylesheets(sheetName, cssText);
             }
             var menuCssText = ".menu-normal\n{\n    font-family: Arial Black;\n    font-size: 10pt;\n    background-color: #1b76bc;\n    color: #ffffff;\n}\n\n.menu-hover:hover\n{\n    background-color: #28aae1;\n    color: #000000;\n}\n";
-            string menuCssFile = System.IO.Path.Combine(folder, "Menu.css");
-            if (!System.IO.File.Exists(menuCssFile))
-            {
-                System.IO.File.WriteAllText(menuCssFile, menuCssText);
-            }
+            string menuCssFile = System.IO.Path.Combine(folder, "Menu");
+            writeStylesheets(menuCssFile, menuCssText);
+            //if (!System.IO.File.Exists(menuCssFile))
+            //{
+            //    System.IO.File.WriteAllText(menuCssFile, menuCssText);
+            //}
         }
 
         private void EnsureInitialPages()

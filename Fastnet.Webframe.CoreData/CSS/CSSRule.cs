@@ -28,7 +28,7 @@ namespace Fastnet.Webframe.CoreData
         public static string GetDefaultCSS(string panelName)
         {
             panelName = NormalizePanelName(panelName);
-            string filename = Path.Combine(GetDefaultCSSFolder(), panelName + ".css");
+            string filename = Path.Combine(GetMainStylesheetFolder(), panelName + ".css");
             return File.ReadAllText(filename);
         }
         public static string GetCustomLess(string panelName)
@@ -73,7 +73,7 @@ namespace Fastnet.Webframe.CoreData
             panelName = NormalizePanelName(panelName);
             string filename = Path.Combine(GetCustomLessFolder(), panelName + ".less");
             File.WriteAllText(filename, lessText);
-            filename = Path.Combine(GetDefaultCSSFolder(), panelName + ".user.css");
+            filename = Path.Combine(GetMainStylesheetFolder(), panelName + ".user.css");
             File.WriteAllText(filename, cssText);
         }
         private static string NormalizePanelName(string name)
@@ -106,7 +106,7 @@ namespace Fastnet.Webframe.CoreData
             }
             return name;
         }
-        private static string GetDefaultCSSFolder()
+        public static string GetMainStylesheetFolder()
         {
             return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
         }
@@ -150,17 +150,17 @@ namespace Fastnet.Webframe.CoreData
             sb.AppendFormat("}}").AppendLine();
             return sb.ToString();
         }
-        public static string GetDefaultCSSFolder()
-        {
-            return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
-        }
+        //public static string GetDefaultCSSFolder()
+        //{
+        //    return HostingEnvironment.MapPath("~/Content/Main/DefaultCSS");
+        //}
         public static string GetCustomCSSFolder()
         {
             return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
         }
         public static string GetUserImagesRelativePath()
         {
-            string sitePath = GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/");
+            string sitePath = LayoutFiles.GetMainStylesheetFolder();// GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/");
             string userImagesPath = GetUserImagesFolder();
             return Win32IO.PathRelativePathTo(sitePath, userImagesPath).Replace("\\", "/");
         }
@@ -202,7 +202,7 @@ namespace Fastnet.Webframe.CoreData
     {
         public void CreateCSSFromPanels()
         {
-            var folder = CSSRule.GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/Content/Main/AppCSS");
+            var folder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/Content/Main/AppCSS");
             string[] panelList = new string[] {
                      "BrowserPanel",
                      "SitePanel",
