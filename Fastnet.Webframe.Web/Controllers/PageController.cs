@@ -47,6 +47,7 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 page = allLandingPages.First();
             }
+            this.SetCurrentPage(page);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId.ToString() });
 
         }
@@ -69,7 +70,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     data = PrepareHTMLPage(page);
                 }
             }
-            this.SetCurrentPage(page);
+            
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
             //if (th
             //{

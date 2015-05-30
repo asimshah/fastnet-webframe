@@ -62,7 +62,8 @@ namespace Fastnet.Webframe.CoreData
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("IdentityConnection", throwIfV1Schema: false)
+            : base("CoreData", throwIfV1Schema: false)
+            //: base("IdentityConnection", throwIfV1Schema: false)
         {
         }
 

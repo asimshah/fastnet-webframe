@@ -91,10 +91,19 @@ namespace Fastnet.Webframe.Web.Controllers
             //    true that I can remove the following call to RecordCurrentMember() if
             //    I decide to get rid of "AutologinAdmin" as it is done on login/logoff below)
             RecordCurrentMember();
-            //if (id != null)
-            //{
-            //    this.CurrentPageId = id;
-            //}
+            if (id != null)
+            {
+                long pageId = Convert.ToInt64(id);
+                Page page = DataContext.Pages.SingleOrDefault(p => p.PageId == pageId);
+                if (page != null)
+                {
+                    this.SetCurrentPage(page);
+                }
+            }
+            else
+            {
+                this.SetCurrentPage(null);
+            }
             PageModel pm = GetPageModel();// new PageModel(id);
 
 
