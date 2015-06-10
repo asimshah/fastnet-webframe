@@ -9,83 +9,83 @@ using System.Web.Hosting;
 
 namespace Fastnet.Webframe.Web.Common
 {
-    public class TemplateLibrary //: CustomFactory !! add this when customisinig for DWH
-    {
-        private class Templates
-        {
-            // key = template name, value fullpath
-            private Dictionary<string, string> dict = new Dictionary<string, string>();
-            public void Add(string name, string path)
-            {
-                dict.Add(name, path);
-            }
-            public string Get(string name)
-            {
-                if (dict.ContainsKey(name))
-                {
-                    return dict[name];
-                }
-                return null;
-            }
-        }
-        public static TemplateLibrary GetInstance()
-        {
-            var app = HttpContext.Current.Application;
-            if (app.Get("template-library") == null)
-            {
-                app.Set("template-library", new TemplateLibrary());
-            }
-            return app.Get("template-library") as TemplateLibrary;
-        }
-        // key = location, value = list of templates
-        private Dictionary<string, Templates> templatesByLocation = new Dictionary<string, Templates>();
-        private TemplateLibrary()
-        {
+    //public class TemplateLibrary //: CustomFactory !! add this when customisinig for DWH
+    //{
+    //    private class Templates
+    //    {
+    //        // key = template name, value fullpath
+    //        private Dictionary<string, string> dict = new Dictionary<string, string>();
+    //        public void Add(string name, string path)
+    //        {
+    //            dict.Add(name, path);
+    //        }
+    //        public string Get(string name)
+    //        {
+    //            if (dict.ContainsKey(name))
+    //            {
+    //                return dict[name];
+    //            }
+    //            return null;
+    //        }
+    //    }
+    //    public static TemplateLibrary GetInstance()
+    //    {
+    //        var app = HttpContext.Current.Application;
+    //        if (app.Get("template-library") == null)
+    //        {
+    //            app.Set("template-library", new TemplateLibrary());
+    //        }
+    //        return app.Get("template-library") as TemplateLibrary;
+    //    }
+    //    // key = location, value = list of templates
+    //    private Dictionary<string, Templates> templatesByLocation = new Dictionary<string, Templates>();
+    //    private TemplateLibrary()
+    //    {
 
-        }
-        public void AddTemplate(string location, string name, string path)
-        {
-            location = location.ToLower();
-            name = name.ToLower();
-            if (!templatesByLocation.ContainsKey(location))
-            {
-                templatesByLocation.Add(location, new Templates());
-            }
-            Templates templates = templatesByLocation[location];
-            templates.Add(name, path);
-        }
-        public string GetTemplate(string location, string name)
-        {
-            FileInfo file;
-            return GetTemplate(location, name, out file);
-        }
-        public string GetTemplate(string location, string name, out FileInfo file)
-        {
-            location = location.ToLower();
-            name = name.ToLower();
-            if (templatesByLocation.ContainsKey(location))
-            {
-                Templates templates = templatesByLocation[location];
-                string text = ReadText(templates.Get(name), out file);
-                return text;
-            }
-            file = null;
-            return null;
-        }
-        private static string ReadText(string fn, out FileInfo file)
-        {
-            if (fn != null)
-            {
-                file = new FileInfo(fn);
-                return File.ReadAllText(file.FullName);
-            }
-            else
-            {
-                file = null;
-                return string.Empty;
-            }
-        }
-    }
+    //    }
+    //    public void AddTemplate(string location, string name, string path)
+    //    {
+    //        location = location.ToLower();
+    //        name = name.ToLower();
+    //        if (!templatesByLocation.ContainsKey(location))
+    //        {
+    //            templatesByLocation.Add(location, new Templates());
+    //        }
+    //        Templates templates = templatesByLocation[location];
+    //        templates.Add(name, path);
+    //    }
+    //    public string GetTemplate(string location, string name)
+    //    {
+    //        FileInfo file;
+    //        return GetTemplate(location, name, out file);
+    //    }
+    //    public string GetTemplate(string location, string name, out FileInfo file)
+    //    {
+    //        location = location.ToLower();
+    //        name = name.ToLower();
+    //        if (templatesByLocation.ContainsKey(location))
+    //        {
+    //            Templates templates = templatesByLocation[location];
+    //            string text = ReadText(templates.Get(name), out file);
+    //            return text;
+    //        }
+    //        file = null;
+    //        return null;
+    //    }
+    //    private static string ReadText(string fn, out FileInfo file)
+    //    {
+    //        if (fn != null)
+    //        {
+    //            file = new FileInfo(fn);
+    //            return File.ReadAllText(file.FullName);
+    //        }
+    //        else
+    //        {
+    //            file = null;
+    //            return string.Empty;
+    //        }
+    //    }
+    //}
     //public abstract class TemplateBase : CustomFactory
     //{
     //    protected string templateFolder = HostingEnvironment.MapPath("~/Templates");

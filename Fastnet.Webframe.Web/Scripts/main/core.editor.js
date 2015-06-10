@@ -593,7 +593,7 @@
                     // I am assuming here that on this first call for directories
                     // I will always get an array of one entry and that
                     // entry is the $root directory (renamed by the server to Store)
-                    
+
                     pb.options.rootDirectoryId = data[0].Id;
                     loadTreeViewItem(null, data);
                 });
@@ -769,7 +769,7 @@
                 switch ($this.options.mode) {
                     case "prompt":
                         var ilf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/inserthyperlink", {
-                            Title: "Insert Link",                            
+                            Title: "Insert Link",
                             AfterItemValidation: function (f, result) {
                                 if (result.success) {
                                     f.enableCommand("insertlink");
@@ -950,7 +950,7 @@
                         title: "insert links & images",
                         icon: 'link',
                         menu: [
-                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start({mode: 'prompt'}); } },
+                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start({ mode: 'prompt' }); } },
                             { text: 'Insert link to new page', onclick: function () { $T.InsertLink.Start({ mode: 'createnew' }); } },
                             { text: 'Insert link & edit new page ...', onclick: function () { $T.InsertLink.Start({ mode: 'createandedit' }); } }
                             //,{ text: 'break ...', onclick: function () { debugger; } }

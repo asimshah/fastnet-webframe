@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Net.Http;
 using System.Web.Http;
+using Fastnet.Common;
 using Data = Fastnet.Webframe.CoreData;
 
 namespace Fastnet.Webframe.Web.Controllers

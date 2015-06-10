@@ -17,6 +17,7 @@ using System.Web.Routing;
 using System.Web.SessionState;
 using System.Web.WebPages;
 using Autofac;
+using Fastnet.Common;
 
 namespace Fastnet.Webframe.Web
 {
@@ -62,7 +63,7 @@ namespace Fastnet.Webframe.Web
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            ScanForTemplates();
+            TemplateLibrary.ScanForTemplates();
             using (CoreDataContext core = new CoreDataContext())
             {
                 int count = core.Groups.Count(); // causes seeding, migrations, etc.
@@ -77,52 +78,51 @@ namespace Fastnet.Webframe.Web
             }
         }
 
-        private void ScanForTemplates()
-        {
-            var mainTemplateFolder = new System.IO.DirectoryInfo(HostingEnvironment.MapPath("~/Templates"));
-            if (System.IO.Directory.Exists(mainTemplateFolder.FullName))
-            {
-                LoadTemplateInfo(mainTemplateFolder);
-            }
-            var areasDi = new System.IO.DirectoryInfo(HostingEnvironment.MapPath("~/Areas"));
-            foreach(System.IO.DirectoryInfo di in areasDi.GetDirectories())
-            {
-                //Debug.Print("area {0} found", di.Name);
-                var tf = System.IO.Path.Combine(di.FullName, "Templates");
-                if (System.IO.Directory.Exists(tf))
-                {
-                    LoadTemplateInfo(new System.IO.DirectoryInfo(tf));
-                }
-            }
-        }
-
-        private void LoadTemplateInfo(System.IO.DirectoryInfo templateFolder)
-        {
-            var templateLibrary = TemplateLibrary.GetInstance();
-            Action<string, System.IO.DirectoryInfo> findHtmlFiles = (location, di) =>
-            {
-                var files = di.EnumerateFiles("*.html");
-                foreach (System.IO.FileInfo file in files)
-                {
-                    //Debug.Print("Add location {0}, file {1}", location, System.IO.Path.GetFileNameWithoutExtension(file.Name));
-                    templateLibrary.AddTemplate(location, System.IO.Path.GetFileNameWithoutExtension(file.Name), file.FullName);
-                }
-            };
-            string appName = "main";
-            if(string.Compare(templateFolder.Parent.Parent.Name, "Areas", true) == 0)
-            {
-                appName = templateFolder.Parent.Name.ToLower();
-            }
-            Debug.Print("loading templates for {0}", appName);
-            findHtmlFiles(appName, templateFolder);
-            var directories = templateFolder.EnumerateDirectories("*", System.IO.SearchOption.AllDirectories);
-            foreach (System.IO.DirectoryInfo dir in directories)
-            {
-                string location = appName + "-" + dir.FullName.Substring(dir.FullName.ToLower().IndexOf("templates\\") + 10);
-                findHtmlFiles(location.Replace("\\", "-").ToLower(), dir);
-            }
-            Application["td"] = templateLibrary;
-        }
+        //private void ScanForTemplates()
+        //{
+        //    var mainTemplateFolder = new System.IO.DirectoryInfo(HostingEnvironment.MapPath("~/Templates"));
+        //    if (System.IO.Directory.Exists(mainTemplateFolder.FullName))
+        //    {
+        //        LoadTemplateInfo(mainTemplateFolder);
+        //    }
+        //    var areasDi = new System.IO.DirectoryInfo(HostingEnvironment.MapPath("~/Areas"));
+        //    foreach(System.IO.DirectoryInfo di in areasDi.GetDirectories())
+        //    {
+        //        //Debug.Print("area {0} found", di.Name);
+        //        var tf = System.IO.Path.Combine(di.FullName, "Templates");
+        //        if (System.IO.Directory.Exists(tf))
+        //        {
+        //            LoadTemplateInfo(new System.IO.DirectoryInfo(tf));
+        //        }
+        //    }
+        //}
+        //private void LoadTemplateInfo(System.IO.DirectoryInfo templateFolder)
+        //{
+        //    var templateLibrary = TemplateLibrary.GetInstance();
+        //    Action<string, System.IO.DirectoryInfo> findHtmlFiles = (location, di) =>
+        //    {
+        //        var files = di.EnumerateFiles("*.html");
+        //        foreach (System.IO.FileInfo file in files)
+        //        {
+        //            //Debug.Print("Add location {0}, file {1}", location, System.IO.Path.GetFileNameWithoutExtension(file.Name));
+        //            templateLibrary.AddTemplate(location, System.IO.Path.GetFileNameWithoutExtension(file.Name), file.FullName);
+        //        }
+        //    };
+        //    string appName = "main";
+        //    if(string.Compare(templateFolder.Parent.Parent.Name, "Areas", true) == 0)
+        //    {
+        //        appName = templateFolder.Parent.Name.ToLower();
+        //    }
+        //    Debug.Print("loading templates for {0}", appName);
+        //    findHtmlFiles(appName, templateFolder);
+        //    var directories = templateFolder.EnumerateDirectories("*", System.IO.SearchOption.AllDirectories);
+        //    foreach (System.IO.DirectoryInfo dir in directories)
+        //    {
+        //        string location = appName + "-" + dir.FullName.Substring(dir.FullName.ToLower().IndexOf("templates\\") + 10);
+        //        findHtmlFiles(location.Replace("\\", "-").ToLower(), dir);
+        //    }
+        //    Application["td"] = templateLibrary;
+        //}
         protected void Session_Start()
         {
             
