@@ -124,7 +124,12 @@ namespace Fastnet.Webframe.CoreData
         }
         public static string GetCustomStylesheetFolder()
         {
-            return HostingEnvironment.MapPath("~/Content/Main/CustomLess");
+            string folder = HostingEnvironment.MapPath("~/Content/Main/CustomLess");
+            if (!System.IO.Directory.Exists(folder))
+            {
+                System.IO.Directory.CreateDirectory(folder);
+            }
+            return folder;// HostingEnvironment.MapPath("~/Content/Main/CustomLess");
         }
     }
     public class CSSRule
