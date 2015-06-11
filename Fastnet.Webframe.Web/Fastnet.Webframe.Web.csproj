@@ -1089,13 +1089,6 @@
       <DependentUpon>main.css</DependentUpon>
     </Content>
     <Content Include="Areas\Designer\Views\Layout\Index.cshtml" />
-    <Content Include="Content\Main\CustomLess\BannerPanel.less" />
-    <Content Include="Content\Main\CustomLess\CentrePanel.less" />
-    <Content Include="Content\Main\CustomLess\ContentPanel.less" />
-    <Content Include="Content\Main\CustomLess\LeftPanel.less" />
-    <Content Include="Content\Main\CustomLess\MenuPanel.less" />
-    <Content Include="Content\Main\CustomLess\RightPanel.less" />
-    <Content Include="Content\Main\CustomLess\SitePanel.less" />
     <Content Include="Content\Main\forms.less" />
     <Content Include="Content\Main\forms.css.map">
       <DependentUpon>forms.css</DependentUpon>
@@ -1276,6 +1269,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Areas\Designer\Views\Style\" />
+    <Folder Include="Content\Main\CustomLess\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

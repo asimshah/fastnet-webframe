@@ -35,7 +35,19 @@ namespace Fastnet.Webframe.CoreData
         {
             panelName = NormalizePanelName(panelName);
             string filename = Path.Combine(GetCustomStylesheetFolder(), panelName + ".less");
-            return File.ReadAllText(filename);
+            if (File.Exists(filename))
+            {
+                return File.ReadAllText(filename);
+            }
+            else
+            {
+                return EmptyPanelLessFile(panelName);
+            }
+        }
+
+        private static string EmptyPanelLessFile(string panelName)
+        {
+            return string.Format(".{0}\n{{\n\n}}\n", panelName);
         }
         public static string GetHelpText(string cmd)
         {
