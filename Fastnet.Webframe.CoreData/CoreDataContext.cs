@@ -232,7 +232,7 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredGroups();
                 EnsureAdministratorsInAdditionalGroups();
                 SetSiteVersion("4.0.0.0");
-                WriteCustomStylesheets();
+                //WriteCustomStylesheets();
             }
             else
             {
@@ -241,8 +241,9 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredPanels();
                 EnsureInitialPages();
                 SetSiteVersion("4.0.0.0");
+                // this will need addtion in cases of a v4 upgrade
                 WriteMainStylesheets();
-                ClearCustomStylesheets();
+                //ClearCustomStylesheets();
             }
         }
 
