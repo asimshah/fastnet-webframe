@@ -132,7 +132,6 @@
                 };
                 var dpf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/directoryproperties", options, r);
                 var validator = new $.fastnet$validators.Create(dpf);
-                //dpf.addIsRequiredValidator("name", "A folder name is required")
                 validator.AddIsRequired("name", "A folder name is required")
                 dpf.disableCommand("save-changes");
                 dpf.show();
@@ -170,7 +169,6 @@
                 var ppf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/pageproperties", options, r);
                 var validator = new $.fastnet$validators.Create(ppf);
                 validator.AddIsRequired("name", "A page name is required");
-                //ppf.addIsRequiredValidator("name", "A page name is required")
                 ppf.disableCommand("save-changes");
                 ppf.show();
             });
@@ -181,7 +179,6 @@
             $.when(
                 $U.AjaxPost({ url: url, data: postData })
                 ).then(function (result) {
-                    //$U.Debug("deleted {0}/{1}", type, id);
                     if (type === "directory") {
                         removeDirectoryNode(id);
                     } else {
@@ -203,7 +200,6 @@
                 $U.AjaxPost({ url: url, data: postData })
                 ).then(function (result) {
                     var pageId = result.PageId;
-                    //$U.Debug("created new page {0}", result.Url);
                     loadDirectoryContent();
                 });
         };
@@ -215,8 +211,7 @@
                 ).then(function (result) {
                     var directoryId = result.DirectoryId;
                     var name = result.Name;
-                    //$U.Debug("created new directory {0}", directoryId);
-                    var parentNode = findDirectoryNode(parentDirectoryId);// pb.forms.tv.FindNode({ UserData: parentDirectoryId })
+                    var parentNode = findDirectoryNode(parentDirectoryId);
                     loadTreeViewItem(parentNode, [{ Name: name, Id: directoryId, SubdirectoryCount: 0 }]);
                 });
         }
@@ -224,11 +219,9 @@
             if (type === null) {
                 pb.SelectedItem = {};
                 pb.forms.bfl.disableCommand("select-page");
-                //$U.Debug("Selected item cleared");
             } else {
                 pb.SelectedItem = { Type: type, Id: id, Url: url };
                 pb.forms.bfl.enableCommand("select-page");
-                //$U.Debug("Selected item:  {0}/{1}", pb.SelectedItem.Type, pb.SelectedItem.Id);
             }
         };
         function showUploadForm() {
@@ -267,7 +260,6 @@
                     if (bufctl.chunkNumber == 0) {
                         bufctl.key = r;
                     }
-                    //$U.Debug("Uploaded {0} key {1}, {2}/{3} length {4}", bufctl.filename, bufctl.key, bufctl.chunkNumber, bufctl.totalChunks, postdata.base64Length);
                     if (bufctl.progessElement !== null) {
                         var percentComplete = ((bufctl.chunkNumber + 1) / (bufctl.totalChunks)) * 100.0;
                         $(bufctl.progressElement).find(".progress-bar").css("width", percentComplete + "%");
@@ -279,8 +271,8 @@
                         // here this upload is finished
                         uploadCount--;
                         if (uploadCount === 0) {
-                            ulf.disableCommand("cancel-upload");
-                            ulf.enableCommand("close");
+                            ulf.disableCommand("cancel");
+                            ulf.enableCommand("close-upload");
                         }
                     }
                 });
@@ -321,19 +313,19 @@
                 OnCommand: function (f, cmd) {
                     switch (cmd) {
                         case "start-upload":
+                            f.disableCommand("cancel");
                             pb.myDropzone.enqueueFiles(pb.myDropzone.getFilesWithStatus(Dropzone.ADDED));
                             break;
-                        case "close":
+                        case "close-upload":
                             ulf.close();
                             loadDirectoryContent();
                             break;
                     }
                 },
             }, {});
-            //ulf.disableCommand("upload-files");
             ulf.show(function () {
-                ulf.disableCommand("cancel-upload");
-                ulf.hideCommand("close");
+                //ulf.disableCommand("cancel-upload");
+                ulf.hideCommand("close-upload");
                 var previewNode = document.querySelector("#template");
                 previewNode.id = "";
                 var previewTemplate = previewNode.parentNode.innerHTML;
@@ -353,9 +345,9 @@
                     uploadCount = files.length;
                     ulf.hideCommand("add-files");
                     ulf.disableCommand("start-upload");
-                    ulf.disableCommand("close");
-                    ulf.enableCommand("cancel-upload");
-                    ulf.showCommand("close");
+                    ulf.disableCommand("close-upload");
+                    ulf.showCommand("close-upload");
+                    ulf.enableCommand("cancel");
                     $.each(files, function (index, file) {
                         //$U.Debug("Uploading file {0}, {1}", file.name, file.type);
                         var fr = new FileReader();
@@ -598,25 +590,6 @@
                     loadTreeViewItem(null, data);
                 });
             });
-
-            //bfl = new $.fastnet$form("template/form/BrowseForLink", {
-            //    Title: "Store Browser",
-            //    IsResizable: true,
-            //    OnCommand: onCommand
-            //});
-            //treeview = $TV.NewTreeview({
-            //    Selector: ".browser-tree",
-            //    OnSelectChanged: onFolderSelectChanged,
-            //    OnExpandCollapse: onExpandCollapse,
-            //});
-            //var url = $U.Format("store/directories");
-            //$.when($U.AjaxGet({ url: url }, true)).then(function (data) {
-            //    bfl.disableCommand("select-page");
-            //    bfl.disableCommand("add-new-page");
-            //    bfl.show(function (f) {
-            //        loadTreeViewItem(null, data);
-            //    });
-            //});
         };
     };
     $.core$editor = {
@@ -704,12 +677,6 @@
                     if (cmd === "ok") {
                         tinymce.remove();
                         $T.manager.restoreAllContent();
-                        //$.each($T.manager.control, function (index, item) {
-                        //    var ps = $U.Format(".{0}", item.panel);
-                        //    $(ps).html(item.savedContent);
-
-                        //});
-                        //$T.savedContent = [];
                         afterClose();
                     }
                 });
@@ -741,16 +708,7 @@
                     //$this.currentEditor.setContent(content);
                     $this.currentEditor.execCommand("mceReplaceContent", 0, content);
                 };
-                //function getControl() {
-                //    var ctrl = null;
-                //    $.each($T.control, function (index, item) {
-                //        if (item.editor === $this.currentEditor) {
-                //            ctrl = item;
-                //            return false;
-                //        }
-                //    });
-                //    return ctrl;
-                //};
+
                 var text = "";
                 var url = "";
                 var htmlText = $this.currentEditor.selection.getContent({ format: 'html' });
@@ -792,14 +750,6 @@
                                             data.linktext = data.linkurl;
                                         }
                                         pasteLink(data.linkurl, data.linktext);
-                                        //var content = null;
-                                        //if (data.linkurl.indexOf("image/") === 0) {
-                                        //    content = $U.Format('<img src="{0}" alt="{1}">', data.linkurl, data.linktext);
-                                        //} else {
-                                        //    content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
-                                        //}
-                                        ////var content = $U.Format('<a href="{0}">{1}</a>', data.linkurl, data.linktext);
-                                        //$this.currentEditor.execCommand("mceReplaceContent", 0, content);
                                         f.close();
                                         break;
                                 }
@@ -808,7 +758,7 @@
                             LinkUrl: url,
                             LinkText: text
                         });
-                        var validator = new $.fastnet$validators(ilf);
+                        var validator = new $.fastnet$validators.Create(ilf);
                         validator.AddIsRequired("linkurl", "A link url is required");
                         //ilf.addIsRequiredValidator("linkurl", "A link url is required");
                         ilf.disableCommand("insertlink");
@@ -869,59 +819,22 @@
             return result;
         },
 
-        //OnBeforeContextMenuOpen: function (cm, src) {
-        //    //$cm.ClearMenuItems();
-        //    cm.AddMenuItem("Insert Link ...", "insert-link", $T.OnContextMenu, {})
-        //    cm.AddMenuItem("Insert Image ...", "insert-image", $T.OnContextMenu, {})
-        //    var panel = $(src).closest(".editable-content");
-        //    if (typeof panel !== "undefined" && panel !== null) {
-        //        //if ($(panel).hasClass("editor-open")) {
-        //        //    $T.cm.DisableMenuItem("open-editor");
-        //        //    $T.cm.EnableMenuItem("close-editor");
-        //        //} else {
-        //        //    $T.cm.DisableMenuItem("close-editor");
-        //        //    $T.cm.EnableMenuItem("open-editor");
-        //        //}
-        //    }
-        //},
         OnCommand: function (cmd, data) {
             switch (cmd) {
                 case "exit-edit-mode":
                     $T.Stop();
                     break;
-                    //case "insert-link":
-                    //    $T.InsertLink.Start();
-                    //    break;
+
                 case "save-changes":
                     $T.SavePageChanges();
                     break;
-                    //case "insert-image":
-                    //    //break;
+
                 default:
                     alert("This feature is not implemented");
                     break;
             }
         },
-        //OnContextMenu: function (src, index, cmd, data) {
-        //    switch (cmd) {
-        //        //case "open-editor":
-        //        //case "close-editor":
-        //        default:
-        //            var panel = $(src).closest(".editable-content");
-        //            $T.OnCommand(cmd, { panel: panel });
-        //            break;
-        //        case "test":
-        //            if ($T.cm.IsMenuItemDisabled(1)) {
-        //                $T.cm.EnableMenuItem(1);
-        //            } else {
-        //                $T.cm.DisableMenuItem(1);
-        //            }
-        //            break;
-        //            //default:
-        //            //    alert("context menu cmd = " + cmd);
-        //            //    break;
-        //    }
-        //},
+
         OnContentChange: function (ed) {
             //$U.Debug("text change ({0})", ed.settings.selector);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), true);
@@ -994,11 +907,7 @@
                 $(".edit-panel").removeClass("closed").addClass("open");//.height(32);
                 $T.isOpen = true;
             }
-            //$T.cm.AttachTo($(".edit-panel"));
-            //var eps = $(".editable-content");
-            //$.each(eps, function (index, ep) {
-            //    $T.cm.AttachTo($(ep));
-            //});
+
             var centrePageId = $(".CentrePanel").attr("data-page-id");
             var url = $U.Format("store/panelinfo/{0}", centrePageId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {

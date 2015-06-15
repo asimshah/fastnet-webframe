@@ -209,7 +209,6 @@
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Areas\cms\Common\CMSTemplate.cs" />
     <Compile Include="Areas\cms\Controllers\CMSController.cs" />
     <Compile Include="Areas\cms\Controllers\HomeController.cs">
       <SubType>Code</SubType>
@@ -250,7 +249,6 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Areas\membership\Common\MembershipFormTemplate.cs" />
     <Compile Include="Areas\membership\Controllers\HomeController.cs" />
     <Compile Include="Areas\membership\Controllers\MembershipController.cs" />
     <Compile Include="Areas\membership\Controllers\TemplateController.cs" />
@@ -262,7 +260,6 @@
     <Compile Include="Common\DataModule.cs" />
     <Compile Include="Common\DirectoryExtensions.cs" />
     <Compile Include="Common\Enums.cs" />
-    <Compile Include="Common\FormTemplate.cs" />
     <Compile Include="Common\Globals.cs" />
     <Compile Include="Common\GroupExtensions.cs" />
     <Compile Include="Common\HtmlParser.cs" />
@@ -1267,8 +1264,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Areas\Designer\Views\Style\" />
+    <Folder Include="Areas\membership\Common\" />
     <Folder Include="Content\Main\CustomLess\" />
   </ItemGroup>
   <ItemGroup>

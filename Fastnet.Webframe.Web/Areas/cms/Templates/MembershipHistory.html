@@ -1,0 +1,41 @@
+﻿<div class="membership-history">
+    <div class="report-title">Membership History</div>
+    <table class="table table-bordered table-striped" >
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Email</th>
+                <th>Name</th>
+                <th>By</th>
+                <!--<th>By2</th>-->
+                <th>Property</th>
+                <th>Old</th>
+                <th>New</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#data}}
+            <tr>
+                <td><div class="recordedOn">{{RecordedOn}}</div></td>
+                <td><div class="actionName">{{ActionName}}</div></td>
+                <td><div class="emailAddress">{{EmailAddress}}</div></td>
+                <td><div class="fullName">{{FullName}}</div></td>
+                <td><div class="actionBy">{{ActionBy}}</div></td>
+                {{#IsModification}}
+                <!--<td><div class="actionBy">{{ActionBy}}</div></td>-->
+                <td><div class="propertyChanged">{{PropertyChanged}}</div></td>
+                <td><div class="oldValue">{{OldValue}}</div></td>
+                <td><div class="newValue">{{NewValue}}</div></td>
+                {{/IsModification}}
+                {{^IsModification}}
+                <!--<td><div class="actionBy"></div></td>-->
+                <td><div class="propertyChanged"></div></td>
+                <td><div class="oldValue"></div></td>
+                <td><div class="newValue"></div></td>
+                {{/IsModification}}
+            </tr>
+            {{/data}}
+        </tbody>
+    </table>
+</div>
