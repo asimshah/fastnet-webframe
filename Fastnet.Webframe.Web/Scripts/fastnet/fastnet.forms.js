@@ -1,25 +1,5 @@
-﻿/* for this library to work, forms must follow a pattern. A good example
- * is the registration form in the webframe templates/account folder.
- * 1. Each individual input control should be like:
- *      <div class="form-group" data-property>
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password" data-item="password">
-            <div class="message"></div>
-        </div>
- *     Note especially the data-property and data-item attributes, as well as the message class div for error messages
- * 2.  First call Initialise with a context and a form (typically a root div containing form-groups as described above).
- *     The context is a variable that will be passed through to caller defined functions (such as validation functions)
- *     and elsewhere as required
- * 3.  Call AddValidation as required for each dataItem. dataItem must match the string used for the data-item attribute in the 
- *     form. Multiple validations are supported for the same dataItem.
- * 4.  Call Bind to attach handlers. Available handlers are AfterItemValidation and OnCommand. All input and button tags are bound internally. Caller defined handlers are called
- *     as required. button (or input type=button) tags must have a data-cmd attribute that specifies a string which is the command.
- *     Clicking any button (or input type=button) with data-cmd="cancel" will the form to close.
- * 5.  Call Show to show the form.
- * 6.  The AfterItemValidation handler will be called after each individual data-item is validated (after the blur event).
- * 7.  The OnCommand handler will be called whenever any button is pressed.
- */
-(function ($) {
+﻿(function ($) {
+    // Version 1.0.9
     var $T;
     var $U;
     var modelessTemplate =
@@ -245,7 +225,7 @@
             }
             _saveOriginalData.call(me);
             _bindCommands.call(me);
-            _bindLeaveFocus.call(me);
+            _bindFocus.call(me);
             _bindDataChange.call(me);
             _bindFileButtons.call(me);
             if (me.options.IsModal) {
@@ -466,14 +446,18 @@
         }
         function _bindFileButtons() {
             var me = this;
-            $(".btn-file :file").on("change", function () {
+            $(".btn-file :file").on("change", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var input = $(this);
                 var dataItem = input.attr("data-item");
                 var numFiles = input.get(0).files ? input.get(0).files.length : 1;
                 var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
                 input.trigger('fileselect', [numFiles, label, dataItem]);
             });
-            $(".btn-file :file").on("fileselect", function (event, numFiles, label, dataItem) {
+            $(".btn-file :file").on("fileselect", function (e, numFiles, label, dataItem) {
+                e.preventDefault();
+                e.stopPropagation();
                 var input = $(this).parents('.input-group').find(':text'),
                     log = numFiles > 1 ? numFiles + ' files selected' : label;
                 if (input.length) {
@@ -518,66 +502,56 @@
                 _onCommand.call(me, cmd, this);
             });
         }
-        function _bindLeaveFocus(target) {
+        function _bindFocus(target) {
+            function getValue(element) {
+                var tag = element.tagName.toLowerCase();
+                //var inputType = $(element).attr("type");
+                var val;
+                var dataItem = $(element).attr("data-item");
+                //input, button, textarea, select
+                switch (tag) {
+                    case "input":
+                        var inputType = $(element).attr("type").toLowerCase();
+                        switch (inputType) {
+                            case "checkbox":
+                                val = $(element).prop('checked');
+                                break;
+                            default:
+                                val = $(element).val();
+                                break;
+                        }
+                        break;
+                    case "textarea":
+                        val = $(element).val();
+                        if ($(element).prop("placeholder") === val) {
+                            // workaround for IE textarea placeholder bug
+                            val = "";
+                        }
+                        break;
+                    case "select":
+                        $U.Debug("getValue: select not yet implemented");
+                        break;
+                    default:
+                        break;
+                }
+                //// so far only input tags
+                //if (inputType === "checkbox") {
+                //    val = $(element).is(":checked");
+                //} else {
+                //    val = $(element).val();
+                //    if (tag === "textarea" && $(element).prop("placeholder") === val) {
+                //        // workaround for IE textarea placeholder bug
+                //        val = "";
+                //    }
+                //}
+                return val;
+            }
             var me = this;
             var t = _getroot(me, target);
             var root = t.root;
-            //var selector = "textarea, input[type=text], input[type=password], input[type=email], input[type=checkbox]";
-            root.find(me.options.allControlsSelector).on("blur", function (e) {
-                function getValue(element) {
-                    var tag = element.tagName.toLowerCase();
-                    //var inputType = $(element).attr("type");
-                    var val;
-                    var dataItem = $(element).attr("data-item");
-                    //input, button, textarea, select
-                    switch (tag) {
-                        case "input":
-                            var inputType = $(element).attr("type").toLowerCase();
-                            switch (inputType) {
-                                case "checkbox":
-                                    val = $(element).prop('checked');
-                                    break;
-                                default:
-                                    val = $(element).val();
-                                    break;
-                            }
-                            break;
-                        case "textarea":
-                            val = $(element).val();
-                            if ($(element).prop("placeholder") === val) {
-                                // workaround for IE textarea placeholder bug
-                                val = "";
-                            }
-                            break;
-                        case "select":
-                            $U.Debug("getValue: select not yet implemented");
-                            break;
-                        default:
-                            break;
-                    }
-                    //// so far only input tags
-                    //if (inputType === "checkbox") {
-                    //    val = $(element).is(":checked");
-                    //} else {
-                    //    val = $(element).val();
-                    //    if (tag === "textarea" && $(element).prop("placeholder") === val) {
-                    //        // workaround for IE textarea placeholder bug
-                    //        val = "";
-                    //    }
-                    //}
-                    return val;
-                }
-                function afterItemValidation(me, result) {
-                    if (me.options.AfterItemValidation !== null) {
-                        result.totalErrors = root.find("[data-validation-state='error']").length;
-                        result.totalValid = root.find("[data-validation-state='valid']").length;
-                        result.totalInitial = root.find("[data-validation-state='initial']").length;
-                        $U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
-                            result.totalValid, result.totalInitial,
-                            result.totalErrors + result.totalValid + result.totalInitial);
-                        me.options.AfterItemValidation(me, result);
-                    }
-                }
+            root.find(me.options.allControlsSelector).on("focus", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 if (me.options._validationStateUpdated === false) {
                     $("[data-property]").find("[data-item]").each(function (i, item) {
                         var element = item;
@@ -603,6 +577,54 @@
                     me.options._validationStateUpdated = true;
                     _checkForm.call(me);
                 }
+                var propElement = $(this).closest("[data-property");
+                $(propElement).find(".message").html("");                
+                $(propElement).attr("data-validation-state", "visiting");
+                var es = _updateErrorSummary.bind(me);
+                es();
+            });
+            //var selector = "textarea, input[type=text], input[type=password], input[type=email], input[type=checkbox]";
+            root.find(me.options.allControlsSelector).on("blur", function (e) {
+
+                function afterItemValidation(me, result) {
+                    var totals = me.getValidationCounts();
+                    $.extend(result, totals);
+                    $U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
+                        result.totalValid, result.totalInitial,
+                        result.totalErrors + result.totalValid + result.totalInitial);
+                    var es = _updateErrorSummary.bind(me);
+                    es();
+                    if (me.options.AfterItemValidation !== null) {
+                        me.options.AfterItemValidation(me, result);
+                    }
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                //if (me.options._validationStateUpdated === false) {
+                //    $("[data-property]").find("[data-item]").each(function (i, item) {
+                //        var element = item;
+                //        var dataItem = $(element).attr("data-item");
+                //        var validations = me.options._validators[dataItem];
+                //        if (typeof validations === "undefined") {
+                //            validations = null;
+                //        }
+                //        if (validations != null) {
+                //            $.each(validations, function (i, item) {
+                //                if (item.setIsRequired) {
+                //                    var propElement = $(element).closest("[data-property");
+                //                    $(propElement).attr("data-value-required", "true");
+                //                    var val = getValue(element);
+                //                    if (val === "") {
+                //                        $(propElement).attr("data-validation-state", "error");
+                //                    }
+                //                    return false;
+                //                }
+                //            });
+                //        }
+                //    });
+                //    me.options._validationStateUpdated = true;
+                //    _checkForm.call(me);
+                //}
 
                 var val = getValue(this);
                 var dataItem = $(this).attr("data-item");
@@ -642,29 +664,32 @@
             var me = this;
             var t = _getroot(me, target);
             var root = t.root;
+            var cb$radio$selector = "input[type='checkbox'], input[type='radio']";
+            var remainder$selector = "input:not([type='checkbox']):not([type='radio'])";
             //var dcSelector = "input[type=text], input[type=password], input[type=email], textarea";
-           root.find(me.options.allControlsSelector).on("input", function () {
+            root.find(cb$radio$selector).on('change', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var checked = $(e.target).is(":checked");
+                var item = $(this).attr("data-item");
+                if (me.options.OnChange !== null) {
+                    me.options.OnChange(me, item, checked);
+                }
+            });
+            root.find(remainder$selector).on("input", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 var tag = this.tagName.toLowerCase();
                 switch (tag) {
                     case "input":
                     case "textarea":
                         var item = $(this).attr("data-item");
-                        $(this).closest("[data-property]").find(".message").html("");
+                        //$(this).closest("[data-property]").find(".message").html("");
                         if (me.options.OnChange !== null) {
                             me.options.OnChange(me, item);
                         }
                         break;
                 }
-                //var item = $(this).attr("data-item");
-                ////$(this).attr("data-changed", "true");
-                ////var value = $(this).val();
-                ////if (typeof value === 'string') {
-                ////    value = value.trim();
-                ////}
-                //$(this).closest("[data-property]").find(".message").html("");
-                //if (me.options.OnChange !== null) {
-                //    me.options.OnChange(me, item);
-                //}
             });
         }
         function _commandEnable(command, enable) {
@@ -748,6 +773,18 @@
             });
             me.options._froot.find("[data-item='" + dataItem + "']").closest("[data-property]").find(".message").html(text);
         }
+        function _updateErrorSummary() {
+            var me = this;
+            var root = me.options._froot;
+            var totals = me.getValidationCounts();
+            if (totals.totalErrors > 0) {
+                var fmt = totals.totalErrors === 1 ? "There is 1 error" : "There are {0} errors";
+                root.find(".error-summary").text($U.Format(fmt, totals.totalErrors));
+            } else {
+                root.find(".error-summary").text("");
+            }
+            
+        }
         frm.prototype.clearMessages = function () {
             var me = this;
             me.options._froot.find("[data-property] .message").html('');
@@ -820,7 +857,15 @@
                 me.options._froot.find("[data-item]").each(function (index, element) {
                     var name = $(this).attr("data-item");
                     var val = getElementData(this);// $(this).val().trim();
-                    result[name] = val;
+                    if ($(this).is("[data-array]")) {
+                        var arrayName = $(this).attr("data-array");
+                        if (typeof result[arrayName] === "undefined") {
+                            result[arrayName] = [];
+                        }
+                        result[arrayName].push({ dataItem: name, value: val });
+                    } else {
+                        result[name] = val;
+                    }
                 });
                 return result;
             } else {
@@ -878,6 +923,17 @@
             var errorCount = me.options._froot.find("[data-validation-state='error']").length;
             return errorCount === 0;//validCount === fieldCount;
         };
+        frm.prototype.getValidationCounts = function () {
+            var me = this;
+            var root = me.options._froot;
+            var result = {
+                totalErrors: root.find("[data-validation-state='error']").length,
+                totalValid: root.find("[data-validation-state='valid']").length,
+                totalInitial: root.find("[data-validation-state='initial']").length,
+            };
+            result.totalControls = result.totalErrors + result.totalInitial + result.totalValid;
+            return result;
+        };
         frm.prototype.hideCommand = function (command) {
             var me = this;
             _commandShow.call(me, command, false);
@@ -901,7 +957,7 @@
                 me.options._froot.find("[data-property]").attr("data-validation-state", "initial");
                 _saveOriginalData.call(me, content);
                 _bindCommands.call(me, content);
-                _bindLeaveFocus.call(me, content);
+                _bindFocus.call(me, content);
                 _bindDataChange.call(me, content);
                 _checkForm.call(me);
             }

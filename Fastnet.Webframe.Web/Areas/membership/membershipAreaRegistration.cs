@@ -37,6 +37,7 @@ namespace Fastnet.Webframe.Web.Areas.membership
                 "~/Scripts/mustache.js",
                 "~/Scripts/fastnet/fastnet.validators.js",
                 "~/Scripts/fastnet/fastnet.forms.js",
+                "~/Scripts/fastnet/fastnet.treeview.js",
                 "~/Areas/membership/Scripts/webframe.membership.js"
                 ));
         }

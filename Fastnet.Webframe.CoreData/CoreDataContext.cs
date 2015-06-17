@@ -845,24 +845,28 @@ namespace Fastnet.Webframe.CoreData
                         return ctx.Groups.SingleOrDefault(x => x.Name == name && x.ParentGroup.GroupId == parent.GroupId);
                     }
                 };
-            Func<string, GroupTypes, Group, Group> addgroup = (name, type, parent) =>
+            Func<string, string, GroupTypes, Group, Group> addgroup = (name, descr, type, parent) =>
             {
                 Group g = findGroup(name, parent);
                 if (g == null)
                 {
-                    g = new Group { Name = name, Type = type, ParentGroup = parent };
+                    g = new Group { Name = name, Type = type, ParentGroup = parent, Description = descr };
                     ctx.Groups.Add(g);
                     //Log.Debug("{0}: group {1} added", identifier, name);
+                }
+                else
+                {
+                    g.Description = descr;
                 }
                 return g;
             };
 
-            Group everyone = addgroup("Everyone", GroupTypes.System | GroupTypes.SystemDefinedMembers, null);
-            Group all = addgroup("AllMembers", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
-            Group anon = addgroup("Anonymous", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
-            Group admins = addgroup("Administrators", GroupTypes.System, all);
-            Group designers = addgroup("Designers", GroupTypes.System, all);
-            Group editors = addgroup("Editors", GroupTypes.System, all);
+            Group everyone = addgroup("Everyone", "All visitors whether members or not", GroupTypes.System | GroupTypes.SystemDefinedMembers, null);
+            Group all = addgroup("AllMembers", "All visitors that have logged in (and therefore are memebrs)", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
+            Group anon = addgroup("Anonymous", "All visitors that have not logged in - this group excludes those that have logged in", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
+            Group admins = addgroup("Administrators", "Site Administrators - members who can do everything", GroupTypes.System, all);
+            Group designers = addgroup("Designers", "Site Designers - members who can modify layout and style", GroupTypes.System, all);
+            Group editors = addgroup("Editors", "Site Editors - members who can add, modify and delete pages and folders" , GroupTypes.System, all);
             ctx.SaveChanges();
         }
         private void EnsureAdministratorsInAdditionalGroups()

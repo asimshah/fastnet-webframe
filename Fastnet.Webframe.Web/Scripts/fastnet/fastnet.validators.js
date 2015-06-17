@@ -1,4 +1,5 @@
 ﻿(function ($) {
+    // Version 1.0.2
     var $U;
     function validator(f) {
         var $U = $.fastnet$utilities;
@@ -24,8 +25,17 @@
         }
         function validatePasswordLength(form, val, errorMessage, errors) {
             var minlength = $U.options.MinimumPasswordLength || 8;// $T.options.ClientAction.MinimumPasswordLength;
-            var errorMessage = $U.Format(errorMessage, minlength);
+            errorMessage = $U.Format(errorMessage, minlength);
             var r = val.length >= minlength;
+            if (!r) {
+                errors.push(errorMessage);
+            }
+            return r;
+        }
+        function validateWithRegex(form, val, errorMessage, errors, validator) {
+            // call with validator.user.regex set to the required regex pattern
+            var regex = validator.user.regex instanceof RegExp ? validator.user.regex : new RegExp(validator.user.regex);
+            var r = regex.test(val);
             if (!r) {
                 errors.push(errorMessage);
             }
@@ -54,7 +64,7 @@
                 errors.push(errorMessage);
             }
             return r;
-        };
+        }
         function serverValidateEmailAddressInUse(form, val, errorMessage, errors) {
             var deferred = new $.Deferred();
             $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
@@ -68,7 +78,7 @@
                     }
                 });
             return deferred.promise();
-        };
+        }
         function serverValidateEmailAddressNotInUse(form, val, errorMessage, errors) {
             var deferred = new $.Deferred();
             $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
@@ -91,9 +101,9 @@
                 this.validatedProperties.push(dataItem);
             }
             this.form.addValidator(dataItem, {
-                func: func, setIsRequired: setIsRequired,  isDeferred: isDeferred, errorMessage: errorMessage
+                func: func, setIsRequired: setIsRequired, isDeferred: isDeferred, errorMessage: errorMessage
             });
-        }        
+        };
         validator.prototype.AddIsRequired = function (dataItem, errorMessage) {
             this.AddValidator(dataItem, validateIsRequired, false, errorMessage, true);
             //this.form.addValidator(dataItem, {
@@ -114,7 +124,7 @@
             this.form.addValidator(dataItem, {
                 func: serverValidateEmailAddressInUse, isDeferred: true, errorMessage: errorMessage
             });
-            
+
         };
         validator.prototype.AddPasswordLength = function (dataItem, errorMessage) {
             this.form.addValidator(dataItem, {
@@ -128,26 +138,31 @@
         },
         validator.prototype.AddConfirmPassword = function (dataItem, errorMessage, compareWith) {
             this.form.addValidator(dataItem, {
-                func: validateConfirmPassword, isDeferred: false, errorMessage: errorMessage, user: { compareWith: compareWith}
+                func: validateConfirmPassword, isDeferred: false, errorMessage: errorMessage, user: { compareWith: compareWith }
             });
-        },
+        };
+        validator.prototype.AddRegex = function (dataItem, errorMessage, regex) {
+            this.form.addValidator(dataItem, {
+                func: validateWithRegex, isDeferred: false, errorMessage: errorMessage, user: { regex: regex }
+            });
+        };
         validator.prototype.ClearValidator = function (dataItem) {
-            var index = $.inArray(dataItem, validatedProperties);
+            var index = $.inArray(dataItem, this.validatedProperties);
             if (index > -1) {
                 this.form.removeValidators(dataItem);
                 this.validatedProperties.splice(index, 1);
             }
-        }
+        };
         validator.prototype.ClearValidators = function () {
             $.each(this.validatedProperties, function (i, dataItem) {
                 this.form.removeValidators(dataItem);
             });
             this.validatedProperties = [];
-        }
+        };
     }
     $.fastnet$validators = {
         Create: validator,
-        Init: function() {
+        Init: function () {
             $U = $.fastnet$utilities;
         },
         //validateEmailAddress: function (form, email, errorMessage, errors) {

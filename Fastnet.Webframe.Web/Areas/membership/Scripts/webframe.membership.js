@@ -1,9 +1,9 @@
 ﻿(function ($) {
     $.webframe$membership = function membership() {
         var currentForm = null;
-        var subformName = null; 
+        var subformName = null;
         var validator = null;
-        var mode = { newMember: false};
+        var mode = { newMember: false };
         var memberItemTemplate =
             "    <div class='member' data-member-id='{{Id}}'>" +
             "        <span>{{Name}}</span>" +
@@ -38,6 +38,7 @@
             $(".lookup-panel").addClass("active");
             $(".details-panel").removeClass("active");
         }
+
         var clearMemberList = function () {
             $(".member-manager .lookup-panel .member-list").off();
             $(".member-manager .lookup-panel .member-list").empty();
@@ -54,7 +55,7 @@
                         validator.AddPasswordLength("password", "Minimum password length is {0}");
                         validator.AddPasswordComplexity("password", "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
                     }
-                    
+
                     validator.AddIsRequired("email-address", "An email address is required");
                     validator.AddEmailAddress("email-address", "This is not a valid email address");
                     validator.AddEmailAddressNotInUse("email-address", "This email address is already in use");
@@ -69,14 +70,6 @@
                     }
                 }
             });
-            //validator = new $.fastnet$validators.Create(currentForm);
-            //validator.AddIsRequired("email-address", "An email address is required");
-            //validator.AddEmailAddress("email-address", "This is not a valid email address");
-            //validator.AddEmailAddressNotInUse("email-address", "This email address is already in use");
-            //validator.AddIsRequired("first-name", "A first name is required");
-            //validator.AddIsRequired("last-name", "A last name is required");
-            //subformName = "memberDetails";
-
         }
         var loadMemberDetails = function (memberId) {
             closeSubform();
@@ -92,7 +85,7 @@
                     loadMemberDetailsForm(r);
                 });
         };
-        var getMembers = function(url) {
+        var getMembers = function (url) {
             $.when(
                 $U.AjaxGet({ url: url }, true)
                 ).then(function (r) {
@@ -105,7 +98,7 @@
                         var id = $(this).attr("data-member-id");
                         $U.Debug("load details for member {0}", id);
                         loadMemberDetails(id);
-                    });                  
+                    });
                 });
         }
         var clearSearchMode = function () {
@@ -140,7 +133,7 @@
                         var id = $(this).attr("data-member-id");
                         $U.Debug("load details for member {0}", id);
                         loadMemberDetails(id);
-                    });                  
+                    });
                 });
         }
         var onNavigationCommand = function (cmd) {
@@ -158,17 +151,7 @@
                     break;
             }
         };
-        var showGroupManager = function () {
-            if (currentForm !== null) {
-                currentForm.close();
-            }
-            //currentForm = new $.fastnet$forms.CreateForm("membership/template/form/groupmanager", {
-            currentForm = new $.fastnet$forms.CreateForm("template/get/membership-forms/groupmanager", {
-                Title: "Group Manager",
-                IsModal: false,
-            });
-            currentForm.show();
-        };
+
         var prepareForNewMember = function () {
             closeSubform();
             resetIndexTabs();
@@ -197,11 +180,14 @@
                     closeSubform();
                     mode.newMember = false;
                     currentForm.enableCommand("add-new-member");
-                    var mb = new $.fastnet$messageBox({});
-                    var message = "A new member record has been created.";
-                    mb.show(message, function (cmd) {
+                    $U.MessageBox("A new member record has been created.", {}, function () {
                         switchToLookup();
-                    });                    
+                    });
+                    //var mb = new $.fastnet$messageBox({});
+                    //var message = "A new member record has been created.";
+                    //mb.show(message, function (cmd) {
+                    //    switchToLookup();
+                    //});
                 });
             }
             function performUpdate() {
@@ -229,39 +215,53 @@
                 createNew();
             } else {
                 if (data['email-address'] !== originalData['email-address']) {
-                    var mb = new $.fastnet$messageBox({
-                        CancelButton: true
-                    });
                     var message = "<div>Changing the email address will: <ul><li>Deactivate the member's account</li><li>Send an activation email using the new email address</li></ul></div><div>Please confirm</div>";
-                    mb.show(message, function (cmd) {
-                        if (cmd === "ok") {
-                            performUpdate();
-                        }
+                    $U.Confirm(message, function () {
+                        performUpdate();
                     });
+                    //var mb = new $.fastnet$messageBox({
+                    //    CancelButton: true
+                    //});
+                    //var message = "<div>Changing the email address will: <ul><li>Deactivate the member's account</li><li>Send an activation email using the new email address</li></ul></div><div>Please confirm</div>";
+                    //mb.show(message, function (cmd) {
+                    //    if (cmd === "ok") {
+                    //        performUpdate();
+                    //    }
+                    //});
                 } else {
                     performUpdate();
                 }
             }
         };
         var deleteMember = function () {
-            var mb = new $.fastnet$messageBox({
-                CancelButton: true
-            });
             var message = "<div>Deleting a member is an irreversible process. Please confirm</div>";
-            mb.show(message, function (cmd) {
-                switch (cmd) {
-                    case "ok":
-                        var id = currentForm.find(".member-details").attr("data-id");
-                        var url = "membershipapi/delete/member";
-                        var postData = { id: id };
-                        $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
-                            $(".member-manager .lookup-panel .member-list")
-                                .find(".member[data-member-id='" + id + "']").remove();
-                        });
-                        break;
-                }
+            $U.Confirm(message, function () {
+                var id = currentForm.find(".member-details").attr("data-id");
+                var url = "membershipapi/delete/member";
+                var postData = { id: id };
+                $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                    $(".member-manager .lookup-panel .member-list")
+                        .find(".member[data-member-id='" + id + "']").remove();
+                });
             });
-            
+            //var mb = new $.fastnet$messageBox({
+            //    CancelButton: true
+            //});
+            //var message = "<div>Deleting a member is an irreversible process. Please confirm</div>";
+            //mb.show(message, function (cmd) {
+            //    switch (cmd) {
+            //        case "ok":
+            //            var id = currentForm.find(".member-details").attr("data-id");
+            //            var url = "membershipapi/delete/member";
+            //            var postData = { id: id };
+            //            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+            //                $(".member-manager .lookup-panel .member-list")
+            //                    .find(".member[data-member-id='" + id + "']").remove();
+            //            });
+            //            break;
+            //    }
+            //});
+
         };
         var sendActivationMail = function () {
             function _sendActivationEmail(id) {
@@ -277,15 +277,19 @@
             var id = currentForm.find(".member-details").attr("data-id");
             var isActive = currentForm.find(".member-details").attr("data-active") === "true";
             if (isActive) {
-                var mb = new $.fastnet$messageBox({
-                    CancelButton: true
-                });
                 var message = "<div>Sending an activation email will deactivate this member. Please confirm</div>";
-                mb.show(message, function (cmd) {
-                    if (cmd === "ok") {
-                        _sendActivationEmail(id);
-                    }
+                $U.Confirm(message, function () {
+                    _sendActivationEmail(id);
                 });
+                //var mb = new $.fastnet$messageBox({
+                //    CancelButton: true
+                //});
+                //var message = "<div>Sending an activation email will deactivate this member. Please confirm</div>";
+                //mb.show(message, function (cmd) {
+                //    if (cmd === "ok") {
+                //        _sendActivationEmail(id);
+                //    }
+                //});
             } else {
                 _sendActivationEmail(id);
             }
@@ -298,7 +302,7 @@
             currentForm = new $.fastnet$forms.CreateForm("template/get/membership-forms/membermanager", {
                 Title: "Membership Manager",
                 IsModal: false,
-                OnChange: function(f, cmd) {
+                OnChange: function (f, cmd) {
                     switch (cmd) {
                         case "search-text":
                             var text = f.getData(cmd);
@@ -330,7 +334,7 @@
                             break;
                         case "search-cmd":
                             var searchText = currentForm.getData("search-text");
-                            
+
                             loadMembersWithSearch(searchText);
                             break;
                         case "clear-search":
@@ -376,6 +380,243 @@
                 switchToLookup();
             });
         };
+        var showGroupManager = function () {
+            if (currentForm !== null) {
+                currentForm.close();
+            }
+            currentForm = new $.fastnet$forms.CreateForm("template/get/membership-forms/groupmanager", {
+                Title: "Group Manager",
+                IsModal: false,
+                OnCommand: function (f, cmd, src) {
+                    $U.Debug("Command {0}", cmd);
+                    var groupId = $(src).closest(".group-details").attr("data-id");
+                    switch (cmd) {
+                        case "add-members":                            
+                            addMembers(groupId);
+                            break;
+                        case "remove-members":
+                            var data = f.getData();
+                            var membersToRemove = [];
+                            $.each(data.members, function (i, item) {
+                                if (item.value) {
+                                    membersToRemove.push(item.dataItem);
+                                }
+                            });
+                            removeMembers(groupId, membersToRemove);
+                            break;
+                        case "save-group-changes":
+                            if (f.isValid()) {
+                                //alert("can save changes!");
+                                var data = f.getData();
+                                updateGroupProperties(groupId, data["group-name"], data["group-descr"]);
+                            }
+                            break;
+                        case "delete-group":
+                            $U.Confirm("Deleting a group will also delete all subgroups (if any). Please confirm.", function () {
+                                deleteGroup(groupId);
+                            });
+                            break;
+                        case "add-new-group":
+                            var id = $(".group-manager .group-details").attr("data-id");
+                            addNewGroup(id);
+                            break;
+
+                    }
+                },
+                OnChange: function (f, dataItem, checked) {
+                    $U.Debug("Changed {0} checked = {1}", dataItem, checked);
+                    if (dataItem === "group-name" || dataItem === "group-descr") {
+                        f.enableCommand("save-group-changes");
+                    }
+                    var data = f.getData();
+                    var count = 0;
+                    if (typeof data.members !== "undefined") {
+                        $.each(data.members, function (i, item) {
+                            if (item.value) {
+                                ++count;
+                            }
+                        });
+                        if (count > 0) {
+                            f.enableCommand("remove-members");
+                        } else {
+                            f.disableCommand("remove-members");
+                        }
+                    }
+                }
+            });
+            currentForm.show(function () {
+                switchToGroupTree();
+                loadGroupTree();
+            });
+        };
+        var addNewGroup = function (groupId) {
+            var url = "membershipapi/add/group";
+            var postData = { groupId: groupId };
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                var newGroupId = r.groupId;
+                gtv.Clear();
+                reloadGroupTree(function (node, item) {
+                    if (item.Id === newGroupId) {
+                        gtv.TriggerNode(node);
+                    }
+                });
+            });
+        };
+        var deleteGroup = function (groupId) {
+            var url = "membershipapi/delete/group";
+            var postData = { groupId: groupId };
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                gtv.Clear();
+                reloadGroupTree();
+                $(".group-content-panel .toolbar").hide();
+                $(".group-details-panel").empty();
+            });
+        }
+        var updateGroupProperties = function (groupId, name, description) {
+            var url = "membershipapi/update/group";
+            var postData = {groupId: groupId, name: name, descr: description};
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                $(".group-details .command-strip .message").text("Changes saved");
+                var selector = $U.Format(".group-tree span[data-id='{0}']", groupId);
+                $(selector).attr('title', description).text(name);
+            });
+        };
+        var removeMembers = function (groupId, members) {
+            var url = $U.Format("membershipapi/delete/groupmembers");
+            var postData = { groupId: groupId, members: members };
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                loadGroupDetails(groupId);
+            })
+        };
+        var addMembers = function (groupId) {
+            function addMembersToGroup(members) {
+                var url = "membershipapi/add/groupmembers";
+                var postData = { groupId: groupId, members: members };
+                $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                    loadGroupDetails(groupId);
+                });
+            }
+            var url = $U.Format("membershipapi/get/candidatemembers/{0}", groupId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                $.each(r, function (i, member) {
+                    $U.Debug("Candidate {0}: {1} ({2})", i, member.Name, member.EmailAddress);
+                });
+                var af = new $.fastnet$forms.CreateForm("template/get/membership-forms/selectmembers", {
+                    Title: "Select Members",
+                    IsModal: true,
+                    OnChange: function (f, dataItem, checked) {
+                        var data = f.getData();
+                        var count = 0;
+                        $.each(data.members, function (i, item) {
+                            if (item.value) {
+                                ++count;
+                            }
+                        });
+                        if (count > 0) {
+                            f.enableCommand("select-command");
+                        } else {
+                            f.disableCommand("select-command");
+                        }
+                    },
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "select-command":
+                                var data = f.getData();
+                                var membersToAdd = [];
+                                $.each(data.members, function (i, item) {
+                                    if (item.value) {
+                                        membersToAdd.push(item.dataItem);
+                                    }
+                                });
+                                f.close();
+                                addMembersToGroup(membersToAdd);
+                                break;
+                        }
+                    }
+                }, { Members: r });
+                af.disableCommand("select-command");
+                af.show();
+            });
+        };
+        var gtv = null;
+        var loadGroupDetailsForm = function (data) {
+            var validator = new $.fastnet$validators.Create(currentForm);
+            currentForm.loadSubform(".group-details-panel", { templateUrl: "template/get/membership-forms/groupdetails" }, data, function () {
+                currentForm.disableCommand("remove-members");
+                currentForm.disableCommand("save-group-changes");
+                validator.AddIsRequired("group-name", "A name is required");
+                validator.AddIsRequired("group-descr", "A description is required");
+                var buttonText = $U.Format("{0}: Add New Subgroup", data.Group.Name);
+                $(".group-manager button[data-cmd='add-new-group']").text(buttonText);
+            });
+        };
+        var loadGroupDetails = function (groupId) {
+            var url = $U.Format("membershipapi/get/group/{0}", groupId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                if (r.Group.Name === "Everyone" || r.Group.Name === "Anonymous") {
+                    $(".group-content-panel .toolbar").hide();
+                } else {
+                    $(".group-content-panel .toolbar").show();
+                }
+                loadGroupDetailsForm(r);
+                //if (!r.Group.IsSystem || !r.Group.HasSystemDefinedMembers) {
+                //    loadGroupDetailsForm(r);
+                //}
+            });
+        };
+        var loadGroupTree = function () {
+            gtv = $.fastnet$treeview.NewTreeview({
+                EnableContextMenu: false,
+                Selector: ".group-manager .group-tree",
+                OnSelectChanged: function (nodeData) {
+                    loadGroupDetails(nodeData.userData);
+                }
+            });
+            reloadGroupTree();
+            //var url = "membershipapi/get/groups";
+            //$.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+            //    //debugger;
+            //    loadGroupTreeData(null, r);
+            //});
+        };
+        var reloadGroupTree = function (onItemLoad) {
+            var url = "membershipapi/get/groups";
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                //debugger;
+                loadGroupTreeData(null, r, onItemLoad);
+            });
+        };
+        var loadGroupTreeData = function (node, data, onItemLoad) {
+            $.each(data, function (index, item) {
+                var fmt = "<img class='group-icon' src='/areas/membership/content/images/user_group.png' ></img><span data-id='{2}' class='title' title='{1}' >{0}</span>";
+                var html = $U.Format(fmt, item.Name, item.Description, item.Id);
+                var newNode = gtv.AddNode(node, {
+                    NodeHtml: html,
+                    Title: item.Name,
+                    UserData: item.Id,
+                    ChildCount: item.SubgroupTotal
+                });
+                gtv.SetNodeLoaded(newNode);
+                if (item.Name === "Everyone" || item.Name === "AllMembers") {
+                    gtv.OpenNode(newNode);
+                }
+                if ($.isFunction(onItemLoad)) {
+                    onItemLoad(newNode, item);
+                }
+                if (item.SubgroupTotal > 0) {
+                    var url = $U.Format("membershipapi/get/groups/{0}", item.Id);
+                    $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                        loadGroupTreeData(newNode, r, onItemLoad);
+                    });
+                }
+                
+            });
+
+        };
+        function switchToGroupTree() {
+            $(".group-tree-panel").addClass("active");
+            $(".group-content-panel").removeClass("active");
+        }
         membership.prototype.start = function (options) {
             function bindNavigation() {
                 $(".menu-overlay button").on("click", function () {

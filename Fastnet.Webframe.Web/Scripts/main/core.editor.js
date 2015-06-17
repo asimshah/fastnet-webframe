@@ -669,7 +669,6 @@
             if ($T.IsDirty()) {
                 var mb = new $.fastnet$messageBox({
                     CancelButton: true
-
                 });
                 var message = "There are unsaved changes. Closing edit mode will discard these changes! Please confirm.";
                 mb.show(message, function (cmd) {
@@ -840,7 +839,7 @@
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), true);
         },
         OpenEditor: function (panelName) {
-            var selector = "." + panelName;
+            var selector = "." + panelName;// + " .editable-content";
             var originalHtml = $(selector).html();
             tinymce.baseURL = $T.tinymceUrl;
             tinymce.init({

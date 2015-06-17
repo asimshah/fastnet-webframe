@@ -1,4 +1,5 @@
 ﻿(function ($) {
+    // Version 1.0.0
     var $T;
     var $U;
     $.fastnet$contextmenu = {
