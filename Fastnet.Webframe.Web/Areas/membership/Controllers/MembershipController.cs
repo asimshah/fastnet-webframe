@@ -1,5 +1,6 @@
 ﻿using Fastnet.Common;
 using Fastnet.Webframe.CoreData;
+using cd = Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Areas.membership.Models;
 using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.Web.Controllers;
@@ -16,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Newtonsoft.Json.Linq;
 
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
@@ -36,6 +38,161 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             {
                 return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false });
             }
+        }
+        [HttpGet]
+        [Route("get/groups/{parentId?}")]
+        public async Task<HttpResponseMessage> GetGroups(long? parentId = null)
+        {
+            IEnumerable<cd.Group> groups = null;
+            cd.Group parent = null;
+            if (parentId.HasValue)
+            {
+                parent = await DataContext.Groups.FindAsync(parentId.Value);
+                groups = await DataContext.Groups.Where(x => x.ParentGroupId == parent.GroupId).OrderBy(x => x.Name).ToArrayAsync();
+            }
+            else
+            {
+                cd.Group[] list = new cd.Group[1];
+                list[0] = await DataContext.Groups.SingleAsync(x => x.ParentGroup == null);
+                groups = list;
+            }
+            
+            var result = groups.Select(x => GetClientSideGroupListDetails(x));
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        [Route("get/group/{groupId}")]
+        public async Task<HttpResponseMessage> GetGroupDetails(long groupId)
+        {
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            var members = group.Members.Where(m => !m.IsAdministrator).OrderBy(x => x.LastName);
+            var resultMembers = members.Select(m => GetClientSideMemberIndexDetails(m));
+            var result = new
+            {
+                Group = GetClientSideGroupListDetails(group),
+                Members = resultMembers,// members.Select(m => GetClientSideMemberIndexDetails(m))
+                HasMembers = resultMembers.Count() > 0
+            };
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        [Route("get/candidatemembers/{groupId}")]
+        public async Task<HttpResponseMessage> GetCandidateMembers(long groupId)
+        {
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            var members = await DataContext.Members.Where(m => !m.IsAdministrator).ToArrayAsync();
+            //var groupMembers = group.Members.ToArrayAsync();
+            var candidates = members.Except(group.Members.ToArray()).OrderBy(x => x.LastName);
+            var resultCandidates = candidates.Select(m => GetClientSideMemberIndexDetails(m));
+            var result = new
+            {
+                Members = resultCandidates,
+                HasMembers = resultCandidates.Count() > 0
+            };
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpPost]
+        [Route("delete/group")]
+        public async Task<HttpResponseMessage> DeleteGroup(dynamic data)
+        {
+            long groupId = data.groupId;
+            List<cd.Group> childGroups = new List<cd.Group>();
+            Action<cd.Group> deleteChildren = null;
+            deleteChildren = (g) =>
+            {
+                var childgroups = g.Children.ToArray();
+                foreach (var cg in childgroups)
+                {
+                    deleteChildren(cg);
+                }
+                DataContext.Groups.Remove(g);
+            };
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            deleteChildren(group);
+            DataContext.Groups.Remove(group);
+            await DataContext.SaveChangesAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [HttpPost]
+        [Route("update/group")]
+        public async Task<HttpResponseMessage> UpdateGroup(dynamic data)
+        {
+            long groupId = data.groupId;
+            string name = data.name;
+            string description = data.descr;
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            group.Name = name;
+            group.Description = description;
+            await DataContext.SaveChangesAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [HttpPost]
+        [Route("add/group")]
+        public async Task<HttpResponseMessage> AddGroup(dynamic data)
+        {
+            Func< IEnumerable<string>, string> getUniqueName = (existingNames) =>
+            {
+                string fmt = "New Group";
+                int count = 1;
+                bool finished = false;
+                string result = fmt;
+                do
+                {
+                    if (!existingNames.Contains(result, StringComparer.InvariantCultureIgnoreCase))
+                    {
+                        finished = true;
+                    }
+                    else
+                    {
+                        result = string.Format("{0} ({1})", fmt, ++count);                        
+                    }
+                } while (!finished);
+                return result;
+            };
+            long groupId = data.groupId;
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            string name = getUniqueName(group.Children.Select(x => x.Name));
+            cd.Group ng = new cd.Group
+            {
+                ParentGroup = group,
+                Name = name,
+                Description = ""
+            };
+            DataContext.Groups.Add(ng);
+            await DataContext.SaveChangesAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { groupId = ng.GroupId });
+        }
+        [HttpPost]
+        [Route("add/groupmembers")]
+        public async Task<HttpResponseMessage> AddGroupMembersd(dynamic data)
+        {
+            long groupId = data.groupId;
+            JArray membersArray = data.members;
+            string[] members = membersArray.ToObject<string[]>();
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            foreach (string key in members)
+            {
+                Member m = await DataContext.Members.FindAsync(key);
+                group.Members.Add(m);
+            }
+            await DataContext.SaveChangesAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [HttpPost]
+        [Route("delete/groupmembers")]
+        public async Task<HttpResponseMessage> DeleteGroupMembers(dynamic data)
+        {
+            long groupId = data.groupId;
+            JArray membersArray = data.members;
+            string[] members = membersArray.ToObject<string[]>();
+            cd.Group group = await DataContext.Groups.FindAsync(groupId);
+            foreach (string key in members)
+            {
+                Member m = await DataContext.Members.FindAsync(key);
+                group.Members.Remove(m);
+            }
+            await DataContext.SaveChangesAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         [HttpGet]
         [Route("get/member/{memberId}")]
@@ -314,7 +471,29 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 Name = m.Fullname,
                 IsAdministrator = m.IsAdministrator,
                 IsDisabled = m.Disabled,
-                EmailConfirmed = m.EmailAddressConfirmed
+                EmailConfirmed = m.EmailAddressConfirmed,
+                EmailAddress = m.EmailAddress,
+            };
+        }
+
+        private object GetClientSideGroupListDetails(cd.Group g)
+        {
+            //[Flags]
+            //public enum GroupTypes
+            //{
+            //    None = 0,
+            //    User = 1,
+            //    System = 2,
+            //    SystemDefinedMembers = 4
+            //}
+            return new 
+            {
+                Id = g.GroupId,
+                Name = g.Name,
+                Description = g.Description,
+                IsSystem = g.Type.HasFlag(GroupTypes.System),
+                HasSystemDefinedMembers = g.Type.HasFlag(GroupTypes.SystemDefinedMembers),
+                SubgroupTotal = g.Children.Count()
             };
         }
     }

@@ -122,6 +122,7 @@
             return url;
         },
         LoadStartPage: function (startPage) {
+            //debugger;
             var startUrl = "";
             if (typeof startPage === "undefined" || startPage === null || startPage === "") {
                 startUrl = "pageapi/home";
@@ -176,7 +177,6 @@
             });
         },
         QueryAuthentication: function () {
-            //window.history.pushState({ href: url }, null, url);
             $.when(
                 $U.AjaxGet({ url: "account/currentuser" }, true)
                 ).then(function (r) {
@@ -215,19 +215,21 @@
         SetContent: function (panelName, pageInfo) {
             var styleList = pageInfo.styleList;
             var html = pageInfo.html;
-            var styleId = $U.Format("{0}-style", panelName.toLowerCase());
-            var style = $U.Format("<style id='{0}'>", styleId);
-            $.each(styleList, function (i, item) {
-                style += $U.Format(".{0} {1}", panelName, item.Selector);
-                style += " {";
-                $.each(item.Rules, function (j, rule) {
-                    style += rule + "; ";
+            if (typeof styleList !== "string") {
+                var styleId = $U.Format("{0}-style", panelName.toLowerCase());
+                var style = $U.Format("<style id='{0}'>", styleId);
+                $.each(styleList, function (i, item) {
+                    style += $U.Format(".{0} {1}", panelName, item.Selector);
+                    style += " {";
+                    $.each(item.Rules, function (j, rule) {
+                        style += rule + "; ";
+                    });
+                    style += "} ";
                 });
-                style += "} ";
-            });
-            style += "</style>";
-            $("head").find("#" + styleId).remove();
-            $("head").append($(style));
+                style += "</style>";
+                $("head").find("#" + styleId).remove();
+                $("head").append($(style));
+            }
             $("." + panelName).off();
             var content = $(html);
             content.find('a').on("click", function (e) {
@@ -248,10 +250,6 @@
             $T.options = options;
             if ($T.options.ClientSideLog) {
                 $.fastnet$utilities.EnableClientSideLog();
-                //$.fastnet$utilities.clientSideLog = $T.options.ClientSideLog;
-                //if ($T.options.ClientSideLog) {
-                //    $(".fastnet-error-panel").removeClass("hide");
-                //}
             }
             $T.LoadStartPage(options.StartPage);
             if (options.HasAction) {
@@ -268,13 +266,7 @@
                     //debugger;
                 }
             }
-            //setTimeout(function () {
-            //    setTimeout(function () {
-            //        $U.UnBlock(".SitePanel");
-            //    }, 5000);
-            //    $U.Block(".SitePanel");
-            //    //$(".SitePanel").block({  message: "<i class='fa fa-cog fa-spin'></i>", css: { backgroundColor: 'white' } });
-            //}, 3000);
+
 
         },
         UpdatePanel: function (panelName, currentPageId, newPageId) {

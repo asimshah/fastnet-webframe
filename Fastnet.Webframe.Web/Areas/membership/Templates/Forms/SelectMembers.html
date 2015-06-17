@@ -1,0 +1,15 @@
+﻿<div>
+    <div class="form-body membership select-members">
+        <div class="form-group-sm member-list">
+            {{#Members}}
+            <div class="member-item"><input class="" type="checkbox" data-item="{{Id}}" data-array="members" /><span>{{Name}} ({{EmailAddress}})</span></div>
+            {{/Members}}
+        </div>
+    </div>
+    <div class="form-footer">
+        <div class="form-group">
+            <button class="btn btn-primary" data-cmd="select-command">Select</button>
+            <button class="btn btn-default" data-cmd="cancel">Cancel</button>
+        </div>
+    </div>
+</div>
