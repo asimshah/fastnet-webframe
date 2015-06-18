@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.9
+    // Version 1.0.12
     var $T;
     var $U;
     var modelessTemplate =
@@ -97,6 +97,7 @@
     var formCount = 0;
     function frm(template, options, data) {
         this.options = $.extend({
+            
             _container: ".forms-container",
             _template: template,
             _id: $U.Format("fn-{0}", formCount++),
@@ -104,6 +105,7 @@
             _froot: null, //current form's root element, i.e with an Id of _id
             _validators: {},
             _validationStateUpdated: false,
+            BaseZIndex: 12000,
             DisableSystemClose: false,
             Title: "Form Title",
             IsModal: true,
@@ -478,7 +480,8 @@
             if (t.isMainForm) {
                 if (me.options.IsModal) {
                     me.options._froot.on("shown.bs.modal", function () {
-                        var zIndex = 1040 + ((formList.length) * 10);
+                        //var zIndex = 1040 + ((formList.length) * 10);
+                        var zIndex = me.options.BaseZIndex + (formCount * 10);
                         $(this).css('z-index', zIndex);
                     });
                     me.options._froot.on("hidden.bs.modal", function () {

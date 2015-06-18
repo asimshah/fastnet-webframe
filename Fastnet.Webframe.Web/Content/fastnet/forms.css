@@ -24,9 +24,6 @@ input[readonly] {
   float: right;
   margin-top: 12px;
 }
-.modal-dialog {
-  z-index: 12001;
-}
 .modal-dialog .modal-content {
   display: table;
   width: 100%;
