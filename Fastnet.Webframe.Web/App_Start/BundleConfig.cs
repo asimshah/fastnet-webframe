@@ -55,7 +55,9 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
-                    "~/Scripts/main/core.page.js"
+                    "~/Scripts/main/core.page.js",
+                    "~/Scripts/main/core.storebrowser.js",
+                    "~/Scripts/main/core.test.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/identity")
@@ -89,7 +91,7 @@ namespace Fastnet.Webframe.Web
                   "~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
                   .Include("~/Content/bootstrap.css",
                   "~/Content/fastnet/treeview.css",
-                  "~/Content/main/forms.css",
+                  "~/Content/fastnet/forms.css",
                   "~/Content/main/main.css"));
 
             bundles.Add(new StyleBundle("~/Content/datepicker/css").Include(

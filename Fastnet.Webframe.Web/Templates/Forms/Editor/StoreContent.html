@@ -1,0 +1,23 @@
+﻿<div class="folder-content">
+    <div class="header">
+        <div class="row">
+            <div class="url">Url</div>
+            <div class="name">Name</div>
+            <div class="remarks"></div>
+            <div class="edit-button"></div>
+            <div class="delete-button"></div>
+        </div>
+    </div>
+    <div class="data">
+        {{#data}}
+        <div class="row" data-id="{{Id}}" data-type="{{Type}}" data-url="{{Url}}" data-landing-page="{{LandingPage}}">
+
+            <div class="url"><div>{{Url}}</div></div>
+            <div class="name"><div>{{Name}}</div><div class="size">{{Size}}</div></div>
+            <div class="remarks"><div>{{Remarks}}</div></div>
+            <div class="edit-button buttons"><div><span class="fa fa-pencil-square-o edit" title="Edit properties"></span></div></div>
+            <div class="delete-button buttons"><div><span class="fa fa-times delete" title="Delete"></span></div></div>
+        </div>
+        {{/data}}
+    </div>
+</div>

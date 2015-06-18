@@ -788,8 +788,26 @@
         },
         BrowseForLink: {
             Start: function (ctx, onClose) {
-                var pb = new pageBrowser({
-                    Context: ctx,
+                //var pb = new pageBrowser({
+                //    Context: ctx,
+                //    OnClose: onClose,
+                //    OnCancel: function () {
+                //        //$U.Debug("Page browser closed with a cancel/system-close");
+                //    },
+                //    OnSelect: function (ctx, selectedItem) {
+                //        //$U.Debug("selected url {0}", selectedItem.Url);
+                //        ctx.setData("linkurl", selectedItem.Url);
+                //        if (ctx.isValid()) {
+                //            ctx.enableCommand("insertlink");
+                //        } else {
+                //            ctx.disableCommand("insertlink");
+                //        }
+                //    }
+                //});
+                //pb.Show();
+                var sb = new StoreBrowser({
+                //var pb = new pageBrowser({
+                    User: ctx,
                     OnClose: onClose,
                     OnCancel: function () {
                         //$U.Debug("Page browser closed with a cancel/system-close");
@@ -804,7 +822,7 @@
                         }
                     }
                 });
-                pb.Show();
+                sb.show();
             }
         },
         IsDirty: function () {
@@ -827,7 +845,9 @@
                 case "save-changes":
                     $T.SavePageChanges();
                     break;
-
+                case "open-store-browser":
+                    $T.OpenStoreBrowser();
+                    break;
                 default:
                     alert("This feature is not implemented");
                     break;
@@ -968,6 +988,11 @@
                 $T.cleanupTinymce();
                 $(window).off(".editor");
             })
+        },
+        OpenStoreBrowser: function () {
+            //$(".mce-resizehandle").hide();
+            var sb = new StoreBrowser();
+            sb.show();
         },
         onwindowresize: function () {
             var totalHeight = $(window).height();

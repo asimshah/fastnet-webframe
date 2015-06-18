@@ -164,12 +164,20 @@ body {
 
             &:first-child {
                 width: 100%;
+                .btn {
+                    margin-right: 4px;
+                }
             }
 
             button {
                 margin-top: 2px;
                 line-height: 1.4;
             }
+        }
+        // ensure that the testing button is hidden in production
+        .testing-command {
+            //display:none;
+            margin-right: 4px;
         }
     }
 }

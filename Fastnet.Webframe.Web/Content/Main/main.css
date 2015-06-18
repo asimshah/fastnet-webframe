@@ -214,9 +214,15 @@ body {
 .edit-panel .edit-toolbar div:first-child {
   width: 100%;
 }
+.edit-panel .edit-toolbar div:first-child .btn {
+  margin-right: 4px;
+}
 .edit-panel .edit-toolbar div button {
   margin-top: 2px;
   line-height: 1.4;
+}
+.edit-panel .edit-toolbar .testing-command {
+  margin-right: 4px;
 }
 .login-status {
   position: relative;
