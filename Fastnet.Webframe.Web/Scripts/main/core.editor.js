@@ -654,7 +654,7 @@
             });
             $(".edit-panel").addClass("closed");//.height(8);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
-            $(".edit-toolbar button").on("click", function (e) {
+            $(".edit-toolbar button.editor-command").on("click", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var cmd = $(this).attr("data-cmd");
