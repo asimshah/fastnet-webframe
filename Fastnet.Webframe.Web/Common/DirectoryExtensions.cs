@@ -1,4 +1,5 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.EventSystem;
+using Fastnet.Webframe.CoreData;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,9 +41,9 @@ namespace Fastnet.Webframe.Web.Common
                     return dir.DirectoryAccessRules;
                 }
             }
-            catch (Exception )
+            catch (Exception xe)
             {
-                Debugger.Break();
+                Log.Write(xe);
                 throw;
             }
         }

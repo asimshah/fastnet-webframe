@@ -36,7 +36,7 @@ namespace Fastnet.Webframe.CoreData
             catch (Exception xe)
             {
                 Log.Write(xe);
-                Debugger.Break();
+                //Debugger.Break();
                 throw;
             }
         }

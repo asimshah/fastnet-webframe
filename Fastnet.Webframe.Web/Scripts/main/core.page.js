@@ -36,7 +36,9 @@
             $U = $.fastnet$utilities;
             $(window).bind('popstate', function (event) {
                 //Debug.writeln(location.href);
-                location.href = location.href;
+                if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
+                    location.href = location.href;
+                }
             });
         },
         ClearContent: function (panelName) {

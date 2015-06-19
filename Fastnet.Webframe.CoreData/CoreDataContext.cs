@@ -104,12 +104,14 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<CloneInformation> CloneInformata { get; set; }
 
         public DbSet<Directory> Directories { get; set; }
+        [Obsolete]
         public DbSet<DirectoryAccessRule> DirectoryAccessRules { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<FileChunk> FileChunks { get; set; }
         public DbSet<Font> Fonts { get; set; }
 
         public DbSet<Group> Groups { get; set; }
+        public DbSet<DirectoryGroup> DirectoryGroups { get; set; }
         //public DbSet<GroupClientApp> GroupClientApps { get; set; }
         //public DbSet<GroupMember> GroupMembers { get; set; }
         //public DbSet<GroupRegistrationKey> GroupRegistrationKeys { get; set; }
@@ -244,6 +246,31 @@ namespace Fastnet.Webframe.CoreData
                 // this will need addtion in cases of a v4 upgrade
                 WriteMainStylesheets();
                 //ClearCustomStylesheets();
+            }
+            EnsureAnonymousMember();
+        }
+
+        private void EnsureAnonymousMember()
+        {
+            var anonymous = ctx.Members.SingleOrDefault(x => x.IsAnonymous);
+            if (anonymous == null)
+            {
+                anonymous = new Member
+                {
+                    Id = "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz", // this can never be a ligitimate guid
+                    EmailAddress = "",
+                    EmailAddressConfirmed = true,
+                    FirstName = "",
+                    LastName = "Anonymous",
+                    CreationDate = DateTime.UtcNow,
+                    PlainPassword = "",
+                    IsAnonymous = true
+                };
+                ctx.Members.Add(anonymous);
+                Group.Anonymous.Members.Add(anonymous);
+                ctx.SaveChanges();
+                // **NB** the single anonymous memner is NOT added to the Identity system as
+                // no one can login as anonymous (by definition)
             }
         }
 

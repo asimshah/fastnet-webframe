@@ -67,7 +67,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("")]
         public async Task<ActionResult> Index(string id = null)
         {
-            var memberCount = DataContext.Members.Count();
+            var memberCount = DataContext.Members.Where(x => !x.IsAnonymous).Count();
             //Debug.Print("Member count = {0}", memberCount);
             if (memberCount == 0)
             {
@@ -507,7 +507,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("account/test")]
         public ActionResult Test1()
         {
-            Debugger.Break();
+            //Debugger.Break();
             return new EmptyResult();
         }
         private ActionResult RedirectToLocal(string returnUrl)
@@ -563,6 +563,10 @@ namespace Fastnet.Webframe.Web.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+            }
+            else
+            {
+                member = DataContext.Members.Single(x => x.IsAnonymous);
             }
             this.SetCurrentMember(member);
         }

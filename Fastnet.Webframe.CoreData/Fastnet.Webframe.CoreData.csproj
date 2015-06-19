@@ -167,7 +167,7 @@
     <Compile Include="CoreDbInitializer.cs" />
     <Compile Include="CSS\CSSRule.cs" />
     <Compile Include="Directory.cs" />
-    <Compile Include="DirectoryAccessRule.cs" />
+    <Compile Include="DirectoryGroup.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="FileChunk.cs" />
     <Compile Include="Font.cs" />

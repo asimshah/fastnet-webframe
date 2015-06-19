@@ -8,10 +8,7 @@ using System.Web;
 namespace Fastnet.Webframe.CoreData
 {
     public partial class Group //: IHierarchical<Group>
-    {
-        private ICollection<Member> members;
-        private ICollection<RegistrationKey> registrationKeys;
-        //
+    {        
         public long GroupId { get; set; }
         [ForeignKey("ParentGroup")]
         public long? ParentGroupId { get; set; }
@@ -22,22 +19,22 @@ namespace Fastnet.Webframe.CoreData
         public long? RegistrationKeyId { get; set; }
         [Timestamp]
         public byte[] TimeStamp { get; set; }
-
         public virtual Group ParentGroup { get; set; }
+        //
+        private ICollection<Member> members;
+        private ICollection<RegistrationKey> registrationKeys;
         public virtual ICollection<Group> Children { get; set; }
-
         public virtual ICollection<Member> Members
         {
             get { return members ?? (members = new HashSet<Member>()); }
             set { members = value; }
         }
-
-        public virtual ICollection<RegistrationKey> RegistrationKeys // this page hyperlinks to this document
+        public virtual ICollection<RegistrationKey> RegistrationKeys
         {
             get { return registrationKeys ?? (registrationKeys = new HashSet<RegistrationKey>()); }
             set { registrationKeys = value; }
         }
-
+        //
         [NotMapped]
         public string Fullpath
         {

@@ -41,6 +41,7 @@ namespace Fastnet.Webframe.CoreData
         public DateTime? PasswordResetEmailSentDate { get; set; }
         public string PlainPassword { get; set; }
         public bool IsAdministrator { get; set; }
+        public bool IsAnonymous { get; set; }
         //
         public string UserString1 { get; set; }
         public string UserString2 { get; set; }
