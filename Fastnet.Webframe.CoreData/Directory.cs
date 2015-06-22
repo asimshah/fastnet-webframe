@@ -8,7 +8,7 @@ using System.Web;
 namespace Fastnet.Webframe.CoreData
 {
 
-    public partial class Directory
+    public partial class Directory : Hierarchy<Directory>
     {
 
         public long DirectoryId { get; set; }
@@ -64,7 +64,14 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return getPath(); }
         }
-
+        public override Directory GetParent()
+        {
+            return this.ParentDirectory;
+        }
+        //public override Hierachy GetParent()
+        //{
+        //    return this.ParentDirectory;
+        //}
         private string getPath()
         {
             Action<List<string>, Directory> addParentName = null;
@@ -79,6 +86,22 @@ namespace Fastnet.Webframe.CoreData
             List<string> fragments = new List<string>();
             addParentName(fragments, this);
             return string.Join("/", fragments.ToArray().Reverse());
+        }
+        public IEnumerable<Group> AccessibleFrom()
+        {
+            // look up the directory hierarchy till you get to
+            // a directory (including this one) that has a one or more groups attached
+            // this set contains the groups that content in the current directory
+            // (i.e. this one) is restricted to.
+            // Note: if nothing else we should get to the root directory
+            // and find that restricted to Everyone
+            return this.SelfAndParents.First(p => p.DirectoryGroups.Select(dg => dg.Group).Count() > 0)
+                .DirectoryGroups.Select(x => x.Group);
+        }
+        public Page GetClosestLandingPage()
+        {
+            return this.SelfAndParents.First(x => x.Pages.Any(y => y.IsLandingPage))
+                .Pages.Single(z => z.IsLandingPage);
         }
     }
 }

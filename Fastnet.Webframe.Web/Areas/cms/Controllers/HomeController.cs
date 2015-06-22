@@ -5,12 +5,14 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Fastnet.Webframe.Web.Common;
+using Fastnet.Webframe.Mvc;
 
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RouteArea("cms")]
     //[RoutePrefix("reports")]
-    public class HomeController : Controller
+    [PermissionFilter(SystemGroups.Administrators, "CMS features are not available")]
+    public class HomeController : BaseMvcController
     {
 
         private CoreDataContext DataContext = Core.GetDataContext();
@@ -19,36 +21,38 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         //[Route("asimx")]
         public ActionResult Index()
         {
-            if (!IsPermitted())
-            {
-                return RedirectToAction("PermissionDenied");
-            }
-            PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            //if (!IsPermitted())
+            //{
+            //    return RedirectToAction("PermissionDenied");
+            //}
+            
+            //PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            PageContent bannerContent = Member.Anonymous.FindLandingPage()[ContentPanels.Banner];
             return View();
         }
-        [Route("permissiondenied")]
-        public ActionResult PermissionDenied()
-        {
-            return View();
-        }
-        private bool IsPermitted()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
-                Member member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
-                return Group.Editors.Members.Contains(member);
-            }
-            else
-            {
-                return false;
-            }
-        }
-        private void xxx()
-        {
-            Page home = DataContext.GetDefaultLandingPage();
-            PanelPage bannerpp = home.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == Panel.BannerPanel.PanelId);
-            Page bannerPage = bannerpp != null ? bannerpp.Page : null;
-        }
+        //[Route("permissiondenied")]
+        //public ActionResult PermissionDenied()
+        //{
+        //    return View();
+        //}
+        //private bool IsPermitted()
+        //{
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
+        //        Member member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+        //        return Group.Editors.Members.Contains(member);
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
+        //private void xxx()
+        //{
+        //    Page home = DataContext.GetDefaultLandingPage();
+        //    PanelPage bannerpp = home.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == Panel.BannerPanel.PanelId);
+        //    Page bannerPage = bannerpp != null ? bannerpp.Page : null;
+        //}
     }
 }

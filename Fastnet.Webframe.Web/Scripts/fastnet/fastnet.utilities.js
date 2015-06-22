@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.5
+    // Version 1.0.6
     // Notes
     // 1. moment.js is required (to mark log/debug with date time info)
     var $T;
@@ -62,7 +62,7 @@
                 cache = !noCache;
             }
             $(".ajax-error-message").empty();
-            $T.Debug("AjaxGet: {0}", args.url);
+            //$T.Debug("AjaxGet: {0}", args.url);
             //var url = encodeURIComponent(args.url);
             return $.ajax({
                 url: $T.rootUrl + args.url,

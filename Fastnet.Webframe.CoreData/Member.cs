@@ -79,6 +79,14 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return string.Format("{0} {1}", this.FirstName, this.LastName).Trim(); }
         }
+        public static Member Anonymous
+        {
+            get
+            {
+                CoreDataContext ctx = Core.GetDataContext();
+                return ctx.Members.Single(x => x.IsAnonymous);
+            }
+        }
         //
         public static string HashPassword(string password)
         {
@@ -225,6 +233,43 @@ namespace Fastnet.Webframe.CoreData
                         break;
                 }
             }
+        }
+        public bool CanView(Page page)
+        {
+            bool result = true;
+            var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
+            var pageAccessibleFrom = page.Directory.AccessibleFrom();
+            result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
+            return result;
+        }
+        public Page FindLandingPage()
+        {
+            var memberOf = GetAllGroups();// Groups; // i.e. direct membership
+            var directories = memberOf.SelectMany(g => g.DirectoryGroups).Select(dg => dg.Directory);
+            var pages = directories.Select(x => x.GetClosestLandingPage());
+            Debug.Assert(pages.Count() != 0);
+            if (pages.Count() > 1)
+            {
+                foreach (var lp in pages)
+                {
+                    Log.Write(EventSeverities.Warning, "Multiple home pages: Member {0}, page url {1}", this.Fullname, lp.Url);
+                }
+            }
+            return pages.First();
+        }
+        private IEnumerable<Group> GetAllGroups()
+        {
+            // this returns a flat list of all groups this member is in 
+            // including parent groups all the way to the root
+            List<Group> list = new List<Group>();
+            foreach (var g in this.Groups)
+            {
+                foreach (var pg in g.SelfAndParents)
+                {
+                    list.Add(pg);
+                }
+            }
+            return list;
         }
     }
     //public class DWHMember : Member

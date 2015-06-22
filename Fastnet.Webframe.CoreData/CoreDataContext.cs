@@ -63,6 +63,7 @@ namespace Fastnet.Webframe.CoreData
         WordMl,
         DocX
     }
+    [Flags]
     public enum Permission
     {
         [Description("View Pages")]
@@ -97,15 +98,15 @@ namespace Fastnet.Webframe.CoreData
         {
 
         }
-        public DbSet<AccessRule> AccessRules { get; set; }
+        //public DbSet<AccessRule> AccessRules { get; set; }
         //public DbSet<Activity> Activities { get; set; }
         public DbSet<Background> Backgrounds { get; set; }
         public DbSet<ClientApp> ClientApps { get; set; }
         public DbSet<CloneInformation> CloneInformata { get; set; }
 
         public DbSet<Directory> Directories { get; set; }
-        [Obsolete]
-        public DbSet<DirectoryAccessRule> DirectoryAccessRules { get; set; }
+        //[Obsolete]
+        //public DbSet<DirectoryAccessRule> DirectoryAccessRules { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<FileChunk> FileChunks { get; set; }
         public DbSet<Font> Fonts { get; set; }
@@ -124,7 +125,7 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<Menu> Menus { get; set; }
         public DbSet<Page> Pages { get; set; }
 
-        public DbSet<PageAccessRule> PageAccessRules { get; set; }
+        //public DbSet<PageAccessRule> PageAccessRules { get; set; }
         public DbSet<PageMarkup> PageMarkups { get; set; }
         public DbSet<Panel> Panels { get; set; }
         public DbSet<PanelPage> PanelPages { get; set; }
@@ -213,13 +214,6 @@ namespace Fastnet.Webframe.CoreData
     }
     public class DataSeeder
     {
-        // if the database is completely empty, i.e. new, then it must be populated with:
-        //  client applications
-        //  roles
-        //  groups
-        //  administrator member
-        //  version info
-        //  marked to force css creation
         private CoreDataContext ctx;
         public DataSeeder(CoreDataContext context)
         {
@@ -232,7 +226,7 @@ namespace Fastnet.Webframe.CoreData
             {
                 LoadLegacyData();
                 EnsureRequiredGroups();
-                EnsureAdministratorsInAdditionalGroups();
+                EnsureAdministratorInAdministratorsGroup();
                 SetSiteVersion("4.0.0.0");
                 //WriteCustomStylesheets();
             }
@@ -248,10 +242,26 @@ namespace Fastnet.Webframe.CoreData
                 //ClearCustomStylesheets();
             }
             EnsureAnonymousMember();
+            EnsureRootDirectoryIsEveryoneView();
+        }
+
+        private void EnsureRootDirectoryIsEveryoneView()
+        {
+            Group everyone = ctx.Groups.ToArray().Single(x => x.Name == SystemGroups.Everyone.ToString() && x.Type.HasFlag(GroupTypes.System));
+            var rootDirectory = ctx.Directories.Single(x => x.ParentDirectory == null);
+            if (rootDirectory.DirectoryGroups.Count() != 1 || rootDirectory.DirectoryGroups.First().Group.GroupId != everyone.GroupId || rootDirectory.DirectoryGroups.First().Permission != Permission.ViewPages)
+            {
+                var dgList = rootDirectory.DirectoryGroups.ToArray();
+                ctx.DirectoryGroups.RemoveRange(dgList);
+                DirectoryGroup dg = new DirectoryGroup { Directory = rootDirectory, Group = Group.Everyone, Permission = Permission.ViewPages };
+                ctx.DirectoryGroups.Add(dg);
+                ctx.SaveChanges();
+            }
         }
 
         private void EnsureAnonymousMember()
         {
+            Group anonymousGroup = ctx.Groups.ToArray().Single(x => x.Name == SystemGroups.Anonymous.ToString() && x.Type.HasFlag(GroupTypes.System));
             var anonymous = ctx.Members.SingleOrDefault(x => x.IsAnonymous);
             if (anonymous == null)
             {
@@ -267,13 +277,13 @@ namespace Fastnet.Webframe.CoreData
                     IsAnonymous = true
                 };
                 ctx.Members.Add(anonymous);
-                Group.Anonymous.Members.Add(anonymous);
+                anonymousGroup.Members.Add(anonymous);
                 ctx.SaveChanges();
                 // **NB** the single anonymous memner is NOT added to the Identity system as
                 // no one can login as anonymous (by definition)
             }
+            var test = ctx.Members.SingleOrDefault(x => x.IsAnonymous);
         }
-
         private void WriteCustomStylesheets()
         {
             var customStylesheetFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
@@ -493,15 +503,15 @@ namespace Fastnet.Webframe.CoreData
             Page bannerPage = AddPage(directory, "Site Banner.docx");
             Page homePage = AddHtmlPage(directory, "Home Page.html");
             homePage.IsLandingPage = true;
-            AccessRule rule = GetAccessRule(Permission.ViewPages, true);
+            //AccessRule rule = GetAccessRule(Permission.ViewPages, true);
             //int groupType = (int)GroupTypes.System | (int)GroupTypes.SystemDefinedMembers;
-            GroupTypes gt = GroupTypes.System | GroupTypes.SystemDefinedMembers;
-            Group group = ctx.Groups.Single(g => g.Name == "Everyone" && g.Type.HasFlag(gt));
-            PageAccessRule par = new PageAccessRule();
-            par.AccessRule = rule;
-            par.Group = group;
-            par.Page = homePage;
-            ctx.PageAccessRules.Add(par);
+            //GroupTypes gt = GroupTypes.System | GroupTypes.SystemDefinedMembers;
+            //Group group = ctx.Groups.Single(g => g.Name == "Everyone" && g.Type.HasFlag(gt));
+            //PageAccessRule par = new PageAccessRule();
+            //par.AccessRule = rule;
+            //par.Group = group;
+            //par.Page = homePage;
+            //ctx.PageAccessRules.Add(par);
             Page leftPage = AddHtmlPage(directory, "Left side panel.html");// AddPage(directory, "Left side panel.docx");
             //leftPage.IsSidePage = bannerPage.IsSidePage = true;
             ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = bPanel, Page = bannerPage, Timestamp = BitConverter.GetBytes(1) });
@@ -510,16 +520,16 @@ namespace Fastnet.Webframe.CoreData
 
             return homePage;
         }
-        private AccessRule GetAccessRule(Permission permission, bool allow)
-        {
-            AccessRule rule = ctx.AccessRules.SingleOrDefault(r => r.Allow == allow && r.Permission == permission);
-            if (rule == null)
-            {
-                rule = new AccessRule { Permission = permission, Allow = allow };
-                ctx.AccessRules.Add(rule);
-            }
-            return rule;
-        }
+        //private AccessRule GetAccessRule(Permission permission, bool allow)
+        //{
+        //    AccessRule rule = ctx.AccessRules.SingleOrDefault(r => r.Allow == allow && r.Permission == permission);
+        //    if (rule == null)
+        //    {
+        //        rule = new AccessRule { Permission = permission, Allow = allow };
+        //        ctx.AccessRules.Add(rule);
+        //    }
+        //    return rule;
+        //}
         private Page AddHtmlPage(Directory directory, string htmlFilename)
         {
             try
@@ -786,13 +796,13 @@ namespace Fastnet.Webframe.CoreData
                         Log.Write("legacyData: Groups loaded");
                         ll.LoadMembers();
                         Log.Write("legacyData: Members loaded");
-                        ll.LoadAccessRules();
-                        Log.Write("legacyData: AccessRules loaded");
+                        //ll.LoadAccessRules();
+                        //Log.Write("legacyData: AccessRules loaded");
                         ll.LoadBackgrounds();
                         Log.Write("legacyData: Backgrounds loaded");
                         ll.LoadDirectories();
                         Log.Write("legacyData: Directories loaded");
-                        ll.LoadDirectoryAccessRules();
+                        ll.LoadDirectoryGroups();
                         Log.Write("legacyData: DirectoryAccessRules loaded");
                         ll.LoadFonts();
                         Log.Write("legacyData: Fonts loaded");
@@ -806,8 +816,8 @@ namespace Fastnet.Webframe.CoreData
                         Log.Write("legacyData: Pages loaded");
                         ll.LoadPanelPages();
                         Log.Write("legacyData: PanelPages loaded");
-                        ll.LoadPageAccessRules();
-                        Log.Write("legacyData: PageAccessRules loaded");
+                        //ll.LoadPageAccessRules();
+                        //Log.Write("legacyData: PageAccessRules loaded");
                         ll.LoadImages();
                         Log.Write("legacyData: Images loaded");
                         ll.LoadSiteSettings();
@@ -896,7 +906,7 @@ namespace Fastnet.Webframe.CoreData
             Group editors = addgroup("Editors", "Site Editors - members who can add, modify and delete pages and folders" , GroupTypes.System, all);
             ctx.SaveChanges();
         }
-        private void EnsureAdministratorsInAdditionalGroups()
+        private void EnsureAdministratorInAdministratorsGroup()
         {
             var admingroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Administrators");
             var adminMembers = admingroup.Members.ToList();
@@ -905,19 +915,19 @@ namespace Fastnet.Webframe.CoreData
             {
                 adminMembers.Add(originalAdmin);
             }
-            var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Editors");
-            var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Designers");
-            foreach (Member m in adminMembers)
-            {
-                if (!editorsGroup.Members.Contains(m))
-                {
-                    editorsGroup.Members.Add(m);
-                }
-                if (!designersGroup.Members.Contains(m))
-                {
-                    designersGroup.Members.Add(m);
-                }
-            }
+            //var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Editors");
+            //var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Designers");
+            //foreach (Member m in adminMembers)
+            //{
+            //    if (!editorsGroup.Members.Contains(m))
+            //    {
+            //        editorsGroup.Members.Add(m);
+            //    }
+            //    if (!designersGroup.Members.Contains(m))
+            //    {
+            //        designersGroup.Members.Add(m);
+            //    }
+            //}
             ctx.SaveChanges();
         }
         private void SetSiteVersion(string version)
@@ -1004,7 +1014,7 @@ namespace Fastnet.Webframe.CoreData
     {
         private CoreDataContext coreDb;
         private ApplicationDbContext appDb;
-        private LDB.WebframeDataEntities wde;
+        private LDB.WebframeDataEntities legacyDb;
         private string configConnectionString;
         public LegacyLoader(CoreDataContext context, string configConnectionString)
         {
@@ -1012,24 +1022,24 @@ namespace Fastnet.Webframe.CoreData
             appDb = new ApplicationDbContext();
             this.configConnectionString = configConnectionString;
             string connectionString = GetEntityConnectionString(configConnectionString);
-            wde = new LDB.WebframeDataEntities(connectionString);
+            legacyDb = new LDB.WebframeDataEntities(connectionString);
         }
         public void Dispose()
         {
-            wde.Dispose();
+            legacyDb.Dispose();
         }
-        internal void LoadAccessRules()
-        {
-            foreach (var item in wde.AccessRules)
-            {
-                AccessRule ar = new AccessRule { Permission = (Permission)item.PermissionCode, Allow = item.Allow };
-                coreDb.AccessRules.Add(ar);
-            }
-            coreDb.SaveChanges();
-        }
+        //internal void LoadAccessRules()
+        //{
+        //    foreach (var item in legacyDb.AccessRules)
+        //    {
+        //        AccessRule ar = new AccessRule { Permission = (Permission)item.PermissionCode, Allow = item.Allow };
+        //        coreDb.AccessRules.Add(ar);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
         internal void LoadBackgrounds()
         {
-            foreach (var item in wde.Backgrounds)
+            foreach (var item in legacyDb.Backgrounds)
             {
                 Background bg = new Background { Colour = item.Colour, BackgroundImageUrl = item.BackgroundImageUrl, BackgroundPosition = item.BackgroundPosition, BackgroundRepeat = item.BackgroundRepeat };
                 coreDb.Backgrounds.Add(bg);
@@ -1038,7 +1048,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadClientApps()
         {
-            foreach (var item in wde.ClientApps)
+            foreach (var item in legacyDb.ClientApps)
             {
                 ClientApp ca = new ClientApp { Name = item.Name, IsInstalled = item.IsInstalled, Url = item.Url };
                 coreDb.ClientApps.Add(ca);
@@ -1057,39 +1067,45 @@ namespace Fastnet.Webframe.CoreData
                     addDirectory(child, g);
                 }
             };
-            foreach (var item in wde.Directories.Where(g => g.ParentDirectory == null))
+            foreach (var item in legacyDb.Directories.Where(g => g.ParentDirectory == null))
             {
                 addDirectory(item, null);
             }
             coreDb.SaveChanges();
         }
-        internal void LoadDirectoryAccessRules()
+        internal void LoadDirectoryGroups()
         {
-            foreach (var item in wde.DirectoryAccessRules)
+            foreach (var item in legacyDb.DirectoryAccessRules)
             {
                 Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
                 Group g = coreDb.Groups.ToArray().First(x => x.Fullpath == item.Group.Fullpath);
-                AccessRule ar = coreDb.AccessRules.First(x => ((int)x.Permission) == ((int)item.AccessRule.Permission) && x.Allow == item.AccessRule.Allow);
-                DirectoryAccessRule dar = new DirectoryAccessRule { Directory = d, Group = g, AccessRule = ar };
-                coreDb.DirectoryAccessRules.Add(dar);
+                DirectoryGroup dg = coreDb.DirectoryGroups.Local.SingleOrDefault(x => x.DirectoryId == d.DirectoryId && x.GroupId == g.GroupId);
+                if (dg == null)
+                {
+                    dg = new DirectoryGroup { Directory = d, Group = g, Permission = Permission.ViewPages };
+                    coreDb.DirectoryGroups.Add(dg);
+                }
+                //AccessRule ar = coreDb.AccessRules.First(x => ((int)x.Permission) == ((int)item.AccessRule.Permission) && x.Allow == item.AccessRule.Allow);
+                //DirectoryAccessRule dar = new DirectoryAccessRule { Directory = d, Group = g, AccessRule = ar };
+                //coreDb.DirectoryAccessRules.Add(dar);
             }
             coreDb.SaveChanges();
         }
-        internal void LoadPageAccessRules()
-        {
-            foreach (var item in wde.PageAccessRules)
-            {
-                Page p = coreDb.Pages.Find(item.Page.PageId);
-                Group g = coreDb.Groups.ToArray().First(x => x.Fullpath == item.Group.Fullpath);
-                AccessRule ar = coreDb.AccessRules.First(x => ((int)x.Permission) == ((int)item.AccessRule.Permission) && x.Allow == item.AccessRule.Allow);
-                PageAccessRule par = new PageAccessRule { Page = p, Group = g, AccessRule = ar };
-                coreDb.PageAccessRules.Add(par);
-            }
-            coreDb.SaveChanges();
-        }
+        //internal void LoadPageAccessRules()
+        //{
+        //    foreach (var item in legacyDb.PageAccessRules)
+        //    {
+        //        Page p = coreDb.Pages.Find(item.Page.PageId);
+        //        Group g = coreDb.Groups.ToArray().First(x => x.Fullpath == item.Group.Fullpath);
+        //        AccessRule ar = coreDb.AccessRules.First(x => ((int)x.Permission) == ((int)item.AccessRule.Permission) && x.Allow == item.AccessRule.Allow);
+        //        PageAccessRule par = new PageAccessRule { Page = p, Group = g, AccessRule = ar };
+        //        coreDb.PageAccessRules.Add(par);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
         internal void LoadPages()
         {
-            foreach (var item in wde.Pages)
+            foreach (var item in legacyDb.Pages)
             {
                 Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
                 Page p = new Page
@@ -1124,7 +1140,7 @@ namespace Fastnet.Webframe.CoreData
                 coreDb.PageMarkups.Add(markup);
             }
             // second pass to collect links
-            foreach (var item in wde.Pages)
+            foreach (var item in legacyDb.Pages)
             {
                 foreach (var mpl in item.MarkupPageLinks)
                 {
@@ -1143,7 +1159,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadDocuments()
         {
-            foreach (var item in wde.Documents)
+            foreach (var item in legacyDb.Documents)
             {
                 Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
                 Document doc = new Document
@@ -1165,7 +1181,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadFonts()
         {
-            foreach (var item in wde.Fonts)
+            foreach (var item in legacyDb.Fonts)
             {
                 Font f = new Font { Name = item.Name, PointSize = item.PointSize, Style = item.Style, Weight = item.Weight };
                 coreDb.Fonts.Add(f);
@@ -1174,7 +1190,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadRegistrationKeys()
         {
-            foreach (var item in wde.RegistrationKeys)
+            foreach (var item in legacyDb.RegistrationKeys)
             {
                 RegistrationKey r = new RegistrationKey { Key = item.Key, Description = item.Description, EmailTemplate = item.EmailTemplate };
                 coreDb.RegistrationKeys.Add(r);
@@ -1207,7 +1223,7 @@ namespace Fastnet.Webframe.CoreData
                     addGroup(child, g);
                 }
             };
-            foreach (var item in wde.Groups.Where(g => g.ParentGroup == null))
+            foreach (var item in legacyDb.Groups.Where(g => g.ParentGroup == null))
             {
                 addGroup(item, null);
             }
@@ -1235,7 +1251,7 @@ namespace Fastnet.Webframe.CoreData
                     addPanel(child, panel);
                 }
             };
-            foreach (var item in wde.Panels.Where(g => g.ParentPanel == null))
+            foreach (var item in legacyDb.Panels.Where(g => g.ParentPanel == null))
             {
                 addPanel(item, null);
             }
@@ -1243,7 +1259,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadPanelPages()
         {
-            foreach (var item in wde.PanelPages)
+            foreach (var item in legacyDb.PanelPages)
             {
                 Panel panel = coreDb.Panels.Single(x => x.Name == item.Panel.Name);
                 Page cp = coreDb.Pages.Find(item.CentrePage.PageId);
@@ -1255,7 +1271,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadStyles()
         {
-            foreach (var item in wde.Styles)
+            foreach (var item in legacyDb.Styles)
             {
                 Background b = FindBackground(item.Background);
                 Font font = FindFont(item.Font);
@@ -1282,7 +1298,7 @@ namespace Fastnet.Webframe.CoreData
             {
                 try
                 {
-                    foreach (var item in wde.Members.OrderBy(x => x.UserId))
+                    foreach (var item in legacyDb.Members.OrderBy(x => x.UserId))
                     {
                         if (item.Name == "Administrator$")
                         {
@@ -1356,7 +1372,7 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadSiteSettings()
         {
-            foreach (var item in wde.SiteSettings)
+            foreach (var item in legacyDb.SiteSettings)
             {
                 SiteSetting ss = new SiteSetting { Name = item.Name, Value = item.Value };
                 if (ss.Name == "OnLineBookingClosed")
@@ -1407,7 +1423,7 @@ namespace Fastnet.Webframe.CoreData
                             if (srcValue.StartsWith("image/"))
                             {
                                 long pk = Convert.ToInt64(srcValue.Substring(6));
-                                LDB.TopicImage ti = wde.TopicImages.SingleOrDefault(x => x.TopicImageId == pk);
+                                LDB.TopicImage ti = legacyDb.TopicImages.SingleOrDefault(x => x.TopicImageId == pk);
                                 Image image = coreDb.CreateNewImage();
                                 image.CreatedBy = p.CreatedBy;
                                 image.CreatedOn = p.CreatedOn;
@@ -1485,7 +1501,7 @@ namespace Fastnet.Webframe.CoreData
                     addMenu(child, menu);
                 }
             };
-            foreach (var item in wde.Menus.Where(g => g.ParentMenu == null))
+            foreach (var item in legacyDb.Menus.Where(g => g.ParentMenu == null))
             {
                 addMenu(item, null);
             }

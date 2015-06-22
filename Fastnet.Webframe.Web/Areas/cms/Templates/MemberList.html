@@ -15,7 +15,12 @@
         <tbody>
             {{#data}}
             <tr class="{{#Disabled}}disabled{{/Disabled}} {{^EmailConfirmed}}waiting-activation{{/EmailConfirmed}}" data-id="{{Id}}">
-                <td><div class="email-address">{{EmailAddress}}</div></td>
+                <td>
+                    <div class="email-address">{{EmailAddress}}</div>
+                    {{#Groups}}
+                    <div class="group-name">{{Name}}</div>
+                    {{/Groups}}
+                </td>
                 <td><div class="firstname">{{FirstName}}</div></td>
                 <td><div class="lastname">{{LastName}}</div></td>
                 <td><div class="creation-date">{{CreationDate}}</div></td>

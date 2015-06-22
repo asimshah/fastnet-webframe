@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.12
+    // Version 1.0.13
     var $T;
     var $U;
     var modelessTemplate =
@@ -150,7 +150,7 @@
                         }
                     });
                     var text = itemElements.join(', ');
-                    $U.Debug("                : {0}", text);
+                    //$U.Debug("                : {0}", text);
                 });
             }
             try {
@@ -173,14 +173,14 @@
                     var requiredCount = froot.find("[data-value-required='true']").length;
                     var originalValuesCount = froot.find("[data-original]").length;
                     var validationState = me.options._validationStateUpdated;
-                    $U.Debug("checkform.1 {0}: {1} controls, {2} participating, match = {3}, {4} commands, {5} properties",
-                        me.options._id, allControls, totalControls, controlsMatched,
-                        commandControls, propertyControls);
-                    $U.Debug("checkform.2 {0}: {1} validatable {2} {7} original values{8} :: {3} initial, {4} valid, {5} error, {6} required",
-                        me.options._id, validatable, allValidatable ? "(all)" : "(" + (propertyControls - validatable) + " missing)",
-                        initialCount, validCount, errorCount, requiredCount, originalValuesCount,
-                        validationState ? "" : " update required!"
-                        );
+                    //$U.Debug("checkform.1 {0}: {1} controls, {2} participating, match = {3}, {4} commands, {5} properties",
+                    //    me.options._id, allControls, totalControls, controlsMatched,
+                    //    commandControls, propertyControls);
+                    //$U.Debug("checkform.2 {0}: {1} validatable {2} {7} original values{8} :: {3} initial, {4} valid, {5} error, {6} required",
+                    //    me.options._id, validatable, allValidatable ? "(all)" : "(" + (propertyControls - validatable) + " missing)",
+                    //    initialCount, validCount, errorCount, requiredCount, originalValuesCount,
+                    //    validationState ? "" : " update required!"
+                    //    );
                     listPropertyDetails(me, froot);
                     //if (!allValidatable) {
                     //    listPropertyDetails(me.options._id, froot);
@@ -592,9 +592,9 @@
                 function afterItemValidation(me, result) {
                     var totals = me.getValidationCounts();
                     $.extend(result, totals);
-                    $U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
-                        result.totalValid, result.totalInitial,
-                        result.totalErrors + result.totalValid + result.totalInitial);
+                    //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
+                    //    result.totalValid, result.totalInitial,
+                    //    result.totalErrors + result.totalValid + result.totalInitial);
                     var es = _updateErrorSummary.bind(me);
                     es();
                     if (me.options.AfterItemValidation !== null) {

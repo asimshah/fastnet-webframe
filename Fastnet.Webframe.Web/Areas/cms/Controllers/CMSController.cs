@@ -10,12 +10,14 @@ using System.Web.Http;
 using Fastnet.Webframe.Web.Common;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Core.Objects;
+using Fastnet.Webframe.WebApi;
 
 
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RoutePrefix("cmsapi")]
-    public class CMSController : ApiController
+    [PermissionFilter("Administrators")]
+    public class CMSController : BaseApiController
     {
 
         private CoreDataContext DataContext = Core.GetDataContext();
@@ -23,7 +25,8 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         [Route("banner")]
         public HttpResponseMessage GetBannerHtml()
         {
-            PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            //PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            PageContent bannerContent = Member.Anonymous.FindLandingPage()[ContentPanels.Banner];
             if (bannerContent != null)
             {
                 return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });

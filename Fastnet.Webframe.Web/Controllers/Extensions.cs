@@ -1,6 +1,8 @@
 ﻿using Fastnet.Common;
 using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Mvc;
 using Fastnet.Webframe.Web.Common;
+using Fastnet.Webframe.WebApi;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +18,7 @@ using System.Web.SessionState;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
+
     public static class Extensions
     {
         public static void SetCurrentPage(this ApiController controller, Page page)
@@ -34,40 +37,40 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             return GetPage();
         }
-        public static void SetCurrentMember(this ApiController controller, Member member)
-        {
-            SetMember(member);
-        }
-        public static void SetCurrentMember(this Controller controller, Member member)
-        {
-            SetMember(member);
-        }
-        public static Member GetCurrentMember(this ApiController controller)
-        {
-            return GetMember();
-        }
-        public static Member GetCurrentMember(this Controller controller)
-        {
-            return GetMember();
-        }
-        private static void SetMember(Member member)
-        {
+        //public static void SetCurrentMember(this ApiController controller, Member member)
+        //{
+        //    SetMember(member);
+        //}
+        //public static void SetCurrentMember(this BaseMvcController controller, Member member)
+        //{
+        //    SetMember(member);
+        //}
+        //public static Member GetCurrentMember(this BaseApiController controller)
+        //{
+        //    return GetMember();
+        //}
+        //public static Member GetCurrentMember(this BaseMvcController controller)
+        //{
+        //    return GetMember();
+        //}
+        //private static void SetMember(Member member)
+        //{
             
-            // store the id not the object so that we are syncornised with
-            // the current datacontext
-            var session = HttpContext.Current.Session;
-            session["current-member"] = member == null ? null : member.Id;
-            //Debug.Print("Recorded member {0}", member == null ? "null" : member.Fullname);
-        }
-        private static Member GetMember()
-        {
-            // store the id not the object so that we are syncornised with
-            // the current datacontext
-            var session = HttpContext.Current.Session;
-            string id = (string)(session["current-member"] ?? null);
-            return id == null ? null : Core.GetDataContext().Members.Single(m => m.Id == id);
-            //Debug.Print("Recorded member {0}", member.Fullname);
-        }
+        //    // store the id not the object so that we are syncornised with
+        //    // the current datacontext
+        //    var session = HttpContext.Current.Session;
+        //    session["current-member"] = member == null ? null : member.Id;
+        //    //Debug.Print("Recorded member {0}", member == null ? "null" : member.Fullname);
+        //}
+        //private static Member GetMember()
+        //{
+        //    // store the id not the object so that we can synchronise with
+        //    // the current datacontext
+        //    var session = HttpContext.Current.Session;
+        //    string id = (string)(session["current-member"] ?? null);
+        //    return id == null ? Member.Anonymous : Core.GetDataContext().Members.Single(m => m.Id == id);
+        //    //Debug.Print("Recorded member {0}", member.Fullname);
+        //}
         private static void SetPage(Page page)
         {
             // store the id not the object so that we are syncornised with

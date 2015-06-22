@@ -1,6 +1,7 @@
 ﻿
 using Fastnet.Common;
 using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Mvc;
 using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.Web.Models;
 using Microsoft.AspNet.Identity.Owin;
@@ -18,19 +19,17 @@ namespace Fastnet.Webframe.Web.Controllers
 
     //[RouteArea("main")]
     //[RoutePrefix("home")]
-    public class HomeController : Controller
+    public class HomeController : BaseMvcController //Controller
     {
         //private Member currentMember;
         private CoreDataContext DataContext = Core.GetDataContext();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
         private bool InEditMode
         {
             get { return (bool)Session["edit-mode"]; }
             set { Session["edit-mode"] = value; }
         }
-
         public ApplicationSignInManager SignInManager
         {
             get
@@ -59,6 +58,27 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 return HttpContext.GetOwinContext().Authentication;
             }
+        }
+        //protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        //{
+        //    Member member = null;
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+        //    }
+        //    else
+        //    {
+        //        member = DataContext.Members.Single(x => x.IsAnonymous);
+        //    }
+        //    Session["current-member"] =  member.Id;
+
+        //    base.OnActionExecuting(filterContext);
+        //}
+        [Route("permissiondenied/{message?}")]
+        public ActionResult PermissionDenied(string message)
+        {
+            ViewBag.Message = message;
+            return View();
         }
         // GET: Main/Home
         [Route("page/{id}")]
@@ -90,7 +110,7 @@ namespace Fastnet.Webframe.Web.Controllers
             //    has completed the Redirect back to the Index method. IT IS PROBABLY
             //    true that I can remove the following call to RecordCurrentMember() if
             //    I decide to get rid of "AutologinAdmin" as it is done on login/logoff below)
-            RecordCurrentMember();
+            //RecordCurrentMember();
             if (id != null)
             {
                 long pageId = Convert.ToInt64(id);
@@ -146,8 +166,9 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             AuthenticationManager.SignOut();
             this.InEditMode = false;
+            Session["current-member"] = Member.Anonymous.Id;
             //this.CurrentPageId = null;
-            RecordCurrentMember();
+            //RecordCurrentMember();
             return RedirectToAction("Index");
             //PageModel pm = GetPageModel();// new PageModel(id);
             //return View("Index", pm);
@@ -200,7 +221,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     {
                         case SignInStatus.Success:
                             member.LastLoginDate = DateTime.UtcNow;
-                            //RecordCurrentMember();
+                            Session["current-member"] = member.Id;
                             return Json(new { Success = true });
                         default:
                             return Json(new { Success = false, Error = statusToString(result) });
@@ -518,14 +539,12 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-        //private PageModel GetPageModel(long? pageId)
         private PageModel GetPageModel()
         {
             Page page = this.GetCurrentPage();
             PageModel pm = new PageModel(page, this.GetCurrentMember());
             return pm;
         }
-        //private PageModel GetPageModel(ClientDialogNames name, long? pageId)
         private PageModel GetPageModel(ClientSideActions name)
         {
 
@@ -539,37 +558,25 @@ namespace Fastnet.Webframe.Web.Controllers
             pm.SetClientAction(name, member);
             return pm;
         }
-        //private PageModel GetPageModel(ClientDialogNames name, Member member, long? pageId)
         private PageModel GetPageModel(ClientSideActions name, Member member)
         {
             PageModel pm = GetPageModel();
             pm.SetClientAction(name, member);
             return pm;
         }
-        //private Member GetCurrentMember()
+        //private void RecordCurrentMember()
         //{
+        //    Member member = null;
         //    if (User.Identity.IsAuthenticated)
         //    {
-        //        return DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+        //        member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
         //    }
         //    else
         //    {
-        //        return null;
+        //        member = DataContext.Members.Single(x => x.IsAnonymous);
         //    }
+        //    this.SetCurrentMember(member);
         //}
-        private void RecordCurrentMember()
-        {
-            Member member = null;
-            if (User.Identity.IsAuthenticated)
-            {
-                member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
-            }
-            else
-            {
-                member = DataContext.Members.Single(x => x.IsAnonymous);
-            }
-            this.SetCurrentMember(member);
-        }
     }
 
 }

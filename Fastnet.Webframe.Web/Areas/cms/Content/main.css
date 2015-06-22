@@ -163,6 +163,9 @@
   cursor: pointer;
   color: deepskyblue;
 }
+.report-container .member-list .group-name {
+  color: #31708f;
+}
 .report-container .member-list .disabled {
   color: darkgray;
 }

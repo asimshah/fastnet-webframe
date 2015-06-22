@@ -17,35 +17,35 @@ namespace Fastnet.Webframe.Web.Common
     }
     public static class DirectoryExtensions
     {
-        public static IEnumerable<EffectiveDirectoryAccessRule> GetEffectiveDirectoryAccessRules(this Directory dir)
-        {
-            IEnumerable<DirectoryAccessRule> dars = GetEffectiveDirectoryAccessRulesInternal(dir);
-            return dars.Select(x => new EffectiveDirectoryAccessRule
-            {
-                Directory = dir,
-                InheritedFrom = x.Directory,
-                Group = x.Group,
-                AccessRule = x.AccessRule
-            });
-        }
-        internal static IEnumerable<DirectoryAccessRule> GetEffectiveDirectoryAccessRulesInternal(this Directory dir)
-        {
-            try
-            {
-                if (dir.DirectoryAccessRules.Count() == 0)
-                {
-                    return dir.ParentDirectory.GetEffectiveDirectoryAccessRulesInternal();
-                }
-                else
-                {
-                    return dir.DirectoryAccessRules;
-                }
-            }
-            catch (Exception xe)
-            {
-                Log.Write(xe);
-                throw;
-            }
-        }
+        //public static IEnumerable<EffectiveDirectoryAccessRule> GetEffectiveDirectoryAccessRules(this Directory dir)
+        //{
+        //    IEnumerable<DirectoryAccessRule> dars = GetEffectiveDirectoryAccessRulesInternal(dir);
+        //    return dars.Select(x => new EffectiveDirectoryAccessRule
+        //    {
+        //        Directory = dir,
+        //        InheritedFrom = x.Directory,
+        //        Group = x.Group,
+        //        AccessRule = x.AccessRule
+        //    });
+        //}
+        //internal static IEnumerable<DirectoryAccessRule> GetEffectiveDirectoryAccessRulesInternal(this Directory dir)
+        //{
+        //    try
+        //    {
+        //        if (dir.DirectoryAccessRules.Count() == 0)
+        //        {
+        //            return dir.ParentDirectory.GetEffectiveDirectoryAccessRulesInternal();
+        //        }
+        //        else
+        //        {
+        //            return dir.DirectoryAccessRules;
+        //        }
+        //    }
+        //    catch (Exception xe)
+        //    {
+        //        Log.Write(xe);
+        //        throw;
+        //    }
+        //}
     }
 }

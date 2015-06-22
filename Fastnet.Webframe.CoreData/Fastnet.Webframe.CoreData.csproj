@@ -48,8 +48,8 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5641.31352, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5641.31352\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5651.15841, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5651.15841\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5641.32231, Culture=neutral, processorArchitecture=MSIL">
@@ -175,6 +175,7 @@
     <Compile Include="GroupRegistrationKey.cs" />
     <Compile Include="Actions.cs" />
     <Compile Include="IdentityModels.cs" />
+    <Compile Include="Hierarchy.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
     <Compile Include="Logs.cs" />

@@ -7,7 +7,7 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
-    public partial class Group //: IHierarchical<Group>
+    public partial class Group : Hierarchy<Group>
     {        
         public long GroupId { get; set; }
         [ForeignKey("ParentGroup")]
@@ -23,7 +23,13 @@ namespace Fastnet.Webframe.CoreData
         //
         private ICollection<Member> members;
         private ICollection<RegistrationKey> registrationKeys;
+        private ICollection<DirectoryGroup> directoryGroups;
         public virtual ICollection<Group> Children { get; set; }
+        public virtual ICollection<DirectoryGroup> DirectoryGroups
+        {
+            get { return directoryGroups ?? (directoryGroups = new HashSet<DirectoryGroup>()); }
+            set { directoryGroups = value; }
+        }
         public virtual ICollection<Member> Members
         {
             get { return members ?? (members = new HashSet<Member>()); }
@@ -35,10 +41,19 @@ namespace Fastnet.Webframe.CoreData
             set { registrationKeys = value; }
         }
         //
+        public override Group GetParent()
+        {
+            return this.ParentGroup;
+        }
         [NotMapped]
         public string Fullpath
         {
             get { return getPath(); }
+        }
+        [NotMapped]
+        public string Shortenedpath
+        {
+            get { return getPath(true); }
         }
         public static Group Everyone
         {
@@ -81,12 +96,12 @@ namespace Fastnet.Webframe.CoreData
         {
             return ultimateChild.IsChildOf(this);
         }
-        private string getPath()
+        private string getPath(bool shortened = false)
         {
             Action<List<string>, Group> addParentName = null;
             addParentName = (l, d) =>
             {
-                if (d != null)
+                if (d != null &&(shortened == false || !d.Type.HasFlag(GroupTypes.SystemDefinedMembers)))
                 {
                     l.Add(d.Name);
                     addParentName(l, d.ParentGroup);

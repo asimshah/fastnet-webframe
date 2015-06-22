@@ -165,12 +165,12 @@ namespace Fastnet.Webframe.CoreData
             this.Pages.Add(p);
             return p;
         }
-        public Page GetDefaultLandingPage()
-        {
-            Group everyone = Group.Everyone;
-            PageAccessRule par = this.PageAccessRules.Where(x => x.Group.GroupId == everyone.GroupId)
-                .First(p => p.AccessRule.Allow == true && p.AccessRule.Permission == Permission.ViewPages);
-            return par.Page;
-        }
+        //public Page GetDefaultLandingPage()
+        //{
+        //    Group everyone = Group.Everyone;
+        //    PageAccessRule par = this.PageAccessRules.Where(x => x.Group.GroupId == everyone.GroupId)
+        //        .First(p => p.AccessRule.Allow == true && p.AccessRule.Permission == Permission.ViewPages);
+        //    return par.Page;
+        //}
     }
 }

@@ -18,18 +18,20 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using Newtonsoft.Json.Linq;
+using Fastnet.Webframe.WebApi;
 
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
     [RoutePrefix("membershipapi")]
-    public class MembershipController : ApiController
+    public class MembershipController : BaseApiController // : ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         [HttpGet]
         [Route("banner")]
         public HttpResponseMessage GetBannerHtml()
         {
-            PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            //PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
+            PageContent bannerContent = Member.Anonymous.FindLandingPage()[ContentPanels.Banner];
             if (bannerContent != null)
             {
                 return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });
@@ -241,7 +243,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         [Route("get/members/all")]
         public async Task<HttpResponseMessage> GetAllMembers()
         {
-            var members = await DataContext.Members.ToArrayAsync();
+            var members = await DataContext.Members.Where(m => !m.IsAnonymous).ToArrayAsync();
             var result = members.Select(m => new
             {
                 Id = m.Id,
@@ -251,7 +253,9 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 CreationDate = m.CreationDate,
                 LastLoginDate = m.LastLoginDate,
                 Disabled = m.Disabled,
-                EmailConfirmed = m.EmailAddressConfirmed
+                EmailConfirmed = m.EmailAddressConfirmed,
+                Groups = m.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
+                    .Select(g => new { Name = g.Shortenedpath })
             });
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }

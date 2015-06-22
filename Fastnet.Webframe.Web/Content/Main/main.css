@@ -95,6 +95,20 @@ body {
   overflow-y: scroll;
   color: white;
 }
+.permission-page {
+  width: 300px;
+  height: 200px;
+  margin-left: 15%;
+  margin-right: 85%;
+  margin-top: 24px;
+}
+.permission-page .permission-denied .heading {
+  color: red;
+  font-size: 22px;
+}
+.permission-page .permission-denied .message {
+  font-style: italic;
+}
 .SitePanel {
   /*font-size: 10.5pt;
     margin-left: auto;

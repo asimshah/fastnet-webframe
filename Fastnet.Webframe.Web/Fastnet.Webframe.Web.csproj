@@ -67,12 +67,16 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5641.31352, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5641.31352\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5651.15841, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5651.15841\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5641.32231, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Fastnet.EventSystem.Logging.3.2.5641.32231\lib\net45\Fastnet.EventSystem.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Fastnet.Web.Common, Version=1.0.5651.15841, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Web.Common.1.0.5651.15841\lib\net45\Fastnet.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -92,6 +96,18 @@
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.0\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.2.0\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -282,7 +298,8 @@
     <Compile Include="Common\PageExtensions.cs" />
     <Compile Include="Common\Templates.cs" />
     <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\BaseApiController.cs" />
+    <Compile Include="Controllers\BaseMvcController.cs" />
     <Compile Include="Controllers\Extensions.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PageController.cs" />
@@ -684,15 +701,62 @@
       <DependentUpon>bootstrap.css</DependentUpon>
     </Content>
     <Content Include="Content\datatables\css\datables.bootstrap.css" />
+    <Content Include="Content\datatables\css\dataTables.autoFill.css" />
+    <Content Include="Content\datatables\css\dataTables.autoFill.min.css" />
+    <Content Include="Content\datatables\css\dataTables.bootstrap.css" />
+    <Content Include="Content\datatables\css\dataTables.colReorder.css" />
+    <Content Include="Content\datatables\css\dataTables.colReorder.min.css" />
+    <Content Include="Content\datatables\css\dataTables.colVis.css" />
+    <Content Include="Content\datatables\css\dataTables.colvis.jqueryui.css" />
+    <Content Include="Content\datatables\css\dataTables.colVis.min.css" />
+    <Content Include="Content\datatables\css\dataTables.fixedColumns.css" />
+    <Content Include="Content\datatables\css\dataTables.fixedColumns.min.css" />
+    <Content Include="Content\datatables\css\dataTables.fixedHeader.css" />
+    <Content Include="Content\datatables\css\dataTables.fixedHeader.min.css" />
+    <Content Include="Content\datatables\css\dataTables.foundation.css" />
+    <Content Include="Content\datatables\css\dataTables.jqueryui.css" />
+    <Content Include="Content\datatables\css\dataTables.keyTable.css" />
+    <Content Include="Content\datatables\css\dataTables.keyTable.min.css" />
+    <Content Include="Content\datatables\css\dataTables.responsive.css" />
+    <Content Include="Content\datatables\css\dataTables.scroller.css" />
+    <Content Include="Content\datatables\css\dataTables.scroller.min.css" />
+    <Content Include="Content\datatables\css\dataTables.tableTools.css" />
+    <Content Include="Content\datatables\css\dataTables.tableTools.min.css" />
     <Content Include="Content\datatables\css\jquery.dataTables.css" />
     <Content Include="Content\datatables\css\jquery.dataTables.min.css" />
     <Content Include="Content\datatables\css\jquery.dataTables_themeroller.css" />
+    <Content Include="Content\datatables\images\background.png" />
+    <Content Include="Content\datatables\images\back_disabled.png" />
+    <Content Include="Content\datatables\images\back_enabled.png" />
+    <Content Include="Content\datatables\images\back_enabled_hover.png" />
+    <Content Include="Content\datatables\images\collection.png" />
+    <Content Include="Content\datatables\images\collection_hover.png" />
+    <Content Include="Content\datatables\images\copy.png" />
+    <Content Include="Content\datatables\images\copy_hover.png" />
+    <Content Include="Content\datatables\images\csv.png" />
+    <Content Include="Content\datatables\images\csv_hover.png" />
+    <Content Include="Content\datatables\images\details_close.png" />
+    <Content Include="Content\datatables\images\details_open.png" />
     <Content Include="Content\datatables\images\favicon.ico" />
+    <Content Include="Content\datatables\images\filler.png" />
+    <Content Include="Content\datatables\images\forward_disabled.png" />
+    <Content Include="Content\datatables\images\forward_enabled.png" />
+    <Content Include="Content\datatables\images\forward_enabled_hover.png" />
+    <Content Include="Content\datatables\images\insert.png" />
+    <Content Include="Content\datatables\images\loading-background.png" />
+    <Content Include="Content\datatables\images\pdf.png" />
+    <Content Include="Content\datatables\images\pdf_hover.png" />
+    <Content Include="Content\datatables\images\print.png" />
+    <Content Include="Content\datatables\images\print_hover.png" />
     <Content Include="Content\datatables\images\sort_asc.png" />
     <Content Include="Content\datatables\images\sort_asc_disabled.png" />
     <Content Include="Content\datatables\images\sort_both.png" />
     <Content Include="Content\datatables\images\sort_desc.png" />
     <Content Include="Content\datatables\images\sort_desc_disabled.png" />
+    <Content Include="Content\datatables\images\xls.png" />
+    <Content Include="Content\datatables\images\xls_hover.png" />
+    <Content Include="Content\datatables\swf\copy_csv_xls.swf" />
+    <Content Include="Content\datatables\swf\copy_csv_xls_pdf.swf" />
     <Content Include="Content\fastnet\forms.css" />
     <Content Include="Content\fastnet\forms.min.css" />
     <Content Include="Content\fastnet\treeview.css" />
@@ -819,7 +883,27 @@
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
+    <Content Include="Scripts\datatables\dataTables.autoFill.js" />
+    <Content Include="Scripts\datatables\dataTables.autoFill.min.js" />
     <Content Include="Scripts\datatables\datatables.bootstrap.js" />
+    <Content Include="Scripts\datatables\dataTables.colReorder.js" />
+    <Content Include="Scripts\datatables\dataTables.colReorder.min.js" />
+    <Content Include="Scripts\datatables\dataTables.colVis.js" />
+    <Content Include="Scripts\datatables\dataTables.colVis.min.js" />
+    <Content Include="Scripts\datatables\dataTables.fixedColumns.js" />
+    <Content Include="Scripts\datatables\dataTables.fixedColumns.min.js" />
+    <Content Include="Scripts\datatables\dataTables.fixedHeader.js" />
+    <Content Include="Scripts\datatables\dataTables.fixedHeader.min.js" />
+    <Content Include="Scripts\datatables\dataTables.foundation.js" />
+    <Content Include="Scripts\datatables\dataTables.jqueryui.js" />
+    <Content Include="Scripts\datatables\dataTables.keyTable.js" />
+    <Content Include="Scripts\datatables\dataTables.keyTable.min.js" />
+    <Content Include="Scripts\datatables\dataTables.responsive.js" />
+    <Content Include="Scripts\datatables\dataTables.responsive.min.js" />
+    <Content Include="Scripts\datatables\dataTables.scroller.js" />
+    <Content Include="Scripts\datatables\dataTables.scroller.min.js" />
+    <Content Include="Scripts\datatables\dataTables.tableTools.js" />
+    <Content Include="Scripts\datatables\dataTables.tableTools.min.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.min.js" />
     <Content Include="Scripts\dropzone\basic.css" />
@@ -841,6 +925,8 @@
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap-theme.css.map" />
+    <Content Include="Content\datatables\css\dataTables.responsive.scss" />
+    <Content Include="Content\datatables\css\dataTables.jqueryui.scss" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
@@ -1272,6 +1358,8 @@
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.eot" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\readme.md" />
     <Content Include="Scripts\tinymce\langs\readme.md" />
+    <Content Include="Views\Home\PermissionDenied.cshtml" />
+    <Content Include="Views\Shared\_BareLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

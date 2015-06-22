@@ -20,8 +20,9 @@ namespace Fastnet.Webframe.Web.Controllers
     using System.Net.Http.Headers;
     using Fastnet.Webframe.Web.Common;
     using System.IO;
+    using Fastnet.Webframe.WebApi;
     [RoutePrefix("pageapi")]
-    public class PageController : ApiController
+    public class PageController : BaseApiController// ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         [HttpGet]
@@ -38,18 +39,19 @@ namespace Fastnet.Webframe.Web.Controllers
             //    httpResponseMessage.Headers.Location = new Uri(string.Format("/pageapi/page/{0}", id.Value ), UriKind.Relative);
             //    return httpResponseMessage;
             //}
-            var allLandingPages = DataContext.FindAllLandingPages();
-            Data.Page page = null;
-            if (allLandingPages.Count() > 1)
-            {
-                page = allLandingPages.OrderByDescending(p => p.PageId).First();
-            }
-            else
-            {
-                page = allLandingPages.First();
-            }
-            this.SetCurrentPage(page);
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId.ToString() });
+            //var allLandingPages = DataContext.FindAllLandingPages();
+            //Data.Page page = null;
+            //if (allLandingPages.Count() > 1)
+            //{
+            //    page = allLandingPages.OrderByDescending(p => p.PageId).First();
+            //}
+            //else
+            //{
+            //    page = allLandingPages.First();
+            //}
+            Page defaultlandingPage = Member.Anonymous.FindLandingPage();
+            this.SetCurrentPage(defaultlandingPage);
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = defaultlandingPage.PageId.ToString() });
 
         }
         [HttpGet]
@@ -111,7 +113,7 @@ namespace Fastnet.Webframe.Web.Controllers
         public HttpResponseMessage GetMenuInfo()
         {
             bool isVisible = Data.Panel.MenuPanel.Visible;
-            var info = new { Visible = isVisible, MenuHtml = DataContext.GetMenuHtml(GetCurrentMember()) };
+            var info = new { Visible = isVisible, MenuHtml = ""};//DataContext.GetMenuHtml(GetCurrentMember()) };
             return this.Request.CreateResponse(HttpStatusCode.OK, info);
         }
         [HttpGet]
@@ -132,17 +134,18 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("banner")]
         public HttpResponseMessage GetDefaultBannerPageId()
         {
-            var allLandingPages = DataContext.FindAllLandingPages();
-            Data.Page page = null;
-            if (allLandingPages.Count() > 1)
-            {
-                page = allLandingPages.OrderByDescending(p => p.PageId).First();
-            }
-            else
-            {
-                page = allLandingPages.First();
-            }
-            var bannerPanel = GetPanelInfo(page, Data.Panel.BannerPanel);
+            //var allLandingPages = DataContext.FindAllLandingPages();
+            //Data.Page page = null;
+            //if (allLandingPages.Count() > 1)
+            //{
+            //    page = allLandingPages.OrderByDescending(p => p.PageId).First();
+            //}
+            //else
+            //{
+            //    page = allLandingPages.First();
+            //}
+            Page defaultlandingPage = Member.Anonymous.FindLandingPage();
+            var bannerPanel = GetPanelInfo(defaultlandingPage, Data.Panel.BannerPanel);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Visible = bannerPanel.Visible, PageId = bannerPanel.PageId });
         }
 

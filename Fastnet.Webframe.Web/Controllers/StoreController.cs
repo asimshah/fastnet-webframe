@@ -1,5 +1,6 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
+using Fastnet.Webframe.WebApi;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,8 @@ namespace Fastnet.Webframe.Web.Controllers
 {
     [RoutePrefix("store")]
     //[Authorize]
-    public class StoreController : ApiController
+    [PermissionFilter("Editors")]
+    public class StoreController : BaseApiController //: ApiController
     {
         private CD.CoreDataContext DataContext = CD.Core.GetDataContext();
         //private string CurrentMemberId
@@ -119,30 +121,26 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("createdirectory")]
         public async Task<HttpResponseMessage> CreateNewDirectory(dynamic data)
         {
-            if (this.GetCurrentMember() != null)
+            bool result = true;
+            try
             {
-                bool result = true;
-                try
-                {
-                    long directoryId = data.directoryId;
-                    CD.Directory parent = DataContext.Directories.Find(directoryId);
-                    CD.Directory dir = new CD.Directory();
-                    dir.Name = GetUniqueDirectoryName(parent);
-                    dir.ParentDirectory = parent;
-                    DataContext.Directories.Add(dir);
-                    await DataContext.SaveChangesAsync();
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { DirectoryId = dir.DirectoryId, Name = dir.Name }));
-                }
-                catch (Exception xe)
-                {
-                    Log.Write(xe.Message);
-                    result = false;
-
-                }
-                if (!result)
-                {
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
-                }
+                long directoryId = data.directoryId;
+                CD.Directory parent = DataContext.Directories.Find(directoryId);
+                CD.Directory dir = new CD.Directory();
+                dir.Name = GetUniqueDirectoryName(parent);
+                dir.ParentDirectory = parent;
+                DataContext.Directories.Add(dir);
+                await DataContext.SaveChangesAsync();
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { DirectoryId = dir.DirectoryId, Name = dir.Name }));
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe.Message);
+                result = false;
+            }
+            if (!result)
+            {
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -150,34 +148,31 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("createpage/{refpageid?}")]
         public async Task<HttpResponseMessage> CreateNewPage(dynamic data, long? refpageid = null)
         {
-            if (this.GetCurrentMember() != null)
+            bool result = true;
+            try
             {
-                bool result = true;
-                try
+                long directoryId;
+                if (refpageid.HasValue)
                 {
-                    long directoryId;
-                    if (refpageid.HasValue)
-                    {
-                        directoryId = DataContext.Pages.Find(refpageid.Value).Directory.DirectoryId;
-                    }
-                    else
-                    {
-                        directoryId = data.directoryId;
-                    }
-                    CD.Page page = await CreatePageInternal(directoryId);
-                    //long pageId = page.PageId;
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url, Name = page.Name }));
+                    directoryId = DataContext.Pages.Find(refpageid.Value).Directory.DirectoryId;
                 }
-                catch (Exception xe)
+                else
                 {
-                    Log.Write(xe.Message);
-                    result = false;
+                    directoryId = data.directoryId;
+                }
+                CD.Page page = await CreatePageInternal(directoryId);
+                //long pageId = page.PageId;
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url, Name = page.Name }));
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe.Message);
+                result = false;
 
-                }
-                if (!result)
-                {
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
-                }
+            }
+            if (!result)
+            {
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -186,33 +181,29 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("delete")]
         public async Task<HttpResponseMessage> DeleteItem(dynamic data)
         {
-            if (this.GetCurrentMember() != null)
+            bool result = true;
+            try
             {
-                bool result = true;
-                try
+                long id = data.id;
+                switch ((string)data.type)
                 {
-                    long id = data.id;
-                    switch ((string)data.type)
-                    {
-                        case "page":
-                            await DeletePage(id);
-                            break;
-                        case "directory":
-                            await DeleteDirectory(id);
-                            break;
-                    }
+                    case "page":
+                        await DeletePage(id);
+                        break;
+                    case "directory":
+                        await DeleteDirectory(id);
+                        break;
                 }
-                catch (Exception xe)
-                {
-                    Log.Write(xe);
-                    result = false;
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                result = false;
 
-                }
-                if (!result)
-                {
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
-                }
-
+            }
+            if (!result)
+            {
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -220,53 +211,42 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("get/directory/{id}")]
         public async Task<HttpResponseMessage> GetDirectoryDetails(long id)
         {
-            if (this.GetCurrentMember() != null)
+            CD.Directory d = DataContext.Directories.Find(id);
+            var data = new
             {
-                CD.Directory d = DataContext.Directories.Find(id);
-                var data = new
-                {
-                    Id = d.DirectoryId,
-                    Name = d.Name
-                };
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+                Id = d.DirectoryId,
+                Name = d.Name
+            };
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+            //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
         }
         [HttpPost]
         [Route("update/directory")]
         public async Task<HttpResponseMessage> UpdateDirectory(dynamic data)
         {
-            if (this.GetCurrentMember() != null)
-            {
-                long id = data.id;
-                CD.Directory d = DataContext.Directories.Find(id);
-                d.Name = data.name;
-                await DataContext.SaveChangesAsync();
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+            long id = data.id;
+            CD.Directory d = DataContext.Directories.Find(id);
+            d.Name = data.name;
+            await DataContext.SaveChangesAsync();
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpGet]
         [Route("get/page/{id}")]
         public async Task<HttpResponseMessage> GetPageDetails(long id)
         {
-            if (this.GetCurrentMember() != null)
+            CD.Page p = DataContext.Pages.Find(id);
+            var data = new
             {
-                CD.Page p = DataContext.Pages.Find(id);
-                var data = new
-                {
-                    Id = p.PageId,
-                    Url = p.Url,
-                    Name = p.Name,
-                    CreatedBy = p.PageMarkup.CreatedBy,
-                    CreatedOn = p.PageMarkup.CreatedOn.ToString("ddMMMyyyy HH:mm"),
-                    ModifiedBy = p.PageMarkup.ModifiedBy,
-                    ModifiedOn = p.PageMarkup.ModifiedOn.HasValue ? p.PageMarkup.ModifiedOn.Value.ToString("ddMMMyyyy HH:mm") : "",
-                    ModificationState = p.PageMarkup.ModifiedOn.HasValue ? "visible" : "hidden"
-                };
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+                Id = p.PageId,
+                Url = p.Url,
+                Name = p.Name,
+                CreatedBy = p.PageMarkup.CreatedBy,
+                CreatedOn = p.PageMarkup.CreatedOn.ToString("ddMMMyyyy HH:mm"),
+                ModifiedBy = p.PageMarkup.ModifiedBy,
+                ModifiedOn = p.PageMarkup.ModifiedOn.HasValue ? p.PageMarkup.ModifiedOn.Value.ToString("ddMMMyyyy HH:mm") : "",
+                ModificationState = p.PageMarkup.ModifiedOn.HasValue ? "visible" : "hidden"
+            };
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
         }
         [HttpGet]
         [Route("panelinfo/{id}")]
@@ -309,166 +289,137 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/page")]
         public async Task<HttpResponseMessage> UpdatePage(dynamic data)
         {
-            if (this.GetCurrentMember() != null)
-            {
-
-                long id = data.id;
-                CD.Page p = DataContext.Pages.Find(id);
-                p.Name = data.name;
-                await DataContext.SaveChangesAsync();
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+            long id = data.id;
+            CD.Page p = DataContext.Pages.Find(id);
+            p.Name = data.name;
+            await DataContext.SaveChangesAsync();
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
         [Route("update/page/content")]
         public async Task<HttpResponseMessage> UpdatePageContent(dynamic data)
         {
-            CD.Member m = this.GetCurrentMember();
-            if (m != null)
+            Action<dynamic> update = (p) =>
             {
-                //CD.Member m = DataContext.Members.Find(CurrentMemberId);
-
-                //Action<long, string> updatePage = (id, htmlText) =>
-                //    {
-                //        Page page = DataContext.Pages.Find(id);
-                //        PageMarkup pm = page.PageMarkup;
-                //        pm.HtmlText = htmlText;
-                //        pm.HtmlTextLength = htmlText.Length;
-                //        pm.ModifiedBy = m.Fullname;
-                //        pm.ModifiedOn = DateTime.UtcNow;
-                //        page.MarkupType = MarkupType.Html;
-                //    };
-                Action<dynamic> update = (p) =>
+                string pageId = p.PageId;
+                if (pageId != null)
                 {
-                    string pageId = p.PageId;
-                    if (pageId != null)
+                    bool changed = (bool)p.HasChanged;
+                    if (changed)
                     {
-                        bool changed = (bool)p.HasChanged;
-                        if (changed)
-                        {
-                            long id = Convert.ToInt64(pageId);
-                            string htmlText = (string)p.HtmlText;
-                            CD.Page page = DataContext.Pages.Find(id);
-                            CD.PageMarkup pm = page.PageMarkup;
-                            pm.HtmlText = htmlText;
-                            pm.HtmlTextLength = htmlText.Length;
-                            pm.ModifiedBy = m.Fullname;
-                            pm.ModifiedOn = DateTime.UtcNow;
-                            page.MarkupType = CD.MarkupType.Html;
-                        }
+                        long id = Convert.ToInt64(pageId);
+                        string htmlText = (string)p.HtmlText;
+                        CD.Page page = DataContext.Pages.Find(id);
+                        CD.PageMarkup pm = page.PageMarkup;
+                        pm.HtmlText = htmlText;
+                        pm.HtmlTextLength = htmlText.Length;
+                        pm.ModifiedBy = this.GetCurrentMember().Fullname;
+                        pm.ModifiedOn = DateTime.UtcNow;
+                        page.MarkupType = CD.MarkupType.Html;
                     }
-                };
-                // ((Newtonsoft.Json.Linq.JObject)data).ToObject<dynamic>().BannerPanel.PageId
-                //(string)(data as dynamic).BannerPanel.PageId
-
-                update((data as dynamic).BannerPanel);
-                update((data as dynamic).LeftPanel);
-                update((data as dynamic).CentrePanel);
-                update((data as dynamic).RightPanel);
-                await DataContext.SaveChangesAsync();
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+                }
+            };
+            update((data as dynamic).BannerPanel);
+            update((data as dynamic).LeftPanel);
+            update((data as dynamic).CentrePanel);
+            update((data as dynamic).RightPanel);
+            await DataContext.SaveChangesAsync();
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
         [Route("upload/file")]
         public async Task<HttpResponseMessage> UploadFile(dynamic data)
         {
-            if (this.GetCurrentMember() != null)
+            // data properties:
+            // chunkNumber: number of this chunk (zero based)
+            // totalChunks: total chunks for this transfer
+            // updateKey: a guid originally provided by the server - see notes
+            // directoryId: directory in which to store the uploaded file
+            // filename: full filename (incl extension but no path(s))
+            // mimetype:
+            // binaryLength: binary length once chunks are assembled and converted to byte[]
+            // base64: base64 string data
+            // base64Length: length of base64
+            //
+            // Notes:
+            // 1. a new update starts with chunkNumber == 0
+            //    a. this causes a new upload to start
+            //    b. a guid is created that will identify subsequent uploads
+            //    c. properties directoryid, filename, and mimetype, binaryLength, chunkNumber, totalChunks, base64 and base64Length are valid
+            //    d. updatekey is not valid
+            // 2. calls continue for each chunk
+            //    a. only updateKey, chunkNumber, totalChunks, base64 and base64Length are valid
+            // 3. final chunk is when chunkNumber == (totalChunks - 1)
+            //    a. file is reassembled from base64 strings and saved in the required directory
+            Action<CD.UploadFile, int, string> saveChunk = (uf, cn, bs) =>
             {
-                // data properties:
-                // chunkNumber: number of this chunk (zero based)
-                // totalChunks: total chunks for this transfer
-                // updateKey: a guid originally provided by the server - see notes
-                // directoryId: directory in which to store the uploaded file
-                // filename: full filename (incl extension but no path(s))
-                // mimetype:
-                // binaryLength: binary length once chunks are assembled and converted to byte[]
-                // base64: base64 string data
-                // base64Length: length of base64
-                //
-                // Notes:
-                // 1. a new update starts with chunkNumber == 0
-                //    a. this causes a new upload to start
-                //    b. a guid is created that will identify subsequent uploads
-                //    c. properties directoryid, filename, and mimetype, binaryLength, chunkNumber, totalChunks, base64 and base64Length are valid
-                //    d. updatekey is not valid
-                // 2. calls continue for each chunk
-                //    a. only updateKey, chunkNumber, totalChunks, base64 and base64Length are valid
-                // 3. final chunk is when chunkNumber == (totalChunks - 1)
-                //    a. file is reassembled from base64 strings and saved in the required directory
-                Action<CD.UploadFile, int, string> saveChunk = (uf, cn, bs) =>
+                CD.FileChunk fc = new CD.FileChunk
                 {
-                    CD.FileChunk fc = new CD.FileChunk
-                    {
-                        UploadFile = uf,
-                        ChunkNumber = cn,
-                        //Length = len,
-                        Base64String = bs
-                    };
-                    DataContext.FileChunks.Add(fc);
-                    DataContext.SaveChanges();
+                    UploadFile = uf,
+                    ChunkNumber = cn,
+                    //Length = len,
+                    Base64String = bs
                 };
-                bool result = true;
-                int chunkNumber = data.chunkNumber;
-                long totalChunks = data.totalChunks;
-                string base64String = data.base64;
-                int base64StringLength = data.base64Length;
-                string key = null;
-                CD.UploadFile uploadFile = null;
-                Debug.Assert(base64StringLength == base64String.Length);
-                try
+                DataContext.FileChunks.Add(fc);
+                DataContext.SaveChanges();
+            };
+            bool result = true;
+            int chunkNumber = data.chunkNumber;
+            long totalChunks = data.totalChunks;
+            string base64String = data.base64;
+            int base64StringLength = data.base64Length;
+            string key = null;
+            CD.UploadFile uploadFile = null;
+            Debug.Assert(base64StringLength == base64String.Length);
+            try
+            {
+                if (chunkNumber == 0)
                 {
-                    if (chunkNumber == 0)
+                    long directoryid = Convert.ToInt64((string)data.directoryId);
+                    CD.Directory d = DataContext.Directories.Find(directoryid);
+                    string filename = data.filename;
+                    string mimetype = data.mimetype;
+                    long binaryLength = data.binaryLength;
+                    uploadFile = new CD.UploadFile
                     {
-                        long directoryid = Convert.ToInt64((string)data.directoryId);
-                        CD.Directory d = DataContext.Directories.Find(directoryid);
-                        string filename = data.filename;
-                        string mimetype = data.mimetype;
-                        long binaryLength = data.binaryLength;
-                        uploadFile = new CD.UploadFile
-                        {
-                            Name = filename,
-                            MimeType = mimetype,
-                            DirectoryId = directoryid,
-                            Guid = Guid.NewGuid().ToString(),
-                            TotalChunks = totalChunks,
-                            BinaryLength = binaryLength
-                        };
-                        key = uploadFile.Guid;
-                        DataContext.UploadFiles.Add(uploadFile);
-                        //saveChunk(uploadFile, chunkNumber, base64String);
-                        //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, uploadFile.Guid));
-                    }
-                    else
-                    {
-                        key = data.updateKey;
-                        uploadFile = DataContext.UploadFiles.Single(x => x.Guid == key);
-                    }
-                    saveChunk(uploadFile, chunkNumber, base64String);
-                    if (chunkNumber < (totalChunks - 1))
-                    {
-                        //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
-                    }
-                    else
-                    {
-                        await SaveUploadedFile(uploadFile);
-                        
-                    }
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
+                        Name = filename,
+                        MimeType = mimetype,
+                        DirectoryId = directoryid,
+                        Guid = Guid.NewGuid().ToString(),
+                        TotalChunks = totalChunks,
+                        BinaryLength = binaryLength
+                    };
+                    key = uploadFile.Guid;
+                    DataContext.UploadFiles.Add(uploadFile);
+                    //saveChunk(uploadFile, chunkNumber, base64String);
+                    //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, uploadFile.Guid));
                 }
-                catch (Exception xe)
+                else
                 {
-                    Log.Write(xe);
-                    result = false;
+                    key = data.updateKey;
+                    uploadFile = DataContext.UploadFiles.Single(x => x.Guid == key);
                 }
-                if (!result)
+                saveChunk(uploadFile, chunkNumber, base64String);
+                if (chunkNumber < (totalChunks - 1))
                 {
-                    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
+                    //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
                 }
+                else
+                {
+                    await SaveUploadedFile(uploadFile);
+
+                }                
             }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                result = false;                
+            }
+            if (!result)
+            {
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
         }
 
         private async Task SaveUploadedFile(CD.UploadFile uploadFile)

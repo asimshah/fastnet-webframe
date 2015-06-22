@@ -179,6 +179,7 @@ namespace Fastnet.Webframe.Web
         {
             return userAgentString == null ? false : userAgentString.IndexOf("IPad", StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
+
     }
     public class VersionInfo
     {
