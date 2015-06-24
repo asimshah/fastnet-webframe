@@ -63,6 +63,13 @@ namespace Fastnet.Webframe.CoreData
         WordMl,
         DocX
     }
+    public enum PageType
+    {
+        Centre,
+        Banner,
+        Left,
+        Right
+    }
     [Flags]
     public enum Permission
     {
@@ -451,9 +458,9 @@ namespace Fastnet.Webframe.CoreData
             {
                 Directory root = new Directory { Name = "$root" };
                 Group everyone = ctx.Groups.ToArray().Single(gp => gp.Type.HasFlag(GroupTypes.System) && gp.Name == "Everyone");
-                AccessRule viewRule = new AccessRule { Permission = Permission.ViewPages, Allow = true };
-                DirectoryAccessRule dar = new DirectoryAccessRule { AccessRule = viewRule, Group = everyone, Directory = root };
-                root.DirectoryAccessRules.Add(dar);
+                //AccessRule viewRule = new AccessRule { Permission = Permission.ViewPages, Allow = true };
+                //DirectoryAccessRule dar = new DirectoryAccessRule { AccessRule = viewRule, Group = everyone, Directory = root };
+                //root.DirectoryAccessRules.Add(dar);
                 ctx.Directories.Add(root);
                 //
                 Directory sitePages = new Directory();
@@ -882,8 +889,9 @@ namespace Fastnet.Webframe.CoreData
                         return ctx.Groups.SingleOrDefault(x => x.Name == name && x.ParentGroup.GroupId == parent.GroupId);
                     }
                 };
-            Func<string, string, GroupTypes, Group, Group> addgroup = (name, descr, type, parent) =>
+            Func<SystemGroups, string, GroupTypes, Group, Group> addgroup = (group, descr, type, parent) =>
             {
+                string name = group.ToString();
                 Group g = findGroup(name, parent);
                 if (g == null)
                 {
@@ -898,22 +906,32 @@ namespace Fastnet.Webframe.CoreData
                 return g;
             };
 
-            Group everyone = addgroup("Everyone", "All visitors whether members or not", GroupTypes.System | GroupTypes.SystemDefinedMembers, null);
-            Group all = addgroup("AllMembers", "All visitors that have logged in (and therefore are memebrs)", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
-            Group anon = addgroup("Anonymous", "All visitors that have not logged in - this group excludes those that have logged in", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
-            Group admins = addgroup("Administrators", "Site Administrators - members who can do everything", GroupTypes.System, all);
-            Group designers = addgroup("Designers", "Site Designers - members who can modify layout and style", GroupTypes.System, all);
-            Group editors = addgroup("Editors", "Site Editors - members who can add, modify and delete pages and folders" , GroupTypes.System, all);
+            Group everyone = addgroup(SystemGroups.Everyone, "All visitors whether members or not", GroupTypes.System | GroupTypes.SystemDefinedMembers, null);
+            Group all = addgroup(SystemGroups.AllMembers, "All visitors that have logged in (and therefore are memebrs)", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
+            Group anon = addgroup(SystemGroups.Anonymous, "All visitors that have not logged in - this group excludes those that have logged in", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
+            Group admins = addgroup(SystemGroups.Administrators, "Site Administrators - members who can do everything", GroupTypes.System, all);
+            Group designers = addgroup(SystemGroups.Designers, "Site Designers - members who can modify layout and style", GroupTypes.System, all);
+            Group editors = addgroup(SystemGroups.Editors, "Site Editors - members who can add, modify and delete pages and folders" , GroupTypes.System, all);
             ctx.SaveChanges();
         }
         private void EnsureAdministratorInAdministratorsGroup()
         {
-            var admingroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Administrators");
+            var admingroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == SystemGroups.Administrators.ToString());
+            var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == SystemGroups.Editors.ToString());
+            var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == SystemGroups.Designers.ToString());
             var adminMembers = admingroup.Members.ToList();
             var originalAdmin = ctx.Members.Single(x => x.IsAdministrator);
             if (!adminMembers.Contains(originalAdmin))
             {
                 adminMembers.Add(originalAdmin);
+            }
+            if (!editorsGroup.Members.Contains(originalAdmin))
+            {
+                editorsGroup.Members.Add(originalAdmin);
+            }
+            if (!designersGroup.Members.Contains(originalAdmin))
+            {
+                designersGroup.Members.Add(originalAdmin);
             }
             //var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Editors");
             //var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Designers");
@@ -1113,6 +1131,7 @@ namespace Fastnet.Webframe.CoreData
                     PageId = item.PageId,
                     Name = item.Name,
                     MarkupType = (MarkupType)item.MarkupTypeCode,
+                    Type = PageType.Centre, // the default
                     Directory = d,
                     IsLandingPage = item.IsLandingPage,
                     InheritSideContentFromUrl = item.InheritSideContentFromUrl,
@@ -1264,6 +1283,18 @@ namespace Fastnet.Webframe.CoreData
                 Panel panel = coreDb.Panels.Single(x => x.Name == item.Panel.Name);
                 Page cp = coreDb.Pages.Find(item.CentrePage.PageId);
                 Page p = coreDb.Pages.Find(item.Page.PageId);
+                switch (item.Panel.Name)
+                {
+                    case "BannerPanel":
+                        p.Type = PageType.Banner;
+                        break;
+                    case "LeftPanel":
+                        p.Type = PageType.Left;
+                        break;
+                    case "RightPanel":
+                        p.Type = PageType.Right;
+                        break;
+                }
                 PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
                 coreDb.PanelPages.Add(r);
             }

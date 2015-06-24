@@ -55,6 +55,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
+                    "~/Scripts/main/core.pagetoolbar.js",
                     "~/Scripts/main/core.page.js",
                     "~/Scripts/main/core.storebrowser.js",
                     "~/Scripts/main/core.test.js"

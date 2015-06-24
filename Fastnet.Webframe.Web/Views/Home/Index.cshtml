@@ -6,14 +6,16 @@
     ViewBag.BaseUrl = Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/");
 }
 @section styles {
-    @if (Model.CanEditPages)
-    {
-        // I think that I may not need any of the jquery ui css for the tinymce editor
-        // because I am not using any tinymce dialogs. I may be wrong so I am
-        // leaving this commented for now.
-        @Styles.Render("~/Content/editorcss");
-        @Styles.Render("~/Content/dropzonecss");
-    }
+    @*@if (Model.CanEditPages)
+        {
+            // I think that I may not need any of the jquery ui css for the tinymce editor
+            // because I am not using any tinymce dialogs. I may be wrong so I am
+            // leaving this commented for now.
+            @Styles.Render("~/Content/editorcss");
+            @Styles.Render("~/Content/dropzonecss");
+        }*@
+    @Styles.Render("~/Content/editorcss")
+    @Styles.Render("~/Content/dropzonecss")
     @if (Model.Features.HasFlag(Features.DateCapture))
     {
         @Styles.Render("~/Content/datepicker/css");
@@ -24,17 +26,17 @@
 <div class="MenuPanel"></div>
 <div class="ContentPanel">
     <div class="LeftPanel editable-content"></div>
-        <div class="CentrePanel editable-content"></div>
-        <div class="RightPanel editable-content"></div>
+    <div class="CentrePanel editable-content"></div>
+    <div class="RightPanel editable-content"></div>
     @*<div class="LeftPanel">
-        <div class="editable-content"></div>
-    </div>
-    <div class="CentrePanel">
-        <div class="editable-content"></div>
-    </div>
-    <div class="RightPanel">
-        <div class="editable-content"></div>
-    </div>*@
+            <div class="editable-content"></div>
+        </div>
+        <div class="CentrePanel">
+            <div class="editable-content"></div>
+        </div>
+        <div class="RightPanel">
+            <div class="editable-content"></div>
+        </div>*@
 </div>
 
 @section scripts {
@@ -44,10 +46,11 @@
     }
     @Scripts.Render("~/bundles/main/page")
     @Scripts.Render("~/bundles/identity")
-    @if (Model.CanEditPages)
-    {
-        @Scripts.Render("~/bundles/main/editor");
-    }
+    @Scripts.Render("~/bundles/main/editor");
+    @*@if (Model.CanEditPages)
+        {
+            @Scripts.Render("~/bundles/main/editor");
+        }*@
     <script>
         $(function () {
             $.fastnet$utilities.AddOptions(@Html.Raw(@Model.Options.ToJson()));

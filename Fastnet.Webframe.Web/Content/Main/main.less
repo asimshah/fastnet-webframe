@@ -28,18 +28,19 @@ body {
     color: white;
 }
 
-.permission-page {
+.permission-page, .timeout-page {
     width: 300px;
     height: 200px;
     margin-left: 15%;
     margin-right: 85%;
     margin-top: 24px;
 
-    .permission-denied {
+    .content {
         .heading {
             color: red;
             font-size: 22px;
         }
+
         .message {
             font-style: italic;
         }
@@ -145,11 +146,11 @@ body {
     transition: height ease 1s;
     background-color: black;
 
-    &.closed {
+    &.up {
         height: 8px;
     }
 
-    &.open {
+    &.down {
         height: 32px;
     }
 
@@ -170,8 +171,11 @@ body {
         //height: 12px;
         padding: 2px 2px 2px 4px;
         display: table;
-
-        &.opaque {
+        /*&.opaque {
+            opacity: 1.0;
+            top: 0;
+        }*/
+        &.present {
             opacity: 1.0;
             top: 0;
         }
@@ -200,6 +204,41 @@ body {
     }
 }
 
+.editor-side-panel {
+    position: relative;
+
+    .overlay {
+        position: absolute;
+        //background-color: rgba(95, 158, 160, 0.53);
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background:
+        /* On "top" */
+        repeating-linear-gradient( 45deg, transparent, transparent 10px, #ccc 10px, #ccc 20px ),
+        /* on "bottom" */
+        linear-gradient( to bottom, #eee, #999 );
+
+        .btn {
+            margin: 4px;
+        }
+    }
+}
+
+i.mce-i-deletepage:before {
+    content: '\f00d';
+    color: red;
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 1.0em;
+    //padding-right: 0.5em;
+    position: absolute;
+    top: 1px;
+    left: 7px;
+}
+
 .login-status {
     position: relative;
 
@@ -218,7 +257,7 @@ body {
         top: 60px;
         margin-right: 4px;
         background: transparent;
-        color: white;
+        color: red;
     }
     /*.login-name:before {
         content: "Welcome: ";
@@ -305,7 +344,7 @@ body {
             height: 80px;
         }
 
-        .browser-folder-content {
+        .folder-content {
             max-height: @totalHeight;
             height: @totalHeight;
             overflow: hidden;
@@ -328,45 +367,99 @@ body {
                     background-color: lightgray;
                 }
 
-                div:not([data-type='page']) {
+                .page-row {
+                    &[data-landing-page='true'] {
+                        .delete-button {
+                            visibility: hidden;
+                        }
+                    }
+                }
+
+                .document-row {
                     .edit-button {
                         visibility: hidden;
                     }
                 }
 
-                div[data-landing-page='true'] {
-                    .delete-button {
+                .image-row {
+                    .edit-button {
                         visibility: hidden;
                     }
                 }
+                /*div:not([data-type='page']) {
+                    .edit-button {
+                        visibility: hidden;
+                    }
+                }*/
+                /*.page-row[data-landing-page='true'] {
+                    .delete-button {
+                        visibility: hidden;
+                    }
+                }*/
             }
 
-            div {
-                &.buttons {
+            .url {
+                .make-xs-column(4);
+            }
+
+            .name {
+                .make-xs-column(5);
+                padding-left: 0;
+            }
+
+            .remarks {
+                .make-xs-column(1.0);
+                padding-left: 0;
+            }
+
+            .buttons {
+                .make-xs-column(1.5);
+                padding-right:0;
+                 > span {
+                    margin-left: 2px;
+                .pull-right;
+                }
+            }
+
+            .header {
+                .url {
+                    margin-left: 2px;
+                    //margin-bottom: 8px;
+                }
+            }
+
+            .data {
+                .buttons {
                     span {
                         cursor: pointer;
                     }
                 }
 
-                &.edit-button {
-                    .make-xs-column(0.5);
+                .edit-button {
+
 
                     &:hover {
                         color: hsl(207.7, 100%, 45.9%);
                     }
                 }
 
-                &.delete-button {
-                    .make-xs-column(0.5);
+                .delete-button {
+
 
                     &:hover {
                         color: red;
                     }
                 }
 
-                &.url {
-                    margin-left: 4px;
-                    .make-xs-column(3);
+                .url {
+
+
+                    img {
+                        margin-left: 4px;
+                        margin-right: 4px;
+                        margin-bottom: 2px;
+                    }
+
 
                     div {
                         cursor: pointer;
@@ -385,12 +478,11 @@ body {
                     }
                 }
 
-                &.remarks {
-                    .make-xs-column(2.0);
+                .remarks {
                 }
 
-                &.name {
-                    .make-xs-column(5);
+                .name {
+
 
                     .size {
                         font-size: x-small;

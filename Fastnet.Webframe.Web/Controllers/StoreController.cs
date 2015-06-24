@@ -20,7 +20,7 @@ namespace Fastnet.Webframe.Web.Controllers
 {
     [RoutePrefix("store")]
     //[Authorize]
-    [PermissionFilter("Editors")]
+    [PermissionFilter(CD.SystemGroups.Editors)]
     public class StoreController : BaseApiController //: ApiController
     {
         private CD.CoreDataContext DataContext = CD.Core.GetDataContext();
@@ -64,7 +64,7 @@ namespace Fastnet.Webframe.Web.Controllers
             foreach (var page in directory.Pages.OrderBy(x => x.PageId))
             {
                 //if (page.CentrePanelPages.Count() == 0)
-                if (page.IsCentrePage)
+                if (true)
                 {
                     string remarks = page.SidePageInfo;
                     //foreach (var pp in page.SidePanelPages)
@@ -88,8 +88,11 @@ namespace Fastnet.Webframe.Web.Controllers
                         Id = page.PageId,
                         Url = page.Url,
                         Name = page.Name,
-                        Remarks = remarks,
-                        LandingPage = page.IsLandingPage
+                        //Remarks = remarks,
+                        LandingPage = page.IsLandingPage,
+                        LandingPageImage = page.GetLandingPageImageUrl(),
+                        PageTypeImage = page.GetTypeImageUrl(),
+                        PageTypeTooltip = page.GetTypeTooltip()
                     });
                 }
             }
@@ -112,7 +115,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     Id = document.DocumentId,
                     Url = document.Url,
                     Name = document.Name,
-                    Remarks = string.Empty,
+                    DocumentTypeImage = document.GetTypeImageUrl()
                 });
             }
             return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, folderContent));
@@ -145,13 +148,16 @@ namespace Fastnet.Webframe.Web.Controllers
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
-        [Route("createpage/{refpageid?}")]
-        public async Task<HttpResponseMessage> CreateNewPage(dynamic data, long? refpageid = null)
+        [Route("createpage")]
+        public async Task<HttpResponseMessage> CreateNewPage(dynamic data)
         {
             bool result = true;
             try
             {
                 long directoryId;
+                long? refpageid = data.referencePageId;
+                string pt = data.type;
+                CD.PageType type = (CD.PageType)Enum.Parse(typeof(CD.PageType), pt, true);
                 if (refpageid.HasValue)
                 {
                     directoryId = DataContext.Pages.Find(refpageid.Value).Directory.DirectoryId;
@@ -160,7 +166,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 {
                     directoryId = data.directoryId;
                 }
-                CD.Page page = await CreatePageInternal(directoryId);
+                CD.Page page = await CreatePageInternal(directoryId, type);
                 //long pageId = page.PageId;
                 return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url, Name = page.Name }));
             }
@@ -170,13 +176,12 @@ namespace Fastnet.Webframe.Web.Controllers
                 result = false;
 
             }
-            if (!result)
-            {
-                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
-            }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            //if (!result)
+            //{
+            //    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
+            //}
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
-
         [HttpPost]
         [Route("delete")]
         public async Task<HttpResponseMessage> DeleteItem(dynamic data)
@@ -249,7 +254,7 @@ namespace Fastnet.Webframe.Web.Controllers
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
         }
         [HttpGet]
-        [Route("panelinfo/{id}")]
+        [Route("sidePages/{id}")]
         public HttpResponseMessage GetSidePanelInformation(string id)
         {
             Func<CD.Page, long?> getPageId = (p) =>
@@ -472,7 +477,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         //
         //
-        private async Task<CD.Page> CreatePageInternal(long directoryId)
+        private async Task<CD.Page> CreatePageInternal(long directoryId, CD.PageType type)
         {
             CD.Member m = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             CD.Directory dir = DataContext.Directories.Find(directoryId);
@@ -486,7 +491,8 @@ namespace Fastnet.Webframe.Web.Controllers
             page.TimeStamp = BitConverter.GetBytes(-1);
             page.Visible = true;
             page.VersionCount = 0;
-            page.Name = GetUniquePageName(dir);
+            page.Type = type;
+            page.Name = GetUniquePageName(dir, type);
             page.Directory = dir;
             page.MarkupType = CD.MarkupType.Html;
             page.PageMarkup = pm;
@@ -586,9 +592,23 @@ namespace Fastnet.Webframe.Web.Controllers
             DataContext.PageMarkups.Remove(pm);
             DataContext.Pages.Remove(p);
         }
-        private string GetUniquePageName(CD.Directory dir)
+        private string GetUniquePageName(CD.Directory dir, CD.PageType type)
         {
             string proposedName = "New Page";
+            switch (type)
+            {
+                case CD.PageType.Centre:                    
+                    break;
+                case CD.PageType.Banner:
+                    proposedName = "Banner";
+                    break;
+                case CD.PageType.Left:
+                    proposedName = "Left Panel";
+                    break;
+                case CD.PageType.Right:
+                    proposedName = "Right Panel";
+                    break;
+            }
             Func<string, bool> nameExists = (name) =>
             {
                 return dir.Pages.FirstOrDefault(x => String.Compare(name, x.Name, StringComparison.InvariantCultureIgnoreCase) == 0) != null;

@@ -1,4 +1,208 @@
-﻿(function ($) {
+﻿var PageEditor = (function () {
+    // this uses a javascript singleton pattern
+    var $U = $.fastnet$utilities;
+    var instance = null;
+    function createInstance() {
+        var pages = {
+            banner: { panelSelector: ".BannerPanel", id: null, savedHtml: null, mce: null, allowDelete: true},
+            centre: { panelSelector: ".CentrePanel", id: null, savedHtml: null, mce: null, allowDelete: false },
+            left: { panelSelector: ".LeftPanel", id: null, savedHtml: null, mce: null, allowDelete: true },
+            right: { panelSelector: ".RightPanel", id: null, savedHtml: null, mce: null, allowDelete: true }
+        };
+        var _tinymceUrl = null;
+        var _toolbar = null;
+        function _initialize() {
+            var baseUrl = $("head base").prop("href");
+            _tinymceUrl = baseUrl + "Scripts/tinymce/";
+            _toolbar = PageToolbar.get();
+            _toolbar.addHandler("toolbar-opened", _toolbarOpened);
+            _toolbar.addHandler("exit-edit-mode", __exitEditRequested);
+            _toolbar.addHandler("save-changes", _savePageChanges);
+            _toolbar.addHandler("open-store-browser", _openStoreBrowser);
+            $U.Debug("PageEditor initialized");
+        }
+        function _changesPending() {
+            var result = false;
+            $.each(tinymce.EditorManager.editors, function (index, ed) {
+                if (ed.isDirty()) {
+                    result = true;
+                    return false;
+                }
+            });
+            return result;
+        }
+        function _openMce(page) {
+            page.savedHtml = $(page.panelSelector).html();
+            tinymce.baseURL = _tinymceUrl;
+            tinymce.init({
+                selector: page.panelSelector,
+                browser_spellcheck: true,
+                visual_table_class: "",
+                paste_data_images: true,
+                plugins: "textcolor colorpicker visualblocks table link image code",
+                menubar: false,
+                inline: true,
+                toolbar_items_size: 'small',
+                toolbar: ["undo redo | cut copy paste | styleselect | fontselect fontsizeselect | visualblocks code | deletepage",
+                          "bold italic forecolor backcolor | bullist numlist | alignleft aligncenter alignright outdent indent | insertlinks | table"],
+                setup: function (editor) {
+                    page.mce = editor;
+                    if (page.allowDelete) {
+                        editor.addButton('deletepage', {
+                            type: 'button',
+                            //text: 'delete page',
+                            title: 'delete this content',
+                            onclick: function () {
+                                alert('delete clicked');
+                            }
+                        });
+                    }
+                    editor.addButton('insertlinks', {
+                        type: 'menubutton',
+                        text: 'Links|Images',
+                        title: "insert links & images",
+                        icon: 'link',
+                        menu: [
+                            { text: 'Insert link/image ...', onclick: function () { $T.InsertLink.Start({ mode: 'prompt' }); } },
+                            { text: 'Insert link to new page', onclick: function () { $T.InsertLink.Start({ mode: 'createnew' }); } },
+                            { text: 'Insert link & edit new page ...', onclick: function () { $T.InsertLink.Start({ mode: 'createandedit' }); } }
+                            //,{ text: 'break ...', onclick: function () { debugger; } }
+                        ]
+                    });
+                    editor.on('change', function (e) {
+                        _toolbar.enableCommand("save-changes");
+                    });
+                }
+            });
+        }
+        function _initEditing(panel) {
+            var pageId = pages[panel].id;
+            if (pageId === null) {
+                if (pages[panel].mce !== null) {
+                    pages[panel].mce.editor.remove();
+                    pages[panel].mce = null;
+                }
+                pages[panel].savedHtml = null;
+                _addPanelOverlay(panel);
+            } else {
+                _openMce(pages[panel]);
+            }
+        }
+        function _addContent(panel) {
+            $U.Debug("add content for {0} (centre page id is {1})", panel, pages.centre.id);
+            var url = "store/createpage";
+            var postData = { referencePageId: pages.centre.id, directoryId: null, type: panel };
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                var newPageId = r.PageId;
+                $.when(
+                    $U.AjaxGet({ url: "pageapi/page/" + newPageId })
+                    ).then(function (result) {
+                        _removePanelOverlay(panel);
+                        var panelName = pages[panel].panelSelector.substring(1);
+                        $.core$page.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId });
+                        pages[panel].id = result.PageId;
+                        _initEditing(panel);
+                });
+            });
+        }
+        function _addPanelOverlay(panel) {
+            var overlay = $("<div class='overlay'><button class='btn btn-xs btn-primary'>Add Content</button></div>");
+            $(pages[panel].panelSelector).addClass("editor-side-panel").append(overlay);
+            overlay.find(".btn").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                _addContent(panel);
+            });
+        }
+        function _removePanelOverlay(panel) {
+            $(pages[panel].panelSelector).find(".overlay").off().remove();
+            $(pages[panel].panelSelector).removeClass("editor-side-panel");
+        }
+        function _onWindowResize() {
+            var totalHeight = $(window).height();
+            var panel = pages.centre.panelSelector;
+            var panelTop = $(panel).offset().top;
+            var availableHeight = totalHeight - panelTop;
+            $(panel).css("max-height", availableHeight + "px");
+        }
+        function _toolbarOpened() {
+            // load up all editors
+            _toolbar.disableCommand("save-changes");
+            pages.centre.id = $(".CentrePanel").attr("data-page-id");
+            var url = $U.Format("store/sidePages/{0}", pages.centre.id);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                pages.banner.id = r.BannerPanel.PageId;
+                pages.left.id = r.LeftPanel.PageId;
+                pages.id = r.RightPanel.PageId;
+                _initEditing("banner");
+                _initEditing("left");
+                _initEditing("centre");
+                _initEditing("right");
+                setTimeout(function () {
+                    pages.centre.mce.execCommand("mceAddControl", false, $(pages.centre.panelSelector));
+                }, 300);
+                $(window).on("resize.editor", function () {
+                    _onWindowResize();
+                });
+                _onWindowResize();
+            });
+        }
+        function __exitEditRequested() {
+            function __unloadEditorsAndClose() {
+                tinymce.remove();
+                pages.banner.mce = null;
+                pages.left.mce = null;
+                pages.centre.mce = null;
+                pages.right.mce = null;
+                pages.banner.savedHtml = null;
+                pages.left.savedHtml = null;
+                pages.centre.savedHtml = null;
+                pages.right.savedHtml = null;
+                _toolbar.disableCommand("save-changes");
+                _toolbar.close();
+                // the following tidies up after tinymce (it should do this itself, IMHO)
+                $("table.mce-item-table").removeClass("mce-item-table");
+                $("div.mce-resizehandle").remove();
+                $("div[contenteditable='true'").removeAttr('contenteditable');
+                $(window).off(".editor");
+            }
+            if (_changesPending()) {
+                $U.Confirm("There are unsaved changes which will be lost. Please confirm", function () {
+                    $(pages.banner.panelSelector).html(pages.banner.savedHtml);
+                    $(pages.left.panelSelector).html(pages.left.savedHtml);
+                    $(pages.centre.panelSelector).html(pages.centre.savedHtml);
+                    $(pages.right.panelSelector).html(pages.right.savedHtml);
+                    __unloadEditorsAndClose();
+                });
+            } else {
+                __unloadEditorsAndClose();
+            }
+        }
+        function _savePageChanges() {
+
+        }
+        function _openStoreBrowser() {
+            var sb = new StoreBrowser();
+            sb.show();
+        }
+        _initialize();
+        return {
+            // expose instance methods here
+        };
+        
+    }
+    function getInstance() {
+        if (!instance) {
+            instance = new createInstance();
+        }
+        return instance;
+    }
+    return {
+        get: getInstance
+    }
+})(jQuery);
+
+(function ($) {
     var $T;
     var $U;
     var $TV;
@@ -593,6 +797,7 @@
         };
     };
     $.core$editor = {
+        toolbar: null,
         manager: {
             //control.push({ panel: panelName, editor: editor, savedContent: originalHtml });
             control: [],
@@ -643,24 +848,65 @@
         cm: null,
         isOpen: false,
         Init: function () {
+            //debugger;
             $T = this;
             $U = $.fastnet$utilities;
             $TV = $.fastnet$treeview;
             //$U.Debug("");
             var baseUrl = $("head base").prop("href");
             $T.tinymceUrl = baseUrl + "Scripts/tinymce/";
-            $(".edit-panel").on("click", function (e) {
-                $T.Start();
+            toolbar = PageToolbar.get();
+            toolbar.addHandler("toolbar-opened", null);
+            toolbar.addHandler("toolbar-closed", null);
+            toolbar.addHandler("save-changes", $T.SavePageChanges);
+            toolbar.addHandler("open-store-browser", $T.OpenStoreBrowser);
+
+            //$(".edit-panel").on("click", function (e) {
+            //    $T.Start();
+            //});
+            ////$(".edit-panel").addClass("closed");//.height(8);
+            //$T.SetEditToolbar("hidden");
+            //$U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
+            //$(".edit-toolbar button.editor-command").on("click", function (e) {
+            //    e.preventDefault();
+            //    e.stopPropagation();
+            //    var cmd = $(this).attr("data-cmd");
+            //    $T.OnCommand(cmd, null);
+            //});
+        },
+
+        SavePageChanges: function () {
+            var postData = {
+                BannerPanel: { PageId: null },
+                LeftPanel: { PageId: null },
+                RightPanel: { PageId: null }
+            };
+            $.each(tinymce.EditorManager.editors, function (index, ed) {
+                var panelElement = $(ed.getElement());
+                var pageId = panelElement.attr("data-page-id");
+                if (typeof pageId !== "undefined") {
+                    var panelName = panelElement.attr("data-panel");
+                    postData[panelName] = { PageId: pageId, HtmlText: ed.getContent(), HasChanged: ed.isDirty() };
+                }
             });
-            $(".edit-panel").addClass("closed");//.height(8);
-            $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
-            $(".edit-toolbar button.editor-command").on("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var cmd = $(this).attr("data-cmd");
-                $T.OnCommand(cmd, null);
+            var url = "store/update/page/content";
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
+                $.each($T.manager.control, function (index, item) {
+                    if (item.editor.isDirty()) {
+                        item.editor.isNotDirty = true;
+                        $T.manager.updateSavedContent(item.editor);
+                        //item.savedContent = item.editor.getContent();
+                    }
+                });
+                $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
             });
         },
+        OpenStoreBrowser: function () {
+            //$(".mce-resizehandle").hide();
+            var sb = new StoreBrowser();
+            sb.show();
+        },
+        //
         CloseEditors: function (okcallback) {
             function afterClose() {
                 $.core$page.isEditing = false;
@@ -769,7 +1015,8 @@
                         var ctrl = $T.manager.getControlForEditor($this.currentEditor);// getControl();
                         var panelSelector = "." + ctrl.panel;
                         var pageId = parseInt($(panelSelector).attr("data-page-id"));
-                        var url = $U.Format("store/createpage/{0}", pageId);
+                        var url = $U.Format("store/createpage");
+                        var postData = { referencePageId: pageId, type: "centre" };
                         $.when($U.AjaxPost({ url: url, data: null })).then(function (r) {
                             var newPageId = r.PageId;
                             var pageUrl = r.Url;
@@ -835,25 +1082,23 @@
             });
             return result;
         },
-
         OnCommand: function (cmd, data) {
             switch (cmd) {
                 case "exit-edit-mode":
                     $T.Stop();
                     break;
 
-                case "save-changes":
-                    $T.SavePageChanges();
-                    break;
-                case "open-store-browser":
-                    $T.OpenStoreBrowser();
-                    break;
+                //case "save-changes":
+                //    $T.SavePageChanges();
+                //    break;
+                //case "open-store-browser":
+                //    $T.OpenStoreBrowser();
+                //    break;
                 default:
                     alert("This feature is not implemented");
                     break;
             }
         },
-
         OnContentChange: function (ed) {
             //$U.Debug("text change ({0})", ed.settings.selector);
             $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), true);
@@ -894,39 +1139,14 @@
                 }
             });
         },
-        SavePageChanges: function () {
-            var postData = {
-                BannerPanel: { PageId: null },
-                LeftPanel: { PageId: null },
-                RightPanel: { PageId: null }
-            };
-            $.each(tinymce.EditorManager.editors, function (index, ed) {
-                var panelElement = $(ed.getElement());
-                var pageId = panelElement.attr("data-page-id");
-                if (typeof pageId !== "undefined") {
-                    var panelName = panelElement.attr("data-panel");
-                    postData[panelName] = { PageId: pageId, HtmlText: ed.getContent(), HasChanged: ed.isDirty() };
-                }
-            });
-            var url = "store/update/page/content";
-            $.when($U.AjaxPost({ url: url, data: postData })).then(function () {
-                $.each($T.manager.control, function (index, item) {
-                    if (item.editor.isDirty()) {
-                        item.editor.isNotDirty = true;
-                        $T.manager.updateSavedContent(item.editor);
-                        //item.savedContent = item.editor.getContent();
-                    }
-                });
-                $U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
-            });
-        },
-        Start: function () {
-            if (!$T.isOpen) {
-                $(".edit-toolbar").addClass("opaque");
-                $(".edit-panel").removeClass("closed").addClass("open");//.height(32);
-                $T.isOpen = true;
-            }
 
+        Start: function () {
+            $T.SetEditToolbar("open");
+            //if (!$T.isOpen) {
+            //    $(".edit-toolbar").addClass("opaque");
+            //    $(".edit-panel").removeClass("closed").addClass("open");//.height(32);
+            //    $T.isOpen = true;
+            //}
             var centrePageId = $(".CentrePanel").attr("data-page-id");
             var url = $U.Format("store/panelinfo/{0}", centrePageId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
@@ -935,7 +1155,24 @@
                 $.core$page.isEditing = true;
                 $(window).on("resize.editor", function () { $T.onwindowresize(); });
             });
-
+        },
+        SetEditToolbar: function(cmd) {
+            switch(cmd) {
+                case "hidden":
+                    // i.e. editing cannot be accessed at all (no editing is possible)
+                    // this is the default appearance of the toolbar
+                    $(".edit-toolbar").removeClass("present"); //i.e. it cannot be seen
+                    break;
+                case "closed":
+                    // i.e. editing is possible but the toolbar is closed and can only be clicked
+                    $(".edit-toolbar").addClass("present"); // i.e. it is there to see
+                    $(".edit-toolbar").removeClass("down").addClass("up");
+                    break;
+                case "open":
+                    // i.e. toolbar is fully open (all buttons are visible), editors are loaded
+                    $(".edit-toolbar").removeClass("up").addClass("down");
+                    break;
+            }
         },
         PageChanged: function () {
             function update(panelName, pageId) {
@@ -989,11 +1226,7 @@
                 $(window).off(".editor");
             })
         },
-        OpenStoreBrowser: function () {
-            //$(".mce-resizehandle").hide();
-            var sb = new StoreBrowser();
-            sb.show();
-        },
+
         onwindowresize: function () {
             var totalHeight = $(window).height();
             var panel = ".CentrePanel";
@@ -1036,7 +1269,7 @@
         }
     };
     $(function () {
-        $.core$editor.Init();
+        //$.core$editor.Init();
         //debugger;
     });
 })(jQuery);

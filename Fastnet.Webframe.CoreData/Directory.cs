@@ -23,7 +23,7 @@ namespace Fastnet.Webframe.CoreData
         public virtual Directory ParentDirectory { get; set; }
         //
         private ICollection<Directory> subDirectories;
-        private ICollection<DirectoryAccessRule> directoryAccessRules;
+        //private ICollection<DirectoryAccessRule> directoryAccessRules;
         private ICollection<DirectoryGroup> directoryGroups;
         private ICollection<Page> pages;
         private ICollection<Document> documents;
@@ -33,11 +33,11 @@ namespace Fastnet.Webframe.CoreData
             get { return subDirectories ?? (subDirectories = new HashSet<Directory>()); }
             set { subDirectories = value; }
         }
-        public virtual ICollection<DirectoryAccessRule> DirectoryAccessRules
-        {
-            get { return directoryAccessRules ?? (directoryAccessRules = new HashSet<DirectoryAccessRule>()); }
-            set { directoryAccessRules = value; }
-        }
+        //public virtual ICollection<DirectoryAccessRule> DirectoryAccessRules
+        //{
+        //    get { return directoryAccessRules ?? (directoryAccessRules = new HashSet<DirectoryAccessRule>()); }
+        //    set { directoryAccessRules = value; }
+        //}
         public virtual ICollection<DirectoryGroup> DirectoryGroups
         {
             get { return directoryGroups ?? (directoryGroups = new HashSet<DirectoryGroup>()); }
@@ -87,7 +87,7 @@ namespace Fastnet.Webframe.CoreData
             addParentName(fragments, this);
             return string.Join("/", fragments.ToArray().Reverse());
         }
-        public IEnumerable<Group> AccessibleFrom()
+        public IEnumerable<Group> ViewableFrom()
         {
             // look up the directory hierarchy till you get to
             // a directory (including this one) that has a one or more groups attached
@@ -95,8 +95,28 @@ namespace Fastnet.Webframe.CoreData
             // (i.e. this one) is restricted to.
             // Note: if nothing else we should get to the root directory
             // and find that restricted to Everyone
-            return this.SelfAndParents.First(p => p.DirectoryGroups.Select(dg => dg.Group).Count() > 0)
+            return this.SelfAndParents.First(p => p.DirectoryGroups.Where(dg => dg.ViewAllowed).Select(dg => dg.Group).Count() > 0)
                 .DirectoryGroups.Select(x => x.Group);
+        }
+        public IEnumerable<Group> EditableFrom()
+        {
+            // look up the directory hierarchy till you get to
+            // a directory (including this one) that has a one or more groups attached
+            // this set contains the groups that content in the current directory
+            // (i.e. this one) is restricted to.
+            // Note: if nothing else we should get to the root directory
+            // and find that restricted to Everyone
+            var directory = this.SelfAndParents.FirstOrDefault(p => p.DirectoryGroups.Where(dg => dg.EditAllowed).Select(dg => dg.Group).Count() > 0);
+            if (directory != null)
+            {
+                return directory.DirectoryGroups.Select(x => x.Group);
+            }
+            else
+            {
+                return new List<Group>();
+            }
+            //return this.SelfAndParents.First(p => p.DirectoryGroups.Where(dg => dg.EditAllowed).Select(dg => dg.Group).Count() > 0)
+            //    .DirectoryGroups.Select(x => x.Group);
         }
         public Page GetClosestLandingPage()
         {

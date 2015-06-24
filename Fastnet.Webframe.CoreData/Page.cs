@@ -39,6 +39,7 @@ namespace Fastnet.Webframe.CoreData
         public long PageId { get; set; }
         public string Name { get; set; }
         public MarkupType MarkupType { get; set; }
+        public PageType Type { get; set; }
         public int VersionCount { get; set; }
         public long DirectoryId { get; set; }
         public bool IsLandingPage { get; set; }
@@ -66,9 +67,8 @@ namespace Fastnet.Webframe.CoreData
             get { return forwardLinks ?? (forwardLinks = new HashSet<Page>()); }
             set { forwardLinks = value; }
         }
-
         public virtual ICollection<Page> BackLinks { get; set; } // this page is hyperlinked from these pages
-        public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
+        //public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
         [NotMapped]
         public string Url
         {
@@ -90,9 +90,67 @@ namespace Fastnet.Webframe.CoreData
         [NotMapped]
         public bool IsCentrePage { get { return this.CentrePanelPages.Count() == 0; } }
         [NotMapped]
+        [Obsolete]
         public string SidePageInfo
         {
             get { return getSidePageInfo(); }
+        }
+        public string GetLandingPageImageUrl()
+        {
+            if (this.IsLandingPage)
+            {
+                return "content/images/homepage.png";
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public string GetTypeImageUrl()
+        {
+            string r = null;
+            switch (this.Type)
+            {
+                case PageType.Centre:
+                    r = "Content/images/centrepage.png";
+                    break;
+                case PageType.Left:
+                    r = "Content/images/leftpage.png";
+                    break;
+                case PageType.Right:
+                    r = "Content/images/rightpage.png";
+                    break;
+                case PageType.Banner:
+                    r = "Content/images/bannerpage.png";
+                    break;
+                default:
+                    r = "Content/images/panelwire.jpg";
+                    break;
+            }
+            return r;
+        }
+        public string GetTypeTooltip()
+        {
+            string r = null;
+            switch (this.Type)
+            {
+                case PageType.Centre:
+                    r = "Centre page";
+                    break;
+                case PageType.Left:
+                    r = "Left Panel page";
+                    break;
+                case PageType.Right:
+                    r = "Right Panel page";
+                    break;
+                case PageType.Banner:
+                    r = "Banner page";
+                    break;
+                default:
+                    r = "Unknown!";
+                    break;
+            }
+            return r;
         }
         private PageContent GetContent(ContentPanels index)
         {

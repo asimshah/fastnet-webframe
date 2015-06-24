@@ -28,12 +28,16 @@
     var $T;
     var $U;
     $.core$page = {
+        toolbar: null,
+        pageEditor: null,
         isEditing: false,
         options: null,
         currentPages: { centreId: null, bannerId: null, leftId: null, rightId: null },
         Init: function () {
             $T = this;
             $U = $.fastnet$utilities;
+            $T.toolbar = PageToolbar.get();
+            $T.pageEditor = PageEditor.get();
             $(window).bind('popstate', function (event) {
                 //Debug.writeln(location.href);
                 if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
@@ -129,6 +133,7 @@
             if (typeof startPage === "undefined" || startPage === null || startPage === "") {
                 startUrl = "pageapi/home";
             } else {
+                //**TODO** relook at this call as $T.SetPage() also get the page content
                 startUrl = $U.Format("pageapi/page/{0}", startPage);
             }
             var homeUrl = "pageapi/home";
@@ -148,25 +153,25 @@
                     $T.QueryAuthentication();
                 });
         },
-        LoadHomePage: function () {
-            //LoadHomePage: function (sa) {
-            var homeUrl = "pageapi/home";
-            $.when(
-                $U.AjaxGet({ url: "pageapi/menuinfo" }),
-                $U.AjaxGet({ url: homeUrl })
-                ).then(function (menuInfo, home) {
-                    var menuInfoResult = menuInfo[0];
-                    var homeResult = home[0];
-                    var menuVisible = menuInfoResult.Visible;
-                    if (menuVisible) {
-                        var menuHtml = menuInfoResult.MenuHtml;
-                        $T.CreateMenus(menuHtml);
-                    }
-                    var homePageId = homeResult.PageId;
-                    $T.SetPage(homePageId);
-                    $T.QueryAuthentication();
-                });
-        },
+        //LoadHomePage: function () {
+        //    //LoadHomePage: function (sa) {
+        //    var homeUrl = "pageapi/home";
+        //    $.when(
+        //        $U.AjaxGet({ url: "pageapi/menuinfo" }),
+        //        $U.AjaxGet({ url: homeUrl })
+        //        ).then(function (menuInfo, home) {
+        //            var menuInfoResult = menuInfo[0];
+        //            var homeResult = home[0];
+        //            var menuVisible = menuInfoResult.Visible;
+        //            if (menuVisible) {
+        //                var menuHtml = menuInfoResult.MenuHtml;
+        //                $T.CreateMenus(menuHtml);
+        //            }
+        //            var homePageId = homeResult.PageId;
+        //            $T.SetPage(homePageId);
+        //            $T.QueryAuthentication();
+        //        });
+        //},
         ParallelCalls: function () {
             $.when(
                 $U.AjaxGet({ url: "main/special/echo/2" }),
@@ -193,8 +198,11 @@
         },
         SetPage: function (pageId) {
             $.when(
-                $U.AjaxGet({ url: "pageapi/panelinfo/" + pageId })
-                ).then(function (panelinfo) {
+                $U.AjaxGet({ url: "pageapi/panelinfo/" + pageId }),
+                $U.AjaxGet({ url: "pageapi/page/canedit/" + pageId })
+                ).then(function (q0, q1) {
+                    var panelinfo = q0[0];
+                    var canEdit = q1[0].CanEdit;
                     var centrePageId = pageId;
                     var bannerPageId = panelinfo.BannerPanel.Visible ? panelinfo.BannerPanel.PageId : null;
                     var leftPageId = panelinfo.LeftPanel.Visible ? panelinfo.LeftPanel.PageId : null;
@@ -208,10 +216,15 @@
                         //alert("Load user profile");
                         $T.GotoInternalLink("/userprofile");
                     });
-                    if ($T.isEditing) {
-                        //alert("set page while editing");
-                        $.core$editor.PageChanged();
+                    if (canEdit) {
+                        $T.toolbar.show();
+                    } else {
+                        $T.toolbar.hide();
                     }
+                    //if ($T.isEditing) {
+                    //    //alert("set page while editing");
+                    //    $.core$editor.PageChanged();
+                    //}
                 });
         },
         SetContent: function (panelName, pageInfo) {
@@ -282,6 +295,45 @@
                 }
                 return newPageId;
             }
+        },
+        LoadEditor: function (afterLoad) {
+            // **NB** I do not use this lazy loading of the editor scripts
+            // as I found a problem with the electric mobile emulation of sadari - it
+            // was not able to debug. This is a problem thatis talked about on the net
+            // and the crossDomain setting on the script call was supposed to fix it and
+            // didn't. Not really bothered with it for now, am going back the older
+            // way where the editor code will always be laoded - caching should make it
+            // fast enough - let's see. 23Jun2015
+            if (!$.core$editor) {
+                var scripts = [
+                 "scripts/jquery-ui-1.11.4.min.js",
+                 "scripts/datatables/jquery.datatables.js",
+                 "scripts/tinymce/tinymce.js",
+                 "scripts/dropzone/dropzone.js",
+                 "scripts/fastnet/fastnet.contextmenu.js",
+                 "scripts/fastnet/fastnet.treeview.js",
+                 "scripts/main/core.editor.js"
+                ];
+                var dfds = [];
+                $.each(scripts, function (i, url) {
+                    dfds.push($T.AjaxGetScript({url: url}));
+                });
+                $.when.apply($, dfds).then(function () {
+                    afterLoad();
+                });
+            }
+
+        },
+        AjaxGetScript: function (args) {
+            // **NB** not used - see comment in LoadEditor
+            $(".ajax-error-message").empty();
+            return $.ajax({
+                url: "/" + args.url,// $T.rootUrl + args.url,
+                dataType: "script",
+                type: "GET",
+                cache: true,
+                crossDomain: true
+            });
         },
     };
     $(function () {

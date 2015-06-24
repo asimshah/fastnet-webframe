@@ -8,41 +8,41 @@
 "    </div>" +
 "</div>" +
 "</div>";
-        var pageTemplate =
-"<div class='row' >" +
-"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-"        <div class='picture' >" +
-//"           <div class='iframe-container'><iframe src='{{FullUrl}}'></iframe></div>" +
-"        </div>" +
-"        <div class='name'><a href='{{Url}}'>{{Url}}</a>" +
-"        </div>" +
-"        <div class='title'>{{Name}}</div>" +
-"        <div class='info'>{{Info}}</div>" +
-"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-"</div>" +
-"</div>";
-        var imageTemplate =
-"<div class='row' >" +
-"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-"        <div class='picture' >" +
-//"            <div><img src='{{Url}}'></img></div>" +
-"        </div>" +
-"        <div class='name'><div>{{Url}}</div></div>" +
-"        <div class='title'>{{Name}}</div>" +
-"        <div class='info'>{{Info}}</div>" +
-"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-"</div>" +
-"</div>";
-        var docTemplate =
-"<div class='row' >" +
-"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-"        <div class='picture' ><div></div></div>" +
-"        <div class='name'><div>{{Url}}</div></div>" +
-"        <div class='title'>{{Name}}</div>" +
-"        <div class='info'>{{Info}}</div>" +
-"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-"</div>" +
-"</div>";
+        //        var pageTemplate =
+        //"<div class='row' >" +
+        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
+        //"        <div class='picture' >" +
+        ////"           <div class='iframe-container'><iframe src='{{FullUrl}}'></iframe></div>" +
+        //"        </div>" +
+        //"        <div class='name'><a href='{{Url}}'>{{Url}}</a>" +
+        //"        </div>" +
+        //"        <div class='title'>{{Name}}</div>" +
+        //"        <div class='info'>{{Info}}</div>" +
+        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
+        //"</div>" +
+        //"</div>";
+        //        var imageTemplate =
+        //"<div class='row' >" +
+        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
+        //"        <div class='picture' >" +
+        ////"            <div><img src='{{Url}}'></img></div>" +
+        //"        </div>" +
+        //"        <div class='name'><div>{{Url}}</div></div>" +
+        //"        <div class='title'>{{Name}}</div>" +
+        //"        <div class='info'>{{Info}}</div>" +
+        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
+        //"</div>" +
+        //"</div>";
+        //        var docTemplate =
+        //"<div class='row' >" +
+        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
+        //"        <div class='picture' ><div></div></div>" +
+        //"        <div class='name'><div>{{Url}}</div></div>" +
+        //"        <div class='title'>{{Name}}</div>" +
+        //"        <div class='info'>{{Info}}</div>" +
+        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
+        //"</div>" +
+        //"</div>";
         var $U = $.fastnet$utilities;
         function closeNavigationTable() {
             $(".toolbar button[data-cmd='back-to-cms']").show();
@@ -96,7 +96,7 @@
                                 $U.MessageBox("Mail sent");
                             });
                             break;
-                    }                
+                    }
                 },
                 AfterItemValidation: function (f, r) {
                     if (r.totalErrors == 0) {
@@ -127,7 +127,7 @@
                     showHistory(template, data);
                     $(".mail-history td div.to").on("click", function () {
                         var body = $(this).siblings(".body");
-                        $U.MessageBox(body[0].innerHTML, { Title: "Email Content"});
+                        $U.MessageBox(body[0].innerHTML, { Title: "Email Content" });
                     });
                 });
         }
@@ -171,33 +171,52 @@
         }
         function showSiteContent() {
             url = "cmsapi/get/folders";
-            $.when($U.AjaxGet({ url: url }, true).then(function (r) {
-                $.each(r, function (i, folder) {
-                    var html = $(Mustache.to_html(folderTemplate, folder));
-                    //$(".cms-content").append(html);
-                    $(".report-container").append(html);
-                    //var folderId = folder.Id;
-                    var url2 = $U.Format("cmsapi/get/foldercontent/{0}", folder.Id);
-                    $.when($U.AjaxGet({ url: url2 }, true).then(function (list) {
-                        $.each(list, function (j, item) {
-                            //var selector = $U.Format(".cms-content .cms-folder[data-folder-id='{0}'] .folder-name", folder.Id);
-                            var selector = $U.Format(".cms-folder[data-folder-id='{0}'] .folder-name", folder.Id);
-                            item.FullUrl = $U.Format("{0}//{1}/{2}", location.protocol, location.host, item.Url);
-                            var lastmodified = moment(item.LastModifiedOn).local();
-                            item.LastModifiedOn = $U.FormatDate(lastmodified, "DDMMMYYYY HH:mm:ss");
-                            if (item.Type === "page") {
-                                $(selector).append($(Mustache.to_html(pageTemplate, item)));
-                            } else if (item.Type === "document") {
-                                $(selector).append($(Mustache.to_html(docTemplate, item)));
+            var pageTemplateUrl = "template/get/cms/pagetemplate";
+            var imageTemplateUrl = "template/get/cms/imagetemplate";
+            var documentTemplateUrl = "template/get/cms/documenttemplate";
+            $.when(
+                $U.AjaxGet({ url: url }, true),
+                $U.AjaxGet({url: pageTemplateUrl}),
+                $U.AjaxGet({url: imageTemplateUrl}),
+                $U.AjaxGet({url: documentTemplateUrl})
+                ).then(function (q0, q1, q2, q3) {
+                    var r = q0[0];
+                    var pageTemplate = q1[0].Template;
+                    var imageTemplate = q2[0].Template;
+                    var docTemplate = q3[0].Template;
+                    $.each(r, function (i, folder) {
+                        var html = $(Mustache.to_html(folderTemplate, folder));
+                        $(".report-container").append(html);
+                        var url2 = $U.Format("cmsapi/get/foldercontent/{0}", folder.Id);
+                        $.when(
+                            $U.AjaxGet({ url: url2 }, true)
+                            ).then(function (list) {
+                                $.each(list, function (j, item) {
+                                    var selector = $U.Format(".cms-folder[data-folder-id='{0}'] .folder-name", folder.Id);
+                                    item.FullUrl = $U.Format("{0}//{1}/{2}", location.protocol, location.host, item.Url);
+                                    var lastmodified = moment(item.LastModifiedOn).local();
+                                    item.LastModifiedOn = $U.FormatDate(lastmodified, "DDMMMYYYY HH:mm:ss");
+                                    if (item.Type === "page") {
+                                        $(selector).append($(Mustache.to_html(pageTemplate, item)));
+                                    } else if (item.Type === "document") {
+                                        $(selector).append($(Mustache.to_html(docTemplate, item)));
 
-                            } else {
-                                $(selector).append($(Mustache.to_html(imageTemplate, item)));
-                            }
-                        });
-                    }));
+                                    } else {
+                                        $(selector).append($(Mustache.to_html(imageTemplate, item)));
+                                    }
+                                });
+                            });
+                        //$.when(
+                        //    $U.AjaxGet({ url: url2 }, true)
+                        //    .then(function (list) {
+
+                        //}));
+                    });
                 });
-                //debugger;
-            }));
+            //$.when($U.AjaxGet({ url: url }, true).then(function (r) {
+
+            //    //debugger;
+            //}));
         }
         cms.prototype.echo = function (text) {
             alert(text);

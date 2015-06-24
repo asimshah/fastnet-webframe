@@ -24,17 +24,20 @@
     }
     public class PermissionFilterAttribute : ActionFilterAttribute
     {
-        private Group permittedTo;
-        public PermissionFilterAttribute(string groupName)
+        //private Group permittedTo;       
+        private long groupPK;
+        public PermissionFilterAttribute(SystemGroups group)
         {
             var ctx = Core.GetDataContext();
-            permittedTo = ctx.Groups.SingleOrDefault(g => g.Type == GroupTypes.System && string.Compare(g.Name, groupName, true) == 0);
+            var permittedTo = ctx.Groups.SingleOrDefault(g => g.Type == GroupTypes.System && string.Compare(g.Name, group.ToString(), true) == 0);
+            groupPK = permittedTo.GroupId;
         }
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             try
             {
                 Member m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
+                var permittedTo = Core.GetDataContext().Groups.Find(groupPK);
                 if (!permittedTo.Members.Contains(m))
                 {
                     var response = actionContext.Request.CreateResponse(System.Net.HttpStatusCode.Unauthorized);
@@ -65,7 +68,7 @@
                         username = actionContext.RequestContext.Principal.Identity.Name;
                     }
                     string sessionUser = m.Fullname;
-                    Log.Write("Executing {0}:{1}(), user {2} ({3}), {4}", actionContext.ControllerContext.Controller.GetType().Name,
+                    Log.Write("webapi {0}:{1}(), user {2} ({3}), {4}", actionContext.ControllerContext.Controller.GetType().Name,
                         actionContext.ActionDescriptor.ActionName, username, sessionUser, actionContext.Request.RequestUri.PathAndQuery);
                 }
             }

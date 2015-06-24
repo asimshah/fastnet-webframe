@@ -19,6 +19,7 @@ using System.Web.WebPages;
 using Autofac;
 using Fastnet.Common;
 
+
 namespace Fastnet.Webframe.Web
 {
     //public class WebApiApplication : System.Web.HttpApplication
@@ -124,8 +125,7 @@ namespace Fastnet.Webframe.Web
         //    Application["td"] = templateLibrary;
         //}
         protected void Session_Start()
-        {
-            
+        {            
             var ctx = new HttpContextWrapper(this.Context);
             string ua = ctx.GetOverriddenUserAgent();
             Session["CanTouch"] = IsIPad(ua) || IsTablet(ua);

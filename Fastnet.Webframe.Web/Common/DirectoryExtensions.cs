@@ -8,13 +8,13 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Common
 {
-    public class EffectiveDirectoryAccessRule
-    {
-        public Directory Directory { get; set; }
-        public Directory InheritedFrom { get; set; }
-        public Group Group { get; set; }
-        public AccessRule AccessRule { get; set; }
-    }
+    //public class EffectiveDirectoryAccessRule
+    //{
+    //    public Directory Directory { get; set; }
+    //    public Directory InheritedFrom { get; set; }
+    //    public Group Group { get; set; }
+    //    public AccessRule AccessRule { get; set; }
+    //}
     public static class DirectoryExtensions
     {
         //public static IEnumerable<EffectiveDirectoryAccessRule> GetEffectiveDirectoryAccessRules(this Directory dir)

@@ -195,6 +195,9 @@
 }
 .cms-folder .folder-item {
   font-size: small;
+  /*.page-type {
+            .make-xs-column(2);
+        }*/
   /*.additional-info {
                 .make-xs-column(2);
             }*/
@@ -212,23 +215,6 @@
   color: #902a12;
 }
 .cms-folder .folder-item .name {
-  margin-left: 2.08333333%;
-  position: relative;
-  float: left;
-  width: 12.5%;
-  min-height: 1px;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-.cms-folder .folder-item .title {
-  position: relative;
-  float: left;
-  width: 25%;
-  min-height: 1px;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-.cms-folder .folder-item .info {
   position: relative;
   float: left;
   width: 16.66666667%;
@@ -236,32 +222,53 @@
   padding-left: 15px;
   padding-right: 15px;
 }
-.cms-folder .folder-item .modification-info {
+.cms-folder .folder-item .title {
   position: relative;
   float: left;
-  width: 33.33333333%;
+  width: 39.58333333%;
   min-height: 1px;
   padding-left: 15px;
   padding-right: 15px;
+  font-size: x-small;
+}
+.cms-folder .folder-item .info {
+  position: relative;
+  float: left;
+  width: 14.58333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: x-small;
+}
+.cms-folder .folder-item .modification-info {
+  position: relative;
+  float: left;
+  width: 25%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  float: right !important;
+  font-size: x-small;
 }
 .cms-folder .folder-item .modification-info > div {
   display: inline;
   margin-right: 2px;
 }
 .cms-folder .folder-item .picture {
-  display: none;
   position: relative;
   float: left;
-  width: 8.33333333%;
+  width: 1.66666667%;
   min-height: 1px;
   padding-left: 15px;
   padding-right: 15px;
-}
-.cms-folder .folder-item .picture img {
-  width: 200px;
-  border: 2px solid #808080;
-  margin-bottom: 4px;
-  border-radius: 2px;
+  padding-right: 4px;
+  /*img {
+                width: 200px;
+                border: 2px solid @image-border-colour;
+                //margin-top: 4px;
+                margin-bottom: 4px;
+                border-radius: 2px;
+            }*/
 }
 .cms-folder .folder-item .picture .iframe-container {
   overflow: hidden;
@@ -290,5 +297,11 @@
 .mail-history .mail-disabled,
 .mail-history .mail-failed-delivery {
   color: red;
+}
+@media print {
+  a:link:after,
+  a:visited:after {
+    content: "";
+  }
 }
 /*# sourceMappingURL=main.css.map */

@@ -52,7 +52,6 @@ namespace Fastnet.Webframe.Web.Controllers
             Page defaultlandingPage = Member.Anonymous.FindLandingPage();
             this.SetCurrentPage(defaultlandingPage);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = defaultlandingPage.PageId.ToString() });
-
         }
         [HttpGet]
         [Route("page/{id}")]
@@ -75,25 +74,17 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
-            //if (th
-            //{
-            //    HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK, data);
-            //    response.Content.Headers.LastModified = page.PageMarkup.CreatedOn;
-            //    response.Headers.ETag = new EntityTagHeaderValue(CreateEtag(page.PageId, page.PageMarkup.CreatedOn));
-            //    CacheControlHeaderValue cchv = new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromMinutes(maxAge) };
-            //    response.Headers.CacheControl = cchv;
-            //    return response;
-            //}
-            //else
-            //{
-            //    HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.NotModified);
-            //    //response.Content.Headers.LastModified = page.PageMarkup.CreatedOn;
-            //    //response.Headers.ETag = new EntityTagHeaderValue(CreateEtag(page.PageId, page.PageMarkup.CreatedOn));
-            //    //CacheControlHeaderValue cchv = new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromMinutes(maxAge) };
-            //    //response.Headers.CacheControl = cchv;
-            //    return response;
-            //}
-            //return this.Request.CreateResponse(HttpStatusCode.NotFound);
+        }
+        [HttpGet]
+        [Route("page/canedit/{id}")]
+        public HttpResponseMessage CanEditPage(string id)
+        {
+            var admins = Group.Administrators;
+            long pageId = Int64.Parse(id);
+            Data.Page page = DataContext.Pages.Find(pageId);
+            Member m = GetCurrentMember();
+            bool result = admins.Members.Contains(m) || m.CanEdit(page);
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { CanEdit = result });
         }
         [HttpGet]
         [Route("panelinfo/{id}")]
@@ -148,7 +139,7 @@ namespace Fastnet.Webframe.Web.Controllers
             var bannerPanel = GetPanelInfo(defaultlandingPage, Data.Panel.BannerPanel);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Visible = bannerPanel.Visible, PageId = bannerPanel.PageId });
         }
-
+        //
         private dynamic PrepareHTMLPage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;
@@ -232,15 +223,15 @@ namespace Fastnet.Webframe.Web.Controllers
             } while (lp == null);
             return lp;
         }
-        private Data.Member GetCurrentMember()
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                var userId = Convert.ToInt64(User.Identity.GetUserId());
-                return DataContext.Members.Find(userId);
-            }
-            return null;
-        }
+        //private Data.Member GetCurrentMember()
+        //{
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        var userId = Convert.ToInt64(User.Identity.GetUserId());
+        //        return DataContext.Members.Find(userId);
+        //    }
+        //    return null;
+        //}
         private bool IsContentModified(Data.Page page)
         {
             var ifModifiedSince = Request.Headers.IfModifiedSince;
@@ -251,17 +242,6 @@ namespace Fastnet.Webframe.Web.Controllers
             string etag = CreateEtag(page.PageId, page.PageMarkup.LastModifiedOn);
             return etag != receivedTag || ifModifiedSince.HasValue == false || (modifiedOn - ifModifiedSince.Value) > TimeSpan.FromSeconds(1);
         }
-        //private void SetCacheInfo(Page page)
-        //{
-        //    var ifModifiedSince = Request.Headers.IfModifiedSince;
-        //    var ifNoneMatch = Request.Headers.IfNoneMatch;
-        //    var modifiedOn = DateTime.SpecifyKind(page.PageMarkup.CreatedOn, DateTimeKind.Utc);
-        //    //DateTime requestIfModifiedSince = DateTime.MinValue;
-        //    //DateTime.TryParse(ifModifiedSince, out requestIfModifiedSince);
-        //    //requestIfModifiedSince = requestIfModifiedSince.ToUniversalTime();
-        //    //string requestEtag = ifNoneMatch;  
-        //    Debugger.Break();
-        //}
         private string CreateEtag(params object[] args)
         {
             string t = "";

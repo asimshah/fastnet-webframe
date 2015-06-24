@@ -33,6 +33,50 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return string.Format("document/{0}", DocumentId); }
         }
+        public string GetTypeImageUrl()
+        {
+            string r = null;
+            switch (Extension)
+            {
+                default:
+                    r = "content/images/documenttypes/unknownsmall.png";
+                    break;
+                case ".mp3":
+                    r = "content/images/documenttypes/audiosmall.png";
+                    break;
+                case ".css":
+                    r = "content/images/documenttypes/csssmall.png";
+                    break;
+                case ".dotx":
+                    r = "content/images/documenttypes/dotxsmall.png";
+                    break;
+                case ".xls":
+                case ".xlsx":
+                    r = "content/images/documenttypes/excelsmall.png";
+                    break;
+                case ".pdf":
+                    r = "content/images/documenttypes/pdfsmall.png";
+                    break;
+                case ".ppt":
+                case ".pptx":
+                    r = "content/images/documenttypes/powerpointsmall.png";
+                    break;
+                case ".doc":
+                case ".docx":
+                    r = "content/images/documenttypes/wordsmall.png";
+                    break;
+                case ".mp4":
+                case ".mpg":
+                case ".mpeg":
+                case ".avi":
+                case ".flv":
+                case ".mov":
+                case ".wmc":
+                    r = "content/images/documenttypes/videosmall.png";
+                    break;
+            }
+            return r;
+        }
     }
     public partial class CoreDataContext
     {

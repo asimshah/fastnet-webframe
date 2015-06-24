@@ -16,7 +16,7 @@ using Fastnet.Webframe.WebApi;
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RoutePrefix("cmsapi")]
-    [PermissionFilter("Administrators")]
+    [PermissionFilter(SystemGroups.Administrators)]
     public class CMSController : BaseApiController
     {
 
@@ -49,9 +49,56 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         [Route("get/foldercontent/{id}")]
         public HttpResponseMessage GetDirectoryContent(long id)
         {
+            //Func<PageType, string> getPageTypeImage = (pt) =>
+            //{
+            //    string r = null;
+            //    switch (pt)
+            //    {
+            //        case PageType.Centre:
+            //            r = "areas/cms/Content/images/centrepage.png";
+            //            break;
+            //        case PageType.Left:
+            //            r = "areas/cms/Content/images/leftpage.png";
+            //            break;
+            //        case PageType.Right:
+            //            r = "areas/cms/Content/images/rightpage.png";
+            //            break;
+            //        case PageType.Banner:
+            //            r = "areas/cms/Content/images/bannerpage.png";
+            //            break;
+            //        default:
+            //            r = "areas/cms/Content/images/panelwire.jpg";
+            //            break;
+            //    }
+            //    return r;
+            //};
+            //Func<PageType, string> getPageTypeTooltip = (pt) =>
+            //{
+            //    string r = null;
+            //    switch (pt)
+            //    {
+            //        case PageType.Centre:
+            //            r = "Centre page";
+            //            break;
+            //        case PageType.Left:
+            //            r = "Left Panel page";
+            //            break;
+            //        case PageType.Right:
+            //            r = "Right Panel page";
+            //            break;
+            //        case PageType.Banner:
+            //            r = "Banner page";
+            //            break;
+            //        default:
+            //            r = "Unknown!";
+            //            break;
+            //    }
+            //    return r;
+            //};
             List<dynamic> list = new List<dynamic>();
             Directory dir = DataContext.Directories.Find(id);
-            var pages = dir.Pages.ToArray().Where(x => x.IsCentrePage).OrderBy(p => p.Url);
+            //var pages = dir.Pages.ToArray().Where(x => x.IsCentrePage).OrderBy(p => p.Url);
+            var pages = dir.Pages.ToArray().OrderBy(p => p.Url);
             var documents = dir.Documents.ToArray().OrderBy(d => d.Url);
             var images = dir.Images.ToArray().OrderBy(x => x.Url);
             list.AddRange(pages.Select(p => new
@@ -60,7 +107,12 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Id = p.PageId,
                 Name = p.Name,
                 Url = p.Url,
-                Info = p.SidePageInfo,
+                //Info = p.SidePageInfo,
+                LandingPage = p.IsLandingPage,
+                PageType = p.Type,
+                LandingPageImage = p.GetLandingPageImageUrl(),
+                PageTypeImage = p.GetTypeImageUrl(),// getPageTypeImage(p.Type),
+                PageTypeTooltip = p.GetTypeTooltip(),// getPageTypeTooltip(p.Type),
                 LastModifiedOn = p.ModifiedOn ?? p.CreatedOn,
                 LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy: p.CreatedBy
             }));
@@ -70,7 +122,8 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Id = d.DocumentId,
                 Name = d.Name,
                 Url = d.Url,
-                Info = string.Empty,
+                //Info = string.Empty,
+                DocumentTypeImage = d.GetTypeImageUrl(),
                 LastModifiedOn = d.CreatedOn,
                 LastModifiedBy = d.CreatedBy
             }));

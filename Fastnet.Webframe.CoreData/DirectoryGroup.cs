@@ -7,20 +7,20 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
-    [Obsolete]
-    public partial class DirectoryAccessRule
-    {
-        public long DirectoryAccessRuleId { get; set; }
-        public long DirectoryId { get; set; }
-        public long GroupId { get; set; }
-        public long AccessRuleId { get; set; }
-        [Timestamp]
-        public byte[] TimeStamp { get; set; }
+    //[Obsolete]
+    //public partial class DirectoryAccessRule
+    //{
+    //    public long DirectoryAccessRuleId { get; set; }
+    //    public long DirectoryId { get; set; }
+    //    public long GroupId { get; set; }
+    //    public long AccessRuleId { get; set; }
+    //    [Timestamp]
+    //    public byte[] TimeStamp { get; set; }
 
-        public virtual Directory  Directory { get; set;}
-        public virtual AccessRule AccessRule { get; set; }
-        public virtual Group Group { get; set; }
-    }
+    //    public virtual Directory  Directory { get; set;}
+    //    public virtual AccessRule AccessRule { get; set; }
+    //    public virtual Group Group { get; set; }
+    //}
     public partial class DirectoryGroup
     {
         [Key, Column(Order = 0)]
@@ -34,7 +34,7 @@ namespace Fastnet.Webframe.CoreData
         internal Permission Permission { get; set; }
         [NotMapped]
         public bool ViewAllowed { get { return Permission.HasFlag(Permission.ViewPages | Permission.EditPages); } }
-        //[NotMapped]
-        //public bool EditAllowed { get { return Permission.HasFlag(Permission.EditPages); } }
+        [NotMapped]
+        public bool EditAllowed { get { return Permission.HasFlag(Permission.EditPages); } }
     }
 }

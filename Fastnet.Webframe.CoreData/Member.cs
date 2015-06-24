@@ -238,7 +238,15 @@ namespace Fastnet.Webframe.CoreData
         {
             bool result = true;
             var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
-            var pageAccessibleFrom = page.Directory.AccessibleFrom();
+            var pageAccessibleFrom = page.Directory.ViewableFrom();
+            result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
+            return result;
+        }
+        public bool CanEdit(Page page)
+        {
+            bool result = true;
+            var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
+            var pageAccessibleFrom = page.Directory.EditableFrom();
             result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
             return result;
         }

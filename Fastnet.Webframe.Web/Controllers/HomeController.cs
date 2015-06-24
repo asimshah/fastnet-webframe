@@ -6,7 +6,6 @@ using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.Web.Models;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -80,6 +79,12 @@ namespace Fastnet.Webframe.Web.Controllers
             ViewBag.Message = message;
             return View();
         }
+        [Route("sessiontimedout")]
+        public ActionResult SessionTimedout()
+        {
+            
+            return View();
+        }
         // GET: Main/Home
         [Route("page/{id}")]
         [Route("$home")]
@@ -101,6 +106,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 var user = await UserManager.FindByIdAsync(admin.Id);
                 await SignInManager.SignInAsync(user, false, false);
                 admin.LastLoginDate = DateTime.UtcNow;
+                Session["current-member"] = admin.Id;
                 await DataContext.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -465,8 +471,8 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 var user = await UserManager.FindByEmailAsync(User.Identity.Name);
                 var member = DataContext.Members.Single(m => m.Id == user.Id);
-                string name = string.Join(" ", member.FirstName, member.LastName).Trim();
-                return Json(new { Authenticated = true, Name = name, EmailAddress = user.Email }, JsonRequestBehavior.AllowGet);
+                //string name = string.Join(" ", member.FirstName, member.LastName).Trim();
+                return Json(new { Authenticated = true, Name = member.Fullname, EmailAddress = member.EmailAddress }, JsonRequestBehavior.AllowGet);
             }
             else
             {

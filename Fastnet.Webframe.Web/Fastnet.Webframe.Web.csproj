@@ -323,6 +323,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\cms\Content\constants.less" />
+    <Content Include="Areas\cms\Content\images\bannerpage.png" />
+    <Content Include="Areas\cms\Content\images\centrepage.png" />
+    <Content Include="Areas\cms\Content\images\homepage.png" />
+    <Content Include="Areas\cms\Content\images\leftpage.png" />
+    <Content Include="Areas\cms\Content\images\panelwire.jpg" />
+    <Content Include="Areas\cms\Content\images\rightpage.png" />
     <Content Include="Areas\cms\Content\main.css">
       <DependentUpon>main.less</DependentUpon>
     </Content>
@@ -331,10 +337,13 @@
       <DependentUpon>main.css</DependentUpon>
     </Content>
     <Content Include="Areas\cms\Scripts\webframe.cms.js" />
+    <Content Include="Areas\cms\Templates\DocumentTemplate.html" />
+    <Content Include="Areas\cms\Templates\ImageTemplate.html" />
     <Content Include="Areas\cms\Templates\MailHistory.html" />
     <Content Include="Areas\cms\Templates\MailTester.html" />
     <Content Include="Areas\cms\Templates\MemberList.html" />
     <Content Include="Areas\cms\Templates\MembershipHistory.html" />
+    <Content Include="Areas\cms\Templates\PageTemplate.html" />
     <Content Include="Areas\cms\Templates\SessionHistory.html" />
     <Content Include="Areas\cms\Views\Home\Index.cshtml">
       <SubType>Code</SubType>
@@ -765,6 +774,30 @@
     <Content Include="Content\font-awesome\css\font-awesome.min.css" />
     <Content Include="Content\font-awesome\fonts\fontawesome-webfont.svg" />
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\images\bannerpage.png" />
+    <Content Include="Content\images\centrepage.png" />
+    <Content Include="Content\images\documentTypes\AudioLarge.png" />
+    <Content Include="Content\images\documentTypes\AudioSmall.png" />
+    <Content Include="Content\images\documentTypes\CssLarge.png" />
+    <Content Include="Content\images\documentTypes\CssSmall.png" />
+    <Content Include="Content\images\documentTypes\DotxLarge.png" />
+    <Content Include="Content\images\documentTypes\DotxSmall.png" />
+    <Content Include="Content\images\documentTypes\ExcelLarge.png" />
+    <Content Include="Content\images\documentTypes\ExcelSmall.png" />
+    <Content Include="Content\images\documentTypes\PdfLarge.png" />
+    <Content Include="Content\images\documentTypes\PdfSmall.png" />
+    <Content Include="Content\images\documentTypes\PowerPointLarge.png" />
+    <Content Include="Content\images\documentTypes\PowerPointSmall.png" />
+    <Content Include="Content\images\documentTypes\UnknownLarge.png" />
+    <Content Include="Content\images\documentTypes\UnknownSmall.png" />
+    <Content Include="Content\images\documentTypes\VideoLarge.png" />
+    <Content Include="Content\images\documentTypes\VideoSmall.png" />
+    <Content Include="Content\images\documentTypes\WordLarge.png" />
+    <Content Include="Content\images\documentTypes\WordSmall.png" />
+    <Content Include="Content\images\homepage.png" />
+    <Content Include="Content\images\leftpage.png" />
+    <Content Include="Content\images\panelwire.jpg" />
+    <Content Include="Content\images\rightpage.png" />
     <Content Include="Content\Main\DefaultCSS\BannerPanel.css">
       <DependentUpon>BannerPanel.less</DependentUpon>
     </Content>
@@ -950,6 +983,10 @@
     <Content Include="Scripts\main\core.admin.setup.js" />
     <Content Include="Scripts\main\core.editor.js" />
     <Content Include="Scripts\main\core.page.js" />
+    <Content Include="Scripts\main\core.page.min.js">
+      <DependentUpon>core.page.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\main\core.pagetoolbar.js" />
     <Content Include="Scripts\main\core.storebrowser.js" />
     <Content Include="Scripts\main\core.test.js" />
     <Content Include="Scripts\moment-with-locales.js" />
@@ -1360,6 +1397,10 @@
     <Content Include="Scripts\tinymce\langs\readme.md" />
     <Content Include="Views\Home\PermissionDenied.cshtml" />
     <Content Include="Views\Shared\_BareLayout.cshtml" />
+    <Content Include="Scripts\main\core.page.min.js.map">
+      <DependentUpon>core.page.min.js</DependentUpon>
+    </Content>
+    <Content Include="Views\Home\SessionTimedout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

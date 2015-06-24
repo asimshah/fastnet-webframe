@@ -1,6 +1,7 @@
 ﻿using Fastnet.Common;
 using Fastnet.Webframe.Web.Areas.Designer.Common;
 using Fastnet.Webframe.Web.Common;
+using Fastnet.Webframe.WebApi;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +18,7 @@ namespace Fastnet.Webframe.Web.Controllers
         one, two
     }
     [RoutePrefix("template")]
-    public class TemplateController : ApiController
+    public class TemplateController : BaseApiController //: ApiController
     {
         //[HttpGet]
         //[Route("form/{type}")]

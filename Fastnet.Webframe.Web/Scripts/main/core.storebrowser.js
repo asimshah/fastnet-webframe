@@ -143,24 +143,38 @@
                         switch (item.Type) {
                             case "page":
                                 content.data.push({
+                                    IsPage: true,
                                     Type: item.Type,
                                     Id: item.Id,
                                     Url: item.Url,
                                     Name: item.Name,
-                                    LandingPage: item.LandingPage ? "true" : "false",
-                                    Remarks: item.Remarks
+                                    LandingPage: item.LandingPage,// ? "true" : "false",
+                                    LandingPageImage: item.LandingPageImage,
+                                    PageTypeImage: item.PageTypeImage,
+                                    PageTypeTooltip: item.PageTypeTooltip
                                 });
                                 break;
                             case "image":
-                            case "document":
                                 content.data.push({
+                                    IsImage: true,
                                     Type: item.Type,
                                     Id: item.Id,
                                     Url: item.Url,
                                     Name: item.Name,
                                     LandingPage: false,
                                     Size: item.Size,
-                                    Remarks: item.Remarks
+                                });
+                                break;
+                            case "document":
+                                content.data.push({
+                                    IsDocument: true,
+                                    Type: item.Type,
+                                    Id: item.Id,
+                                    Url: item.Url,
+                                    Name: item.Name,
+                                    LandingPage: false,
+                                    Size: item.Size,
+                                    DocumentTypeImage: item.DocumentTypeImage
                                 });
                                 break;
                         }
@@ -267,7 +281,7 @@
     function createNewPage() {
         var me = this;
         var url = $U.Format("store/createpage");
-        var postData = { directoryId: me._currentDirectoryId };
+        var postData = { referencePageId: null, directoryId: me._currentDirectoryId, type: "centre" };
         $.when(
             $U.AjaxPost({ url: url, data: postData })
             ).then(function (result) {

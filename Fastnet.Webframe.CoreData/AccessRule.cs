@@ -9,16 +9,16 @@ using System.Web;
 namespace Fastnet.Webframe.CoreData
 {
 
-    public partial class AccessRule
-    {
-        public long AccessRuleId { get; set; }
-        [Column("PermissionCode")]
-        public Permission Permission { get; set; }
-        public bool Allow { get; set; }
-        [Timestamp]
-        public byte[] TimeStamp { get; set; }
+    //public partial class AccessRule
+    //{
+    //    public long AccessRuleId { get; set; }
+    //    [Column("PermissionCode")]
+    //    public Permission Permission { get; set; }
+    //    public bool Allow { get; set; }
+    //    [Timestamp]
+    //    public byte[] TimeStamp { get; set; }
 
-        public virtual ICollection<DirectoryAccessRule> DirectoryAccessRules { get; set;}
-        public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
-    }
+    //    public virtual ICollection<DirectoryAccessRule> DirectoryAccessRules { get; set;}
+    //    public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
+    //}
 }

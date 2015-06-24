@@ -8,6 +8,9 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Microsoft.Owin;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 
 namespace Fastnet.Webframe.Mvc
 {
@@ -27,27 +30,42 @@ namespace Fastnet.Webframe.Mvc
     }
     public class PermissionFilterAttribute : ActionFilterAttribute
     {
-        private Group permittedTo;
+        private long groupPK;
         private string message;
         public PermissionFilterAttribute(SystemGroups group, string message = "This feature is restricted to authorised users")
         {
             //this.message = HttpUtility.UrlPathEncode(message);
             this.message = message;
             var ctx = Core.GetDataContext();
-            permittedTo = ctx.Groups
-                .Where(g => g.Type == GroupTypes.System && string.Compare(g.Name, group.ToString(), true) == 0).ToArray()
-                .Single(x => string.Compare(x.Name, group.ToString(), true) == 0);
+            var permittedTo = ctx.Groups.SingleOrDefault(g => g.Type == GroupTypes.System && string.Compare(g.Name, group.ToString(), true) == 0);
+            groupPK = permittedTo.GroupId;
         }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             try
             {
-                if (string.Compare(filterContext.ActionDescriptor.ActionName, "permissiondenied", true) != 0)
+                string actionName = filterContext.ActionDescriptor.ActionName;
+                if (string.Compare(actionName, "permissiondenied", true) != 0 && string.Compare(actionName, "SessionTimedout", true) != 0)
                 {
-                    Member m = ((BaseMvcController)filterContext.Controller).GetCurrentMember();
+                    BaseMvcController controller = (BaseMvcController)filterContext.Controller;
+                    Member m = controller.GetCurrentMember();
+                    if(controller.User.Identity.IsAuthenticated && m.IsAnonymous)
+                    {
+                        // we are here because the session has expired but the authentication hasn't
+                        var am = controller.ControllerContext.HttpContext.GetOwinContext().Authentication;
+                        am.SignOut();
+                        filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
+                        {
+                            area = "",
+                            controller = "Home",
+                            action = "SessionTimedout",
+                            message = message
+                        }));
+                        filterContext.Result.ExecuteResult(controller.ControllerContext);
+                    }
+                    var permittedTo = Core.GetDataContext().Groups.Find(groupPK);
                     if (!permittedTo.Members.Contains(m))
                     {
-
                         filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
                         {
                             area = "",
@@ -55,7 +73,7 @@ namespace Fastnet.Webframe.Mvc
                             action = "PermissionDenied",
                             message = message
                         }));
-                        filterContext.Result.ExecuteResult(filterContext.Controller.ControllerContext);
+                        filterContext.Result.ExecuteResult(controller.ControllerContext);
                     }
                 }
             }
@@ -81,7 +99,7 @@ namespace Fastnet.Webframe.Mvc
                     {
                         username = filterContext.HttpContext.User.Identity.Name;
                     }
-                    Log.Write("Executing {0}:{1}(), user {2}, {3}", filterContext.Controller.GetType().Name,
+                    Log.Write("mvc {0}:{1}(), user {2}, {3}", filterContext.Controller.GetType().Name,
                         filterContext.ActionDescriptor.ActionName, username, filterContext.RequestContext.HttpContext.Request.Url.PathAndQuery);
                 }
             }
