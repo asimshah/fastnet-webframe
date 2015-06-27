@@ -28,6 +28,32 @@ namespace Fastnet.Webframe.Mvc
             return id == null ? Member.Anonymous : Core.GetDataContext().Members.Single(m => m.Id == id);
         }
     }
+    public class VerifySessionAttribute : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            string actionName = filterContext.ActionDescriptor.ActionName;
+            if (string.Compare(actionName, "SessionTimedout", true) != 0)
+            {
+                BaseMvcController controller = (BaseMvcController)filterContext.Controller;
+                Member m = controller.GetCurrentMember();
+                if (controller.User.Identity.IsAuthenticated && m.IsAnonymous)
+                {
+                    // we are here because the session has expired but the authentication hasn't
+                    var am = controller.ControllerContext.HttpContext.GetOwinContext().Authentication;
+                    am.SignOut();
+                    filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
+                    {
+                        area = "",
+                        controller = "Home",
+                        action = "SessionTimedout",
+                    }));
+                    filterContext.Result.ExecuteResult(controller.ControllerContext);
+                }
+            }
+            base.OnActionExecuting(filterContext);
+        }
+    }
     public class PermissionFilterAttribute : ActionFilterAttribute
     {
         private long groupPK;
@@ -45,24 +71,10 @@ namespace Fastnet.Webframe.Mvc
             try
             {
                 string actionName = filterContext.ActionDescriptor.ActionName;
-                if (string.Compare(actionName, "permissiondenied", true) != 0 && string.Compare(actionName, "SessionTimedout", true) != 0)
+                if (string.Compare(actionName, "permissiondenied", true) != 0)
                 {
                     BaseMvcController controller = (BaseMvcController)filterContext.Controller;
                     Member m = controller.GetCurrentMember();
-                    if(controller.User.Identity.IsAuthenticated && m.IsAnonymous)
-                    {
-                        // we are here because the session has expired but the authentication hasn't
-                        var am = controller.ControllerContext.HttpContext.GetOwinContext().Authentication;
-                        am.SignOut();
-                        filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
-                        {
-                            area = "",
-                            controller = "Home",
-                            action = "SessionTimedout",
-                            message = message
-                        }));
-                        filterContext.Result.ExecuteResult(controller.ControllerContext);
-                    }
                     var permittedTo = Core.GetDataContext().Groups.Find(groupPK);
                     if (!permittedTo.Members.Contains(m))
                     {

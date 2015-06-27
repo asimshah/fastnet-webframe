@@ -56,45 +56,22 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("content/{id}")]
         public Task<HttpResponseMessage> GetDirectoryContent(long id)
         {
-            //var allPages = DataContext.Pages.Where(p => p.DirectoryId == id)
-            //    .OrderBy(x => x.PageId);
             var directory = DataContext.Directories.Find(id);
-            //var allPages = directory.Pages.OrderBy(x => x.PageId);
             List<dynamic> folderContent = new List<dynamic>();
             foreach (var page in directory.Pages.OrderBy(x => x.PageId))
             {
-                //if (page.CentrePanelPages.Count() == 0)
-                if (true)
+                folderContent.Add(new
                 {
-                    string remarks = page.SidePageInfo;
-                    //foreach (var pp in page.SidePanelPages)
-                    //{
-                    //    switch (pp.Panel.Name)
-                    //    {
-                    //        case "BannerPanel":
-                    //            remarks += "B";
-                    //            break;
-                    //        case "LeftPanel":
-                    //            remarks += "L";
-                    //            break;
-                    //        case "RightPanel":
-                    //            remarks += "R";
-                    //            break;
-                    //    }
-                    //}
-                    folderContent.Add(new
-                    {
-                        Type = "page",
-                        Id = page.PageId,
-                        Url = page.Url,
-                        Name = page.Name,
-                        //Remarks = remarks,
-                        LandingPage = page.IsLandingPage,
-                        LandingPageImage = page.GetLandingPageImageUrl(),
-                        PageTypeImage = page.GetTypeImageUrl(),
-                        PageTypeTooltip = page.GetTypeTooltip()
-                    });
-                }
+                    Type = "page",
+                    Id = page.PageId,
+                    Url = page.Url,
+                    Name = page.Name,
+                    PageType = page.Type.ToString().ToLower(),
+                    LandingPage = page.IsLandingPage,
+                    LandingPageImage = page.GetLandingPageImageUrl(),
+                    PageTypeImage = page.GetTypeImageUrl(),
+                    PageTypeTooltip = page.GetTypeTooltip()
+                });
             }
             foreach (var image in directory.Images.OrderBy(x => x.ImageId))
             {
@@ -104,7 +81,8 @@ namespace Fastnet.Webframe.Web.Controllers
                     Id = image.ImageId,
                     Url = image.Url,
                     Name = image.Name,
-                    Size = image.Size // string.Format("{1}w x {0}h", image.Height, image.Width),
+                    Size = image.Size,
+                    ImageTypeImage = image.GetImageTypeImage()
                 });
             }
             foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
@@ -254,40 +232,56 @@ namespace Fastnet.Webframe.Web.Controllers
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
         }
         [HttpGet]
-        [Route("sidePages/{id}")]
-        public HttpResponseMessage GetSidePanelInformation(string id)
+        [Route("sidepages/{id}")]
+        public HttpResponseMessage GetSidePages(string id)
         {
-            Func<CD.Page, long?> getPageId = (p) =>
-                {
-                    if (p == null)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        return p.PageId;
-                    }
-                };
-            Func<CD.Page, CD.Panel, CD.Page> sidePanelPage = (cp, panel) =>
-            {
-                CD.Page sp = null;
-                if (panel.Visible)
-                {
-                    CD.PanelPage panelPage = cp.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
-                    sp = panelPage != null ? panelPage.Page : null;
-                }
-                return sp;
-            };
+            //Func<CD.Page, long?> getPageId = (p) =>
+            //    {
+            //        if (p == null)
+            //        {
+            //            return null;
+            //        }
+            //        else
+            //        {
+            //            return p.PageId;
+            //        }
+            //    };
+            //Func<CD.Page, CD.Panel, CD.Page> sidePanelPage = (cp, panel) =>
+            //{
+            //    CD.Page sp = null;
+            //    if (panel.Visible)
+            //    {
+            //        CD.PanelPage panelPage = cp.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
+            //        sp = panelPage != null ? panelPage.Page : null;
+            //    }
+            //    return sp;
+            //};
+            //CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
+            //CD.Page bp = sidePanelPage(centrePage, CD.Panel.BannerPanel);
+            //CD.Page lp = sidePanelPage(centrePage, CD.Panel.LeftPanel);
+            //CD.Page rp = sidePanelPage(centrePage, CD.Panel.RightPanel);
+            //var result = new
+            //{
+            //    BannerPanel = new { PageId = getPageId(bp) },
+            //    LeftPanel = new { PageId = getPageId(lp) },
+            //    RightPanel = new { PageId = getPageId(rp) }
+            //};
             CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
-            CD.Page bp = sidePanelPage(centrePage, CD.Panel.BannerPanel);
-            CD.Page lp = sidePanelPage(centrePage, CD.Panel.LeftPanel);
-            CD.Page rp = sidePanelPage(centrePage, CD.Panel.RightPanel);
-            var result = new
+            var Banner = centrePage.FindSidePage(CD.PageType.Banner, false);
+            var Left = centrePage.FindSidePage(CD.PageType.Left, false);
+            var Right = centrePage.FindSidePage(CD.PageType.Right, false);
+            if (ApplicationSettings.Key("TraceSidePages", false))
             {
-                BannerPanel = new { PageId = getPageId(bp) },
-                LeftPanel = new { PageId = getPageId(lp) },
-                RightPanel = new { PageId = getPageId(rp) }
-            };
+                Log.Write("StoreController::GetSidePages(): centre {0}, banner {1}, left {2}, right {3}", centrePage.Url,
+                    Banner == null ? "none" : Banner.Url,
+                    Left == null ? "none" : Left.Url,
+                    Right == null ? "none" : Right.Url);
+            }
+
+            var b = Banner == null ? default(long?) : Banner.PageId;
+            var l = Left == null ? default(long?) : Left.PageId;
+            var r = Right == null ? default(long?) : Right.PageId;
+            var result = new { Banner = b, Left = l, Right = r };
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpPost]
@@ -304,30 +298,33 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/page/content")]
         public async Task<HttpResponseMessage> UpdatePageContent(dynamic data)
         {
-            Action<dynamic> update = (p) =>
+            dynamic banner = data.banner;
+            dynamic left = data.left;
+            dynamic centre = data.centre;
+            dynamic right = data.right;
+
+            Action<dynamic> update = (pd) =>
             {
-                string pageId = p.PageId;
-                if (pageId != null)
+                bool hasChanges = pd.hasChanges;
+                if (hasChanges)
                 {
-                    bool changed = (bool)p.HasChanged;
-                    if (changed)
-                    {
-                        long id = Convert.ToInt64(pageId);
-                        string htmlText = (string)p.HtmlText;
-                        CD.Page page = DataContext.Pages.Find(id);
-                        CD.PageMarkup pm = page.PageMarkup;
-                        pm.HtmlText = htmlText;
-                        pm.HtmlTextLength = htmlText.Length;
-                        pm.ModifiedBy = this.GetCurrentMember().Fullname;
-                        pm.ModifiedOn = DateTime.UtcNow;
-                        page.MarkupType = CD.MarkupType.Html;
-                    }
+                    string pageId = pd.id;
+                    long id = Convert.ToInt64(pageId);
+                    string htmlText = (string)pd.html;
+                    CD.Page page = DataContext.Pages.Find(id);
+                    CD.PageMarkup pm = page.PageMarkup;
+                    pm.HtmlText = htmlText;
+                    pm.HtmlTextLength = htmlText.Length;
+                    pm.ModifiedBy = this.GetCurrentMember().Fullname;
+                    pm.ModifiedOn = DateTime.UtcNow;
+                    page.MarkupType = CD.MarkupType.Html;
+
                 }
             };
-            update((data as dynamic).BannerPanel);
-            update((data as dynamic).LeftPanel);
-            update((data as dynamic).CentrePanel);
-            update((data as dynamic).RightPanel);
+            update(banner);
+            update(left);
+            update(centre);
+            update(right);
             await DataContext.SaveChangesAsync();
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -356,6 +353,7 @@ namespace Fastnet.Webframe.Web.Controllers
             //    a. only updateKey, chunkNumber, totalChunks, base64 and base64Length are valid
             // 3. final chunk is when chunkNumber == (totalChunks - 1)
             //    a. file is reassembled from base64 strings and saved in the required directory
+            bool traceUpload = ApplicationSettings.Key("TraceFileUploads", false);
             Action<CD.UploadFile, int, string> saveChunk = (uf, cn, bs) =>
             {
                 CD.FileChunk fc = new CD.FileChunk
@@ -367,7 +365,12 @@ namespace Fastnet.Webframe.Web.Controllers
                 };
                 DataContext.FileChunks.Add(fc);
                 DataContext.SaveChanges();
+                if (traceUpload)
+                {
+                    Log.Write("Upload[{0}]: chunk {1} of {2}", uf.UploadFileId, uf.Name, fc.ChunkNumber + 1, uf.TotalChunks);
+                }
             };
+            
             bool result = true;
             int chunkNumber = data.chunkNumber;
             long totalChunks = data.totalChunks;
@@ -396,6 +399,10 @@ namespace Fastnet.Webframe.Web.Controllers
                     };
                     key = uploadFile.Guid;
                     DataContext.UploadFiles.Add(uploadFile);
+                    if (traceUpload)
+                    {
+                        Log.Write("Upload[{0}]: {1} to {2}, {3} bytes in {4} chunks", uploadFile.UploadFileId, uploadFile.Name, d.Fullpath, binaryLength, totalChunks);
+                    }
                     //saveChunk(uploadFile, chunkNumber, base64String);
                     //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, uploadFile.Guid));
                 }
@@ -412,13 +419,16 @@ namespace Fastnet.Webframe.Web.Controllers
                 else
                 {
                     await SaveUploadedFile(uploadFile);
-
-                }                
+                    if (traceUpload)
+                    {
+                        Log.Write("Upload[{0}]: {1} saved", uploadFile.UploadFileId, uploadFile.Name);
+                    }
+                }
             }
             catch (Exception xe)
             {
                 Log.Write(xe);
-                result = false;                
+                result = false;
             }
             if (!result)
             {
@@ -426,7 +436,6 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
         }
-
         private async Task SaveUploadedFile(CD.UploadFile uploadFile)
         {
             long directoryid = uploadFile.DirectoryId;
@@ -444,9 +453,9 @@ namespace Fastnet.Webframe.Web.Controllers
             string base64String = sb.ToString();
             byte[] fileData = Convert.FromBase64String(base64String);
             Debug.Assert(fileData.Length == uploadFile.BinaryLength);
-            if (ApplicationSettings.Key("SaveDocumentsToDisk", false))
+            if (ApplicationSettings.Key("SaveUploadsToDisk", false))
             {
-                SaveDocumentToDisk(d.Fullpath, filename, fileData);
+                SaveUploadToDisk(d.Fullpath, filename, fileData);
             }
             string url = string.Empty;
             try
@@ -597,7 +606,7 @@ namespace Fastnet.Webframe.Web.Controllers
             string proposedName = "New Page";
             switch (type)
             {
-                case CD.PageType.Centre:                    
+                case CD.PageType.Centre:
                     break;
                 case CD.PageType.Banner:
                     proposedName = "Banner";
@@ -644,7 +653,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 return new { Height = img.Height, Width = img.Width };
             }
         }
-        private void SaveDocumentToDisk(string folder, string filename, byte[] data)
+        private void SaveUploadToDisk(string folder, string filename, byte[] data)
         {
             string rootFolder = HostingEnvironment.MapPath("~/App_Data/documents");
             string targetFolder = System.IO.Path.Combine(rootFolder, folder.Replace("/", "\\"));

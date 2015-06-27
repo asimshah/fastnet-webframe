@@ -18,19 +18,45 @@
     </div>
     <div class="SitePanel">
         <div class="edit-panel">
-            <div class="edit-toolbar">
-                <div>
-                    <button class="btn btn-primary btn-xs pull-left editor-command" data-cmd="save-changes">Save Changes</button>
-                    <button class="btn btn-default btn-xs pull-left editor-command" data-cmd="open-store-browser">Store</button>
+            <div class="row edit-toolbar">
+                <div class="col-xs-12">
+                    <div class="">
+
+                        <div>
+                            <button class="btn btn-primary btn-xs pull-left editor-command" data-cmd="save-changes">Save Changes</button>
+                            <button class="btn btn-default btn-xs pull-left editor-command" data-cmd="open-store-browser">Store</button>
+                        </div>
+                        <div class="pull-right">
+                            <button class="btn btn-default btn-xs page-info-command closed" data-cmd="page-info-command">
+                                <span>More Info</span>
+                                <span class="fa "></span>
+                            </button>
+                            <button class="btn btn-danger btn-xs testing-command" data-cmd="test-command">Test</button>
+                            <button class="btn btn-danger btn-xs editor-command" data-cmd="exit-edit-mode"><span>&times;</span></button>
+                        </div>
+
+                    </div>
                 </div>
-                <div><button class="btn btn-danger btn-xs pull-left testing-command" data-cmd="test-command">Test</button></div>
-                <div>
-                    <button class="btn btn-danger btn-xs pull-right editor-command" data-cmd="exit-edit-mode"><span>&times;</span></button>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="page-information closed">
+                        <div>
+                            <div class="member-info"><span>Logged in as </span><span></span></div>
+                            <div class="banner-info"><span>Banner url: </span><span></span><span>, Location: </span><span></span></div>
+                            <div class="left-info"><span>Left url: </span><span></span><span>, Location: </span><span></span></div>
+                            <div class="centre-info"><span>Centre url: </span><span></span><span>, Location: </span><span></span></div>
+                            <div class="right-info"><span>Right url: </span><span></span><span>, Location: </span><span></span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="login-status"><div class="login-name"></div></div>
-        <div class="BannerPanel editable-content"></div>
+        <div class="login-status enable">
+            <div class="login-name"></div>
+        </div>
+        <div id="bannerPanel" class="BannerPanel editable-content"></div>
+
         @RenderBody()
         <div class="forms-container">
         </div>

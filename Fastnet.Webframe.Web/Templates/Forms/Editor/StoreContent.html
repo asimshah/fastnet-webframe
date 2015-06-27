@@ -12,7 +12,7 @@
         {{#data}}
         <div class="row">
             {{#IsPage}}
-            <div class="page-row" data-id="{{Id}}" data-type="{{Type}}" data-url="{{Url}}" data-landing-page="{{LandingPage}}">
+            <div class="page-row item-row" data-id="{{Id}}" data-name="{{Name}}" data-pagetype="{{PageType}}" data-type="{{Type}}" data-url="{{Url}}" data-landing-page="{{LandingPage}}">
                 <div class="url"><img src="{{PageTypeImage}}" title="{{PageTypeTooltip}}" /><span>{{Url}}</span></div>
                 <div class="name"><div>{{Name}}</div><div class="size">{{Size}}</div></div>
                 <div class="remarks">
@@ -29,7 +29,7 @@
             </div>
             {{/IsPage}}
             {{#IsDocument}}
-            <div class="document-row" data-id="{{Id}}" data-type="{{Type}}" data-url="{{Url}}">
+            <div class="document-row  item-row" data-id="{{Id}}" data-name="{{Name}}" data-type="{{Type}}" data-url="{{Url}}">
                 <div class="url"><img src="{{DocumentTypeImage}}" /><span>{{Url}}</span></div>
                 <div class="name"><div>{{Name}}</div><div class="size">{{Size}}</div></div>
                 <div class="remarks">
@@ -43,10 +43,11 @@
             </div>
             {{/IsDocument}}
             {{#IsImage}}
-            <div class="image-row" data-id="{{Id}}" data-type="{{Type}}" data-url="{{Url}}">
-                <div class="url"><div>{{Url}}</div></div>
-                <div class="name"><div>{{Name}}</div><div class="size">{{Size}}</div></div>
+            <div class="image-row  item-row" data-id="{{Id}}" data-name="{{Name}}" data-type="{{Type}}" data-url="{{Url}}">
+                <div class="url"><img src="{{ImageTypeImage}}" /><span>{{Url}}</span></div>
+                <div class="name"><div>{{Name}}</div></div>
                 <div class="remarks">
+                    <div class="size">{{Size}}</div>
                 </div>
                 <div class="buttons">
                     <span>

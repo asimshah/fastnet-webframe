@@ -1,3 +1,38 @@
-﻿@default-site-background-colour: rgb(14, 16, 118);
+﻿@blue-base: #337ab7;
+@green-base: #5cb85c;
+@lightblue-info:  #5bc0de;
+@orange-base:  #f0ad4e;
+@red-base:   #d9534f;
+
+@default-site-background-colour: rgb(14, 16, 118);
 @default-site-foreground-colour: #fff;
-@error-message-text:#f82727;
+@error-message-text: lighten(@red-base, 25%);
+
+@error-panel-background-colour: #000000;
+@error-panel-foreground-colour: #ffffff;
+
+@context-menu-background-colour: white;
+@context-menu-foreground-colour: #000000;
+@context-menuitem-disabled-background-colour: lightgray;
+@context-menu-border-colour: @context-menu-foreground-colour;
+
+@editor-bar-background-colour: black;
+@editor-bar-foreground-colour: white;
+@editor-bar-strip-hover-colour: lighten(@editor-bar-background-colour, 80%);
+@editor-bar-information-colour-label: lightblue;
+@editor-wysiwyg-outline-colour: @error-message-text;
+
+/* store browser colours*/
+@sb-panel-separator-colour: black;
+@sb-content-panel-border-colour: #aaaaaa;
+@sb-content-row-selected-backgroundcolour: darken(@blue-base, 20%);
+@sb-content-row-selected-forecolour: lighten(@blue-base, 50%);
+@sb-content-row-hover-background-colour: lighten(@lightblue-info, 30%);
+@sb-content-row-hover-foreground-colour: darken(@lightblue-info, 30%);
+@sb-edit-button-colour: @blue-base;
+@sb-delete-button-colour: @red-base;
+
+.less-compiler-edit {
+    // dummt entry so less will compile
+    background-color: inherit;
+}

@@ -795,9 +795,16 @@
     <Content Include="Content\images\documentTypes\WordLarge.png" />
     <Content Include="Content\images\documentTypes\WordSmall.png" />
     <Content Include="Content\images\homepage.png" />
+    <Content Include="Content\images\image.png" />
     <Content Include="Content\images\leftpage.png" />
     <Content Include="Content\images\panelwire.jpg" />
     <Content Include="Content\images\rightpage.png" />
+    <Content Include="Content\Main\constants.css">
+      <DependentUpon>constants.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\constants.min.css">
+      <DependentUpon>constants.css</DependentUpon>
+    </Content>
     <Content Include="Content\Main\DefaultCSS\BannerPanel.css">
       <DependentUpon>BannerPanel.less</DependentUpon>
     </Content>
@@ -960,6 +967,9 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="Content\datatables\css\dataTables.responsive.scss" />
     <Content Include="Content\datatables\css\dataTables.jqueryui.scss" />
+    <Content Include="Content\Main\constants.css.map">
+      <DependentUpon>constants.css</DependentUpon>
+    </Content>
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
@@ -980,6 +990,7 @@
     <Content Include="Scripts\jspanel\jquery.jspanel.min.js" />
     <Content Include="Scripts\less\less.js" />
     <Content Include="Scripts\less\less.min.js" />
+    <Content Include="Scripts\main\Archive\core.editor.25jun15.js" />
     <Content Include="Scripts\main\core.admin.setup.js" />
     <Content Include="Scripts\main\core.editor.js" />
     <Content Include="Scripts\main\core.page.js" />
@@ -1062,6 +1073,8 @@
     <Content Include="Scripts\tinymce\plugins\fullscreen\plugin.min.js" />
     <Content Include="Scripts\tinymce\plugins\hr\plugin.js" />
     <Content Include="Scripts\tinymce\plugins\hr\plugin.min.js" />
+    <Content Include="Scripts\tinymce\plugins\imagetools\plugin.js" />
+    <Content Include="Scripts\tinymce\plugins\imagetools\plugin.min.js" />
     <Content Include="Scripts\tinymce\plugins\image\plugin.js" />
     <Content Include="Scripts\tinymce\plugins\image\plugin.min.js" />
     <Content Include="Scripts\tinymce\plugins\importcss\plugin.js" />
@@ -1385,6 +1398,12 @@
     <Content Include="Content\jspanel\fonts\jsglyph.woff" />
     <Content Include="Content\jspanel\fonts\jsglyph.woff2" />
     <Content Include="Content\jspanel\images\ui-icons_454545_256x240 - Kopie.psd" />
+    <Content Include="Views\Home\PermissionDenied.cshtml" />
+    <Content Include="Views\Shared\_BareLayout.cshtml" />
+    <Content Include="Scripts\main\core.page.min.js.map">
+      <DependentUpon>core.page.min.js</DependentUpon>
+    </Content>
+    <Content Include="Views\Home\SessionTimedout.cshtml" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce-small.woff" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce-small.ttf" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce-small.json" />
@@ -1395,12 +1414,6 @@
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.eot" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\readme.md" />
     <Content Include="Scripts\tinymce\langs\readme.md" />
-    <Content Include="Views\Home\PermissionDenied.cshtml" />
-    <Content Include="Views\Shared\_BareLayout.cshtml" />
-    <Content Include="Scripts\main\core.page.min.js.map">
-      <DependentUpon>core.page.min.js</DependentUpon>
-    </Content>
-    <Content Include="Views\Home\SessionTimedout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

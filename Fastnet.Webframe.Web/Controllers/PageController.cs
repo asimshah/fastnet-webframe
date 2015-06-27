@@ -21,6 +21,7 @@ namespace Fastnet.Webframe.Web.Controllers
     using Fastnet.Webframe.Web.Common;
     using System.IO;
     using Fastnet.Webframe.WebApi;
+    using Fastnet.EventSystem;
     [RoutePrefix("pageapi")]
     public class PageController : BaseApiController// ApiController
     {
@@ -72,7 +73,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     data = PrepareHTMLPage(page);
                 }
             }
-            
+
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
         }
         [HttpGet]
@@ -87,24 +88,34 @@ namespace Fastnet.Webframe.Web.Controllers
             return this.Request.CreateResponse(HttpStatusCode.OK, new { CanEdit = result });
         }
         [HttpGet]
-        [Route("panelinfo/{id}")]
-        public HttpResponseMessage GetSidePanelInformation(string id)
+        //[Route("panelinfo/{id}")]
+        [Route("sidepages/{id}")]
+        public HttpResponseMessage GetSidePages(string id)
         {
             Data.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
-            var result = new
+            var Banner = centrePage.FindSidePage(PageType.Banner, true);
+            var Left = centrePage.FindSidePage(PageType.Left, true);
+            var Right = centrePage.FindSidePage(PageType.Right, true);
+            if (ApplicationSettings.Key("TraceSidePages", false))
             {
-                BannerPanel = GetPanelInfo(centrePage, Data.Panel.BannerPanel),
-                LeftPanel = GetPanelInfo(centrePage, Data.Panel.LeftPanel),
-                RightPanel = GetPanelInfo(centrePage, Data.Panel.RightPanel)
-            };
+                Log.Write("PageController::GetSidePages(): centre {0}, banner {1}, left {2}, right {3}", centrePage.Url,
+                    Banner == null ? "none" : Banner.Url,
+                    Left == null ? "none" : Left.Url,
+                    Right == null ? "none" : Right.Url);
+            }
+
+            var b = Banner == null ? default(long?) : Banner.PageId;
+            var l = Left == null ? default(long?) : Left.PageId;
+            var r = Right == null ? default(long?) : Right.PageId;
+            var result = new { Banner = b, Left = l, Right = r };
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
         [Route("menuinfo")]
         public HttpResponseMessage GetMenuInfo()
         {
-            bool isVisible = Data.Panel.MenuPanel.Visible;
-            var info = new { Visible = isVisible, MenuHtml = ""};//DataContext.GetMenuHtml(GetCurrentMember()) };
+            //bool isVisible = Data.Panel.MenuPanel.Visible;
+            var info = new {  MenuHtml = "" };//DataContext.GetMenuHtml(GetCurrentMember()) };
             return this.Request.CreateResponse(HttpStatusCode.OK, info);
         }
         [HttpGet]
@@ -136,14 +147,16 @@ namespace Fastnet.Webframe.Web.Controllers
             //    page = allLandingPages.First();
             //}
             Page defaultlandingPage = Member.Anonymous.FindLandingPage();
-            var bannerPanel = GetPanelInfo(defaultlandingPage, Data.Panel.BannerPanel);
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { Visible = bannerPanel.Visible, PageId = bannerPanel.PageId });
+            Page bannerPage = defaultlandingPage.FindSidePage(PageType.Banner, true);
+            //var bannerPanel = GetPanelInfo(defaultlandingPage, Data.Panel.BannerPanel);
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = bannerPage.PageId });
         }
         //
         private dynamic PrepareHTMLPage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;
-            return new { PageId = page.PageId, HtmlText = htmlText, HtmlStyles = string.Empty };
+            var location = page.Directory.Fullpath.Replace("$root", "Store");
+            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
         }
         private dynamic PrepareDocXpage(Page page)
         {
@@ -153,35 +166,36 @@ namespace Fastnet.Webframe.Web.Controllers
             var styleRules = hp.GetLegacyStyleRules();
             // now merge multiple styles into one
             var allRules = styleRules.SelectMany(x => x);
-            return new { PageId = page.PageId, HtmlText = htmlText, HtmlStyles = allRules };
+            var location = page.Directory.Fullpath.Replace("$root", "Store");
+            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = allRules };
         }
         /// <summary>
         /// Get the page required for the requestedpanel when the reference page is in the centre panel
         /// </summary>
         /// <param name="referencePage">centre page</param>
         /// <param name="panel">requested panel</param>
-        private Page FindSidePage(Data.Page referencePage, Data.Panel panel)
-        {
-            Data.PanelPage panelPage = referencePage.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
-            Data.Page sidePage = panelPage != null ? panelPage.Page : null;
-            if (sidePage == null)
-            {
-                Data.Page alternatePage = GetAlternatePage(referencePage);
-                if (alternatePage != null)
-                {
-                    sidePage = FindSidePage(alternatePage, panel);
-                }
-            }
-            if (sidePage == null)
-            {
-                Data.Page closest = GetClosestHomePage(referencePage);
-                if (closest != null)
-                {
-                    sidePage = FindSidePage(closest, panel);
-                }
-            }
-            return sidePage;
-        }
+        //private Page FindSidePage(Data.Page referencePage, Data.Panel panel)
+        //{
+        //    Data.PanelPage panelPage = referencePage.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
+        //    Data.Page sidePage = panelPage != null ? panelPage.Page : null;
+        //    if (sidePage == null)
+        //    {
+        //        Data.Page alternatePage = GetAlternatePage(referencePage);
+        //        if (alternatePage != null)
+        //        {
+        //            sidePage = FindSidePage(alternatePage, panel);
+        //        }
+        //    }
+        //    if (sidePage == null)
+        //    {
+        //        Data.Page closest = GetClosestHomePage(referencePage);
+        //        if (closest != null)
+        //        {
+        //            sidePage = FindSidePage(closest, panel);
+        //        }
+        //    }
+        //    return sidePage;
+        //}
         private Data.Page GetAlternatePage(Page referencePage)
         {
             Data.Page alternatePage = null;
@@ -253,19 +267,19 @@ namespace Fastnet.Webframe.Web.Controllers
             string etag = "\"" + t + "\"";
             return etag;
         }
-        private dynamic GetPanelInfo(Data.Page cp, Data.Panel p)
-        {
-            dynamic x = new ExpandoObject();
-            x.Name = p.Name;
-            //x.Height = p.PixelHeight;
-            //x.Width = p.PixelWidth;
-            x.Visible = p.Visible;
-            if (x.Visible)
-            {
-                var sp = FindSidePage(cp, p);
-                x.PageId = sp != null ? sp.PageId.ToString() : null;
-            }
-            return x;
-        }
+        //private dynamic GetPanelInfo(Data.Page cp, Data.Panel p)
+        //{
+        //    dynamic x = new ExpandoObject();
+        //    x.Name = p.Name;
+        //    //x.Height = p.PixelHeight;
+        //    //x.Width = p.PixelWidth;
+        //    x.Visible = p.Visible;
+        //    if (x.Visible)
+        //    {
+        //        var sp = FindSidePage(cp, p);
+        //        x.PageId = sp != null ? sp.PageId.ToString() : null;
+        //    }
+        //    return x;
+        //}
     }
 }

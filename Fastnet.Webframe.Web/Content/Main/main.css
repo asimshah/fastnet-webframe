@@ -93,7 +93,7 @@ body {
   width: 75%;
   height: 100px;
   overflow-y: scroll;
-  color: white;
+  color: #ffffff;
 }
 .permission-page,
 .timeout-page {
@@ -105,17 +105,12 @@ body {
 }
 .permission-page .content .heading,
 .timeout-page .content .heading {
-  color: red;
+  color: #f0b9b8;
   font-size: 22px;
 }
 .permission-page .content .message,
 .timeout-page .content .message {
   font-style: italic;
-}
-.SitePanel {
-  /*font-size: 10.5pt;
-    margin-left: auto;
-    margin-right: auto;*/
 }
 .ContentPanel {
   /*background-color: white;*/
@@ -176,7 +171,7 @@ body {
 .context-menu-container .context-menu-item-separator {
   margin-left: 2px;
   margin-right: 2px;
-  border: 1px solid #aaaaaa;
+  border: 1px solid #bfbfbf;
 }
 [contenteditable=true] {
   resize: none;
@@ -186,31 +181,64 @@ body {
 }
 [contenteditable=true]:active,
 [contenteditable=true]:focus {
-  outline: 2px dashed red;
+  outline: 2px dashed #f0b9b8;
   border: none;
   z-index: 44444;
 }
 .edit-panel {
   height: 0;
-  position: relative;
   -moz-transition: height ease 1s;
   -o-transition: height ease 1s;
   -webkit-transition: height ease 1s;
   transition: height ease 1s;
   background-color: black;
 }
+.edit-panel .page-information {
+  background-color: black;
+  overflow: hidden;
+  color: white;
+  font-size: 11px;
+}
+.edit-panel .page-information > div {
+  padding: 4px;
+}
+.edit-panel .page-information.closed {
+  height: 0;
+}
+.edit-panel .page-information.open {
+  height: auto;
+}
+.edit-panel .page-information .banner-info span:first-child,
+.edit-panel .page-information .left-info span:first-child,
+.edit-panel .page-information .centre-info span:first-child,
+.edit-panel .page-information .right-info span:first-child,
+.edit-panel .page-information .banner-info span:nth-child(3),
+.edit-panel .page-information .left-info span:nth-child(3),
+.edit-panel .page-information .centre-info span:nth-child(3),
+.edit-panel .page-information .right-info span:nth-child(3) {
+  font-style: italic;
+  color: lightblue;
+}
+.edit-panel .page-information .banner-info span:nth-child(2),
+.edit-panel .page-information .left-info span:nth-child(2),
+.edit-panel .page-information .centre-info span:nth-child(2),
+.edit-panel .page-information .right-info span:nth-child(2) {
+  margin-right: 2px;
+}
 .edit-panel.up {
   height: 8px;
 }
+.edit-panel.up:hover {
+  background-color: #cccccc;
+}
 .edit-panel.down {
   height: 32px;
-}
-.edit-panel:hover {
-  background-color: gray;
+  /*&:hover {
+            background-color: black;
+        }*/
 }
 .edit-panel .edit-toolbar {
   opacity: 0.0;
-  position: relative;
   top: -24px;
   -moz-transition: opacity ease 2s, top ease 1s;
   -o-transition: opacity ease 2s, top ease 1s;
@@ -219,31 +247,35 @@ body {
   color: white;
   font-size: 10px;
   padding: 2px 2px 2px 4px;
-  display: table;
-  /*&.opaque {
-            opacity: 1.0;
-            top: 0;
-        }*/
 }
 .edit-panel .edit-toolbar.present {
   opacity: 1.0;
   top: 0;
-}
-.edit-panel .edit-toolbar div {
-  display: table-cell;
-}
-.edit-panel .edit-toolbar div:first-child {
-  width: 100%;
-}
-.edit-panel .edit-toolbar div:first-child .btn {
-  margin-right: 4px;
 }
 .edit-panel .edit-toolbar div button {
   margin-top: 2px;
   line-height: 1.4;
 }
 .edit-panel .edit-toolbar .testing-command {
-  margin-right: 4px;
+  display: none;
+}
+.edit-panel .edit-toolbar .page-info-command {
+  background: transparent;
+  color: white;
+}
+.edit-panel .edit-toolbar .page-info-command span:first-child {
+  vertical-align: top;
+}
+.edit-panel .edit-toolbar .page-info-command span.fa {
+  font-size: 1.5em;
+  margin-left: 2px;
+  color: white;
+}
+.edit-panel .edit-toolbar .page-info-command.closed span.fa:before {
+  content: '\f01a';
+}
+.edit-panel .edit-toolbar .page-info-command.open span.fa:before {
+  content: '\f01b';
 }
 .editor-side-panel {
   position: relative;
@@ -254,7 +286,8 @@ body {
   top: 0;
   right: 0;
   bottom: 0;
-  background: repeating-linear-gradient(45deg, transparent, transparent 10px, #cccccc 10px, #cccccc 20px), /* on "bottom" */ linear-gradient(to bottom, #eeeeee, #999999);
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(204, 204, 204, 0.48) 10px, #cccccc 20px), /* on "bottom" */ linear-gradient(to bottom, rgba(238, 238, 238, 0.39), rgba(114, 108, 97, 0.28));
+  /*linear-gradient( to bottom, #eee, #999 );*/
 }
 .editor-side-panel .overlay .btn {
   margin: 4px;
@@ -276,6 +309,12 @@ i.mce-i-deletepage:before {
         content: "Welcome: ";
     }*/
 }
+.login-status.enable {
+  display: block;
+}
+.login-status:not(.enable) {
+  display: none;
+}
 .login-status .login-name {
   text-decoration: none;
   cursor: pointer;
@@ -295,13 +334,13 @@ i.mce-i-deletepage:before {
 .modeless .message {
   font-size: 10px;
   font-style: italic;
-  color: #f82727;
+  color: #f0b9b8;
   margin-left: 15px;
 }
 .modal .error,
 .modeless .error {
   font-style: italic;
-  color: #f82727;
+  color: #f0b9b8;
 }
 .modal .form-footer .help-block,
 .modeless .form-footer .help-block {
@@ -353,6 +392,19 @@ i.mce-i-deletepage:before {
   overflow: hidden;
   border: 1px solid #aaaaaa;
   border-radius: 3px;
+  font-size: 11px;
+  padding: 4px;
+}
+.editor-dialog.store-browser .folder-content .item-row {
+  height: 20px;
+}
+.editor-dialog.store-browser .folder-content .item-row.selected {
+  background-color: #1d4567;
+  color: #eff5fa;
+}
+.editor-dialog.store-browser .folder-content .item-row:hover {
+  background-color: #daf1f8;
+  color: #1b6d85;
 }
 .editor-dialog.store-browser .folder-content div.header {
   margin-top: 2px;
@@ -374,9 +426,6 @@ i.mce-i-deletepage:before {
                         visibility: hidden;
                     }
                 }*/
-}
-.editor-dialog.store-browser .folder-content div.data > div:nth-child(odd) {
-  background-color: lightgray;
 }
 .editor-dialog.store-browser .folder-content div.data .page-row[data-landing-page='true'] .delete-button {
   visibility: hidden;
@@ -413,6 +462,26 @@ i.mce-i-deletepage:before {
   padding-right: 15px;
   padding-left: 0;
 }
+.editor-dialog.store-browser .folder-content .image-row .name {
+  position: relative;
+  float: left;
+  width: 29.16666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-left: 0;
+}
+.editor-dialog.store-browser .folder-content .image-row .remarks {
+  text-align: right;
+  font-size: xx-small;
+  position: relative;
+  float: left;
+  width: 20.83333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-left: 0;
+}
 .editor-dialog.store-browser .folder-content .buttons {
   position: relative;
   float: left;
@@ -433,28 +502,30 @@ i.mce-i-deletepage:before {
   cursor: pointer;
 }
 .editor-dialog.store-browser .folder-content .data .edit-button:hover {
-  color: #007eea;
+  color: #337ab7;
 }
 .editor-dialog.store-browser .folder-content .data .delete-button:hover {
-  color: red;
+  color: #d9534f;
+}
+.editor-dialog.store-browser .folder-content .data .url {
+  cursor: pointer;
+  /*border: 1px solid red;
+                    border-radius: 2px;*/
+  /*margin-left: 2px;
+                    margin-right: 2px;*/
+  /*&:hover {
+                        border: 2px solid hsl(207.7, 100%, 45.9%);
+                    }
+
+                    &.selected {
+                        background-color: hsl(207, 75%, 64%);
+                        color: white;
+                    }*/
 }
 .editor-dialog.store-browser .folder-content .data .url img {
   margin-left: 4px;
   margin-right: 4px;
   margin-bottom: 2px;
-}
-.editor-dialog.store-browser .folder-content .data .url div {
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 2px;
-  padding-left: 2px;
-}
-.editor-dialog.store-browser .folder-content .data .url div:hover {
-  border: 2px solid #007eea;
-}
-.editor-dialog.store-browser .folder-content .data .url div.selected {
-  background-color: #5eaae8;
-  color: white;
 }
 .editor-dialog.store-browser .folder-content .data .name .size {
   font-size: x-small;
@@ -468,13 +539,19 @@ i.mce-i-deletepage:before {
   padding-right: 8px;
   margin-right: 8px;
 }
+.editor-dialog.store-browser .store-browser-commands.normal-mode button.select-mode {
+  display: none;
+}
+.editor-dialog.store-browser .store-browser-commands.select-mode button.normal-mode {
+  display: none;
+}
 .editor-dialog.properties .help-block {
   font-size: smaller;
   font-style: italic;
 }
 .field-validation-error {
   font-style: italic;
-  color: #f82727;
+  color: #f0b9b8;
 }
 i.mce-i-wflink:before {
   content: "\e011";

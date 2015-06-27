@@ -21,11 +21,11 @@ body {
     margin-bottom: 12px;
     padding: 4px;
     font-size: x-small;
-    background-color: #000000;
+    background-color: @error-panel-background-colour;
     width: 75%;
     height: 100px;
     overflow-y: scroll;
-    color: white;
+    color: @error-panel-foreground-colour;
 }
 
 .permission-page, .timeout-page {
@@ -37,7 +37,7 @@ body {
 
     .content {
         .heading {
-            color: red;
+            color: @error-message-text;
             font-size: 22px;
         }
 
@@ -48,11 +48,6 @@ body {
 }
 // now follow default values for all the panels
 .SitePanel {
-    //font-family: verdana;
-    /*font-size: 10.5pt;
-    margin-left: auto;
-    margin-right: auto;*/
-    // simply set the width of this panel to get a fixed width centre panel
 }
 
 .ContentPanel {
@@ -80,14 +75,10 @@ body {
     }
 }
 
-
 .context-menu-container {
-    @context-menu-background: white;
-    @context-menuitem-background-disabled: lightgray;
-    @context-menu-border: #000000;
-    border: 2px solid @context-menu-border;
+    border: 2px solid @context-menu-border-colour;
     border-radius: 4px;
-    background-color: @context-menu-background;
+    background-color: @context-menu-background-colour;
     color: black;
     min-width: 128px;
     z-index: 49999;
@@ -101,17 +92,17 @@ body {
         border-radius: 2px;
 
         &:hover {
-            background-color: @context-menu-border;
+            background-color: @context-menu-border-colour;
             color: white;
         }
 
         &.disabled {
-            background-color: @context-menuitem-background-disabled;
-            color: @context-menu-background;
+            background-color: @context-menuitem-disabled-background-colour;
+            color: @context-menu-background-colour;
 
             &:hover {
-                background-color: @context-menuitem-background-disabled;
-                color: @context-menu-background;
+                background-color: @context-menuitem-disabled-background-colour;
+                color: @context-menu-background-colour;
             }
         }
     }
@@ -119,7 +110,7 @@ body {
     .context-menu-item-separator {
         margin-left: 2px;
         margin-right: 2px;
-        border: 1px solid #aaaaaa;
+        border: 1px solid lighten(@context-menu-border-colour, 75%);
     }
 }
 
@@ -131,7 +122,7 @@ body {
     border: none;
 
     &:active, &:focus {
-        outline: 2px dashed red;
+        outline: 2px dashed @editor-wysiwyg-outline-colour;
         border: none;
         z-index: 44444;
     }
@@ -139,57 +130,79 @@ body {
 
 .edit-panel {
     height: 0;
-    position: relative;
+    //position: relative;
     -moz-transition: height ease 1s;
     -o-transition: height ease 1s;
     -webkit-transition: height ease 1s;
     transition: height ease 1s;
-    background-color: black;
+    background-color: @editor-bar-background-colour;
+
+    .page-information {
+        background-color: @editor-bar-background-colour;
+        overflow: hidden;
+        color: @editor-bar-foreground-colour;
+
+        > div {
+            padding: 4px;
+        }
+
+        font-size: 11px;
+
+        &.closed {
+            height: 0;
+        }
+
+        &.open {
+            height: auto;
+        }
+
+        .banner-info, .left-info, .centre-info, .right-info {
+            span:first-child, span:nth-child(3) {
+                font-style: italic;
+                color: @editor-bar-information-colour-label;
+            }
+
+            span:nth-child(2) {
+                margin-right: 2px;
+            }
+        }
+    }
 
     &.up {
         height: 8px;
+
+        &:hover {
+            background-color: @editor-bar-strip-hover-colour; // gray;
+        }
     }
 
     &.down {
         height: 32px;
+
+        /*&:hover {
+            background-color: black;
+        }*/
     }
 
-    &:hover {
-        background-color: gray;
-    }
+
 
     .edit-toolbar {
         opacity: 0.0;
-        position: relative;
         top: -24px;
         -moz-transition: opacity ease 2s, top ease 1s;
         -o-transition: opacity ease 2s, top ease 1s;
         -webkit-transition: opacity ease 2s, top ease 1s;
         transition: opacity ease 2s, top ease 1s;
-        color: white;
+        color: @editor-bar-foreground-colour;
         font-size: 10px;
-        //height: 12px;
         padding: 2px 2px 2px 4px;
-        display: table;
-        /*&.opaque {
-            opacity: 1.0;
-            top: 0;
-        }*/
+
         &.present {
             opacity: 1.0;
             top: 0;
         }
 
         div {
-            display: table-cell;
-
-            &:first-child {
-                width: 100%;
-
-                .btn {
-                    margin-right: 4px;
-                }
-            }
 
             button {
                 margin-top: 2px;
@@ -198,8 +211,41 @@ body {
         }
         // ensure that the testing button is hidden in production
         .testing-command {
-            //display:none;
-            margin-right: 4px;
+            display: none;
+            //margin-right: 4px;
+        }
+
+        .page-info-command {
+            background: transparent;
+            color: white;
+
+            span:first-child {
+                vertical-align: top;
+            }
+
+            span.fa {
+                font-size: 1.5em;
+                margin-left: 2px;
+                color: white;
+            }
+
+            &.closed {
+                span.fa {
+
+                    &:before {
+                        content: '\f01a'; // down
+                    }
+                }
+            }
+
+            &.open {
+                span.fa {
+
+                    &:before {
+                        content: '\f01b'; // up
+                    }
+                }
+            }
         }
     }
 }
@@ -209,17 +255,17 @@ body {
 
     .overlay {
         position: absolute;
-        //background-color: rgba(95, 158, 160, 0.53);
         left: 0;
         top: 0;
         right: 0;
         bottom: 0;
         background:
         /* On "top" */
-        repeating-linear-gradient( 45deg, transparent, transparent 10px, #ccc 10px, #ccc 20px ),
+        /*repeating-linear-gradient( 45deg, transparent, transparent 10px, #ccc 10px, #ccc 20px ),*/
+        repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(204, 204, 204, 0.48) 10px, #ccc 20px ),
         /* on "bottom" */
-        linear-gradient( to bottom, #eee, #999 );
-
+        linear-gradient( to bottom, rgba(238, 238, 238, 0.39), rgba(114, 108, 97, 0.28) );
+        /*linear-gradient( to bottom, #eee, #999 );*/
         .btn {
             margin: 4px;
         }
@@ -240,6 +286,14 @@ i.mce-i-deletepage:before {
 }
 
 .login-status {
+    &.enable {
+        display: block;
+    }
+
+    &:not(.enable) {
+        display: none;
+    }
+
     position: relative;
 
     .login-name {
@@ -310,7 +364,6 @@ i.mce-i-deletepage:before {
 
 
 
-
 .editor-dialog {
     font-size: small;
 
@@ -328,6 +381,7 @@ i.mce-i-deletepage:before {
     }
 
     &.store-browser {
+
         @totalHeight: 400px;
         @dataHeight: @totalHeight - 30px;
         width: 650px;
@@ -339,7 +393,7 @@ i.mce-i-deletepage:before {
 
         .browser-separator {
             display: none;
-            border: 1px solid black;
+            border: 1px solid @sb-panel-separator-colour;
             width: 2px;
             height: 80px;
         }
@@ -348,14 +402,30 @@ i.mce-i-deletepage:before {
             max-height: @totalHeight;
             height: @totalHeight;
             overflow: hidden;
-            border: 1px solid #aaaaaa;
+            border: 1px solid @sb-content-panel-border-colour;
             border-radius: 3px;
+            font-size: 11px;
+            padding: 4px;
+
+            .item-row {
+                height: 20px;
+
+                &.selected {
+                    background-color:@sb-content-row-selected-backgroundcolour;
+                    color: @sb-content-row-selected-forecolour;
+                }
+
+                &:hover {
+                    background-color: @sb-content-row-hover-background-colour;
+                    color: @sb-content-row-hover-foreground-colour;
+                }
+            }
 
             div.header {
                 margin-top: 2px;
                 margin-bottom: 2px;
                 font-weight: bold;
-                border-bottom: 1px solid #aaaaaa;
+                border-bottom: 1px solid @sb-content-panel-border-colour;
             }
 
             div.data {
@@ -364,7 +434,7 @@ i.mce-i-deletepage:before {
                 overflow-x: hidden;
 
                 > div:nth-child(odd) {
-                    background-color: lightgray;
+                    //background-color: lightgray;
                 }
 
                 .page-row {
@@ -412,12 +482,27 @@ i.mce-i-deletepage:before {
                 padding-left: 0;
             }
 
+            .image-row {
+                .name {
+                    .make-xs-column(3.5);
+                    padding-left: 0;
+                }
+
+                .remarks {
+                    text-align: right;
+                    font-size: xx-small;
+                    .make-xs-column(2.5);
+                    padding-left: 0;
+                }
+            }
+
             .buttons {
                 .make-xs-column(1.5);
-                padding-right:0;
-                 > span {
+                padding-right: 0;
+
+                > span {
                     margin-left: 2px;
-                .pull-right;
+                    .pull-right;
                 }
             }
 
@@ -437,23 +522,34 @@ i.mce-i-deletepage:before {
 
                 .edit-button {
 
-
                     &:hover {
-                        color: hsl(207.7, 100%, 45.9%);
+                        color: @sb-edit-button-colour;
                     }
                 }
 
                 .delete-button {
 
-
                     &:hover {
-                        color: red;
+                        color:@sb-delete-button-colour;
                     }
                 }
 
                 .url {
+                    cursor: pointer;
+                    /*border: 1px solid red;
+                    border-radius: 2px;*/
+                    /*margin-left: 2px;
+                    margin-right: 2px;*/
+                    //margin-left: 2px;
+                    //padding-left: 2px;
+                    /*&:hover {
+                        border: 2px solid hsl(207.7, 100%, 45.9%);
+                    }
 
-
+                    &.selected {
+                        background-color: hsl(207, 75%, 64%);
+                        color: white;
+                    }*/
                     img {
                         margin-left: 4px;
                         margin-right: 4px;
@@ -462,19 +558,6 @@ i.mce-i-deletepage:before {
 
 
                     div {
-                        cursor: pointer;
-                        border: 2px solid transparent;
-                        border-radius: 2px;
-                        padding-left: 2px;
-
-                        &:hover {
-                            border: 2px solid hsl(207.7, 100%, 45.9%);
-                        }
-
-                        &.selected {
-                            background-color: hsl(207, 75%, 64%);
-                            color: white;
-                        }
                     }
                 }
 
@@ -482,8 +565,6 @@ i.mce-i-deletepage:before {
                 }
 
                 .name {
-
-
                     .size {
                         font-size: x-small;
                     }
@@ -499,6 +580,20 @@ i.mce-i-deletepage:before {
             overflow: auto;
             padding-right: 8px;
             margin-right: 8px;
+        }
+
+        .store-browser-commands {
+            &.normal-mode {
+                button.select-mode {
+                    display: none;
+                }
+            }
+
+            &.select-mode {
+                button.normal-mode {
+                    display: none;
+                }
+            }
         }
     }
 
@@ -519,5 +614,5 @@ i.mce-i-wflink:before {
     content: "\e011";
 }
 /*.login-status {
-    display:none;
-}*/
+    display:none; */
+

@@ -135,7 +135,7 @@ namespace Fastnet.Webframe.CoreData
         //public DbSet<PageAccessRule> PageAccessRules { get; set; }
         public DbSet<PageMarkup> PageMarkups { get; set; }
         public DbSet<Panel> Panels { get; set; }
-        public DbSet<PanelPage> PanelPages { get; set; }
+        //public DbSet<PanelPage> PanelPages { get; set; }
         public DbSet<RegistrationKey> RegistrationKeys { get; set; }
 
         //public DbSet<Role> Roles { get; set; }
@@ -507,8 +507,8 @@ namespace Fastnet.Webframe.CoreData
             var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
             var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
 
-            Page bannerPage = AddPage(directory, "Site Banner.docx");
-            Page homePage = AddHtmlPage(directory, "Home Page.html");
+            Page bannerPage = AddPage(directory, "Site Banner.docx", PageType.Banner);
+            Page homePage = AddHtmlPage(directory, "Home Page.html", PageType.Centre);
             homePage.IsLandingPage = true;
             //AccessRule rule = GetAccessRule(Permission.ViewPages, true);
             //int groupType = (int)GroupTypes.System | (int)GroupTypes.SystemDefinedMembers;
@@ -519,10 +519,10 @@ namespace Fastnet.Webframe.CoreData
             //par.Group = group;
             //par.Page = homePage;
             //ctx.PageAccessRules.Add(par);
-            Page leftPage = AddHtmlPage(directory, "Left side panel.html");// AddPage(directory, "Left side panel.docx");
+            Page leftPage = AddHtmlPage(directory, "Left side panel.html", PageType.Left);// AddPage(directory, "Left side panel.docx");
             //leftPage.IsSidePage = bannerPage.IsSidePage = true;
-            ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = bPanel, Page = bannerPage, Timestamp = BitConverter.GetBytes(1) });
-            ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = lPanel, Page = leftPage, Timestamp = BitConverter.GetBytes(1) });
+            //ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = bPanel, Page = bannerPage, Timestamp = BitConverter.GetBytes(1) });
+            //ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = lPanel, Page = leftPage, Timestamp = BitConverter.GetBytes(1) });
             ctx.SaveChanges();
 
             return homePage;
@@ -537,7 +537,7 @@ namespace Fastnet.Webframe.CoreData
         //    }
         //    return rule;
         //}
-        private Page AddHtmlPage(Directory directory, string htmlFilename)
+        private Page AddHtmlPage(Directory directory, string htmlFilename, PageType type)
         {
             try
             {
@@ -549,6 +549,7 @@ namespace Fastnet.Webframe.CoreData
                 string htmlString = Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
                 Page page = ctx.CreateNewPage();// new Page();
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(htmlFilename);
+                page.Type = type;
                 //page.TimeStamp = BitConverter.GetBytes(-1);
                 page.Visible = true;
                 page.VersionCount = 0;
@@ -577,7 +578,7 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
-        private Page AddPage(Directory directory, string docxFilename)
+        private Page AddPage(Directory directory, string docxFilename, PageType type)
         {
 
             try
@@ -589,6 +590,7 @@ namespace Fastnet.Webframe.CoreData
                 byte[] htmlData = System.IO.File.ReadAllBytes(htmlFileName);
                 string htmlString = Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
                 Page page = ctx.CreateNewPage();// new Page();
+                page.Type = type;
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(docxFilename);
                 //page.TimeStamp = BitConverter.GetBytes(-1);
                 page.Visible = true;
@@ -1295,8 +1297,8 @@ namespace Fastnet.Webframe.CoreData
                         p.Type = PageType.Right;
                         break;
                 }
-                PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
-                coreDb.PanelPages.Add(r);
+                //PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
+                //coreDb.PanelPages.Add(r);
             }
             coreDb.SaveChanges();
         }

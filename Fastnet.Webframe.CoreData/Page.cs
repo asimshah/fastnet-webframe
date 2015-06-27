@@ -14,13 +14,13 @@ namespace Fastnet.Webframe.CoreData
     // It may also be possible to rid of the PageMarkup table!
     // To help with this I am intoducing a new enum called ContentPanels
 
-    public enum ContentPanels
-    {
-        Centre,
-        Banner,
-        Left,
-        Right
-    }
+    //public enum ContentPanels
+    //{
+    //    Centre,
+    //    Banner,
+    //    Left,
+    //    Right
+    //}
 
     // these can be used to obtain the content using
 
@@ -58,10 +58,10 @@ namespace Fastnet.Webframe.CoreData
             get { return documents ?? (documents = new HashSet<Document>()); }
             set { documents = value; }
         }
-        [InverseProperty("CentrePage")]
-        public virtual ICollection<PanelPage> SidePanelPages { get; set; }
-        [InverseProperty("Page")]
-        public virtual ICollection<PanelPage> CentrePanelPages { get; set; }
+        //[InverseProperty("CentrePage")]
+        //public virtual ICollection<PanelPage> SidePanelPages { get; set; }
+        //[InverseProperty("Page")]
+        //public virtual ICollection<PanelPage> CentrePanelPages { get; set; }
         public virtual ICollection<Page> ForwardLinks // this page hyperlinks to these document
         {
             get { return forwardLinks ?? (forwardLinks = new HashSet<Page>()); }
@@ -83,17 +83,41 @@ namespace Fastnet.Webframe.CoreData
         [NotMapped]
         public string ModifiedBy { get { return this.PageMarkup.ModifiedBy; } }
         [NotMapped]
-        public PageContent this[ContentPanels index]
+        public PageContent this[PageType index]
         {
             get { return GetContent(index); }
         }
-        [NotMapped]
-        public bool IsCentrePage { get { return this.CentrePanelPages.Count() == 0; } }
-        [NotMapped]
-        [Obsolete]
-        public string SidePageInfo
+        //[NotMapped]
+        //public bool IsCentrePage { get { return this.CentrePanelPages.Count() == 0; } }
+        //[NotMapped]
+        //[Obsolete]
+        //public string SidePageInfo
+        //{
+        //    get { return getSidePageInfo(); }
+        //}
+        /// <summary>
+        /// Look for side pages
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="search">If true, then search parent directories</param>
+        /// <returns></returns>
+        public Page FindSidePage(PageType type, bool search)
         {
-            get { return getSidePageInfo(); }
+            Debug.Assert(this.Type == PageType.Centre, "Only centre pages can be used to find side pages");
+            Directory current = this.Directory;
+            foreach (var dir in current.SelfAndParents)
+            {
+                var sp = dir.Pages.SingleOrDefault(x => x.Type == type);
+                if (sp != null)
+                {
+                    return sp;
+                }
+                if (!search)
+                {
+                    break;
+                }
+            }
+            return null;
         }
         public string GetLandingPageImageUrl()
         {
@@ -152,24 +176,25 @@ namespace Fastnet.Webframe.CoreData
             }
             return r;
         }
-        private PageContent GetContent(ContentPanels index)
+        private PageContent GetContent(PageType index)
         {
             // replace this routine if I ever get rid of panel, panelpages and pagemarkups!
-            Func<ContentPanels, PageMarkup> findPageMarkup = (cp) =>
+            Func<PageType, PageMarkup> findPageMarkup = (cp) =>
             {
-                string name = cp.ToString() + "Panel";
-                Panel panel = Core.GetDataContext().Panels.Single(p => p.Name == name);
-                var pp = this.SidePanelPages.SingleOrDefault(x => x.Panel.PanelId == panel.PanelId);
-                if (pp != null)
+                var page = this.FindSidePage(index, true);
+                //string name = cp.ToString() + "Panel";
+                //Panel panel = Core.GetDataContext().Panels.Single(p => p.Name == name);
+                //var pp = this.SidePanelPages.SingleOrDefault(x => x.Panel.PanelId == panel.PanelId);
+                if (page != null)
                 {
-                    return pp.Page.PageMarkup;
+                    return page.PageMarkup;
                 }
                 return null;
             };
             PageMarkup pm = null;
             switch (index)
             {
-                case ContentPanels.Centre:
+                case PageType.Centre:
                     pm  = this.PageMarkup;
                     break;
                 default:
@@ -179,33 +204,7 @@ namespace Fastnet.Webframe.CoreData
 
             return pm == null ? null : new PageContent { HtmlStyles = pm.HtmlStyles, HtmlText = pm.HtmlText, HtmlTextLength = pm.HtmlTextLength };
         }
-        private string getSidePageInfo()
-        {
-            if (IsCentrePage)
-            {
-                string text = string.Empty;
-                foreach (var pp in this.SidePanelPages)
-                {
-                    switch (pp.Panel.Name)
-                    {
-                        case "BannerPanel":
-                            text += "B";
-                            break;
-                        case "LeftPanel":
-                            text += "L";
-                            break;
-                        case "RightPanel":
-                            text += "R";
-                            break;
-                    }
-                }
-                return text;
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
+
     }
     public partial class CoreDataContext
     {

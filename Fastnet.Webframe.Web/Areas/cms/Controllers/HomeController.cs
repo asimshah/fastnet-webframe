@@ -27,7 +27,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             //}
             
             //PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
-            PageContent bannerContent = Member.Anonymous.FindLandingPage()[ContentPanels.Banner];
+            PageContent bannerContent = Member.Anonymous.FindLandingPage()[PageType.Banner];
             return View();
         }
         //[Route("permissiondenied")]

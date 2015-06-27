@@ -62,10 +62,10 @@ namespace Fastnet.Webframe.Web
                 RequireLowercase = complex,
                 RequireUppercase = complex,
             };
-            if (ApplicationSettings.Key("", false))
-            {
-                //manager.PasswordValidator
-            }
+            //if (ApplicationSettings.Key("", false))
+            //{
+            //    //manager.PasswordValidator
+            //}
             // Configure user lockout defaults
             manager.UserLockoutEnabledByDefault = true;
             manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(5);

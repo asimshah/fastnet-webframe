@@ -1,8 +1,8 @@
-﻿<div >
-    <div class="form-body editor-dialog store-browser">
+﻿<div class="editor-dialog store-browser">
+    <div class="form-body ">
         <!--<div class="browser-tree"></div>
         <div class="browser-folder-content "></div>-->
-        <div >
+        <div>
             <div class="left-panel">
                 <div class="browser-tree pull-left"></div>
             </div>
@@ -16,13 +16,14 @@
             </div>
         </div>
     </div>
-    <div class="form-footer">
+    <div class="form-footer store-browser-commands normal-mode">
         <div>
             <!--<button class="btn btn-sm btn-danger pull-left" data-cmd="delete-page">Delete Page</button>-->
             <button class="btn btn-primary pull-left" data-cmd="add-new-page">Add New Page</button>
             <button class="btn btn-primary pull-left" data-cmd="upload-files">Upload File(s)...</button>
-            <button class="btn btn-primary" data-cmd="select-page">Select</button>
-            <button class="btn btn-default" data-cmd="cancel">Cancel</button>
+            <button class="btn btn-primary select-mode" data-cmd="select-item">Select</button>
+            <button class="btn btn-default select-mode" data-cmd="cancel">Cancel</button>
+            <button class="btn btn-default normal-mode" data-cmd="cancel">Close</button>
         </div>
     </div>
 </div>

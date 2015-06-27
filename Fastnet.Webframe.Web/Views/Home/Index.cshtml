@@ -25,9 +25,9 @@
 }
 <div class="MenuPanel"></div>
 <div class="ContentPanel">
-    <div class="LeftPanel editable-content"></div>
-    <div class="CentrePanel editable-content"></div>
-    <div class="RightPanel editable-content"></div>
+    <div id="leftPanel" class="LeftPanel editable-content"></div>
+    <div id="centrePanel" class="CentrePanel editable-content"></div>
+    <div id="rightPanel" class="RightPanel editable-content"></div>
     @*<div class="LeftPanel">
             <div class="editable-content"></div>
         </div>
@@ -46,7 +46,7 @@
     }
     @Scripts.Render("~/bundles/main/page")
     @Scripts.Render("~/bundles/identity")
-    @Scripts.Render("~/bundles/main/editor");
+    @Scripts.Render("~/bundles/main/editor")
     @*@if (Model.CanEditPages)
         {
             @Scripts.Render("~/bundles/main/editor");

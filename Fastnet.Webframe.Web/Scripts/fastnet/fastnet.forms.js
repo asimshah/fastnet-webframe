@@ -1,10 +1,10 @@
 ﻿(function ($) {
-    // Version 1.0.13
+    // Version 1.0.15
     var $T;
     var $U;
     var modelessTemplate =
 "<div class='modeless hide' >" +
-"    <div class='modeless-content'>" +
+"    <div class='modeless-content content-root'>" +
 "        <div class='form-section'>{{{BodyHtml}}}</div>" +
 "        <div class='form-section'>{{{FooterHtml}}}</div>" +
 "    </div>" +
@@ -17,7 +17,7 @@
     var modalTemplate =
 "<div class='modal fade' id='{{Id}}' tabindex='-1'>" +
 "    <div class='modal-dialog container'>" +
-"        <div class='modal-content'>" +
+"        <div class='modal-content content-root'>" +
 "            <div class='modal-section sh'>" +
 "                <div class='modal-header'>" +
 "                    <div>" +
@@ -105,6 +105,7 @@
             _froot: null, //current form's root element, i.e with an Id of _id
             _validators: {},
             _validationStateUpdated: false,
+            _rootClasses: null,
             BaseZIndex: 12000,
             DisableSystemClose: false,
             Title: "Form Title",
@@ -196,16 +197,23 @@
             return $.when(
                  $U.AjaxGet({ url: me.options._template })
                 ).then(function (r) {
-                    var formBody = $(r.Template).find(".form-body");
+                    var template = $(r.Template);
+                    var root = template.first();
+                    if (!root.hasClass("form-body")) {
+                        // there is an element "above" form-body, so get any classes
+                        me.options._rootClasses = root.attr('class');
+                    }
+                    var formBody = template.find(".form-body");
                     formBody = Mustache.to_html(formBody[0].outerHTML, me.data);
-                    var formFooter = $(r.Template).find(".form-footer");
+                    var formFooter = template.find(".form-footer");
                     formFooter = Mustache.to_html(formFooter[0].outerHTML, me.data);
                     me.data = $.extend({
                         BodyHtml: formBody,
                         FooterHtml: formFooter
                     }, me.data);
-                    var template = me.options.IsModal ? modalTemplate : modelessTemplate;
-                    me.options._froot = $(Mustache.to_html(template, me.data));
+                    var modeTemplate = me.options.IsModal ? modalTemplate : modelessTemplate;
+                    me.options._froot = $(Mustache.to_html(modeTemplate, me.data));
+                    me.options._froot.find(".content-root").addClass(me.options._rootClasses);
                     $.each(me.options._pendingSetEnableds, function (index, item) {
                         if (item.action === "disable") {
                             me.disableCommand(item.cmd);
@@ -566,7 +574,7 @@
                         if (validations != null) {
                             $.each(validations, function (i, item) {
                                 if (item.setIsRequired) {
-                                    var propElement = $(element).closest("[data-property");
+                                    var propElement = $(element).closest("[data-property]");
                                     $(propElement).attr("data-value-required", "true");
                                     var val = getValue(element);
                                     if (val === "") {
@@ -614,7 +622,7 @@
                 //        if (validations != null) {
                 //            $.each(validations, function (i, item) {
                 //                if (item.setIsRequired) {
-                //                    var propElement = $(element).closest("[data-property");
+                //                    var propElement = $(element).closest("[data-property]");
                 //                    $(propElement).attr("data-value-required", "true");
                 //                    var val = getValue(element);
                 //                    if (val === "") {

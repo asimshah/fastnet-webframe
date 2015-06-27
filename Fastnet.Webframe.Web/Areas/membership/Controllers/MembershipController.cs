@@ -31,7 +31,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public HttpResponseMessage GetBannerHtml()
         {
             //PageContent bannerContent = DataContext.GetDefaultLandingPage()[ContentPanels.Banner];
-            PageContent bannerContent = Member.Anonymous.FindLandingPage()[ContentPanels.Banner];
+            PageContent bannerContent = Member.Anonymous.FindLandingPage()[PageType.Banner];
             if (bannerContent != null)
             {
                 return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, Styles = bannerContent.HtmlStyles, Html = bannerContent.HtmlText });

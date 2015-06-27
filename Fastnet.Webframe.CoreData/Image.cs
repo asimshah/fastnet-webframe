@@ -48,7 +48,12 @@ namespace Fastnet.Webframe.CoreData
         public string Size
         {
             get { return string.Format("{0}w x {1}h", this.Width, this.Height); }
-        } 
+        }
+
+        public string GetImageTypeImage()
+        {
+            return "content/images/image.png";
+        }
     }
     public partial class CoreDataContext
     {

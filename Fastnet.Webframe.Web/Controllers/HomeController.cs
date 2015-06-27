@@ -15,9 +15,7 @@ using System.Web.Mvc;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
-
-    //[RouteArea("main")]
-    //[RoutePrefix("home")]
+    [VerifySession]
     public class HomeController : BaseMvcController //Controller
     {
         //private Member currentMember;

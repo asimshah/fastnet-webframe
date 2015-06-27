@@ -38,6 +38,10 @@
             $U = $.fastnet$utilities;
             $T.toolbar = PageToolbar.get();
             $T.pageEditor = PageEditor.get();
+            $T.pageEditor.SetChangePageHandler(function (r) {
+                $U.Debug("Editor asked for new page {0}", r.url);
+                $T.GotoInternalLink(r.url);
+            });
             $(window).bind('popstate', function (event) {
                 //Debug.writeln(location.href);
                 if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
@@ -143,7 +147,7 @@
                 ).then(function (menuInfo, urlResult) {
                     var menuInfoResult = menuInfo[0];
                     var pageResult = urlResult[0];
-                    var menuVisible = menuInfoResult.Visible;
+                    var menuVisible = false;//menuInfoResult.Visible;
                     if (menuVisible) {
                         var menuHtml = menuInfoResult.MenuHtml;
                         $T.CreateMenus(menuHtml);
@@ -198,15 +202,16 @@
         },
         SetPage: function (pageId) {
             $.when(
-                $U.AjaxGet({ url: "pageapi/panelinfo/" + pageId }),
+                $U.AjaxGet({ url: "pageapi/sidepages/" + pageId }),
                 $U.AjaxGet({ url: "pageapi/page/canedit/" + pageId })
                 ).then(function (q0, q1) {
-                    var panelinfo = q0[0];
-                    var canEdit = q1[0].CanEdit;
+                    var sidePages = q0[0];
                     var centrePageId = pageId;
-                    var bannerPageId = panelinfo.BannerPanel.Visible ? panelinfo.BannerPanel.PageId : null;
-                    var leftPageId = panelinfo.LeftPanel.Visible ? panelinfo.LeftPanel.PageId : null;
-                    var rightPageId = panelinfo.RightPanel.Visible ? panelinfo.RightPanel.PageId : null;
+                    var bannerPageId = sidePages.Banner;                   
+                    var leftPageId = sidePages.Left;
+                    var rightPageId = sidePages.Right;
+                    //var panelinfo = q0[0];
+                    var canEdit = q1[0].CanEdit;
                     $T.currentPages.bannerId = $T.UpdatePanel("BannerPanel", $T.currentPages.bannerId, bannerPageId);
                     $T.currentPages.leftId = $T.UpdatePanel("LeftPanel", $T.currentPages.leftId, leftPageId);
                     $T.currentPages.rightId = $T.UpdatePanel("RightPanel", $T.currentPages.rightId, rightPageId);
@@ -259,6 +264,7 @@
             $(panelSelector).empty().append(content);
             $(panelSelector).attr("data-page-id", pageInfo.pageId);
             $(panelSelector).attr("data-panel", panelName);
+            $(panelSelector).attr("data-location", pageInfo.location);
         },
         Start: function (options) {
             $U.Debug("pathname = {0}, {1}", location.pathname, location.href);
@@ -288,7 +294,7 @@
             if (currentPageId !== newPageId) {
                 if (newPageId != null) {
                     $.when($U.AjaxGet({ url: "pageapi/page/" + newPageId })).then(function (result) {
-                        $T.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId });
+                        $T.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
                     });
                 } else {
                     $T.ClearContent(panelName);
