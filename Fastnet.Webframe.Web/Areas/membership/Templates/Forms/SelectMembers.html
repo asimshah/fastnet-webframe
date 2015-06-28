@@ -1,14 +1,20 @@
-﻿<div>
-    <div class="form-body membership select-members">
+﻿<div class="membership select-members">
+    <div class="form-body">
         <div class="form-group-sm member-list">
+            {{#HasMembers}}
             {{#Members}}
-            <div class="member-item"><input class="" type="checkbox" data-item="{{Id}}" data-array="members" /><span>{{Name}} ({{EmailAddress}})</span></div>
+            <div class="member-item"><input type="checkbox" data-item="{{Id}}" data-array="members" /><span>{{Name}} ({{EmailAddress}})</span></div>
             {{/Members}}
+            {{/HasMembers}}
+            {{^HasMembers}}
+            <div>There are no more members available</div>
+            {{/HasMembers}}
         </div>
     </div>
     <div class="form-footer">
         <div class="form-group">
-            <button class="btn btn-primary" data-cmd="select-command">Select</button>
+            <button class="btn btn-xs btn-warning pull-left" data-toggle="false" data-cmd="toggle-selectall-command">Select All</button>
+            <button class="btn btn-primary" data-cmd="select-command">OK</button>
             <button class="btn btn-default" data-cmd="cancel">Cancel</button>
         </div>
     </div>

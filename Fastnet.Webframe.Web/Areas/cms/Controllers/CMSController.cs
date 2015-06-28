@@ -46,6 +46,40 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             return this.Request.CreateResponse(HttpStatusCode.OK, folders);
         }
         [HttpGet]
+        [Route("get/groups")]
+        public async Task<HttpResponseMessage> GetAllGroups()
+        {
+            List<Group> groups = new List<Group>();
+            Func<Group, Task> readChildren = null;
+            readChildren = async (g) =>
+            {
+                var list = await DataContext.Groups.Where(x => x.ParentGroupId == g.GroupId).OrderBy(x => x.Name).ToArrayAsync();
+                foreach (var item in list)
+                {
+                    groups.Add(item);
+                    await readChildren(item);
+                }
+            };
+            Group root = await DataContext.Groups.SingleAsync(x => x.ParentGroup == null);
+            groups.Add(root);
+            await readChildren(root);
+            var result = groups.Select(g => new
+            {
+                Id = g.GroupId,
+                Name = g.Name,
+                FullPath = g.Fullpath,
+                Description = g.Description,
+                HasDirectories = g.DirectoryGroups.Count() > 0,
+                Directories = g.DirectoryGroups.Select(x => new
+                {
+                    Path = x.Directory.Fullpath.Replace("$root", "Store"),
+                    View = x.ViewAllowed,
+                    Edit = x.EditAllowed
+                })
+            });
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
         [Route("get/foldercontent/{id}")]
         public HttpResponseMessage GetDirectoryContent(long id)
         {
@@ -150,7 +184,14 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         [Route("get/membershiphistory")]
         public async Task<HttpResponseMessage> GetMembershipHistory()
         {
-            var data = await DataContext.Actions.OfType<MembershipAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            var data = await DataContext.Actions.OfType<MemberAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("get/grouphistory")]
+        public async Task<HttpResponseMessage> GetGroupHistory()
+        {
+            var data = await DataContext.Actions.OfType<GroupAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK, data);
         }
         [HttpGet]

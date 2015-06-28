@@ -280,7 +280,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 Group.AllMembers.Members.Add(member);
                 member.ActivationCode = Guid.NewGuid().ToString();
                 member.ActivationEmailSentDate = DateTime.UtcNow;
-                member.RecordChanges(null, MembershipAction.ActionTypes.New);
+                member.RecordChanges(null, MemberAction.MemberActionTypes.New);
                 await DataContext.SaveChangesAsync();
                 MailHelper mh = new MailHelper();
                 await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);
@@ -304,7 +304,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 }
                 await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                 member.LastLoginDate = DateTime.UtcNow;
-                member.RecordChanges(null, MembershipAction.ActionTypes.Activation);
+                member.RecordChanges(null, MemberAction.MemberActionTypes.Activation);
                 await DataContext.SaveChangesAsync();
                 PageModel pm = GetPageModel(ClientSideActions.activationsuccessful, null);// new PageModel(null);
                 return View("Index", pm);
@@ -325,7 +325,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 Member member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
                 member.PasswordResetCode = Guid.NewGuid().ToString();
                 member.PasswordResetEmailSentDate = DateTime.UtcNow;
-                member.RecordChanges(null, MembershipAction.ActionTypes.PasswordResetRequest);
+                member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordResetRequest);
                 await DataContext.SaveChangesAsync();
                 MailHelper mh = new MailHelper();
                 await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.PasswordResetCode);
@@ -369,7 +369,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 {
                     member.PlainPassword = newPassword;
                 }
-                member.RecordChanges(null, MembershipAction.ActionTypes.PasswordReset);
+                member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordReset);
                 await DataContext.SaveChangesAsync();
                 using (ApplicationDbContext appDb = new ApplicationDbContext())
                 {

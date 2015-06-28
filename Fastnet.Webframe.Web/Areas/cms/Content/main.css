@@ -163,6 +163,24 @@
   cursor: pointer;
   color: deepskyblue;
 }
+.report-container .group-list .directory-heading {
+  color: #31708f;
+}
+.report-container .group-list .group-directory {
+  margin-left: 24px;
+}
+.report-container .group-list .group-directory .edit-allowed[data-value='false'] {
+  color: red;
+}
+.report-container .group-list .group-directory .edit-allowed[data-value='true'] {
+  color: #3c763d;
+}
+.report-container .group-list .group-directory .view-allowed[data-value='false'] {
+  color: red;
+}
+.report-container .group-list .group-directory .view-allowed[data-value='true'] {
+  color: forestgreen;
+}
 .report-container .member-list .group-name {
   color: #31708f;
 }

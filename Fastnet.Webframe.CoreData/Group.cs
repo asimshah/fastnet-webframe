@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fastnet.EventSystem;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Web;
 namespace Fastnet.Webframe.CoreData
 {
     public partial class Group : Hierarchy<Group>
-    {        
+    {
         public long GroupId { get; set; }
         [ForeignKey("ParentGroup")]
         public long? ParentGroupId { get; set; }
@@ -96,12 +97,79 @@ namespace Fastnet.Webframe.CoreData
         {
             return ultimateChild.IsChildOf(this);
         }
+        public void RecordChanges(string actionBy, GroupAction.GroupActionTypes actionType = GroupAction.GroupActionTypes.Modification, string emailAddress = null)
+        {
+            CoreDataContext DataContext = Core.GetDataContext();
+            switch (actionType)
+            {
+                default:
+                case GroupAction.GroupActionTypes.New:
+                case GroupAction.GroupActionTypes.Deletion:
+                    GroupAction ga1 = new GroupAction
+                    {
+                        GroupId = this.GroupId.ToString(),
+                        FullName = this.Shortenedpath,// this.Fullpath,
+                        ActionBy = actionBy,
+                        Action = actionType,
+                    };
+                    DataContext.Actions.Add(ga1);
+                    return;
+                case GroupAction.GroupActionTypes.MemberAddition:
+                case GroupAction.GroupActionTypes.MemberRemoval:
+                    GroupAction ga2 = new GroupAction
+                    {
+                        GroupId = this.GroupId.ToString(),
+                        FullName = this.Shortenedpath,// this.Fullpath,
+                        ActionBy = actionBy,
+                        Action = actionType,
+                        MemberEmailAddress = emailAddress
+                    };
+                    DataContext.Actions.Add(ga2);
+                    return;
+                case GroupAction.GroupActionTypes.Modification:
+                    break;
+            }
+            var entry = DataContext.Entry(this);
+            foreach (var p in entry.CurrentValues.PropertyNames)
+            {
+                switch (p)
+                {
+                    default:
+                        try
+                        {
+                            if (entry.Property(p).IsModified)
+                            {
+                                object ov = entry.Property(p).OriginalValue;
+                                object cv = entry.Property(p).CurrentValue;
+                                GroupAction ga = new GroupAction
+                                {
+                                    GroupId = this.GroupId.ToString(),
+                                    FullName = this.Shortenedpath,// this.Fullpath,
+                                    ActionBy = actionBy,
+                                    Action = actionType,
+                                    PropertyChanged = p,
+                                    OldValue = ov == null ? "<null>" : ov.ToString(),
+                                    NewValue = cv == null ? "<null>" : cv.ToString()
+                                };
+                                DataContext.Actions.Add(ga);
+                            }
+
+                        }
+                        catch (Exception xe)
+                        {
+                            Log.Write(xe);
+                            throw;
+                        }
+                        break;
+                }
+            }
+        }
         private string getPath(bool shortened = false)
         {
             Action<List<string>, Group> addParentName = null;
             addParentName = (l, d) =>
             {
-                if (d != null &&(shortened == false || !d.Type.HasFlag(GroupTypes.SystemDefinedMembers)))
+                if (d != null && (shortened == false || !d.Type.HasFlag(GroupTypes.SystemDefinedMembers)))
                 {
                     l.Add(d.Name);
                     addParentName(l, d.ParentGroup);

@@ -1,12 +1,11 @@
-﻿<div class="membership-history">
-    <div class="report-title">Membership History</div>
-    <table class="table table-bordered table-striped" >
+﻿<div class="group-history">
+    <div class="report-title">Group History</div>
+    <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Time</th>
                 <th>Action</th>
-                <th>Email</th>
-                <th>Name</th>
+                <th><div class="Name">Name</div></th>
                 <th>By</th>
                 <!--<th>By2</th>-->
                 <th>Property</th>
@@ -16,21 +15,33 @@
         </thead>
         <tbody>
             {{#data}}
-            <tr>
+            <tr class="" data-id="{{GroupId}}">
                 <td><div class="recordedOn">{{RecordedOn}}</div></td>
                 <td><div class="actionName">{{ActionName}}</div></td>
-                <td><div class="emailAddress">{{EmailAddress}}</div></td>
-                <td><div class="fullName">{{FullName}}</div></td>
+                <td><div class="Name">{{FullName}}</div></td>
                 <td><div class="actionBy">{{ActionBy}}</div></td>
                 {{#IsModification}}
                 <td><div class="propertyChanged">{{PropertyChanged}}</div></td>
                 <td><div class="oldValue">{{OldValue}}</div></td>
                 <td><div class="newValue">{{NewValue}}</div></td>
                 {{/IsModification}}
+                {{#IsCollectionChanged}}
+                <td><div class="propertyChanged"></div></td>
+                {{#IsAddition}}
+                <td><div class="oldValue"></div></td>
+                <td><div class="newValue">{{MemberEmailAddress}}</div></td>
+                {{/IsAddition}}
+                {{^IsAddition}}
+                <td><div class="oldValue">{{MemberEmailAddress}}</div></td>
+                <td><div class="newValue"></div></td>
+                {{/IsAddition}}
+                {{/IsCollectionChanged}}
                 {{^IsModification}}
+                {{^IsCollectionChanged}}
                 <td><div class="propertyChanged"></div></td>
                 <td><div class="oldValue"></div></td>
                 <td><div class="newValue"></div></td>
+                {{/IsCollectionChanged}}
                 {{/IsModification}}
             </tr>
             {{/data}}

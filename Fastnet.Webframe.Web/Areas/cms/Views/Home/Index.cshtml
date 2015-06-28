@@ -13,34 +13,61 @@
 </div>
 <div class="row">
     <table class="navigation-table table">
-        <tr>
-            <td><button class="btn btn-primary btn-xs" data-cmd="site-content">Page List</button></td>
-            <td>A list of all the pages, documents and images in folder order</td>
-        </tr>
-        <tr>
-            <td><button class="btn btn-primary btn-xs" data-cmd="member-list">Member List</button></td>
-            <td>A list of all registered members</td>
-        </tr>
-        <tr class="hide">
-            <td><button class="btn btn-primary btn-xs" data-cmd="content-changes">Content Changes</button></td>
-            <td>A history of all changes to content, i.e new pages, deletions and modifications</td>
-        </tr>
-        <tr>
-            <td><button class="btn btn-primary btn-xs" data-cmd="mail-history">Mail History</button></td>
-            <td>A history of all email sent by the site</td>
-        </tr>
-        <tr>
-            <td><button class="btn btn-primary btn-xs" data-cmd="membership-history">Membership History</button></td>
-            <td>A history of all registrations and changes to members records</td>
-        </tr>
-        <tr >
-            <td><button class="btn btn-primary btn-xs" data-cmd="session-history">Session History</button></td>
-            <td>A history a browser sessions</td>
-        </tr>
-        <tr>
-            <td><button class="btn btn-primary btn-xs" data-cmd="test-mail">Test Mail</button></td>
-            <td>Mail testing form</td>
-        </tr>
+        <tbody class="content-reports">
+            <tr>
+                <td>Contents</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="site-content">Page List</button></td>
+                <td>A list of all the pages, documents and images in folder order</td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="group-list">Group List</button></td>
+                <td>A list of all groups</td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="member-list">Member List</button></td>
+                <td>A list of all registered members</td>
+            </tr>
+        </tbody>
+        <tbody class="history-reports">
+            <tr>
+                <td>History</td>
+                <td></td>
+            </tr>
+            <tr class="hide">
+                <td><button class="btn btn-primary btn-xs" data-cmd="content-changes">Content Changes</button></td>
+                <td>A history of all changes to content, i.e new pages, deletions and modifications</td>
+            </tr>
+
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="mail-history">Mail History</button></td>
+                <td>A history of all email sent by the site</td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="group-history">Group History</button></td>
+                <td>A history of all changes to groups</td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="membership-history">Membership History</button></td>
+                <td>A history of all registrations and changes to members records</td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="session-history">Session History</button></td>
+                <td>A history of all browser sessions</td>
+            </tr>
+        </tbody>
+        <tbody class="tools">
+            <tr>
+                <td>Tools</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><button class="btn btn-primary btn-xs" data-cmd="test-mail">Test Mail</button></td>
+                <td>Mail testing form</td>
+            </tr>
+        </tbody>
     </table>
     <div class="report-container"></div>
 </div>

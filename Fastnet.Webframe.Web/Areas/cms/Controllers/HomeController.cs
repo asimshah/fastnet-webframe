@@ -11,6 +11,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RouteArea("cms")]
     //[RoutePrefix("reports")]
+    [VerifySession]
     [PermissionFilter(SystemGroups.Administrators, "CMS features are not available")]
     public class HomeController : BaseMvcController
     {

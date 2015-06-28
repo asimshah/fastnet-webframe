@@ -23,6 +23,7 @@ using Fastnet.Webframe.WebApi;
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
     [RoutePrefix("membershipapi")]
+    [PermissionFilter(SystemGroups.Administrators)]
     public class MembershipController : BaseApiController // : ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
@@ -62,6 +63,27 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             var result = groups.Select(x => GetClientSideGroupListDetails(x));
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
+        //[HttpGet]
+        //[Route("get/groupsall")]
+        //public async Task<HttpResponseMessage> GetAllGroups()
+        //{
+        //    List<cd.Group> groups = new List<cd.Group>();
+        //    Func<cd.Group, Task> readChildren = null;
+        //    readChildren = async (g) =>
+        //    {
+        //        var list = await DataContext.Groups.Where(x => x.ParentGroupId == g.GroupId).OrderBy(x => x.Name).ToArrayAsync();
+        //        foreach (var item in list)
+        //        {
+        //            groups.Add(item);
+        //            await readChildren(item);
+        //        }
+        //    };
+        //    cd.Group root = await DataContext.Groups.SingleAsync(x => x.ParentGroup == null);
+        //    groups.Add(root);
+        //    await readChildren(root);
+        //    var result = groups.Select(x => GetClientSideGroupListDetails(x));
+        //    return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        //}
         [HttpGet]
         [Route("get/group/{groupId}")]
         public async Task<HttpResponseMessage> GetGroupDetails(long groupId)
@@ -82,7 +104,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> GetCandidateMembers(long groupId)
         {
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
-            var members = await DataContext.Members.Where(m => !m.IsAdministrator).ToArrayAsync();
+            var members = await DataContext.Members.Where(m => !m.IsAdministrator && !m.IsAnonymous).ToArrayAsync();
             //var groupMembers = group.Members.ToArrayAsync();
             var candidates = members.Except(group.Members.ToArray()).OrderBy(x => x.LastName);
             var resultCandidates = candidates.Select(m => GetClientSideMemberIndexDetails(m));
@@ -112,6 +134,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             deleteChildren(group);
             DataContext.Groups.Remove(group);
+            group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.Deletion);
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
@@ -125,6 +148,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             group.Name = name;
             group.Description = description;
+            group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.Modification);
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
@@ -161,12 +185,13 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 Description = ""
             };
             DataContext.Groups.Add(ng);
+            ng.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.New);
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK, new { groupId = ng.GroupId });
         }
         [HttpPost]
         [Route("add/groupmembers")]
-        public async Task<HttpResponseMessage> AddGroupMembersd(dynamic data)
+        public async Task<HttpResponseMessage> AddGroupMembers(dynamic data)
         {
             long groupId = data.groupId;
             JArray membersArray = data.members;
@@ -176,6 +201,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             {
                 Member m = await DataContext.Members.FindAsync(key);
                 group.Members.Add(m);
+                group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberAddition, m.EmailAddress);
             }
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK);
@@ -192,6 +218,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             {
                 Member m = await DataContext.Members.FindAsync(key);
                 group.Members.Remove(m);
+                group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberRemoval, m.EmailAddress);
             }
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK);
@@ -291,7 +318,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 Fastnet.Webframe.CoreData.Group.AllMembers.Members.Add(member);
                 member.ActivationCode = Guid.NewGuid().ToString();
                 member.ActivationEmailSentDate = DateTime.UtcNow;
-                member.RecordChanges(this.GetCurrentMember().Fullname, MembershipAction.ActionTypes.New);
+                member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
                 await DataContext.SaveChangesAsync();
                 MailHelper mh = new MailHelper();                
                 await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);                
@@ -315,7 +342,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 {
                     g.Members.Remove(m);
                 }
-                m.RecordChanges(this.GetCurrentMember().Fullname, MembershipAction.ActionTypes.Deletion);
+                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deletion);
                 DataContext.Members.Remove(m);
                 await DataContext.SaveChangesAsync();
                 Debug.Print("Member {0} ({1}) deleted", m.EmailAddress, m.Id);
@@ -382,7 +409,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 MailHelper mh = new MailHelper();
                 var request = HttpContext.Current.Request;
                 await mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
-                m.RecordChanges(this.GetCurrentMember().Fullname, MembershipAction.ActionTypes.Deactivation);
+                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
                 await DataContext.SaveChangesAsync();
             }
             var r = GetClientSideMemberIndexDetails(m);
@@ -404,7 +431,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             await appUserManager.UpdateAsync(user);
             if (currentlyActive)
             {
-                m.RecordChanges(this.GetCurrentMember().Fullname, MembershipAction.ActionTypes.Deactivation);
+                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
             }
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();            
@@ -420,7 +447,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             Member member = await DataContext.Members.FindAsync(id);
             member.PasswordResetCode = Guid.NewGuid().ToString();
             member.PasswordResetEmailSentDate = DateTime.UtcNow;
-            member.RecordChanges(this.GetCurrentMember().Fullname, MembershipAction.ActionTypes.PasswordResetRequest);
+            member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.PasswordResetRequest);
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();
             await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
@@ -494,6 +521,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             {
                 Id = g.GroupId,
                 Name = g.Name,
+                //FullPath = g.Fullpath,
                 Description = g.Description,
                 IsSystem = g.Type.HasFlag(GroupTypes.System),
                 HasSystemDefinedMembers = g.Type.HasFlag(GroupTypes.SystemDefinedMembers),

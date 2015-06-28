@@ -1,0 +1,31 @@
+﻿<div class="group-list">
+    <div class="report-title">Group List</div>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th><div class="name">Name</div></th>
+                <th><div class="description">Description</div></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#data}}
+            <tr data-id="{{Id}}">
+                <td><div class="name">{{FullPath}}</div></td>
+                <td>
+                    <div class="description">{{Description}}</div>
+                    {{#HasDirectories}}
+                    <div class="directory-heading">Folders:</div>
+                    {{#Directories}}<div class="group-directory">
+                        <span>{{Path}}</span><span>, view: </span><span class="view-allowed" data-value="{{View}}">{{View}}</span><span>, edit: </span><span class="edit-allowed" data-value="{{Edit}}">{{Edit}}</span>
+                    </div>{{/Directories}}
+                    {{/HasDirectories}}
+                </td>
+            </tr>
+            <!--<tr>
+                <td></td>
+                <td >{{#Directories}}<div>{{Path}}</div>{{/Directories}}</td>
+            </tr>-->
+            {{/data}}
+        </tbody>
+    </table>
+</div>

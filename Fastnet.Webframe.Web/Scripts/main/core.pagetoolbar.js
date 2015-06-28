@@ -9,12 +9,24 @@
             var pageInformation = $(".edit-panel .page-information");
             return pageInformation.hasClass("open");
         }
+        function _openPageInformation() {
+            $(".edit-panel .page-information").removeClass("closed").addClass("open");
+            $(".edit-panel").removeClass("down").addClass("full");
+        }
+        function _closePageInformation() {
+            $(".edit-panel .page-information").removeClass("open").addClass("closed");
+            $(".edit-panel").removeClass("full").addClass("down");
+        }
         function _togglePageInformation() {
             var pageInformation = $(".edit-panel .page-information");
             if (pageInformation.hasClass("closed")) {
-                pageInformation.removeClass("closed").addClass("open");
+                _openPageInformation();
+                //pageInformation.removeClass("closed").addClass("open");
+                //$(".edit-panel").removeClass("down").addClass("full");
             } else {
-                pageInformation.removeClass("open").addClass("closed");
+                _closePageInformation();
+                //pageInformation.removeClass("open").addClass("closed");
+                //$(".edit-panel").removeClass("full").addClass("down");
             }
         }
         function _enableCommand(cmd) {
@@ -51,6 +63,7 @@
             _onCommand("toolbar-opened");
         }
         function _show() {
+            _closePageInformation();
             $(".edit-panel").removeClass("down").addClass("up");
             $(".edit-toolbar").removeClass("present");
             $(".edit-panel").on("click", function (e) {

@@ -78,6 +78,29 @@
                     });
                 });
         }
+        function showGroupList() {
+            var templateurl = "template/get/cms/grouplist";
+            var dataurl = "cmsapi/get/groups";
+            $.when(
+                $U.AjaxGet({ url: templateurl }),
+                $U.AjaxGet({ url: dataurl })
+                ).then(function (q1, q2) {
+                    var template = q1[0].Template;
+                    var data = q2[0];
+                    $.each(data, function (i, item) {
+                        item.CreationDate = $U.FormatDate(moment.utc(item.CreationDate).toDate(), "DDMMMYYYY HH:mm:ss");
+                        if (item.LastLoginDate !== null) {
+                            item.LastLoginDate = $U.FormatDate(moment.utc(item.LastLoginDate).toDate(), "DDMMMYYYY HH:mm:ss");
+                        }
+                    });
+                    var html = $(Mustache.to_html(template, { data: data }));
+                    $(".report-container").append(html);
+                    $(".report-container table").dataTable({
+                        pagingType: "simple",
+                        order: [[0, 'asc']]
+                    });
+                });
+        }
         function sendTestMail() {
             $(".toolbar button[data-cmd='back-to-cms']").hide();
             var formUrl = "template/get/cms/mailtester";
@@ -129,6 +152,19 @@
                         var body = $(this).siblings(".body");
                         $U.MessageBox(body[0].innerHTML, { Title: "Email Content" });
                     });
+                });
+        }
+        function showGroupHistory() {
+            //var templateurl = "cms/template/type/membershiphistory";
+            var templateurl = "template/get/cms/grouphistory";
+            var dataurl = "cmsapi/get/grouphistory";
+            $.when(
+                $U.AjaxGet({ url: templateurl }),
+                $U.AjaxGet({ url: dataurl })
+                ).then(function (q1, q2) {
+                    var template = q1[0].Template;
+                    var data = q2[0];
+                    showHistory(template, data);
                 });
         }
         function showMembershipHistory() {
@@ -255,6 +291,10 @@
                         closeNavigationTable();
                         showMemberList();
                         break;
+                    case "group-list":
+                        closeNavigationTable();
+                        showGroupList();
+                        break;
                     case "session-history":
                         closeNavigationTable();
                         showSessionHistory();
@@ -262,6 +302,10 @@
                     case "membership-history":
                         closeNavigationTable();
                         showMembershipHistory();
+                        break;
+                    case "group-history":
+                        closeNavigationTable();
+                        showGroupHistory();
                         break;
                     case "mail-history":
                         closeNavigationTable();

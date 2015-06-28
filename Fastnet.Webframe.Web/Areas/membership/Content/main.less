@@ -2,7 +2,7 @@
 @import (reference) "constants.less";
 
 .body-content {
-    width: 80%;
+
 }
 
 .fastnet-error-panel {
@@ -274,6 +274,10 @@
 }
 
 .group-manager {
+        .member-list {
+        max-height: 300px;
+        overflow-y: scroll;
+    }
     .group-tree-panel {
         min-height: 500px;
         color: @light-border-colour;
@@ -374,13 +378,10 @@
     }
 }
 
-.membership.select-members {
+.membership {
     padding: 12px;
 
-    .member-list {
-        max-height: 300px;
-        overflow-y: scroll;
-    }
+
 
     .member-item {
         margin-top: 2px;

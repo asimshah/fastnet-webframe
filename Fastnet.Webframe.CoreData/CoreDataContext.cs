@@ -5,6 +5,7 @@ using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Configuration;
 using System.Data.Entity;
 //using System.Data.Entity.Core.EntityClient;
@@ -15,6 +16,7 @@ using System.Data.EntityClient;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Transactions;
@@ -93,7 +95,32 @@ namespace Fastnet.Webframe.CoreData
         //Emz,
         Unknown = 64
     }
+    public sealed class MappedAttribute : Attribute
+    {
 
+    }
+    public sealed class NonPublicColumnAttributeConvention : Convention
+    {
+        public NonPublicColumnAttributeConvention()
+        {
+            Types().Having(NonPublicProperties)
+                   .Configure((config, properties) =>
+                   {
+                       foreach (PropertyInfo prop in properties)
+                       {
+                           config.Property(prop);
+                       }
+                   });
+        }
+
+        private IEnumerable<PropertyInfo> NonPublicProperties(Type type)
+        {
+            var matchingProperties = type.GetProperties(BindingFlags.SetProperty | BindingFlags.GetProperty | BindingFlags.NonPublic | BindingFlags.Instance)
+                                         .Where(propInfo => propInfo.GetCustomAttributes(typeof(MappedAttribute), true).Length > 0)
+                                         .ToArray();
+            return matchingProperties.Length == 0 ? null : matchingProperties;
+        }
+    }
     public partial class CoreDataContext : DbContext
     {
         public static void SetInitializer()
@@ -153,16 +180,8 @@ namespace Fastnet.Webframe.CoreData
         {
             modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
+            modelBuilder.Conventions.Add(new NonPublicColumnAttributeConvention());
             modelBuilder.Properties<DateTime>().Configure(c => c.HasColumnType("datetime2"));
-            //modelBuilder.Entity<Role>()
-            //    .HasMany(t => t.Members)
-            //    .WithMany(t => t.Roles)
-            //    .Map(m =>
-            //    {
-            //        m.MapLeftKey("RoleId");
-            //        m.MapRightKey("MemberId");
-            //        m.ToTable("RoleMember");
-            //    });
 
             modelBuilder.Entity<Group>()
                 .HasMany(t => t.RegistrationKeys)
@@ -909,7 +928,7 @@ namespace Fastnet.Webframe.CoreData
             };
 
             Group everyone = addgroup(SystemGroups.Everyone, "All visitors whether members or not", GroupTypes.System | GroupTypes.SystemDefinedMembers, null);
-            Group all = addgroup(SystemGroups.AllMembers, "All visitors that have logged in (and therefore are memebrs)", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
+            Group all = addgroup(SystemGroups.AllMembers, "All visitors that have logged in (and therefore are members)", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
             Group anon = addgroup(SystemGroups.Anonymous, "All visitors that have not logged in - this group excludes those that have logged in", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
             Group admins = addgroup(SystemGroups.Administrators, "Site Administrators - members who can do everything", GroupTypes.System, all);
             Group designers = addgroup(SystemGroups.Designers, "Site Designers - members who can modify layout and style", GroupTypes.System, all);

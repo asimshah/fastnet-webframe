@@ -166,19 +166,19 @@ namespace Fastnet.Webframe.CoreData
         //    };
         //    DataContext.Actions.Add(ma);
         //}
-        public void RecordChanges(string actionBy = null, MembershipAction.ActionTypes actionType = MembershipAction.ActionTypes.Modification)
+        public void RecordChanges(string actionBy = null, MemberAction.MemberActionTypes actionType = MemberAction.MemberActionTypes.Modification)
         {
             CoreDataContext DataContext = Core.GetDataContext();
             switch (actionType)
             {
                 default:
-                case MembershipAction.ActionTypes.New:
-                case MembershipAction.ActionTypes.Activation:
-                case MembershipAction.ActionTypes.PasswordResetRequest:
-                case MembershipAction.ActionTypes.PasswordReset:
-                case MembershipAction.ActionTypes.Deactivation:
-                case MembershipAction.ActionTypes.Deletion:
-                    MembershipAction ma = new MembershipAction
+                case MemberAction.MemberActionTypes.New:
+                case MemberAction.MemberActionTypes.Activation:
+                case MemberAction.MemberActionTypes.PasswordResetRequest:
+                case MemberAction.MemberActionTypes.PasswordReset:
+                case MemberAction.MemberActionTypes.Deactivation:
+                case MemberAction.MemberActionTypes.Deletion:
+                    MemberAction ma = new MemberAction
                     {
                         MemberId = this.Id,
                         EmailAddress = this.EmailAddress,
@@ -188,7 +188,7 @@ namespace Fastnet.Webframe.CoreData
                     };
                     DataContext.Actions.Add(ma);
                     return;
-                case MembershipAction.ActionTypes.Modification:
+                case MemberAction.MemberActionTypes.Modification:
                     break;
             }
             var entry = DataContext.Entry(this);
@@ -210,7 +210,7 @@ namespace Fastnet.Webframe.CoreData
                             {
                                 object ov = entry.Property(p).OriginalValue;
                                 object cv = entry.Property(p).CurrentValue;
-                                MembershipAction ma = new MembershipAction
+                                MemberAction ma = new MemberAction
                                 {
                                     MemberId = this.Id,
                                     EmailAddress = this.EmailAddress,

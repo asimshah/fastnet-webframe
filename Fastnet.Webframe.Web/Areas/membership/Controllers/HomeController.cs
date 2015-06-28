@@ -1,4 +1,5 @@
 ﻿using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Mvc;
 using Fastnet.Webframe.Web.Areas.membership.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,9 @@ using System.Web.Mvc;
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
     [RouteArea("membership")]
-    public class HomeController : Controller
+    [VerifySession]
+    [PermissionFilter(SystemGroups.Administrators, "Membership features are not available")]
+    public class HomeController : BaseMvcController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         // GET: membership/Home

@@ -338,6 +338,8 @@
     </Content>
     <Content Include="Areas\cms\Scripts\webframe.cms.js" />
     <Content Include="Areas\cms\Templates\DocumentTemplate.html" />
+    <Content Include="Areas\cms\Templates\GroupHistory.html" />
+    <Content Include="Areas\cms\Templates\GroupList.html" />
     <Content Include="Areas\cms\Templates\ImageTemplate.html" />
     <Content Include="Areas\cms\Templates\MailHistory.html" />
     <Content Include="Areas\cms\Templates\MailTester.html" />

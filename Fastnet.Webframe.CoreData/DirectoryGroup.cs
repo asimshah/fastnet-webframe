@@ -31,9 +31,10 @@ namespace Fastnet.Webframe.CoreData
         public virtual Directory Directory { get; set; }
         public virtual Group Group { get; set; }
         //
-        internal Permission Permission { get; set; }
+        [Mapped]
+        internal Permission Permission {  get; set; }
         [NotMapped]
-        public bool ViewAllowed { get { return Permission.HasFlag(Permission.ViewPages | Permission.EditPages); } }
+        public bool ViewAllowed { get { return Permission.HasFlag(Permission.ViewPages) || Permission.HasFlag(Permission.EditPages); } }
         [NotMapped]
         public bool EditAllowed { get { return Permission.HasFlag(Permission.EditPages); } }
     }

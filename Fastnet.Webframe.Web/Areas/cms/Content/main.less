@@ -117,6 +117,30 @@
         cursor: pointer;
         color: deepskyblue
     }
+    .group-list {
+        .directory-heading {
+            color: @state-info-text;
+        }
+        .group-directory {
+            margin-left: 24px;
+            .edit-allowed {
+                &[data-value='false'] {
+                    color: red;
+                }
+                &[data-value='true'] {
+                    color: @state-success-text;
+                }
+            }
+            .view-allowed {
+                &[data-value='false'] {
+                    color: red;
+                }
+                &[data-value='true'] {
+                    color: forestgreen;
+                }
+            }
+        }
+    }
     .member-list {
         .group-name {
             color:@state-info-text;

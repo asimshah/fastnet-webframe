@@ -404,6 +404,12 @@
                             });
                             removeMembers(groupId, membersToRemove);
                             break;
+                        case "toggle-selectall-command":
+                            if (toggleMembers(f, src)) {
+                                f.enableCommand("remove-members");
+                            } else {
+                                f.disableCommand("remove-members");
+                            }
                         case "save-group-changes":
                             if (f.isValid()) {
                                 //alert("can save changes!");
@@ -488,6 +494,21 @@
                 loadGroupDetails(groupId);
             })
         };
+        var toggleMembers = function (f, src) {
+            var allmembersChecked = false;
+            var toggle = $(src).attr("data-toggle") === "true";
+            f.find(".member-item input").each(function (i, item) {
+                $(item).prop("checked", !toggle);
+            });
+            if (toggle) {
+                $(src).text("Select All");
+            } else {
+                $(src).text("Deselect All");
+            }
+            toggle = !toggle;
+            $(src).attr("data-toggle", toggle);
+            return (toggle);
+        }
         var addMembers = function (groupId) {
             function addMembersToGroup(members) {
                 var url = "membershipapi/add/groupmembers";
@@ -498,7 +519,7 @@
             }
             var url = $U.Format("membershipapi/get/candidatemembers/{0}", groupId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
-                $.each(r, function (i, member) {
+                $.each(r.Members, function (i, member) {
                     $U.Debug("Candidate {0}: {1} ({2})", i, member.Name, member.EmailAddress);
                 });
                 var af = new $.fastnet$forms.CreateForm("template/get/membership-forms/selectmembers", {
@@ -518,7 +539,7 @@
                             f.disableCommand("select-command");
                         }
                     },
-                    OnCommand: function (f, cmd) {
+                    OnCommand: function (f, cmd, src) {
                         switch (cmd) {
                             case "select-command":
                                 var data = f.getData();
@@ -531,9 +552,16 @@
                                 f.close();
                                 addMembersToGroup(membersToAdd);
                                 break;
+                            case "toggle-selectall-command":
+                                if (toggleMembers(f, src)) {
+                                    f.enableCommand("select-command");
+                                } else {
+                                    f.disableCommand("select-command");
+                                }
+                                break;
                         }
                     }
-                }, { Members: r });
+                }, r);
                 af.disableCommand("select-command");
                 af.show();
             });

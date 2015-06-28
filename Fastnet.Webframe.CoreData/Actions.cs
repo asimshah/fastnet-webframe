@@ -52,9 +52,19 @@ namespace Fastnet.Webframe.CoreData
         public bool MailDisabled { get; set; }
         public string Failure { get; set; }
     }
-    public class MembershipAction : ActionBase
+    public class DataEntityActionBase : ActionBase
     {
-        public enum ActionTypes
+        public string ActionBy { get; set; }
+
+        public string PropertyChanged { get; set; } // if Action == Modification
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
+
+
+    }
+    public class MemberAction : DataEntityActionBase
+    {
+        public enum MemberActionTypes
         {
             [Description("New Member")]
             New,
@@ -74,14 +84,38 @@ namespace Fastnet.Webframe.CoreData
         public string MemberId { get; set; }
         public string FullName { get; set; }
         public string EmailAddress { get; set; }
-        public string ActionBy { get; set; }
-        public ActionTypes Action { get; set; }
-        public string PropertyChanged { get; set; } // if Action == Modification
-        public string OldValue { get; set; }
-        public string NewValue { get; set; }
+        public MemberActionTypes Action { get; set; }
+        [NotMapped]
+        public bool IsModification { get { return Action == MemberActionTypes.Modification; } }
+        [NotMapped]
+        public string ActionName { get { return Action.GetDescription(); } }
+    }
+    public class GroupAction : DataEntityActionBase
+    {
+        public enum GroupActionTypes
+        {
+            [Description("New Group")]
+            New,
+            [Description("Details Modified")]
+            Modification,
+            [Description("Group Deleted")]
+            Deletion,
+            [Description("Member Added")]
+            MemberAddition,
+            [Description("Member Removed")]
+            MemberRemoval
+        }
+        public string GroupId { get; set; }
+        public string FullName { get; set; }
+        public GroupActionTypes Action { get; set; }
+        public string MemberEmailAddress { get; set; }
         [NotMapped]
         public string ActionName { get { return Action.GetDescription(); } }
         [NotMapped]
-        public bool IsModification { get { return Action == ActionTypes.Modification; } }
+        public bool IsModification { get { return Action == GroupActionTypes.Modification; } }
+        [NotMapped]
+        public bool IsCollectionChanged { get { return Action == GroupActionTypes.MemberAddition || Action == GroupActionTypes.MemberRemoval; } }
+        [NotMapped]
+        public bool IsAddition { get { return Action == GroupActionTypes.MemberAddition; } }
     }
 }
