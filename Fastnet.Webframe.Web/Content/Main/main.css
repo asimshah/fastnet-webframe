@@ -186,27 +186,81 @@ body {
   z-index: 44444;
 }
 .edit-panel {
-  height: 0;
   -moz-transition: height ease 1s;
   -o-transition: height ease 1s;
   -webkit-transition: height ease 1s;
   transition: height ease 1s;
   background-color: black;
 }
-.edit-panel .page-information {
-  background-color: black;
+.edit-panel .toolbar {
+  -moz-transition: height ease 1s;
+  -o-transition: height ease 1s;
+  -webkit-transition: height ease 1s;
+  transition: height ease 1s;
+  /*-moz-transition: opacity ease 2s, top ease 1s;
+        -o-transition: opacity ease 2s, top ease 1s;
+        -webkit-transition: opacity ease 2s, top ease 1s;*/
+  margin-left: 15px;
+  margin-right: 15px;
+  padding-left: 4px;
+  padding-right: 4px;
   overflow: hidden;
   color: white;
-  font-size: 11px;
+  font-size: 10px;
 }
-.edit-panel .page-information > div {
-  padding: 4px;
+.edit-panel .toolbar.closed {
+  height: 0;
+}
+.edit-panel .toolbar.available {
+  height: 8px;
+}
+.edit-panel .toolbar.available .btn {
+  display: none;
+}
+.edit-panel .toolbar.available:hover {
+  background-color: #cccccc;
+}
+.edit-panel .toolbar.open {
+  height: 32px;
+}
+.edit-panel .toolbar .btn {
+  margin: 2px;
+  line-height: 1.4;
+}
+.edit-panel .toolbar .testing-command {
+  display: none;
+}
+.edit-panel .toolbar .page-info-command {
+  background: transparent;
+  color: white;
+}
+.edit-panel .toolbar .page-info-command span:first-child {
+  vertical-align: top;
+}
+.edit-panel .toolbar .page-info-command span.fa {
+  font-size: 1.5em;
+  margin-left: 2px;
+  color: white;
+}
+.edit-panel .toolbar .page-info-command.closed span.fa:before {
+  content: '\f01a';
+}
+.edit-panel .toolbar .page-info-command.open span.fa:before {
+  content: '\f01b';
+}
+.edit-panel .page-information {
+  overflow: hidden;
+  margin-left: 15px;
+  margin-right: 15px;
+  background-color: #333333;
+  color: white;
+  font-size: 11px;
 }
 .edit-panel .page-information.closed {
   height: 0;
 }
-.edit-panel .page-information.open {
-  height: auto;
+.edit-panel .page-information > div {
+  padding: 4px;
 }
 .edit-panel .page-information .banner-info span:first-child,
 .edit-panel .page-information .left-info span:first-child,
@@ -224,61 +278,6 @@ body {
 .edit-panel .page-information .centre-info span:nth-child(2),
 .edit-panel .page-information .right-info span:nth-child(2) {
   margin-right: 2px;
-}
-.edit-panel.up {
-  height: 8px;
-}
-.edit-panel.up:hover {
-  background-color: #cccccc;
-}
-.edit-panel.down {
-  height: 32px;
-  /*&:hover {
-            background-color: black;
-        }*/
-}
-.edit-panel.full {
-  height: 100px;
-}
-.edit-panel .edit-toolbar {
-  opacity: 0.0;
-  top: -24px;
-  -moz-transition: opacity ease 2s, top ease 1s;
-  -o-transition: opacity ease 2s, top ease 1s;
-  -webkit-transition: opacity ease 2s, top ease 1s;
-  transition: opacity ease 2s, top ease 1s;
-  color: white;
-  font-size: 10px;
-  padding: 2px 2px 2px 4px;
-}
-.edit-panel .edit-toolbar.present {
-  opacity: 1.0;
-  top: 0;
-}
-.edit-panel .edit-toolbar div button {
-  margin-top: 2px;
-  line-height: 1.4;
-}
-.edit-panel .edit-toolbar .testing-command {
-  display: none;
-}
-.edit-panel .edit-toolbar .page-info-command {
-  background: transparent;
-  color: white;
-}
-.edit-panel .edit-toolbar .page-info-command span:first-child {
-  vertical-align: top;
-}
-.edit-panel .edit-toolbar .page-info-command span.fa {
-  font-size: 1.5em;
-  margin-left: 2px;
-  color: white;
-}
-.edit-panel .edit-toolbar .page-info-command.closed span.fa:before {
-  content: '\f01a';
-}
-.edit-panel .edit-toolbar .page-info-command.open span.fa:before {
-  content: '\f01b';
 }
 .editor-side-panel {
   position: relative;

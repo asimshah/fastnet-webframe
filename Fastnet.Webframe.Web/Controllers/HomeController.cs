@@ -1,5 +1,6 @@
 ﻿
 using Fastnet.Common;
+using Fastnet.EventSystem;
 using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Mvc;
 using Fastnet.Webframe.Web.Common;
@@ -383,7 +384,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var memberCount = DataContext.Members.Count();
+                var memberCount = DataContext.Members.Where(x => !x.IsAnonymous).Count();
                 if (memberCount == 0)
                 {
                     var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
@@ -407,19 +408,24 @@ namespace Fastnet.Webframe.Web.Controllers
                             member.PlainPassword = model.Password;
                         }
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                        //SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        
                         member.LastLoginDate = DateTime.UtcNow;
                         DataContext.Members.Add(member);
                         Group.AllMembers.Members.Add(member);
                         Group.Administrators.Members.Add(member);
                         Group.Designers.Members.Add(member);
                         Group.Editors.Members.Add(member);
-                        Debug.Print("Saving member {0} ...", member.Id);
+                        //Debug.Print("Saving member {0} ...", member.Id);
                         int x = await DataContext.SaveChangesAsync();
-                        Debug.Print("... saved member {0}, returned {1}", member.Id, x);
+                        Session["current-member"] = member.Id;
+                        //Debug.Print("... saved member {0}, returned {1}", member.Id, x);
                         return RedirectToAction("AdminConfirmed");
                     }
                     //return Json(new { Success = false, Error = result.Errors.First() }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    Log.Write(EventSeverities.Error, "CreateAdministrator() called with invalid member count = {0}", memberCount);
                 }
             }
             return View();

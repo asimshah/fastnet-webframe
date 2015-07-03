@@ -129,86 +129,53 @@ body {
 }
 
 .edit-panel {
-    height: 0;
-    //position: relative;
     -moz-transition: height ease 1s;
     -o-transition: height ease 1s;
     -webkit-transition: height ease 1s;
     transition: height ease 1s;
     background-color: @editor-bar-background-colour;
 
-    .page-information {
-        background-color: @editor-bar-background-colour;
+    .toolbar {
+        -moz-transition: height ease 1s;
+        -o-transition: height ease 1s;
+        -webkit-transition: height ease 1s;
+        transition: height ease 1s;
+        /*-moz-transition: opacity ease 2s, top ease 1s;
+        -o-transition: opacity ease 2s, top ease 1s;
+        -webkit-transition: opacity ease 2s, top ease 1s;*/
+        //transition: opacity ease 2s, top ease 1s;
+        margin-left: 15px;
+        margin-right: 15px;
+        padding-left: 4px;
+        padding-right: 4px;
         overflow: hidden;
-        color: @editor-bar-foreground-colour;
-
-        > div {
-            padding: 4px;
-        }
-
-        font-size: 11px;
 
         &.closed {
             height: 0;
         }
 
+        &.available {
+            height: 8px;
+
+            .btn {
+                display: none;
+            }
+
+            &:hover {
+                background-color: @editor-bar-strip-hover-colour;
+            }
+        }
+
         &.open {
-            height: auto;
+            height: 32px;
         }
 
-        .banner-info, .left-info, .centre-info, .right-info {
-            span:first-child, span:nth-child(3) {
-                font-style: italic;
-                color: @editor-bar-information-colour-label;
-            }
-
-            span:nth-child(2) {
-                margin-right: 2px;
-            }
-        }
-    }
-
-    &.up {
-        height: 8px;
-
-        &:hover {
-            background-color: @editor-bar-strip-hover-colour; // gray;
-        }
-    }
-
-    &.down {
-        height: 32px;
-        /*&:hover {
-            background-color: black;
-        }*/
-    }
-
-    &.full {
-        height: 100px;
-    }
-
-    .edit-toolbar {
-        opacity: 0.0;
-        top: -24px;
-        -moz-transition: opacity ease 2s, top ease 1s;
-        -o-transition: opacity ease 2s, top ease 1s;
-        -webkit-transition: opacity ease 2s, top ease 1s;
-        transition: opacity ease 2s, top ease 1s;
         color: @editor-bar-foreground-colour;
         font-size: 10px;
-        padding: 2px 2px 2px 4px;
-
-        &.present {
-            opacity: 1.0;
-            top: 0;
-        }
-
-        div {
-
-            button {
-                margin-top: 2px;
-                line-height: 1.4;
-            }
+        //padding: 2px 2px 2px 4px;
+        .btn {
+            margin: 2px;
+            line-height: 1.4;
         }
         // ensure that the testing button is hidden in production
         .testing-command {
@@ -246,6 +213,36 @@ body {
                         content: '\f01b'; // up
                     }
                 }
+            }
+        }
+    }
+
+    .page-information {
+        overflow: hidden;
+
+        &.closed {
+            height: 0;
+        }
+
+        margin-left: 15px;
+        margin-right: 15px;
+        background-color: @kbd-bg; // @editor-bar-background-colour;
+        color: @editor-bar-foreground-colour;
+
+        > div {
+            padding: 4px;
+        }
+
+        font-size: 11px;
+
+        .banner-info, .left-info, .centre-info, .right-info {
+            span:first-child, span:nth-child(3) {
+                font-style: italic;
+                color: @editor-bar-information-colour-label;
+            }
+
+            span:nth-child(2) {
+                margin-right: 2px;
             }
         }
     }
@@ -607,18 +604,20 @@ i.mce-i-deletepage:before {
 
     .checkbox-label {
         font-weight: normal;
+
         img {
             margin-bottom: 6px;
         }
+
         input {
             vertical-align: middle;
             margin-bottom: 6px;
         }
+
         span {
             margin-left: 4px;
             //color: red;
             //vertical-align:middle;
-            
         }
     }
 
@@ -629,6 +628,7 @@ i.mce-i-deletepage:before {
             padding: 2px 8px 2px 8px;
             border-radius: 3px;
         }
+
         .system-group {
             font-style: italic;
         }
@@ -641,11 +641,13 @@ i.mce-i-deletepage:before {
             font-size: 9px;
             color: @help-text-colour;
         }
+
         .access-settings {
             margin-top: -4px;
             font-size: 0.9em;
+
             .checkbox-label {
-                vertical-align:middle;
+                vertical-align: middle;
             }
         }
     }
