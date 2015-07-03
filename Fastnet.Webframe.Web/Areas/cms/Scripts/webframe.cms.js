@@ -1,13 +1,5 @@
 ﻿(function ($) {
     $.webframe$cms = function cms() {
-//        var folderTemplate =
-//"<div class='row' >" +
-//"<div class='cms-folder' data-folder-id='{{Id}}' >" +
-//"    <div class='col-xs-12' >" +
-//"        <div class='folder-name'><span class='fa fa-folder'></span><span>{{Path}}</span></div>" +
-//"    </div>" +
-//"</div>" +
-//"</div>";
         var $U = $.fastnet$utilities;
         function closeNavigationTable() {
             $(".toolbar button[data-cmd='back-to-cms']").show();

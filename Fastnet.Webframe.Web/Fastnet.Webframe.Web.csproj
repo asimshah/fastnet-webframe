@@ -75,8 +75,8 @@
       <HintPath>..\packages\Fastnet.EventSystem.Logging.3.2.5641.32231\lib\net45\Fastnet.EventSystem.Logging.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Web.Common, Version=1.0.5660.20725, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Web.Common.1.0.5660.20725\lib\net45\Fastnet.Web.Common.dll</HintPath>
+    <Reference Include="Fastnet.Web.Common, Version=1.0.5662.22254, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Web.Common.1.0.5662.22254\lib\net45\Fastnet.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
