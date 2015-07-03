@@ -1,9 +1,50 @@
-﻿<div>
-    <div class="form-body editor-dialog properties directory-properties">
+﻿<div class="editor-dialog directory-properties">
+    <div class="form-body">
         <div class="form-group" data-property>
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name" placeholder="Enter name" data-item="name" value="{{Name}}" data-focus>
             <div class="message"></div>
+        </div>
+        <div class="row">
+            <div class="col-xs-9">
+                <div class="panel panel-default group-panel inherited-restrictions">
+                    <div class="panel-heading">Inherited Access Restrictions</div>
+                    <div class="panel-items">
+                        {{#InheritedRestrictions.length}}
+                        {{#InheritedRestrictions}}
+                        <div class="panel-item">
+                            <span class="name">{{Group.Name}}, </span><span class="access-descriptor">{{AccessDescription}}</span><span class="weight"> (weight: {{Group.Weight}})</span>
+                        </div>
+                        {{/InheritedRestrictions}}
+                        {{/InheritedRestrictions.length}}
+                        {{^InheritedRestrictions.length}}
+                        <div class="help-block"><span>There are no inherited restrictions</span></div>
+                        {{/InheritedRestrictions.length}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="panel panel-info group-panel direct-restrictions">
+                    <div class="panel-heading">
+                        <span>Direct Access Restrictions</span>
+                        <span class="pull-right"><button class="btn btn-xs btn-default" data-cmd="change-access">Change Restrictions ...</button></span>
+                    </div>
+                    <div class="panel-items">
+                        {{#DirectRestrictions.length}}
+                        {{#DirectRestrictions}}
+                        <div class="panel-item">
+                            <span class="name">{{Group.Name}}, </span><span class="access-descriptor">{{AccessDescription}}</span><span class="weight"> (weight: {{Group.Weight}})</span>
+                        </div>
+                        {{/DirectRestrictions}}
+                        {{/DirectRestrictions.length}}
+                        {{^DirectRestrictions.length}}
+                        <div class="help-block"><span>There are no direct restrictions</span></div>
+                        {{/DirectRestrictions.length}}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="form-footer">

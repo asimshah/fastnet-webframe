@@ -7,8 +7,18 @@
                 <div class="message"></div>
             </div>
             <div class="form-group-sm  {{#Group.IsSystem}}hide{{/Group.IsSystem}}" data-property>
-                <label for="group-name">Description</label>
+                <label for="group-descr">Description</label>
                 <input type="text" class="form-control" id="group-descr" placeholder="Description" data-item="group-descr" value="{{Group.Description}}">
+                <div class="message"></div>
+            </div>
+            <div class="form-group-sm"  data-property>
+                <label for="group-weight">Weight</label>
+                <input type="number" class="form-control" id="group-weight" placeholder="Weight" data-item="group-weight" value="{{Group.Weight}}">
+                <div class="message"></div>
+            </div>
+            <div class="form-group-sm" data-property>
+                <input type="checkbox"  id="update-children" data-item="update-children" value="Update subgroup weights">
+                <label class="checkbox-label" for="update-children">Update subgroup weights</label>
                 <div class="message"></div>
             </div>
             <div class="form-group-sm command-strip {{#Group.IsSystem}}hide{{/Group.IsSystem}}">

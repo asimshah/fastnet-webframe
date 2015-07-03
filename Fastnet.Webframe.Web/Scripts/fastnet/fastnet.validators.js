@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.2
+    // Version 1.0.4
     var $U;
     function validator(f) {
         var $U = $.fastnet$utilities;
@@ -27,6 +27,29 @@
             var minlength = $U.options.MinimumPasswordLength || 8;// $T.options.ClientAction.MinimumPasswordLength;
             errorMessage = $U.Format(errorMessage, minlength);
             var r = val.length >= minlength;
+            if (!r) {
+                errors.push(errorMessage);
+            }
+            return r;
+        }
+        function validatePositiveInteger(form, val, errorMessage, errors, validator) {
+            var r = /^[0-9]+$/.test(val);
+            if (!r) {
+                errors.push(errorMessage);
+            }
+            return r;
+        }
+        function validateIntegerInRange(form, val, errorMessage, errors, validator) {
+            var minimum = validator.user.minimum;
+            var maximum = validator.user.maximum;
+            var number = parseInt(val);
+            var r = true;
+            if (typeof minimum !== "undefined" && minimum !== null) {
+                r = number >= minimum;
+            }
+            if (r === true && typeof maximum !== "undefined" && maximum !== null) {
+                r = number <= maximum;
+            }
             if (!r) {
                 errors.push(errorMessage);
             }
@@ -146,6 +169,16 @@
                 func: validateWithRegex, isDeferred: false, errorMessage: errorMessage, user: { regex: regex }
             });
         };
+        validator.prototype.AddPositiveInteger = function (dataItem, errorMessage) {
+            this.form.addValidator(dataItem, {
+                func: validatePositiveInteger, isDeferred: false, errorMessage: errorMessage
+            });
+        };
+        validator.prototype.AddIntegerInRange = function (dataItem, errorMessage, minimum, maximum) {
+            this.form.addValidator(dataItem, {
+                func: validateIntegerInRange, isDeferred: false, errorMessage: errorMessage, user: { minimum: minimum, maximum: maximum }
+            });
+        };
         validator.prototype.ClearValidator = function (dataItem) {
             var index = $.inArray(dataItem, this.validatedProperties);
             if (index > -1) {
@@ -165,72 +198,25 @@
         Init: function () {
             $U = $.fastnet$utilities;
         },
-        //validateEmailAddress: function (form, email, errorMessage, errors) {
-        //    // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
-        //    //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-        //    var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
-        //    var r = emailReg.test(email);
+        //validateConfirmPassword: function (form, val, errorMessage, errors) {
+        //    var password = form.getData("password"); // how do I this without hardcoding "password"
+        //    var r = !(val === null || val === "" || typeof password === "undefined" || password === null || val !== password);
         //    if (!r) {
         //        errors.push(errorMessage);
         //    }
         //    return r;
         //},
-        validateConfirmPassword: function (form, val, errorMessage, errors) {
-            var password = form.getData("password"); // how do I this without hardcoding "password"
-            var r = !(val === null || val === "" || typeof password === "undefined" || password === null || val !== password);
-            if (!r) {
-                errors.push(errorMessage);
-            }
-            return r;
-        },
-        //validatePasswordComplexity: function (form, val, errorMessage, errors) {
-        //    // (?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$
-        //    var complexPassword = $U.options.RequireComplexPassword || false;// $T.options.ClientAction.RequireComplexPassword;
-        //    var r = false;
-        //    if (!complexPassword) {
-        //        r = true;
-        //    } else {
-        //        var complexReg = new RegExp(/(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/);
-        //        r = complexReg.test(val);
-        //    }
-        //    if (!r) {
-        //        errors.push(errorMessage);
-        //    }
-        //    return r;
-        //},
-        //validatePasswordLength: function (form, val, errorMessage, errors) {
-        //    var minlength = $U.options.MinimumPasswordLength || 8;// $T.options.ClientAction.MinimumPasswordLength;
-        //    var errorMessage = $U.Format(errorMessage, minlength);
-        //    var r = val.length >= minlength;
-        //    if (!r) {
-        //        errors.push(errorMessage);
-        //    }
-        //    return r;
-        //},
-        serverValidateEmailAddressInUse: function (form, val, errorMessage, errors) {
-            var deferred = new $.Deferred();
-            $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
-                ).then(function (data) {
-                    //$U.Debug("validator with message \"{0}\" called", errorMessage);
-                    if (data.InUse) {
-                        deferred.resolve(true);
-                    } else {
-                        errors.push(errorMessage);
-                        deferred.reject(false);
-                    }
-                });
-            return deferred.promise();
-        },
-        //serverValidateEmailAddressNotInUse: function (form, val, errorMessage, errors) {
+
+        //serverValidateEmailAddressInUse: function (form, val, errorMessage, errors) {
         //    var deferred = new $.Deferred();
         //    $.when($U.AjaxGet({ url: "account/addressinuse?emailAddress=" + val }, true)
         //        ).then(function (data) {
         //            //$U.Debug("validator with message \"{0}\" called", errorMessage);
         //            if (data.InUse) {
+        //                deferred.resolve(true);
+        //            } else {
         //                errors.push(errorMessage);
         //                deferred.reject(false);
-        //            } else {
-        //                deferred.resolve(true);
         //            }
         //        });
         //    return deferred.promise();

@@ -414,7 +414,7 @@
                             if (f.isValid()) {
                                 //alert("can save changes!");
                                 var data = f.getData();
-                                updateGroupProperties(groupId, data["group-name"], data["group-descr"]);
+                                updateGroupProperties(groupId, data["group-name"], data["group-descr"], data["group-weight"], data["update-children"]);
                             }
                             break;
                         case "delete-group":
@@ -430,8 +430,8 @@
                     }
                 },
                 OnChange: function (f, dataItem, checked) {
-                    $U.Debug("Changed {0} checked = {1}", dataItem, checked);
-                    if (dataItem === "group-name" || dataItem === "group-descr") {
+                  $U.Debug("Changed {0} checked = {1}", dataItem, checked);
+                    if (dataItem === "group-name" || dataItem === "group-descr" || dataItem === "group-weight") {
                         f.enableCommand("save-group-changes");
                     }
                     var data = f.getData();
@@ -478,9 +478,9 @@
                 $(".group-details-panel").empty();
             });
         }
-        var updateGroupProperties = function (groupId, name, description) {
+        var updateGroupProperties = function (groupId, name, description, weight, updateChildren) {
             var url = "membershipapi/update/group";
-            var postData = {groupId: groupId, name: name, descr: description};
+            var postData = {groupId: groupId, name: name, descr: description, weight: weight, updateChildren: updateChildren};
             $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
                 $(".group-details .command-strip .message").text("Changes saved");
                 var selector = $U.Format(".group-tree span[data-id='{0}']", groupId);
@@ -574,6 +574,9 @@
                 currentForm.disableCommand("save-group-changes");
                 validator.AddIsRequired("group-name", "A name is required");
                 validator.AddIsRequired("group-descr", "A description is required");
+                validator.AddIsRequired("group-weight", "A group weight is required");
+                validator.AddPositiveInteger("group-weight", "A group weight must be a positive integer value");
+                validator.AddIntegerInRange("group-weight", $U.Format("The group weight should be larger than the parent weight ({0})", data.Group.ParentWeight), data.Group.ParentWeight);
                 var buttonText = $U.Format("{0}: Add New Subgroup", data.Group.Name);
                 $(".group-manager button[data-cmd='add-new-group']").text(buttonText);
             });

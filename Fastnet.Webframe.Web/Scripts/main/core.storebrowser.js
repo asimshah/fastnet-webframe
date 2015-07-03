@@ -29,6 +29,123 @@
                     }
                 });
         };
+        function showGroupSelector(directoryId, onclose) {
+            var groupList = null;
+            function saveRestrictionChanges(f) {
+                function getSettings(f, gb) {
+                    var groupIsChecked = $(gb).find(".group-checkbox").prop("checked");
+                    var viewIsChecked = false;
+                    var editIsChecked = false;
+                    if (groupIsChecked) {
+                        viewIsChecked = $(gb).find(".view-checkbox").prop("checked");
+                        editIsChecked = $(gb).find(".edit-checkbox").prop("checked");
+                    }
+                    return { isChecked: groupIsChecked, view: viewIsChecked, edit: editIsChecked };
+                }
+                var list = [];
+                $.each(groupList, function (i, groupInfo) {
+                    var selector = $U.Format(".group-box[data-id='{0}']", groupInfo.Group.Id);
+                    var gb = f.find(selector);
+                    var settings = $.extend({ groupId: groupInfo.Group.Id }, getSettings(f, gb));
+                    list.push(settings);
+                });
+                var url = "store/update/directory/groups";
+                $.when($U.AjaxPost({ url: url, data: { directoryId: directoryId, groups: list } })).then(function (r) {
+                    onclose();
+                });
+            }
+            function setChildGroups(f, groupInfo, disabled) {
+                $.each(groupList, function (item, gi) {
+                    if (gi.Parent.Id === groupInfo.Group.Id) {
+                        var selector = $U.Format(".group-box[data-id='{0}'] input.group-checkbox", gi.Group.Id);
+                        f.find(selector).prop("disabled", disabled);
+                        selector = $U.Format(".group-box[data-id='{0}'] input.edit-checkbox", gi.Group.Id);
+                        f.find(selector).prop("disabled", disabled);
+                        setChildGroups(f, gi, disabled);
+                    }
+                });
+            }
+            function groupCheckedUnChecked(f, groupInfo, checked) {
+                var selector = $U.Format(".group-box[data-id='{0}']", groupInfo.Group.Id);
+                var gb = f.find(selector);
+                if (checked) {
+                    $(gb).find(".access-settings input.edit-checkbox").prop("disabled", false);
+                    $(gb).find(".access-settings input.view-checkbox").prop("checked", true);
+                    setChildGroups(f, groupInfo, true);
+                } else {
+                    $(gb).find(".access-settings input.edit-checkbox").prop("disabled", true);
+                    $(gb).find(".access-settings input").prop("checked", false);
+                    setChildGroups(f, groupInfo, false);
+
+                }
+            }
+            function findClosestGroupInfo(element) {
+                var gb = $(element).closest(".group-box");
+                var groupId = parseInt(gb.attr("data-id"));
+                return findGroupInfo(groupId);
+            }
+            function findGroupInfo(id) {
+                var result = null;
+                $.each(groupList, function (i, item) {
+                    if(item.Group.Id === id) {
+                        result = item;
+                        return false;
+                    }
+                });
+                return result;
+            }
+            var url = $U.Format("store/get/directory/groups/{0}", directoryId);
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                groupList = r;
+                var options = {
+                    Title: "Select Restrictions",
+                    OnChange: function (f, dataItem, checked) {
+                        var gb = f.find("input[data-item='" + dataItem + "']").closest(".group-box");
+                        var groupId = parseInt(gb.attr("data-id"));
+                        var groupInfo = findGroupInfo(groupId);
+                        var item = null;
+                        if (dataItem.indexOf("group-item") > -1) {
+                            item = "group";
+                            groupCheckedUnChecked(f, groupInfo, checked);
+                        }
+                        f.enableCommand("save-changes");
+                        $U.Debug("dataItem {0}, checked {1} for {2}", dataItem, checked, groupInfo.Group.FullName);
+                    },
+                    OnCommand: function (f, cmd) {
+                        switch (cmd) {
+                            case "save-changes":
+                                saveRestrictionChanges(f);
+                                f.close();
+                                break;
+                            default:
+                                f.close();
+                                onclose();
+                                break;
+                        }
+                    }
+                };
+                var sf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/groupselector", options, { data: groupList });
+                sf.show(function () {
+                    sf.find(".group-box .access-settings input.view-checkbox").prop("disabled", true);
+                    sf.find(".group-box.group-selected .group-checkbox").each(function () {
+                        var gb = $(this).closest(".group-box");
+                        var groupInfo = findClosestGroupInfo(this);
+                        $(this).prop("checked", true);
+                        $(gb).find(".access-settings input.edit-checkbox").prop("disabled", false);
+                        if (groupInfo.View) {
+                            $(gb).find(".access-settings input.view-checkbox").prop("checked", true);
+                        }
+                        if (groupInfo.Edit) {
+                            $(gb).find(".access-settings input.edit-checkbox").prop("checked", true);
+                        }
+                    });
+                    sf.find(".group-box:not(.group-selected)").each(function () {
+                        $(this).find(".access-settings input.edit-checkbox").prop("disabled", true);
+                    })
+                    sf.disableCommand("save-changes");
+                });
+            });
+        }
         function showFolderProperties(id) {
             function saveDirectory(f) {
                 var data = f.getData();
@@ -55,6 +172,10 @@
                         switch (cmd) {
                             case "save-changes":
                                 saveDirectory(f);
+                                break;
+                            case "change-access":
+                                f.close();
+                                showGroupSelector(id, function () { showFolderProperties(id); });
                                 break;
                         }
                     }
@@ -87,6 +208,11 @@
                             ppf.disableCommand("save-changes");
                         }
                     },
+                    OnChange: function(f, dataItem, checked) {
+                        if (dataItem === "landing-page") {
+                            ppf.enableCommand("save-changes");
+                        }
+                    },
                     OnCommand: function (f, cmd) {
                         switch (cmd) {
                             case "save-changes":
@@ -99,7 +225,11 @@
                 var validator = new $.fastnet$validators.Create(ppf);
                 validator.AddIsRequired("name", "A page name is required");
                 ppf.disableCommand("save-changes");
-                ppf.show();
+                ppf.show(function () {
+                    if (r.LandingPageLocked) {
+                        ppf.find("input[data-item='landing-page']").prop("disabled", true);
+                    }
+                });
             });
         };
         function loadSubdirectories(node, directoryId) {
@@ -487,6 +617,9 @@
                 OnSelect: null,
                 Mode: "normal" // "normal" means using the primary features (browse, create, delete, set proerties), "select" means using the browser to select a hyperlink
             }, opts);
+            currentDirectoryId = null;
+            rootDirectoryId = null;
+            selectedItem = null;
             form = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/BrowseForLink",
                 {
                     Title: "Store Browser",

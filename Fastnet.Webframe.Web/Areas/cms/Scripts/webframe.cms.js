@@ -1,48 +1,13 @@
 ﻿(function ($) {
     $.webframe$cms = function cms() {
-        var folderTemplate =
-"<div class='row' >" +
-"<div class='cms-folder' data-folder-id='{{Id}}' >" +
-"    <div class='col-xs-12' >" +
-"        <div class='folder-name'><span class='fa fa-folder'></span><span>{{Path}}</span></div>" +
-"    </div>" +
-"</div>" +
-"</div>";
-        //        var pageTemplate =
-        //"<div class='row' >" +
-        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-        //"        <div class='picture' >" +
-        ////"           <div class='iframe-container'><iframe src='{{FullUrl}}'></iframe></div>" +
-        //"        </div>" +
-        //"        <div class='name'><a href='{{Url}}'>{{Url}}</a>" +
-        //"        </div>" +
-        //"        <div class='title'>{{Name}}</div>" +
-        //"        <div class='info'>{{Info}}</div>" +
-        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-        //"</div>" +
-        //"</div>";
-        //        var imageTemplate =
-        //"<div class='row' >" +
-        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-        //"        <div class='picture' >" +
-        ////"            <div><img src='{{Url}}'></img></div>" +
-        //"        </div>" +
-        //"        <div class='name'><div>{{Url}}</div></div>" +
-        //"        <div class='title'>{{Name}}</div>" +
-        //"        <div class='info'>{{Info}}</div>" +
-        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-        //"</div>" +
-        //"</div>";
-        //        var docTemplate =
-        //"<div class='row' >" +
-        //"<div class='folder-item {{Type}}' data-item-id='{{Id}}' >" +
-        //"        <div class='picture' ><div></div></div>" +
-        //"        <div class='name'><div>{{Url}}</div></div>" +
-        //"        <div class='title'>{{Name}}</div>" +
-        //"        <div class='info'>{{Info}}</div>" +
-        //"        <div class='modification-info'><div>{{LastModifiedOn}}</div><div>{{LastModifiedBy}}</div></div>" +
-        //"</div>" +
-        //"</div>";
+//        var folderTemplate =
+//"<div class='row' >" +
+//"<div class='cms-folder' data-folder-id='{{Id}}' >" +
+//"    <div class='col-xs-12' >" +
+//"        <div class='folder-name'><span class='fa fa-folder'></span><span>{{Path}}</span></div>" +
+//"    </div>" +
+//"</div>" +
+//"</div>";
         var $U = $.fastnet$utilities;
         function closeNavigationTable() {
             $(".toolbar button[data-cmd='back-to-cms']").show();
@@ -71,7 +36,7 @@
                         }
                     });
                     var html = $(Mustache.to_html(template, { data: data }));
-                    $(".report-container").append(html);
+                    $(".report-container").addClass("report-member-list").append(html);
                     $(".report-container table").dataTable({
                         pagingType: "simple",
                         order: [[2, 'asc']]
@@ -94,7 +59,7 @@
                         }
                     });
                     var html = $(Mustache.to_html(template, { data: data }));
-                    $(".report-container").append(html);
+                    $(".report-container").addClass("report-group-list").append(html);
                     $(".report-container table").dataTable({
                         pagingType: "simple",
                         order: [[0, 'asc']]
@@ -137,6 +102,18 @@
             stm.disableCommand("send-mail");
             stm.show();
         }
+        function showContentHistory() {
+            var templateurl = "template/get/cms/contenthistory";
+            var dataurl = "cmsapi/get/contenthistory";
+            $.when(
+                $U.AjaxGet({ url: templateurl }),
+                $U.AjaxGet({ url: dataurl })
+                ).then(function (q1, q2) {
+                    var template = q1[0].Template;
+                    var data = q2[0];
+                    showHistory(template, data, "report-content-history");
+                });
+        }
         function showMailHistory() {
             //var templateurl = "cms/template/type/mailhistory";
             var templateurl = "template/get/cms/mailhistory";
@@ -147,7 +124,7 @@
                 ).then(function (q1, q2) {
                     var template = q1[0].Template;
                     var data = q2[0];
-                    showHistory(template, data);
+                    showHistory(template, data, "report-mail-history");
                     $(".mail-history td div.to").on("click", function () {
                         var body = $(this).siblings(".body");
                         $U.MessageBox(body[0].innerHTML, { Title: "Email Content" });
@@ -155,7 +132,6 @@
                 });
         }
         function showGroupHistory() {
-            //var templateurl = "cms/template/type/membershiphistory";
             var templateurl = "template/get/cms/grouphistory";
             var dataurl = "cmsapi/get/grouphistory";
             $.when(
@@ -164,7 +140,7 @@
                 ).then(function (q1, q2) {
                     var template = q1[0].Template;
                     var data = q2[0];
-                    showHistory(template, data);
+                    showHistory(template, data, "report-group-history");
                 });
         }
         function showMembershipHistory() {
@@ -177,7 +153,7 @@
                 ).then(function (q1, q2) {
                     var template = q1[0].Template;
                     var data = q2[0];
-                    showHistory(template, data);
+                    showHistory(template, data, "report-membership-history");
                 });
         }
         function showSessionHistory() {
@@ -194,12 +170,12 @@
                     showHistory(template, data);
                 });
         }
-        function showHistory(template, data) {
+        function showHistory(template, data, reportClass) {
             var html = $(Mustache.to_html(template, { data: data }));
             html.find(".recordedOn").each(function (i, item) {
-                item.innerText = moment.utc($(item).text()).format("DDMMMYYYY HH:mm:ss");
+                item.innerText = moment($(item).text()).format("DDMMMYYYY HH:mm:ss");
             });
-            $(".report-container").append(html);
+            $(".report-container").addClass(reportClass).append(html);
             $(".report-container table").dataTable({
                 pagingType: "simple",
                 order: [[0, 'desc']]
@@ -207,6 +183,7 @@
         }
         function showSiteContent() {
             url = "cmsapi/get/folders";
+            var folderTemplateUrl = "template/get/cms/foldertemplate";
             var pageTemplateUrl = "template/get/cms/pagetemplate";
             var imageTemplateUrl = "template/get/cms/imagetemplate";
             var documentTemplateUrl = "template/get/cms/documenttemplate";
@@ -214,21 +191,23 @@
                 $U.AjaxGet({ url: url }, true),
                 $U.AjaxGet({url: pageTemplateUrl}),
                 $U.AjaxGet({url: imageTemplateUrl}),
-                $U.AjaxGet({url: documentTemplateUrl})
-                ).then(function (q0, q1, q2, q3) {
+                $U.AjaxGet({url: documentTemplateUrl}),
+                $U.AjaxGet({ url: folderTemplateUrl })
+                ).then(function (q0, q1, q2, q3, q4) {
                     var r = q0[0];
                     var pageTemplate = q1[0].Template;
                     var imageTemplate = q2[0].Template;
                     var docTemplate = q3[0].Template;
+                    var folderTemplate = q4[0].Template;
                     $.each(r, function (i, folder) {
                         var html = $(Mustache.to_html(folderTemplate, folder));
-                        $(".report-container").append(html);
+                        $(".report-container").addClass("report-site-content").append(html);
                         var url2 = $U.Format("cmsapi/get/foldercontent/{0}", folder.Id);
                         $.when(
                             $U.AjaxGet({ url: url2 }, true)
                             ).then(function (list) {
                                 $.each(list, function (j, item) {
-                                    var selector = $U.Format(".cms-folder[data-folder-id='{0}'] .folder-name", folder.Id);
+                                    var selector = $U.Format(".report-site-content .folder[data-folder-id='{0}'] .folder-items", folder.Id);
                                     item.FullUrl = $U.Format("{0}//{1}/{2}", location.protocol, location.host, item.Url);
                                     var lastmodified = moment(item.LastModifiedOn).local();
                                     item.LastModifiedOn = $U.FormatDate(lastmodified, "DDMMMYYYY HH:mm:ss");
@@ -242,17 +221,8 @@
                                     }
                                 });
                             });
-                        //$.when(
-                        //    $U.AjaxGet({ url: url2 }, true)
-                        //    .then(function (list) {
-
-                        //}));
                     });
                 });
-            //$.when($U.AjaxGet({ url: url }, true).then(function (r) {
-
-            //    //debugger;
-            //}));
         }
         cms.prototype.echo = function (text) {
             alert(text);
@@ -264,7 +234,6 @@
             $.when($U.AjaxGet({ url: url }).then(function (r) {
                 if (r.Success) {
                     $(r.Styles).find("style").each(function (index, style) {
-                        //debugger;
                         var html = style.outerHTML;
                         $("head").append($(html));
                     });
@@ -311,38 +280,16 @@
                         closeNavigationTable();
                         showMailHistory();
                         break;
+                    case "content-history":
+                        closeNavigationTable();
+                        showContentHistory();
+                        break;
                     case "test-mail":
                         closeNavigationTable();
                         sendTestMail();
                         break;
                 }
             });
-            //url = "cmsapi/get/folders";
-            //$.when($U.AjaxGet({ url: url }, true).then(function (r) {
-            //    $.each(r, function (i, folder) {
-            //        var html = $(Mustache.to_html(folderTemplate, folder));
-            //        $(".cms-content").append(html);
-            //        //var folderId = folder.Id;
-            //        var url2 = $U.Format("cmsapi/get/foldercontent/{0}", folder.Id);
-            //        $.when($U.AjaxGet({ url: url2 }, true).then(function (list) {
-            //            $.each(list, function (j, item) {
-            //                var selector = $U.Format(".cms-content .cms-folder[data-folder-id='{0}'] .folder-name", folder.Id);
-            //                item.FullUrl = $U.Format("{0}//{1}/{2}", location.protocol, location.host, item.Url);
-            //                var lastmodified = moment(item.LastModifiedOn).local();
-            //                item.LastModifiedOn = $U.FormatDate(lastmodified, "DDMMMYYYY HH:mm:ss");
-            //                if (item.Type === "page") {
-            //                    $(selector).append($(Mustache.to_html(pageTemplate, item)));
-            //                } else if (item.Type === "document") {
-            //                    $(selector).append($(Mustache.to_html(docTemplate, item)));
-
-            //                } else {
-            //                    $(selector).append($(Mustache.to_html(imageTemplate, item)));
-            //                }
-            //            });
-            //        }));
-            //    });
-            //    //debugger;
-            //}));
         };
 
     };

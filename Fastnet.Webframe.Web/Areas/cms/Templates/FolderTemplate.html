@@ -1,0 +1,60 @@
+﻿<div class="row">
+    <div class="folder" data-folder-id="{{Id}}">
+        <div class="col-xs-12">
+            <div class="row folder-name">
+                <span class="fa fa-folder"></span><span>{{Path}}</span>
+            </div>
+            <div class="row restrictions">
+                <div class="col-xs-offset-1 col-xs-10">
+                    {{#Restrictions.length}}
+                    <div class="row">
+                        <div class="title-direct col-xs-6">Direct Restrictions</div>
+                    </div>
+                    <div class="row direct">
+                        {{#Restrictions}}
+                        <div class=" col-xs-6">
+                            <span>Group:</span>
+                            <span>{{Group}}</span>
+                        </div>
+                        <div class="col-xs-3">
+                            <span>Access:</span>
+                            <span>{{Access}}</span>
+                        </div>
+                        <div class="col-xs-2">
+                            <span>Weight:</span>
+                            <span>{{Weight}}</span>
+                        </div>
+                        {{/Restrictions}}
+                    </div>
+                    {{/Restrictions.length}}
+                    {{^Restrictions.length}}
+                    {{#InheritedRestrictions.length}}
+                    <div class="row">
+                        <div class="title-inherited col-xs-6">Inherited Restrictions</div>
+                    </div>
+                    <div class="row inherited">
+                        {{#InheritedRestrictions}}
+                        <div class="col-xs-4">
+                            <span>Group:</span>
+                            <span>{{Group}}</span>
+                        </div>
+                        <div class="col-xs-4">
+                            <span>Access:</span>
+                            <span>{{Access}}</span>
+                        </div>
+                        <div class="col-xs-2">
+                            <span>Weight:</span>
+                            <span>{{Weight}}</span>
+                        </div>
+                        {{/InheritedRestrictions}}
+                    </div>
+                    {{/InheritedRestrictions.length}}
+                    {{/Restrictions.length}}
+                </div>
+            </div>
+            <div class="row folder-items">
+
+            </div>
+        </div>
+    </div>
+</div>

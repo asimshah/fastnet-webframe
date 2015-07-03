@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fastnet.Common;
 using System.ComponentModel;
+using System.Data.Entity.Infrastructure;
 
 namespace Fastnet.Webframe.CoreData
 {
@@ -60,7 +61,91 @@ namespace Fastnet.Webframe.CoreData
         public string OldValue { get; set; }
         public string NewValue { get; set; }
 
+        public static void AddPropertyModificationActions(DbEntityEntry entry, Func<DataEntityActionBase> getAction, Action<DataEntityActionBase> saveAction)
+        {
+            foreach (var p in entry.CurrentValues.PropertyNames)
+            {
+                if (entry.Property(p).IsModified)
+                {
+                    object ov = entry.Property(p).OriginalValue;
+                    object cv = entry.Property(p).CurrentValue;
+                    DataEntityActionBase action = getAction();
+                    action.PropertyChanged = p;
+                    action.OldValue = ov == null ? "<null>" : ov.ToString();
+                    action.NewValue = cv == null ? "<null>" : cv.ToString();
+                }
+            }
+        } 
+    }
+    public abstract class EditingAction : DataEntityActionBase
+    {
+        public enum EditingActionTypes
+        {
+            [Description("New Page")]
+            NewPage,
+            [Description("Page Modified")]
+            PageModified,
+            [Description("Page Content Modified")]
+            PageContentModified,
+            [Description("Page Deleted")]
+            PageDeleted,
+            [Description("New Folder")]
+            NewFolder,
+            [Description("Folder Modified")]
+            FolderModified,
+            [Description("Folder Deleted")]
+            FolderDeleted,
+            [Description("Restriction Added")]
+            RestrictionAdded,
+            [Description("Restriction Modfied")]
+            RestrictionModified,
+            [Description("Restriction Removed")]
+            RestrictionRemoved
+        }
+        public EditingActionTypes Action { get; set; }
 
+        public string Folder { get; set; }
+        [NotMapped]
+        public string ActionName { get { return Action.GetDescription(); } }
+        [NotMapped]
+        public bool IsModification
+        {
+            get { return Action == EditingActionTypes.PageModified
+                || Action == EditingActionTypes.FolderModified
+                || Action == EditingActionTypes.PageContentModified
+                || Action == EditingActionTypes.RestrictionModified; }
+        }
+        [NotMapped]
+        public bool IsCollectionChanged
+        {
+            get
+            {
+                return Action == EditingActionTypes.RestrictionAdded
+                    || Action == EditingActionTypes.RestrictionRemoved;
+            }
+        }
+        [NotMapped]
+        public bool IsAddition
+        {
+            get
+            {
+                return Action == EditingActionTypes.RestrictionAdded;
+            }
+        }
+    }
+    public class PageAction : EditingAction
+    {
+        public string Url { get; set; }
+    }
+    public class FolderAction : EditingAction
+    {
+        public string Name { get; set; }
+    }
+    public class RestrictionAction : EditingAction
+    {
+        public string GroupName { get; set; }
+        public bool View { get; set; }
+        public bool Edit { get; set; }
     }
     public class MemberAction : DataEntityActionBase
     {
@@ -87,8 +172,8 @@ namespace Fastnet.Webframe.CoreData
         public MemberActionTypes Action { get; set; }
         [NotMapped]
         public bool IsModification { get { return Action == MemberActionTypes.Modification; } }
-        [NotMapped]
-        public string ActionName { get { return Action.GetDescription(); } }
+        //[NotMapped]
+        //public string ActionName { get { return Action.GetDescription(); } }
     }
     public class GroupAction : DataEntityActionBase
     {
@@ -109,8 +194,8 @@ namespace Fastnet.Webframe.CoreData
         public string FullName { get; set; }
         public GroupActionTypes Action { get; set; }
         public string MemberEmailAddress { get; set; }
-        [NotMapped]
-        public string ActionName { get { return Action.GetDescription(); } }
+        //[NotMapped]
+        //public string ActionName { get { return Action.GetDescription(); } }
         [NotMapped]
         public bool IsModification { get { return Action == GroupActionTypes.Modification; } }
         [NotMapped]

@@ -105,7 +105,7 @@ body {
 }
 .permission-page .content .heading,
 .timeout-page .content .heading {
-  color: #f0b9b8;
+  color: #d9534f;
   font-size: 22px;
 }
 .permission-page .content .message,
@@ -181,7 +181,7 @@ body {
 }
 [contenteditable=true]:active,
 [contenteditable=true]:focus {
-  outline: 2px dashed #f0b9b8;
+  outline: 2px dashed #d9534f;
   border: none;
   z-index: 44444;
 }
@@ -338,13 +338,13 @@ i.mce-i-deletepage:before {
 .modeless .message {
   font-size: 10px;
   font-style: italic;
-  color: #f0b9b8;
+  color: #d9534f;
   margin-left: 15px;
 }
 .modal .error,
 .modeless .error {
   font-style: italic;
-  color: #f0b9b8;
+  color: #d9534f;
 }
 .modal .form-footer .help-block,
 .modeless .form-footer .help-block {
@@ -549,13 +549,63 @@ i.mce-i-deletepage:before {
 .editor-dialog.store-browser .store-browser-commands.select-mode button.normal-mode {
   display: none;
 }
-.editor-dialog.properties .help-block {
+.editor-dialog .help-block {
   font-size: smaller;
+  font-style: italic;
+}
+.editor-dialog .checkbox-label {
+  font-weight: normal;
+}
+.editor-dialog .checkbox-label img {
+  margin-bottom: 6px;
+}
+.editor-dialog .checkbox-label input {
+  vertical-align: middle;
+  margin-bottom: 6px;
+}
+.editor-dialog .checkbox-label span {
+  margin-left: 4px;
+}
+.editor-dialog.group-selector .group-box {
+  border: 1px solid #737373;
+  margin: 2px;
+  padding: 2px 8px 2px 8px;
+  border-radius: 3px;
+}
+.editor-dialog.group-selector .system-group {
+  font-style: italic;
+}
+.editor-dialog.group-selector .group-name,
+.editor-dialog.group-selector .group-parent {
+  font-style: normal;
+}
+.editor-dialog.group-selector .group-parent {
+  font-size: 9px;
+  color: #737373;
+}
+.editor-dialog.group-selector .access-settings {
+  margin-top: -4px;
+  font-size: 0.9em;
+}
+.editor-dialog.group-selector .access-settings .checkbox-label {
+  vertical-align: middle;
+}
+.editor-dialog .group-panel.inherited-restrictions {
+  font-size: 0.75em;
+}
+.editor-dialog .group-panel .panel-items {
+  padding: 8px;
+}
+.editor-dialog .group-panel .panel-items .panel-item span {
+  margin-right: 2px;
+}
+.editor-dialog .group-panel .panel-items .panel-item .weight {
+  font-size: x-small;
   font-style: italic;
 }
 .field-validation-error {
   font-style: italic;
-  color: #f0b9b8;
+  color: #d9534f;
 }
 i.mce-i-wflink:before {
   content: "\e011";

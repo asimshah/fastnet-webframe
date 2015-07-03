@@ -177,7 +177,7 @@ namespace Fastnet.Webframe.Web.Models
     {
         public OptionsModel Options { get; set; }
         public bool ClientSideLog { get; set; }
-        public bool CanEditPages { get; set; }
+        //public bool CanEditPages { get; set; }
         public string StartPage { get; set; }
         public bool ShowDialog
         {
@@ -192,11 +192,11 @@ namespace Fastnet.Webframe.Web.Models
         {
             this.Options = new OptionsModel();
             ClientSideLog = ApplicationSettings.Key("ClientSideLog", false);
-            if (member != null)
-            {
-                CanEditPages = Group.Editors.Members.Contains(member);
-            }
-            StartPage = page == null ? null : page.PageId.ToString();
+            //if (member != null)
+            //{
+            //    CanEditPages = Group.Editors.Members.Contains(member);
+            //}
+            StartPage = page == null ? member.FindLandingPage().PageId.ToString() : page.PageId.ToString();
             if (ApplicationSettings.Key("DonWhillansHut", false))
             {
                 Customer = "dwh";

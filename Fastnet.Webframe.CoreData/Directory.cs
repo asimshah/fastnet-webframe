@@ -23,7 +23,6 @@ namespace Fastnet.Webframe.CoreData
         public virtual Directory ParentDirectory { get; set; }
         //
         private ICollection<Directory> subDirectories;
-        //private ICollection<DirectoryAccessRule> directoryAccessRules;
         private ICollection<DirectoryGroup> directoryGroups;
         private ICollection<Page> pages;
         private ICollection<Document> documents;
@@ -33,11 +32,6 @@ namespace Fastnet.Webframe.CoreData
             get { return subDirectories ?? (subDirectories = new HashSet<Directory>()); }
             set { subDirectories = value; }
         }
-        //public virtual ICollection<DirectoryAccessRule> DirectoryAccessRules
-        //{
-        //    get { return directoryAccessRules ?? (directoryAccessRules = new HashSet<DirectoryAccessRule>()); }
-        //    set { directoryAccessRules = value; }
-        //}
         public virtual ICollection<DirectoryGroup> DirectoryGroups
         {
             get { return directoryGroups ?? (directoryGroups = new HashSet<DirectoryGroup>()); }
@@ -59,19 +53,29 @@ namespace Fastnet.Webframe.CoreData
             set { images = value; }
         }
         //
+        //[NotMapped]
+        //public string Fullpath
+        //{
+        //    get { return getPath().Replace("$root", "Store"); }
+        //}
         [NotMapped]
-        public string Fullpath
+        public string DisplayName
+        {
+            get { return getPath().Replace("$root", "Store"); }
+        }
+        [NotMapped]
+        public string FullName
         {
             get { return getPath(); }
         }
-        public override Directory GetParent()
+        internal override Directory GetParent()
         {
             return this.ParentDirectory;
         }
-        //public override Hierachy GetParent()
-        //{
-        //    return this.ParentDirectory;
-        //}
+        internal override IEnumerable<Directory> GetChildren()
+        {
+            return this.SubDirectories;
+        }
         private string getPath()
         {
             Action<List<string>, Directory> addParentName = null;
@@ -122,6 +126,47 @@ namespace Fastnet.Webframe.CoreData
         {
             return this.SelfAndParents.First(x => x.Pages.Any(y => y.IsLandingPage))
                 .Pages.Single(z => z.IsLandingPage);
+        }
+        public IEnumerable<DirectoryGroup> GetClosestDirectoryGroups()
+        {
+            var parents = this.Parents;
+            if (parents.Count() > 0)
+            {
+                return this.Parents.First(x => x.DirectoryGroups.Count() > 0).DirectoryGroups;
+            }
+            else
+            {
+                return Enumerable.Empty<DirectoryGroup>();
+            }
+        }
+        public void RecordChanges(string actionBy, FolderAction.EditingActionTypes actionType)
+        {
+            Func<FolderAction> getNewFolderAction = () =>
+            {
+                FolderAction fa = new FolderAction
+                {
+                    Action = actionType,
+                    ActionBy = actionBy,
+                    Name = this.DisplayName,                    
+                };
+                return fa;
+            };
+            CoreDataContext DataContext = Core.GetDataContext();
+            switch (actionType)
+            {
+                default:
+                    break;
+                case FolderAction.EditingActionTypes.NewFolder:
+                case FolderAction.EditingActionTypes.FolderDeleted:
+                    DataContext.Actions.Add(getNewFolderAction());
+                    break;
+                case FolderAction.EditingActionTypes.FolderModified:
+                    PageAction.AddPropertyModificationActions(DataContext.Entry(this), getNewFolderAction, (pa) =>
+                    {
+                        DataContext.Actions.Add(pa);
+                    });
+                    break;
+            }
         }
     }
 }

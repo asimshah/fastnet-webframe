@@ -121,9 +121,6 @@
 }*/
 .report-container {
   margin-top: 10px;
-  /*table {
-        font-size: 12px;
-    }*/
 }
 .report-container .report-title {
   font-weight: bold;
@@ -159,6 +156,121 @@
   color: #ffffff;
   outline: none;
 }
+.report-container.report-site-content .folder .folder-name {
+  border-top: 1px solid #a7a7a7;
+  font-size: smaller;
+}
+.report-container.report-site-content .folder .folder-name span.fa-folder {
+  color: orange;
+  margin-right: 4px;
+}
+.report-container.report-site-content .folder .folder-name .row:not(:last-child) {
+  margin-bottom: 4px;
+}
+.report-container.report-site-content .folder .restrictions {
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+  font-size: x-small;
+}
+.report-container.report-site-content .folder .restrictions > div {
+  margin-top: 4px;
+  border: 1px solid darkgray;
+  border-radius: 3px;
+  background-color: rgba(161, 182, 189, 0.48);
+}
+.report-container.report-site-content .folder .restrictions .title-direct {
+  color: red;
+}
+.report-container.report-site-content .folder .restrictions .title-inherited {
+  color: #ff8080;
+}
+.report-container.report-site-content .folder .folder-items .row:last-child {
+  margin-bottom: 12px;
+}
+.report-container.report-site-content .folder .folder-items .folder-item {
+  font-size: small;
+}
+.report-container.report-site-content .folder .folder-items .folder-item.document .name div:nth-child(2n) {
+  font-size: x-small;
+  color: #064f15;
+}
+.report-container.report-site-content .folder .folder-items .folder-item.image .name div:nth-child(2n) {
+  font-size: x-small;
+}
+.report-container.report-site-content .folder .folder-items .folder-item.image .name div:nth-child(3n) {
+  font-size: x-small;
+  color: #902a12;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .name {
+  position: relative;
+  float: left;
+  width: 16.66666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .title {
+  position: relative;
+  float: left;
+  width: 39.58333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: x-small;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .info {
+  position: relative;
+  float: left;
+  width: 14.58333333%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  font-size: x-small;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .modification-info {
+  position: relative;
+  float: left;
+  width: 25%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  float: right !important;
+  font-size: x-small;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .modification-info > div {
+  display: inline;
+  margin-right: 2px;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .picture {
+  position: relative;
+  float: left;
+  width: 1.66666667%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-right: 4px;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .picture .iframe-container {
+  overflow: hidden;
+  height: 200px;
+}
+.report-container.report-site-content .folder .folder-items .folder-item .picture iframe {
+  margin-left: -12px;
+  z-index: -2;
+  height: 600px;
+  width: 900px;
+  border: none;
+  -moz-transform: scale(0.3);
+  -ms-transform: scale(0.3);
+  -o-transform: scale(0.3);
+  -webkit-transform: scale(0.3);
+  transform: scale(0.3);
+  -moz-transform-origin: left top;
+  -ms-transform-origin: left top;
+  -o-transform-origin: left top;
+  -webkit-transform-origin: left top;
+  transform-origin: left top;
+}
 .report-container .mail-history .to {
   cursor: pointer;
   color: deepskyblue;
@@ -190,12 +302,13 @@
 .report-container .member-list .waiting-activation {
   color: red;
 }
-.cms-heading {
-  font-size: large;
-  font-weight: bold;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
+/*.cms-heading {
+    //.make-row();
+    font-size: large;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}*/
 .cms-folder .folder-name {
   margin-bottom: 8px;
   border-top: 1px solid #a7a7a7;

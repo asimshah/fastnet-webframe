@@ -56,21 +56,6 @@ namespace Fastnet.Webframe.Web.Controllers
                 return HttpContext.GetOwinContext().Authentication;
             }
         }
-        //protected override void OnActionExecuting(ActionExecutingContext filterContext)
-        //{
-        //    Member member = null;
-        //    if (User.Identity.IsAuthenticated)
-        //    {
-        //        member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
-        //    }
-        //    else
-        //    {
-        //        member = DataContext.Members.Single(x => x.IsAnonymous);
-        //    }
-        //    Session["current-member"] =  member.Id;
-
-        //    base.OnActionExecuting(filterContext);
-        //}
         [Route("permissiondenied/{message?}")]
         public ActionResult PermissionDenied(string message)
         {

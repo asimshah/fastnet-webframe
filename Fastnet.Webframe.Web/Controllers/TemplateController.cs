@@ -1,14 +1,6 @@
-﻿using Fastnet.Common;
-using Fastnet.Webframe.Web.Areas.Designer.Common;
-using Fastnet.Webframe.Web.Common;
+﻿using Fastnet.Web.Common;
 using Fastnet.Webframe.WebApi;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Web.Hosting;
 using System.Web.Http;
 
 namespace Fastnet.Webframe.Web.Controllers

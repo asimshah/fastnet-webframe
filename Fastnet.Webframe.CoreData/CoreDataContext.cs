@@ -1,18 +1,17 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
 using HtmlAgilityPack;
-//using Fastnet.Webframe.Web.DataModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Configuration;
 using System.Data.Entity;
-//using System.Data.Entity.Core.EntityClient;
+using System.Data.Entity.Core.EntityClient;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using System.Data.EntityClient;
+//using System.Data.EntityClient;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -137,44 +136,24 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<Background> Backgrounds { get; set; }
         public DbSet<ClientApp> ClientApps { get; set; }
         public DbSet<CloneInformation> CloneInformata { get; set; }
-
         public DbSet<Directory> Directories { get; set; }
-        //[Obsolete]
-        //public DbSet<DirectoryAccessRule> DirectoryAccessRules { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<FileChunk> FileChunks { get; set; }
         public DbSet<Font> Fonts { get; set; }
-
         public DbSet<Group> Groups { get; set; }
         public DbSet<DirectoryGroup> DirectoryGroups { get; set; }
-        //public DbSet<GroupClientApp> GroupClientApps { get; set; }
-        //public DbSet<GroupMember> GroupMembers { get; set; }
-        //public DbSet<GroupRegistrationKey> GroupRegistrationKeys { get; set; }
-        //public DbSet<ImageInformation> ImageInformata { get; set; }
         public DbSet<Image> Images { get; set; }
-
-        //public DbSet<MarkupDocumentLink> MarkupDocumentLinks { get; set; }
-        //public DbSet<MarkupPageLink> MarkupPageLinks { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Menu> Menus { get; set; }
         public DbSet<Page> Pages { get; set; }
-
-        //public DbSet<PageAccessRule> PageAccessRules { get; set; }
         public DbSet<PageMarkup> PageMarkups { get; set; }
         public DbSet<Panel> Panels { get; set; }
-        //public DbSet<PanelPage> PanelPages { get; set; }
-        public DbSet<RegistrationKey> RegistrationKeys { get; set; }
-
-        //public DbSet<Role> Roles { get; set; }
         public DbSet<SiteSetting> SiteSettings { get; set; }
         public DbSet<Style> Styles { get; set; }
         public DbSet<UploadFile> UploadFiles { get; set; }
         public DbSet<ActionBase> Actions { get; set; }
         public DbSet<Recorder> Recorders { get; set; }
         public DbSet<Record> Records { get; set;}
-
-        //public virtual DbSet<UserClaim> UserClaims { get; set; }
-        //public virtual DbSet<UserLogin> UserLogins { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -183,15 +162,15 @@ namespace Fastnet.Webframe.CoreData
             modelBuilder.Conventions.Add(new NonPublicColumnAttributeConvention());
             modelBuilder.Properties<DateTime>().Configure(c => c.HasColumnType("datetime2"));
 
-            modelBuilder.Entity<Group>()
-                .HasMany(t => t.RegistrationKeys)
-                .WithMany(t => t.Groups)
-                .Map(m =>
-                {
-                    m.MapLeftKey("GroupId");
-                    m.MapRightKey("RegistrationKeyId");
-                    m.ToTable("GroupRegistrationKey");
-                });
+            //modelBuilder.Entity<Group>()
+            //    .HasMany(t => t.RegistrationKeys)
+            //    .WithMany(t => t.Groups)
+            //    .Map(m =>
+            //    {
+            //        m.MapLeftKey("GroupId");
+            //        m.MapRightKey("RegistrationKeyId");
+            //        m.ToTable("GroupRegistrationKey");
+            //    });
             modelBuilder.Entity<Group>()
                 .HasMany(t => t.Members)
                 .WithMany(t => t.Groups)
@@ -268,21 +247,37 @@ namespace Fastnet.Webframe.CoreData
                 //ClearCustomStylesheets();
             }
             EnsureAnonymousMember();
-            EnsureRootDirectoryIsEveryoneView();
+            EnsureRootDirectoryRestrictions();
         }
 
-        private void EnsureRootDirectoryIsEveryoneView()
+        private void EnsureRootDirectoryRestrictions()
         {
             Group everyone = ctx.Groups.ToArray().Single(x => x.Name == SystemGroups.Everyone.ToString() && x.Type.HasFlag(GroupTypes.System));
+            Group editors = ctx.Groups.ToArray().Single(x => x.Name == SystemGroups.Editors.ToString() && x.Type.HasFlag(GroupTypes.System));
             var rootDirectory = ctx.Directories.Single(x => x.ParentDirectory == null);
-            if (rootDirectory.DirectoryGroups.Count() != 1 || rootDirectory.DirectoryGroups.First().Group.GroupId != everyone.GroupId || rootDirectory.DirectoryGroups.First().Permission != Permission.ViewPages)
+            var dg = rootDirectory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == everyone.GroupId);
+            if (dg == null)
             {
-                var dgList = rootDirectory.DirectoryGroups.ToArray();
-                ctx.DirectoryGroups.RemoveRange(dgList);
-                DirectoryGroup dg = new DirectoryGroup { Directory = rootDirectory, Group = Group.Everyone, Permission = Permission.ViewPages };
+                dg = new DirectoryGroup { Group = everyone, Directory = rootDirectory };
                 ctx.DirectoryGroups.Add(dg);
-                ctx.SaveChanges();
             }
+            dg.SetView(true);
+            dg = rootDirectory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == editors.GroupId);
+            if (dg == null)
+            {
+                dg = new DirectoryGroup { Group = editors, Directory = rootDirectory };
+                ctx.DirectoryGroups.Add(dg);
+            }
+            dg.SetEdit(true);
+            ctx.SaveChanges();
+            //if (rootDirectory.DirectoryGroups.Count() != 1 || rootDirectory.DirectoryGroups.First().Group.GroupId != everyone.GroupId || rootDirectory.DirectoryGroups.First().Permission != Permission.ViewPages)
+            //{
+            //    var dgList = rootDirectory.DirectoryGroups.ToArray();
+            //    ctx.DirectoryGroups.RemoveRange(dgList);
+            //    DirectoryGroup dg = new DirectoryGroup { Directory = rootDirectory, Group = Group.Everyone, Permission = Permission.ViewPages };
+            //    ctx.DirectoryGroups.Add(dg);
+            //    ctx.SaveChanges();
+            //}
         }
 
         private void EnsureAnonymousMember()
@@ -899,6 +894,7 @@ namespace Fastnet.Webframe.CoreData
         //}
         private void EnsureRequiredGroups()
         {
+            int weightIncrement = Group.GetWeightIncrement();
             Func<string, Group, Group> findGroup = (name, parent) =>
                 {
                     if (parent == null)
@@ -916,7 +912,8 @@ namespace Fastnet.Webframe.CoreData
                 Group g = findGroup(name, parent);
                 if (g == null)
                 {
-                    g = new Group { Name = name, Type = type, ParentGroup = parent, Description = descr };
+                    int weight = parent == null ? 0 : parent.Weight + weightIncrement;
+                    g = new Group { Name = name, Type = type, ParentGroup = parent, Description = descr, Weight = weight };
                     ctx.Groups.Add(g);
                     //Log.Debug("{0}: group {1} added", identifier, name);
                 }
@@ -1116,7 +1113,7 @@ namespace Fastnet.Webframe.CoreData
         {
             foreach (var item in legacyDb.DirectoryAccessRules)
             {
-                Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
+                Directory d = coreDb.Directories.ToArray().First(x => x.FullName == item.Directory.Fullpath);
                 Group g = coreDb.Groups.ToArray().First(x => x.Fullpath == item.Group.Fullpath);
                 DirectoryGroup dg = coreDb.DirectoryGroups.Local.SingleOrDefault(x => x.DirectoryId == d.DirectoryId && x.GroupId == g.GroupId);
                 if (dg == null)
@@ -1146,7 +1143,7 @@ namespace Fastnet.Webframe.CoreData
         {
             foreach (var item in legacyDb.Pages)
             {
-                Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
+                Directory d = coreDb.Directories.ToArray().First(x => x.FullName == item.Directory.Fullpath);
                 Page p = new Page
                 {
                     PageId = item.PageId,
@@ -1201,7 +1198,7 @@ namespace Fastnet.Webframe.CoreData
         {
             foreach (var item in legacyDb.Documents)
             {
-                Directory d = coreDb.Directories.ToArray().First(x => x.Fullpath == item.Directory.Fullpath);
+                Directory d = coreDb.Directories.ToArray().First(x => x.FullName == item.Directory.Fullpath);
                 Document doc = new Document
                 {
                     DocumentId = item.DocumentId,
@@ -1228,15 +1225,6 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        internal void LoadRegistrationKeys()
-        {
-            foreach (var item in legacyDb.RegistrationKeys)
-            {
-                RegistrationKey r = new RegistrationKey { Key = item.Key, Description = item.Description, EmailTemplate = item.EmailTemplate };
-                coreDb.RegistrationKeys.Add(r);
-            }
-            coreDb.SaveChanges();
-        }
         internal void LoadRoles()
         {
             //foreach (var item in wde.Roles)
@@ -1248,16 +1236,13 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadGroups()
         {
+            int weightIncrement = Group.GetWeightIncrement();
             Action<LDB.Group, Group> addGroup = null;
             addGroup = (item, parent) =>
             {
-                Group g = new Group { Name = item.Name, ParentGroup = parent, Description = item.Description, Type = (GroupTypes)(int)item.Type };
+                int weight = parent == null ? 0 : parent.Weight + weightIncrement;
+                Group g = new Group { Name = item.Name, ParentGroup = parent, Description = item.Description, Weight = weight, Type = (GroupTypes)(int)item.Type };
                 coreDb.Groups.Add(g);
-                //foreach (var rk in item.GroupRegistrationKeys)
-                //{
-                //    RegistrationKey key = coreDb.RegistrationKeys.Single(x => x.Key == rk.RegistrationKey.Key);
-                //    g.RegistrationKeys.Add(key);
-                //}
                 foreach (var child in item.Children)
                 {
                     addGroup(child, g);

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -19,22 +20,10 @@ using CD = Fastnet.Webframe.CoreData;
 namespace Fastnet.Webframe.Web.Controllers
 {
     [RoutePrefix("store")]
-    //[Authorize]
-    [PermissionFilter(CD.SystemGroups.Editors)]
+    //[PermissionFilter(CD.SystemGroups.Editors)]
     public class StoreController : BaseApiController //: ApiController
     {
         private CD.CoreDataContext DataContext = CD.Core.GetDataContext();
-        //private string CurrentMemberId
-        //{
-        //    get
-        //    {
-        //        if (HttpContext.Current.Session["member-id"] == null)
-        //        {
-        //            return null;
-        //        }
-        //        return (string)HttpContext.Current.Session["member-id"];
-        //    }
-        //}
         [HttpGet]
         [Route("directories/{id?}")]
         public Task<HttpResponseMessage> GetDirectories(long? id = null)
@@ -68,7 +57,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     Name = page.Name,
                     PageType = page.Type.ToString().ToLower(),
                     LandingPage = page.IsLandingPage,
-                    LandingPageImage = page.GetLandingPageImageUrl(),
+                    LandingPageImage = CD.Page.GetLandingPageImageUrl(),
                     PageTypeImage = page.GetTypeImageUrl(),
                     PageTypeTooltip = page.GetTypeTooltip()
                 });
@@ -111,6 +100,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 dir.Name = GetUniqueDirectoryName(parent);
                 dir.ParentDirectory = parent;
                 DataContext.Directories.Add(dir);
+                dir.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.NewFolder);
                 await DataContext.SaveChangesAsync();
                 return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { DirectoryId = dir.DirectoryId, Name = dir.Name }));
             }
@@ -129,7 +119,6 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("createpage")]
         public async Task<HttpResponseMessage> CreateNewPage(dynamic data)
         {
-            bool result = true;
             try
             {
                 long directoryId;
@@ -145,19 +134,15 @@ namespace Fastnet.Webframe.Web.Controllers
                     directoryId = data.directoryId;
                 }
                 CD.Page page = await CreatePageInternal(directoryId, type);
-                //long pageId = page.PageId;
+                page.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.NewPage);
                 return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = page.PageId, Url = page.Url, Name = page.Name }));
             }
             catch (Exception xe)
             {
                 Log.Write(xe.Message);
-                result = false;
+                //result = false;
 
             }
-            //if (!result)
-            //{
-            //    return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
-            //}
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
@@ -198,10 +183,104 @@ namespace Fastnet.Webframe.Web.Controllers
             var data = new
             {
                 Id = d.DirectoryId,
-                Name = d.Name
+                Name = d.Name,
+                InheritedRestrictions = d.GetClosestDirectoryGroups().Select(dg => new
+                {
+                    Group = dg.Group.GetClientSideGroupDetails(),
+                    View = dg.ViewAllowed,
+                    Edit = dg.EditAllowed,
+                    AccessDescription = dg.GetAccessDescription()
+                }),
+                DirectRestrictions = d.DirectoryGroups.Select(dg => new
+                {
+                    Group = dg.Group.GetClientSideGroupDetails(),
+                    View = dg.ViewAllowed,
+                    Edit = dg.EditAllowed,
+                    AccessDescription = dg.GetAccessDescription()
+                }),
+                Groups = d.DirectoryGroups.Select(x => x.Group.GetClientSideGroupDetails())
             };
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
             //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+        }
+        [HttpGet]
+        [Route("get/directory/groups/{id}")]
+        public async Task<HttpResponseMessage> GetRestrictingGroups(long id)
+        {
+            //Func<dynamic> getRestrictionInfo
+            CD.Directory d = DataContext.Directories.Find(id);
+            // first find the first parent directory with any group restrictions
+            // then for each group restriction find all children (as a flat list)
+            var currentRestrictions = d.DirectoryGroups.ToArray();
+            var groups = d.GetClosestDirectoryGroups().Select(dg => dg.Group);
+            List<CD.Group> list = new List<CD.Group>();
+            foreach (var group in groups)
+            {
+                list.AddRange(group.GetAllChildren());
+            }
+            var result = new List<dynamic>();
+            foreach (var group in list.Where(g => g.GroupId != CD.Group.Anonymous.GroupId))
+            {
+                dynamic item = new ExpandoObject();
+                item.Group = group.GetClientSideGroupDetails();
+                bool selected = currentRestrictions.Select(cr => cr.Group).Contains(group);
+                bool view = false;
+                bool edit = false;
+                if (selected)
+                {
+                    var dg = currentRestrictions.Single(x => x.Group == group);
+                    view = dg.ViewAllowed;
+                    edit = dg.EditAllowed;
+                }
+                item.Parent = group.ParentGroup.GetClientSideGroupDetails();
+                item.Selected = selected;
+                item.View = view;
+                item.Edit = edit;
+                result.Add(item);
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, result));
+        }
+        [HttpPost]
+        [Route("update/directory/groups")]
+        public async Task<HttpResponseMessage> UpdateRestrictingGroups(dynamic data)
+        {
+            long directoryId = data.directoryId;
+            JArray list = data.groups;
+            dynamic[] items = list.ToObject<dynamic[]>();
+            CD.Directory directory = await DataContext.Directories.FindAsync(directoryId);
+            foreach (dynamic item in items)
+            {
+                long groupId = item.groupId;
+                bool isChecked = item.isChecked;
+                bool view = item.view;
+                bool edit = item.edit;
+                if (isChecked)
+                {
+                    bool isNew = false;
+                    var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
+                    if (dg == null)
+                    {
+                        isNew = true;
+                        CD.Group group = await DataContext.Groups.FindAsync(groupId);
+                        dg = new CD.DirectoryGroup { Directory = directory, Group = group };
+                        DataContext.DirectoryGroups.Add(dg);
+                    }
+                    dg.SetView(true);
+                    dg.SetEdit(edit);
+                    dg.RecordChanges(this.GetCurrentMember().Fullname, isNew ? CD.RestrictionAction.EditingActionTypes.RestrictionAdded : CD.EditingAction.EditingActionTypes.RestrictionModified);
+                }
+                else
+                {
+                    var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
+                    if (dg != null)
+                    {
+                        DataContext.DirectoryGroups.Remove(dg);
+                        dg.RecordChanges(this.GetCurrentMember().Fullname, CD.RestrictionAction.EditingActionTypes.RestrictionRemoved);
+                    }
+                }
+            }
+            await DataContext.SaveChangesAsync();
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
         [Route("update/directory")]
@@ -210,6 +289,7 @@ namespace Fastnet.Webframe.Web.Controllers
             long id = data.id;
             CD.Directory d = DataContext.Directories.Find(id);
             d.Name = data.name;
+            d.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderModified);
             await DataContext.SaveChangesAsync();
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -223,6 +303,9 @@ namespace Fastnet.Webframe.Web.Controllers
                 Id = p.PageId,
                 Url = p.Url,
                 Name = p.Name,
+                IsLandingPage = p.IsLandingPage,
+                LandingPageLocked = p.Directory.ParentDirectory == null && p.IsLandingPage,
+                LandingPageImage = CD.Page.GetLandingPageImageUrl(),
                 CreatedBy = p.PageMarkup.CreatedBy,
                 CreatedOn = p.PageMarkup.CreatedOn.ToString("ddMMMyyyy HH:mm"),
                 ModifiedBy = p.PageMarkup.ModifiedBy,
@@ -289,8 +372,34 @@ namespace Fastnet.Webframe.Web.Controllers
         public async Task<HttpResponseMessage> UpdatePage(dynamic data)
         {
             long id = data.id;
+            bool isLandingPage = data.isLandingPage;
             CD.Page p = DataContext.Pages.Find(id);
             p.Name = data.name;
+            if (isLandingPage && !p.IsLandingPage)
+            {
+                // we are making this page the landing page
+                var otherPages = p.Directory.Pages.Where(x => x.PageId != p.PageId);
+                var previousLandingPage = otherPages.SingleOrDefault(x => x.IsLandingPage);
+                if (previousLandingPage != null)
+                {
+                    previousLandingPage.IsLandingPage = false;
+                    previousLandingPage.RecordChanges(this.GetCurrentMember().Fullname, CD.EditingAction.EditingActionTypes.PageModified);
+                }
+                p.IsLandingPage = true;
+            }
+            else
+            {
+                if (p.Directory.ParentDirectory == null)
+                {
+                    // we cannot remove the landing page in the root directory
+                    // (we can replace it)
+                }
+                else
+                {
+                    p.IsLandingPage = false;
+                }
+            }
+            p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageModified);
             await DataContext.SaveChangesAsync();
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
@@ -318,7 +427,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     pm.ModifiedBy = this.GetCurrentMember().Fullname;
                     pm.ModifiedOn = DateTime.UtcNow;
                     page.MarkupType = CD.MarkupType.Html;
-
+                    page.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageContentModified);
                 }
             };
             update(banner);
@@ -370,7 +479,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     Log.Write("Upload[{0}]: chunk {1} of {2}", uf.UploadFileId, uf.Name, fc.ChunkNumber + 1, uf.TotalChunks);
                 }
             };
-            
+
             bool result = true;
             int chunkNumber = data.chunkNumber;
             long totalChunks = data.totalChunks;
@@ -401,7 +510,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     DataContext.UploadFiles.Add(uploadFile);
                     if (traceUpload)
                     {
-                        Log.Write("Upload[{0}]: {1} to {2}, {3} bytes in {4} chunks", uploadFile.UploadFileId, uploadFile.Name, d.Fullpath, binaryLength, totalChunks);
+                        Log.Write("Upload[{0}]: {1} to {2}, {3} bytes in {4} chunks", uploadFile.UploadFileId, uploadFile.Name, d.DisplayName, binaryLength, totalChunks);
                     }
                     //saveChunk(uploadFile, chunkNumber, base64String);
                     //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, uploadFile.Guid));
@@ -436,6 +545,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, key));
         }
+        //
         private async Task SaveUploadedFile(CD.UploadFile uploadFile)
         {
             long directoryid = uploadFile.DirectoryId;
@@ -455,7 +565,7 @@ namespace Fastnet.Webframe.Web.Controllers
             Debug.Assert(fileData.Length == uploadFile.BinaryLength);
             if (ApplicationSettings.Key("SaveUploadsToDisk", false))
             {
-                SaveUploadToDisk(d.Fullpath, filename, fileData);
+                SaveUploadToDisk(d.FullName, filename, fileData);
             }
             string url = string.Empty;
             try
@@ -484,8 +594,6 @@ namespace Fastnet.Webframe.Web.Controllers
                 throw;
             }
         }
-        //
-        //
         private async Task<CD.Page> CreatePageInternal(long directoryId, CD.PageType type)
         {
             CD.Member m = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
@@ -587,11 +695,13 @@ namespace Fastnet.Webframe.Web.Controllers
                 await DeleteDirectory(d);
             }
             DataContext.Directories.Remove(dir);
+            dir.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderDeleted);
             await DataContext.SaveChangesAsync();
         }
         private async Task DeletePage(long id)
         {
             CD.Page p = DataContext.Pages.Find(id);
+
             DeletePage(p);
             await DataContext.SaveChangesAsync();
         }
@@ -600,6 +710,7 @@ namespace Fastnet.Webframe.Web.Controllers
             CD.PageMarkup pm = p.PageMarkup;
             DataContext.PageMarkups.Remove(pm);
             DataContext.Pages.Remove(p);
+            p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageDeleted);
         }
         private string GetUniquePageName(CD.Directory dir, CD.PageType type)
         {

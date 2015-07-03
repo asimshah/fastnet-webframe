@@ -1,4 +1,5 @@
-﻿using Fastnet.EventSystem;
+﻿using Fastnet.Common;
+using Fastnet.EventSystem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,15 +16,14 @@ namespace Fastnet.Webframe.CoreData
         public long? ParentGroupId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public int Weight { get; set; }
         [Column("TypeCode")]
         public GroupTypes Type { get; set; }
-        public long? RegistrationKeyId { get; set; }
         [Timestamp]
         public byte[] TimeStamp { get; set; }
         public virtual Group ParentGroup { get; set; }
         //
         private ICollection<Member> members;
-        private ICollection<RegistrationKey> registrationKeys;
         private ICollection<DirectoryGroup> directoryGroups;
         public virtual ICollection<Group> Children { get; set; }
         public virtual ICollection<DirectoryGroup> DirectoryGroups
@@ -36,15 +36,13 @@ namespace Fastnet.Webframe.CoreData
             get { return members ?? (members = new HashSet<Member>()); }
             set { members = value; }
         }
-        public virtual ICollection<RegistrationKey> RegistrationKeys
-        {
-            get { return registrationKeys ?? (registrationKeys = new HashSet<RegistrationKey>()); }
-            set { registrationKeys = value; }
-        }
-        //
-        public override Group GetParent()
+        internal override Group GetParent()
         {
             return this.ParentGroup;
+        }
+        internal override IEnumerable<Group> GetChildren()
+        {
+            return Children;
         }
         [NotMapped]
         public string Fullpath
@@ -80,6 +78,10 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return GetSystemGroup(SystemGroups.Editors); }
         }
+        public static int GetWeightIncrement()
+        {
+            return ApplicationSettings.Key("GroupWeightDefaultIncrement", 1000);
+        }
         public bool IsChildOf(Group ultimateParent)
         {
             Group g = this.ParentGroup;
@@ -96,6 +98,21 @@ namespace Fastnet.Webframe.CoreData
         public bool IsParentOf(Group ultimateChild)
         {
             return ultimateChild.IsChildOf(this);
+        }
+        public dynamic GetClientSideGroupDetails()
+        {
+            return new
+            {
+                Id = this.GroupId,
+                Name = this.Name,
+                FullName = this.Fullpath,
+                Weight = this.Weight,
+                ParentWeight = this.ParentGroup != null ? this.ParentGroup.Weight : 0,
+                Description = this.Description,
+                IsSystem = this.Type.HasFlag(GroupTypes.System),
+                HasSystemDefinedMembers = this.Type.HasFlag(GroupTypes.SystemDefinedMembers),
+                SubgroupTotal = this.Children.Count()
+            };
         }
         public void RecordChanges(string actionBy, GroupAction.GroupActionTypes actionType = GroupAction.GroupActionTypes.Modification, string emailAddress = null)
         {

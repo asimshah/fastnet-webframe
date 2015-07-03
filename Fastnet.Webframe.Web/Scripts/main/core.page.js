@@ -2,7 +2,7 @@
     function test() {
         //debugger;
 
-        
+
         //function a() {
         //    this.id = index++;
         //    a.prototype.test1 = function (x) {
@@ -32,7 +32,14 @@
         pageEditor: null,
         isEditing: false,
         options: null,
-        currentPages: { centreId: null, bannerId: null, leftId: null, rightId: null },
+        currentPage: {
+            Access: null,
+            CentrePanel: { id: null, selector: ".CentrePanel" },
+            BannerPanel: { id: null, selector: ".BannerPanel" },
+            LeftPanel: { id: null, selector: ".LeftPanel" },
+            RightPanel: { id: null, selector: ".RightPanel" }
+        },
+        //currentPages: { centreId: null, bannerId: null, leftId: null, rightId: null },
         Init: function () {
             $T = this;
             $U = $.fastnet$utilities;
@@ -49,11 +56,7 @@
                 }
             });
         },
-        ClearContent: function (panelName) {
-            var styleId = $U.Format("{0}-style", panelName.toLowerCase());
-            $("head").find("#" + styleId).remove();
-            $("." + panelName).empty();
-        },
+
         CreateMenus: function (menuHtml) {
             var menus = $(menuHtml);
             var toplevel = menus.first();
@@ -132,50 +135,20 @@
             return url;
         },
         LoadStartPage: function (startPage) {
-            //debugger;
-            var startUrl = "";
-            if (typeof startPage === "undefined" || startPage === null || startPage === "") {
-                startUrl = "pageapi/home";
-            } else {
-                //**TODO** relook at this call as $T.SetPage() also get the page content
-                startUrl = $U.Format("pageapi/page/{0}", startPage);
-            }
-            var homeUrl = "pageapi/home";
+            var pageId = startPage;
             $.when(
-                $U.AjaxGet({ url: "pageapi/menuinfo" }),
-                $U.AjaxGet({ url: startUrl })
-                ).then(function (menuInfo, urlResult) {
-                    var menuInfoResult = menuInfo[0];
-                    var pageResult = urlResult[0];
-                    var menuVisible = false;//menuInfoResult.Visible;
+                $U.AjaxGet({ url: "pageapi/menuinfo" })).then(function (menuInfo) {
+                    var menuInfoResult = menuInfo;
+                    var menuVisible = false;
                     if (menuVisible) {
                         var menuHtml = menuInfoResult.MenuHtml;
                         $T.CreateMenus(menuHtml);
                     }
-                    var pageId = pageResult.PageId;
+
                     $T.SetPage(pageId);
                     $T.QueryAuthentication();
                 });
         },
-        //LoadHomePage: function () {
-        //    //LoadHomePage: function (sa) {
-        //    var homeUrl = "pageapi/home";
-        //    $.when(
-        //        $U.AjaxGet({ url: "pageapi/menuinfo" }),
-        //        $U.AjaxGet({ url: homeUrl })
-        //        ).then(function (menuInfo, home) {
-        //            var menuInfoResult = menuInfo[0];
-        //            var homeResult = home[0];
-        //            var menuVisible = menuInfoResult.Visible;
-        //            if (menuVisible) {
-        //                var menuHtml = menuInfoResult.MenuHtml;
-        //                $T.CreateMenus(menuHtml);
-        //            }
-        //            var homePageId = homeResult.PageId;
-        //            $T.SetPage(homePageId);
-        //            $T.QueryAuthentication();
-        //        });
-        //},
         ParallelCalls: function () {
             $.when(
                 $U.AjaxGet({ url: "main/special/echo/2" }),
@@ -202,70 +175,71 @@
         },
         SetPage: function (pageId) {
             $.when(
-                $U.AjaxGet({ url: "pageapi/sidepages/" + pageId }),
-                $U.AjaxGet({ url: "pageapi/page/canedit/" + pageId })
+                $U.AjaxGet({ url: "pageapi/sidepages/" + pageId })
+                ,$U.AjaxGet({ url: "pageapi/page/access/" + pageId })
                 ).then(function (q0, q1) {
                     var sidePages = q0[0];
                     var centrePageId = pageId;
-                    var bannerPageId = sidePages.Banner;                   
+                    var bannerPageId = sidePages.Banner;
                     var leftPageId = sidePages.Left;
                     var rightPageId = sidePages.Right;
-                    //var panelinfo = q0[0];
-                    var canEdit = q1[0].CanEdit;
-                    $T.currentPages.bannerId = $T.UpdatePanel("BannerPanel", $T.currentPages.bannerId, bannerPageId);
-                    $T.currentPages.leftId = $T.UpdatePanel("LeftPanel", $T.currentPages.leftId, leftPageId);
-                    $T.currentPages.rightId = $T.UpdatePanel("RightPanel", $T.currentPages.rightId, rightPageId);
-                    $T.currentPages.centreId = $T.UpdatePanel("CentrePanel", $T.currentPages.centreId, centrePageId);
+                    var access = q1[0].Access;
+                    //$T.currentPages.bannerId = $T.UpdatePanel("BannerPanel", $T.currentPages.bannerId, bannerPageId);
+                    //$T.currentPages.leftId = $T.UpdatePanel("LeftPanel", $T.currentPages.leftId, leftPageId);
+                    //$T.currentPages.rightId = $T.UpdatePanel("RightPanel", $T.currentPages.rightId, rightPageId);
+                    //$T.currentPages.centreId = $T.UpdatePanel("CentrePanel", $T.currentPages.centreId, centrePageId);
+                    $T.UpdatePanel($T.currentPage.BannerPanel, bannerPageId);
+                    $T.UpdatePanel($T.currentPage.LeftPanel, leftPageId);
+                    $T.UpdatePanel($T.currentPage.RightPanel, rightPageId);
+                    $T.UpdatePanel($T.currentPage.CentrePanel, centrePageId);
                     $(".SitePanel .login-status").off();
                     $(".SitePanel .login-status").on("click", function () {
                         //alert("Load user profile");
                         $T.GotoInternalLink("/userprofile");
                     });
-                    if (canEdit) {
+                    $T.currentPage.Access = access;
+                    if ($T.currentPage.Access == "editallowed") {
+                    //if (canEdit) {
                         $T.toolbar.show();
                     } else {
                         $T.toolbar.hide();
                     }
-                    //if ($T.isEditing) {
-                    //    //alert("set page while editing");
-                    //    $.core$editor.PageChanged();
-                    //}
                 });
         },
-        SetContent: function (panelName, pageInfo) {
-            var styleList = pageInfo.styleList;
-            var html = pageInfo.html;
-            if (typeof styleList !== "string") {
-                var styleId = $U.Format("{0}-style", panelName.toLowerCase());
-                var style = $U.Format("<style id='{0}'>", styleId);
-                $.each(styleList, function (i, item) {
-                    style += $U.Format(".{0} {1}", panelName, item.Selector);
-                    style += " {";
-                    $.each(item.Rules, function (j, rule) {
-                        style += rule + "; ";
-                    });
-                    style += "} ";
-                });
-                style += "</style>";
-                $("head").find("#" + styleId).remove();
-                $("head").append($(style));
-            }
-            $("." + panelName).off();
-            var content = $(html);
-            content.find('a').on("click", function (e) {
-                var url = $(this).attr("href");
-                if ($T.IsLinkInternal(url)) {
-                    e.preventDefault();
-                    url = $T.StandardiseUrl(url);
-                    $T.GotoInternalLink(url);
-                }
-            });
-            var panelSelector = "." + panelName;
-            $(panelSelector).empty().append(content);
-            $(panelSelector).attr("data-page-id", pageInfo.pageId);
-            $(panelSelector).attr("data-panel", panelName);
-            $(panelSelector).attr("data-location", pageInfo.location);
-        },
+        //SetContent: function (panelName, pageInfo) {
+        //    var styleList = pageInfo.styleList;
+        //    var html = pageInfo.html;
+        //    if (typeof styleList !== "string") {
+        //        var styleId = $U.Format("{0}-style", panelName.toLowerCase());
+        //        var style = $U.Format("<style id='{0}'>", styleId);
+        //        $.each(styleList, function (i, item) {
+        //            style += $U.Format(".{0} {1}", panelName, item.Selector);
+        //            style += " {";
+        //            $.each(item.Rules, function (j, rule) {
+        //                style += rule + "; ";
+        //            });
+        //            style += "} ";
+        //        });
+        //        style += "</style>";
+        //        $("head").find("#" + styleId).remove();
+        //        $("head").append($(style));
+        //    }
+        //    $("." + panelName).off();
+        //    var content = $(html);
+        //    content.find('a').on("click", function (e) {
+        //        var url = $(this).attr("href");
+        //        if ($T.IsLinkInternal(url)) {
+        //            e.preventDefault();
+        //            url = $T.StandardiseUrl(url);
+        //            $T.GotoInternalLink(url);
+        //        }
+        //    });
+        //    var panelSelector = "." + panelName;
+        //    $(panelSelector).empty().append(content);
+        //    $(panelSelector).attr("data-page-id", pageInfo.pageId);
+        //    $(panelSelector).attr("data-panel", panelName);
+        //    $(panelSelector).attr("data-location", pageInfo.location);
+        //},
         Start: function (options) {
             $U.Debug("pathname = {0}, {1}", location.pathname, location.href);
             $T.options = options;
@@ -290,16 +264,79 @@
 
 
         },
-        UpdatePanel: function (panelName, currentPageId, newPageId) {
-            if (currentPageId !== newPageId) {
+        //UpdatePanel: function (panelName, newPageId) {
+        //    if (currentPageId !== newPageId) {
+        //        if (newPageId != null) {
+        //            $.when($U.AjaxGet({ url: "pageapi/page/" + newPageId })).then(function (result) {
+        //                $T.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+        //            });
+        //        } else {
+        //            $T.ClearContent(panelName);
+        //        }
+        //        return newPageId;
+        //    }
+        //},
+        //ClearContent: function (panelName) {
+        //    var styleId = $U.Format("{0}-style", panelName.toLowerCase());
+        //    $("head").find("#" + styleId).remove();
+        //    $("." + panelName).empty();
+        //},
+        ClearContent: function (pageEntry) {
+            var name = pageEntry.selector.substr(1).toLowerCase();
+            var styleId = $U.Format("{0}-style", name);
+            $("head").find("#" + styleId).remove();
+            $(pageEntry).empty();
+        },
+        SetContent: function (pageEntry, pageInfo) {
+            var styleList = pageInfo.styleList;
+            var html = pageInfo.html;
+            if (typeof styleList !== "string") {
+                var name = pageEntry.selector.substr(1).toLowerCase();
+                var styleId = $U.Format("{0}-style", name);
+                var style = $U.Format("<style id='{0}'>", styleId);
+                $.each(styleList, function (i, item) {
+                    style += $U.Format("{0} {1}", pageEntry.selector, item.Selector);
+                    style += " {";
+                    $.each(item.Rules, function (j, rule) {
+                        style += rule + "; ";
+                    });
+                    style += "} ";
+                });
+                style += "</style>";
+                $("head").find("#" + styleId).remove();
+                $("head").append($(style));
+            }
+            $(pageEntry.selector).off();
+            var content = $(html);
+            content.find('a').on("click", function (e) {
+                var url = $(this).attr("href");
+                if ($T.IsLinkInternal(url)) {
+                    e.preventDefault();
+                    url = $T.StandardiseUrl(url);
+                    $T.GotoInternalLink(url);
+                }
+            });
+            //var panelSelector = "." + panelName;
+            var name = pageEntry.selector.substr(1).toLowerCase();
+            $(pageEntry.selector).empty().append(content);
+            $(pageEntry.selector).attr("data-page-id", pageInfo.pageId);
+            $(pageEntry.selector).attr("data-panel", name);
+            $(pageEntry.selector).attr("data-location", pageInfo.location);
+            //if (pageEntry === $T.currentPage.CentrePanel) {
+            //    $T.currentPage.Access = pageInfo.access;
+            //    debugger;
+            //}
+        },
+        UpdatePanel: function (pageEntry, newPageId) {
+            if (pageEntry.id !== newPageId) {
                 if (newPageId != null) {
                     $.when($U.AjaxGet({ url: "pageapi/page/" + newPageId })).then(function (result) {
-                        $T.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+                        $T.SetContent(pageEntry, { access: result.Access, styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
                     });
                 } else {
-                    $T.ClearContent(panelName);
+                    $T.ClearContent(pageEntry);
                 }
-                return newPageId;
+                pageEntry.id = newPageId;
             }
         },
         LoadEditor: function (afterLoad) {
@@ -322,7 +359,7 @@
                 ];
                 var dfds = [];
                 $.each(scripts, function (i, url) {
-                    dfds.push($T.AjaxGetScript({url: url}));
+                    dfds.push($T.AjaxGetScript({ url: url }));
                 });
                 $.when.apply($, dfds).then(function () {
                     afterLoad();

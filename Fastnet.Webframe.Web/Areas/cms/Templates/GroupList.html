@@ -5,6 +5,7 @@
             <tr>
                 <th><div class="name">Name</div></th>
                 <th><div class="description">Description</div></th>
+                <th><div class="weight">Weight</div></th>
             </tr>
         </thead>
         <tbody>
@@ -20,11 +21,8 @@
                     </div>{{/Directories}}
                     {{/HasDirectories}}
                 </td>
+                <td class="weight">{{Weight}}</td>
             </tr>
-            <!--<tr>
-                <td></td>
-                <td >{{#Directories}}<div>{{Path}}</div>{{/Directories}}</td>
-            </tr>-->
             {{/data}}
         </tbody>
     </table>

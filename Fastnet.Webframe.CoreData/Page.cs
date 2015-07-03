@@ -8,22 +8,6 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
-    // Note: 10May2015
-    // I would like to get rid of PanelPage and possibly also Panel in the future
-    // because we now style using CSS and I think it may be possible to do without these tables altogether.
-    // It may also be possible to rid of the PageMarkup table!
-    // To help with this I am intoducing a new enum called ContentPanels
-
-    //public enum ContentPanels
-    //{
-    //    Centre,
-    //    Banner,
-    //    Left,
-    //    Right
-    //}
-
-    // these can be used to obtain the content using
-
     public class PageContent
     {
         public string HtmlText { get; set; }
@@ -58,17 +42,12 @@ namespace Fastnet.Webframe.CoreData
             get { return documents ?? (documents = new HashSet<Document>()); }
             set { documents = value; }
         }
-        //[InverseProperty("CentrePage")]
-        //public virtual ICollection<PanelPage> SidePanelPages { get; set; }
-        //[InverseProperty("Page")]
-        //public virtual ICollection<PanelPage> CentrePanelPages { get; set; }
         public virtual ICollection<Page> ForwardLinks // this page hyperlinks to these document
         {
             get { return forwardLinks ?? (forwardLinks = new HashSet<Page>()); }
             set { forwardLinks = value; }
         }
         public virtual ICollection<Page> BackLinks { get; set; } // this page is hyperlinked from these pages
-        //public virtual ICollection<PageAccessRule> PageAccessRules { get; set; }
         [NotMapped]
         public string Url
         {
@@ -87,20 +66,6 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return GetContent(index); }
         }
-        //[NotMapped]
-        //public bool IsCentrePage { get { return this.CentrePanelPages.Count() == 0; } }
-        //[NotMapped]
-        //[Obsolete]
-        //public string SidePageInfo
-        //{
-        //    get { return getSidePageInfo(); }
-        //}
-        /// <summary>
-        /// Look for side pages
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="search">If true, then search parent directories</param>
-        /// <returns></returns>
         public Page FindSidePage(PageType type, bool search)
         {
             Debug.Assert(this.Type == PageType.Centre, "Only centre pages can be used to find side pages");
@@ -119,16 +84,9 @@ namespace Fastnet.Webframe.CoreData
             }
             return null;
         }
-        public string GetLandingPageImageUrl()
+        public static string GetLandingPageImageUrl()
         {
-            if (this.IsLandingPage)
-            {
-                return "content/images/homepage.png";
-            }
-            else
-            {
-                return null;
-            }
+            return "content/images/homepage.png";
         }
         public string GetTypeImageUrl()
         {
@@ -176,6 +134,37 @@ namespace Fastnet.Webframe.CoreData
             }
             return r;
         }
+        public void RecordChanges(string actionBy, PageAction.EditingActionTypes actionType)
+        {
+            Func<PageAction> getNewPageAction = () =>
+                {
+                    PageAction pa = new PageAction
+                    {
+                        Action = actionType,
+                        ActionBy = actionBy,
+                        Folder = this.Directory.DisplayName,
+                        Url = this.Url
+                    };
+                    return pa;
+                };
+            CoreDataContext DataContext = Core.GetDataContext();
+            switch (actionType)
+            {
+                default:
+                    break;
+                case PageAction.EditingActionTypes.NewPage:
+                case PageAction.EditingActionTypes.PageDeleted:
+                case PageAction.EditingActionTypes.PageContentModified:
+                    DataContext.Actions.Add(getNewPageAction());
+                    break;
+                case PageAction.EditingActionTypes.PageModified:
+                    PageAction.AddPropertyModificationActions(DataContext.Entry(this), getNewPageAction, (pa) =>
+                    {
+                        DataContext.Actions.Add(pa);
+                    });
+                    break;
+            }
+        }
         private PageContent GetContent(PageType index)
         {
             // replace this routine if I ever get rid of panel, panelpages and pagemarkups!
@@ -195,7 +184,7 @@ namespace Fastnet.Webframe.CoreData
             switch (index)
             {
                 case PageType.Centre:
-                    pm  = this.PageMarkup;
+                    pm = this.PageMarkup;
                     break;
                 default:
                     pm = findPageMarkup(index);

@@ -1,4 +1,5 @@
-﻿using Fastnet.EventSystem;
+﻿using Fastnet.Common;
+using Fastnet.EventSystem;
 using Fastnet.Webframe;
 using Microsoft.AspNet.Identity;
 //using Microsoft.AspNet.Identity;
@@ -13,6 +14,12 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
+    public enum AccessResult
+    {
+        Rejected,
+        ViewAllowed,
+        EditAllowed
+    }
     public partial class Member
     {
         // I do not use the Email Confirmation scheme that ias part of the Asp.Net Identity system
@@ -153,19 +160,82 @@ namespace Fastnet.Webframe.CoreData
 
             return byteArraysEqual(buffer3, buffer4);
         }
-        //public void RecordNewMember(string actionBy = null)
+        //public bool CanView(Page page)
         //{
-        //    CoreDataContext DataContext = Core.GetDataContext();
-        //    MembershipAction ma = new MembershipAction
-        //    {
-        //        MemberId = this.Id,
-        //        EmailAddress = this.EmailAddress,
-        //        FullName = this.Fullname,
-        //        ActionBy = actionBy ?? this.Fullname,
-        //        Action = MembershipAction.ActionTypes.New,
-        //    };
-        //    DataContext.Actions.Add(ma);
+        //    bool result = true;
+        //    var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
+        //    var pageAccessibleFrom = page.Directory.ViewableFrom();
+        //    result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
+        //    return result;
         //}
+        //public bool CanEdit(Page page)
+        //{
+        //    bool result = true;
+        //    var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
+        //    var pageAccessibleFrom = page.Directory.EditableFrom();
+        //    result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
+        //    return result;
+        //}
+        public AccessResult GetAccessResult(Page page)
+        {
+            TraceAccess("Access: for {0}, url {1}", this.Fullname, page.Url);
+            Directory dir = page.Directory;
+            return GetAccessResult(dir);
+        }
+        public AccessResult GetAccessResult(Document doc)
+        {
+            TraceAccess("Access: for {0}, url {1}", this.Fullname, doc.Url);
+            Directory dir = doc.Directory;
+            return GetAccessResult(dir);
+        }
+        public AccessResult GetAccessResult(Image image)
+        {
+            TraceAccess("Access: for {0}, url {1}", this.Fullname, image.Url);
+            Directory dir = image.Directory;
+            return GetAccessResult(dir);
+        }
+        public Page FindLandingPage()
+        {
+            Func<AccessResult, bool> canAccess = (ar) =>
+            {
+                return ar == AccessResult.ViewAllowed || ar == AccessResult.EditAllowed;
+            };
+            Page result = null;
+            CoreDataContext DataContext = Core.GetDataContext();
+            var lps = DataContext.Pages.Where(x => x.IsLandingPage).ToArray();
+            var pages = lps.Where(x => canAccess(GetAccessResult(x))).ToArray();
+            if (pages.Count() > 1)
+            {
+                var pagesWithWeight = pages.Select(x => new { Page = x, Weight = FindWeight(x) });
+                TraceAccess("Access: for {0}, candidate landing pages: {1}", this.Fullname, string.Join(", ", pagesWithWeight.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
+                var maxWeight = pagesWithWeight.Max(x => x.Weight);
+                var heaviest = pagesWithWeight.Where(x => x.Weight == maxWeight);
+                if (heaviest.Count() > 1)
+                {
+                    Log.Write("Multiple landing pages found for {0}: {1}", this.Fullname, string.Join(", ", heaviest.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
+                }
+                TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, string.Format("{0} weight {1:#0.00}", heaviest.First().Page.Url, heaviest.First().Weight));
+                result =  heaviest.First().Page;
+            }
+            else
+            {
+                result = pages.First();
+            }
+            TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, result.Url);
+            return result;
+        }
+        public dynamic GetClientSideMemberDetails()
+        {
+            return new
+            {
+                Id = this.Id,
+                Name = this.Fullname,
+                IsAdministrator = this.IsAdministrator,
+                IsDisabled = this.Disabled,
+                EmailConfirmed = this.EmailAddressConfirmed,
+                EmailAddress = this.EmailAddress,
+            };
+        }
         public void RecordChanges(string actionBy = null, MemberAction.MemberActionTypes actionType = MemberAction.MemberActionTypes.Modification)
         {
             CoreDataContext DataContext = Core.GetDataContext();
@@ -234,37 +304,6 @@ namespace Fastnet.Webframe.CoreData
                 }
             }
         }
-        public bool CanView(Page page)
-        {
-            bool result = true;
-            var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
-            var pageAccessibleFrom = page.Directory.ViewableFrom();
-            result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
-            return result;
-        }
-        public bool CanEdit(Page page)
-        {
-            bool result = true;
-            var memberOf = GetAllGroups(); //i.e. as a result of direct membership or because these groups are parents
-            var pageAccessibleFrom = page.Directory.EditableFrom();
-            result = memberOf.Any(mo => pageAccessibleFrom.Contains(mo));
-            return result;
-        }
-        public Page FindLandingPage()
-        {
-            var memberOf = GetAllGroups();// Groups; // i.e. direct membership
-            var directories = memberOf.SelectMany(g => g.DirectoryGroups).Select(dg => dg.Directory);
-            var pages = directories.Select(x => x.GetClosestLandingPage());
-            Debug.Assert(pages.Count() != 0);
-            if (pages.Count() > 1)
-            {
-                foreach (var lp in pages)
-                {
-                    Log.Write(EventSeverities.Warning, "Multiple home pages: Member {0}, page url {1}", this.Fullname, lp.Url);
-                }
-            }
-            return pages.First();
-        }
         private IEnumerable<Group> GetAllGroups()
         {
             // this returns a flat list of all groups this member is in 
@@ -278,6 +317,66 @@ namespace Fastnet.Webframe.CoreData
                 }
             }
             return list;
+        }
+        private AccessResult GetAccessResult(Directory dir)
+        {
+            AccessResult ar = AccessResult.Rejected;
+            TraceAccess("Access: for {0}, directory {1}", this.Fullname, dir.DisplayName);
+            var drgSet = dir.DirectoryGroups;
+            if (drgSet.Count() == 0)
+            {
+                TraceAccess("Access: for {0}, directory {1}, no direct restrictions", this.Fullname, dir.DisplayName);
+                dir = dir.ParentDirectory;
+                ar = GetAccessResult(dir);
+            }
+            TraceAccess("Access: for {0}, directory {1}, direct restriction group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", drgSet.Select(x => x.Group.Fullpath).ToArray()));
+            if (drgSet.Select(x => x.Group).Any(x => IsMemberOf(x)))
+            {
+                var dgs = drgSet.Where(x => IsMemberOf(x.Group));
+                TraceAccess("Access: for {0}, directory {1}, member of group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Select(x => x.Group.Fullpath).ToArray()));
+                if (dgs.Any(x => x.EditAllowed))
+                {
+                    TraceAccess("Access: for {0}, directory {1}, edit allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.EditAllowed).Select(x => x.Group.Fullpath).ToArray()));
+                    ar = AccessResult.EditAllowed;
+                }
+                else if  (dgs.Any(x => x.ViewAllowed))
+                {
+                    //var xx = dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray();
+                    TraceAccess("Access: for {0}, directory {1}, view allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray()));
+                    ar = AccessResult.ViewAllowed;
+                }
+            }
+            TraceAccess("Access: for {0}, directory {1}, access result: {2}", this.Fullname, dir.DisplayName, ar.ToString());
+            return ar;
+        }
+        private bool IsMemberOf(Group group)
+        {
+            return group.SelfAndDescendants.Any(x => x.Members.Contains(this));
+            //return group.Members.Contains(this);
+        }
+        private void TraceAccess(string fmt, params object[] args)
+        {
+            bool trace = ApplicationSettings.Key("TraceAccess", false);
+            if (trace)
+            {
+                Log.Write(fmt, args);
+            }
+        }
+        private double FindWeight(Page p)
+        {
+            double result = -1.0;
+            Directory dir = p.Directory;
+            foreach (var d in dir.SelfAndParents)
+            {
+                var dgs = d.DirectoryGroups.Where(x => IsMemberOf(x.Group));
+                if (dgs.Count() > 0)
+                {
+                    result = dgs.Average(x => x.Group.Weight);
+                    break;
+                }
+            }
+            Debug.Assert(result >= 0);
+            return result;
         }
     }
     //public class DWHMember : Member

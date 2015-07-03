@@ -60,41 +60,20 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 groups = list;
             }
             
-            var result = groups.Select(x => GetClientSideGroupListDetails(x));
+            var result = groups.Select(x => x.GetClientSideGroupDetails());
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
-        //[HttpGet]
-        //[Route("get/groupsall")]
-        //public async Task<HttpResponseMessage> GetAllGroups()
-        //{
-        //    List<cd.Group> groups = new List<cd.Group>();
-        //    Func<cd.Group, Task> readChildren = null;
-        //    readChildren = async (g) =>
-        //    {
-        //        var list = await DataContext.Groups.Where(x => x.ParentGroupId == g.GroupId).OrderBy(x => x.Name).ToArrayAsync();
-        //        foreach (var item in list)
-        //        {
-        //            groups.Add(item);
-        //            await readChildren(item);
-        //        }
-        //    };
-        //    cd.Group root = await DataContext.Groups.SingleAsync(x => x.ParentGroup == null);
-        //    groups.Add(root);
-        //    await readChildren(root);
-        //    var result = groups.Select(x => GetClientSideGroupListDetails(x));
-        //    return this.Request.CreateResponse(HttpStatusCode.OK, result);
-        //}
         [HttpGet]
         [Route("get/group/{groupId}")]
         public async Task<HttpResponseMessage> GetGroupDetails(long groupId)
         {
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             var members = group.Members.Where(m => !m.IsAdministrator).OrderBy(x => x.LastName);
-            var resultMembers = members.Select(m => GetClientSideMemberIndexDetails(m));
+            var resultMembers = members.Select(m => m.GetClientSideMemberDetails());
             var result = new
             {
-                Group = GetClientSideGroupListDetails(group),
-                Members = resultMembers,// members.Select(m => GetClientSideMemberIndexDetails(m))
+                Group = group.GetClientSideGroupDetails(),
+                Members = resultMembers,// members.Select(m => GetClientSideMemberIndexDetails(m))                
                 HasMembers = resultMembers.Count() > 0
             };
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
@@ -107,7 +86,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             var members = await DataContext.Members.Where(m => !m.IsAdministrator && !m.IsAnonymous).ToArrayAsync();
             //var groupMembers = group.Members.ToArrayAsync();
             var candidates = members.Except(group.Members.ToArray()).OrderBy(x => x.LastName);
-            var resultCandidates = candidates.Select(m => GetClientSideMemberIndexDetails(m));
+            var resultCandidates = candidates.Select(m => m.GetClientSideMemberDetails());
             var result = new
             {
                 Members = resultCandidates,
@@ -142,12 +121,33 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         [Route("update/group")]
         public async Task<HttpResponseMessage> UpdateGroup(dynamic data)
         {
+            Action<int, IEnumerable<cd.Group>> changeWeights = null;
+            changeWeights = (incr, subgroups) =>
+            {
+                foreach (var sg in subgroups)
+                {
+                    sg.Weight += incr;
+                    sg.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.Modification);
+                    changeWeights(incr, sg.Children);
+                }
+            };
             long groupId = data.groupId;
             string name = data.name;
             string description = data.descr;
+            int weight = data.weight;
+            bool updateChildren = data.updateChildren;
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             group.Name = name;
             group.Description = description;
+            if (group.Weight != weight)
+            {
+                int increment = weight - group.Weight;
+                group.Weight = weight;
+                if (updateChildren)
+                {
+                    changeWeights(increment, group.Children);
+                }
+            }
             group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.Modification);
             await DataContext.SaveChangesAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK);
@@ -156,6 +156,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         [Route("add/group")]
         public async Task<HttpResponseMessage> AddGroup(dynamic data)
         {
+            int weightIncrement = cd.Group.GetWeightIncrement();
             Func< IEnumerable<string>, string> getUniqueName = (existingNames) =>
             {
                 string fmt = "New Group";
@@ -182,7 +183,8 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             {
                 ParentGroup = group,
                 Name = name,
-                Description = ""
+                Description = "",
+                Weight = group.Weight + weightIncrement
             };
             DataContext.Groups.Add(ng);
             ng.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.New);
@@ -255,15 +257,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> GetMembers(string searchText, bool prefix = false)
         {
             var members = await FindMembers(searchText, prefix);
-            //var result = members.Select(m => new
-            //{
-            //    Id = m.Id,
-            //    Name = m.Fullname,
-            //    IsAdministrator = m.IsAdministrator,
-            //    IsDisabled = m.Disabled,
-            //    EmailConfirmed = m.EmailAddressConfirmed
-            //});
-            var result = members.Select(m => GetClientSideMemberIndexDetails(m));
+            var result = members.Select(m => m.GetClientSideMemberDetails());
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
@@ -412,7 +406,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
                 await DataContext.SaveChangesAsync();
             }
-            var r = GetClientSideMemberIndexDetails(m);
+            var r = (object)m.GetClientSideMemberDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
         [HttpPost]
@@ -436,7 +430,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();            
             await mh.SendAccountActivationAsync(m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
-            var r = GetClientSideMemberIndexDetails(m);
+            var r = (object)m.GetClientSideMemberDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
         [HttpPost]
@@ -493,40 +487,6 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             var selectedMembers = temp.Where(x => match(x.FirstName, x.LastName));
             var keys = selectedMembers.Select(x => x.Id);
             return await DataContext.Members.Where(x => keys.Contains(x.Id)).OrderBy(x => x.LastName).ToArrayAsync();
-        }
-        private object GetClientSideMemberIndexDetails(Member m)
-        {
-            return new
-            {
-                Id = m.Id,
-                Name = m.Fullname,
-                IsAdministrator = m.IsAdministrator,
-                IsDisabled = m.Disabled,
-                EmailConfirmed = m.EmailAddressConfirmed,
-                EmailAddress = m.EmailAddress,
-            };
-        }
-
-        private object GetClientSideGroupListDetails(cd.Group g)
-        {
-            //[Flags]
-            //public enum GroupTypes
-            //{
-            //    None = 0,
-            //    User = 1,
-            //    System = 2,
-            //    SystemDefinedMembers = 4
-            //}
-            return new 
-            {
-                Id = g.GroupId,
-                Name = g.Name,
-                //FullPath = g.Fullpath,
-                Description = g.Description,
-                IsSystem = g.Type.HasFlag(GroupTypes.System),
-                HasSystemDefinedMembers = g.Type.HasFlag(GroupTypes.SystemDefinedMembers),
-                SubgroupTotal = g.Children.Count()
-            };
         }
     }
 }

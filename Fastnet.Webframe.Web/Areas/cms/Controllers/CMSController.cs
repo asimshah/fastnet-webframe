@@ -42,7 +42,13 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         public HttpResponseMessage GetDirectories()
         {
             IEnumerable<Directory> result = GetFlattenedDirectories();
-            var folders = result.Select(d => new { Path = d.Fullpath.Replace("$root", "Store"),  Id = d.DirectoryId }); // add properties here as required
+            var folders = result.Select(d => new
+            {
+                Path = d.DisplayName,
+                Id = d.DirectoryId,
+                Restrictions = d.DirectoryGroups.Select(x => new { Group = x.Group.Fullpath, View = x.ViewAllowed, Edit = x.EditAllowed, Access = x.GetAccessDescription(), Weight = x.Group.Weight}),
+                InheritedRestrictions = d.GetClosestDirectoryGroups().Select(x => new { Group = x.Group.Fullpath, View = x.ViewAllowed, Edit = x.EditAllowed, Access = x.GetAccessDescription(), Weight = x.Group.Weight })
+            }); // add properties here as required
             return this.Request.CreateResponse(HttpStatusCode.OK, folders);
         }
         [HttpGet]
@@ -69,10 +75,11 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Name = g.Name,
                 FullPath = g.Fullpath,
                 Description = g.Description,
+                Weight = g.Weight,
                 HasDirectories = g.DirectoryGroups.Count() > 0,
                 Directories = g.DirectoryGroups.Select(x => new
                 {
-                    Path = x.Directory.Fullpath.Replace("$root", "Store"),
+                    Path = x.Directory.DisplayName,
                     View = x.ViewAllowed,
                     Edit = x.EditAllowed
                 })
@@ -83,55 +90,8 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         [Route("get/foldercontent/{id}")]
         public HttpResponseMessage GetDirectoryContent(long id)
         {
-            //Func<PageType, string> getPageTypeImage = (pt) =>
-            //{
-            //    string r = null;
-            //    switch (pt)
-            //    {
-            //        case PageType.Centre:
-            //            r = "areas/cms/Content/images/centrepage.png";
-            //            break;
-            //        case PageType.Left:
-            //            r = "areas/cms/Content/images/leftpage.png";
-            //            break;
-            //        case PageType.Right:
-            //            r = "areas/cms/Content/images/rightpage.png";
-            //            break;
-            //        case PageType.Banner:
-            //            r = "areas/cms/Content/images/bannerpage.png";
-            //            break;
-            //        default:
-            //            r = "areas/cms/Content/images/panelwire.jpg";
-            //            break;
-            //    }
-            //    return r;
-            //};
-            //Func<PageType, string> getPageTypeTooltip = (pt) =>
-            //{
-            //    string r = null;
-            //    switch (pt)
-            //    {
-            //        case PageType.Centre:
-            //            r = "Centre page";
-            //            break;
-            //        case PageType.Left:
-            //            r = "Left Panel page";
-            //            break;
-            //        case PageType.Right:
-            //            r = "Right Panel page";
-            //            break;
-            //        case PageType.Banner:
-            //            r = "Banner page";
-            //            break;
-            //        default:
-            //            r = "Unknown!";
-            //            break;
-            //    }
-            //    return r;
-            //};
             List<dynamic> list = new List<dynamic>();
             Directory dir = DataContext.Directories.Find(id);
-            //var pages = dir.Pages.ToArray().Where(x => x.IsCentrePage).OrderBy(p => p.Url);
             var pages = dir.Pages.ToArray().OrderBy(p => p.Url);
             var documents = dir.Documents.ToArray().OrderBy(d => d.Url);
             var images = dir.Images.ToArray().OrderBy(x => x.Url);
@@ -141,12 +101,11 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Id = p.PageId,
                 Name = p.Name,
                 Url = p.Url,
-                //Info = p.SidePageInfo,
                 LandingPage = p.IsLandingPage,
                 PageType = p.Type,
-                LandingPageImage = p.GetLandingPageImageUrl(),
-                PageTypeImage = p.GetTypeImageUrl(),// getPageTypeImage(p.Type),
-                PageTypeTooltip = p.GetTypeTooltip(),// getPageTypeTooltip(p.Type),
+                LandingPageImage = Page.GetLandingPageImageUrl(),
+                PageTypeImage = p.GetTypeImageUrl(),
+                PageTypeTooltip = p.GetTypeTooltip(),
                 LastModifiedOn = p.ModifiedOn ?? p.CreatedOn,
                 LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy: p.CreatedBy
             }));
@@ -156,7 +115,6 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Id = d.DocumentId,
                 Name = d.Name,
                 Url = d.Url,
-                //Info = string.Empty,
                 DocumentTypeImage = d.GetTypeImageUrl(),
                 LastModifiedOn = d.CreatedOn,
                 LastModifiedBy = d.CreatedBy
@@ -169,7 +127,8 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Url = x.Url,
                 Info = x.Size,
                 LastModifiedOn = x.CreatedOn,
-                LastModifiedBy = x.CreatedBy
+                LastModifiedBy = x.CreatedBy,
+                ImageTypeImage = x.GetImageTypeImage()
             }));
             return this.Request.CreateResponse(HttpStatusCode.OK, list);
         }
@@ -192,6 +151,13 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         public async Task<HttpResponseMessage> GetGroupHistory()
         {
             var data = await DataContext.Actions.OfType<GroupAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("get/contenthistory")]
+        public async Task<HttpResponseMessage> GetContentHistory()
+        {
+            var data = await DataContext.Actions.OfType<EditingAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK, data);
         }
         [HttpGet]

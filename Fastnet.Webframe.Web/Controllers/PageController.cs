@@ -1,35 +1,29 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.Common;
+using Fastnet.EventSystem;
+using Fastnet.Web.Common;
+using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Web.Common;
+using Fastnet.Webframe.WebApi;
 //using Fastnet.Webframe.Web.Models.Core;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web.Hosting;
 using System.Web.Http;
-using Fastnet.Common;
 using Data = Fastnet.Webframe.CoreData;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
-    using Microsoft.AspNet.Identity;
-    using Microsoft.AspNet.Identity.Owin;
-    using Microsoft.Owin.Security;
-    using System.Dynamic;
-    using System.Diagnostics;
-    using System.Net.Http.Headers;
-    using Fastnet.Webframe.Web.Common;
-    using System.IO;
-    using Fastnet.Webframe.WebApi;
-    using Fastnet.EventSystem;
+
     [RoutePrefix("pageapi")]
     public class PageController : BaseApiController// ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         [HttpGet]
-        //[Route("home/{id?}")]
         [Route("home")]
-        //public HttpResponseMessage GetHomePage(long? id = null)
         public HttpResponseMessage GetHomePage()
         {
             //reminder I need to find the current user to do home page correctly!
@@ -59,10 +53,18 @@ namespace Fastnet.Webframe.Web.Controllers
         public HttpResponseMessage GetPage(string id)
         {
             long pageId = Int64.Parse(id);
+            Member m = GetCurrentMember();
             //HttpContext.Current.Session["CurrentPage"] = pageId;
             Data.Page page = DataContext.Pages.Find(pageId);
+            
+            AccessResult ar = m.GetAccessResult(page);
             object data = null;
-            if (this.Request.IsModified(page.PageMarkup.LastModifiedOn, page.PageId))
+            if (ar == AccessResult.Rejected)
+            {
+                data = PrepareAccessDenied(page);
+                return this.Request.CreateResponse(HttpStatusCode.OK, data);
+            }
+            else if (this.Request.IsModified(page.PageMarkup.LastModifiedOn, page.PageId))
             {
                 if (page.MarkupType == MarkupType.DocX)
                 {
@@ -72,23 +74,25 @@ namespace Fastnet.Webframe.Web.Controllers
                 {
                     data = PrepareHTMLPage(page);
                 }
+                
             }
-
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
         }
+
+
         [HttpGet]
-        [Route("page/canedit/{id}")]
-        public HttpResponseMessage CanEditPage(string id)
+        [Route("page/access/{id}")]
+        public HttpResponseMessage GetAccessResult(string id)
         {
             var admins = Group.Administrators;
             long pageId = Int64.Parse(id);
             Data.Page page = DataContext.Pages.Find(pageId);
             Member m = GetCurrentMember();
-            bool result = admins.Members.Contains(m) || m.CanEdit(page);
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { CanEdit = result });
+            AccessResult ar = m.GetAccessResult(page);
+            //bool result = admins.Members.Contains(m) || m.CanEdit(page);
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { Access  = ar.ToString().ToLower() });
         }
         [HttpGet]
-        //[Route("panelinfo/{id}")]
         [Route("sidepages/{id}")]
         public HttpResponseMessage GetSidePages(string id)
         {
@@ -155,8 +159,8 @@ namespace Fastnet.Webframe.Web.Controllers
         private dynamic PrepareHTMLPage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;
-            var location = page.Directory.Fullpath.Replace("$root", "Store");
-            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
+            var location = page.Directory.DisplayName;//.Replace("$root", "Store");
+            return new { PageId = page.PageId,  Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
         }
         private dynamic PrepareDocXpage(Page page)
         {
@@ -166,85 +170,56 @@ namespace Fastnet.Webframe.Web.Controllers
             var styleRules = hp.GetLegacyStyleRules();
             // now merge multiple styles into one
             var allRules = styleRules.SelectMany(x => x);
-            var location = page.Directory.Fullpath.Replace("$root", "Store");
-            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = allRules };
+            var location = page.Directory.DisplayName;//.Replace("$root", "Store");
+            return new { PageId = page.PageId,  Location = location, HtmlText = htmlText, HtmlStyles = allRules };
         }
-        /// <summary>
-        /// Get the page required for the requestedpanel when the reference page is in the centre panel
-        /// </summary>
-        /// <param name="referencePage">centre page</param>
-        /// <param name="panel">requested panel</param>
-        //private Page FindSidePage(Data.Page referencePage, Data.Panel panel)
+        private dynamic PrepareAccessDenied(Page page)
+        {
+            string htmlFile = page.Type == PageType.Centre ? "~/Default Pages/AccessDenied.html" : "~/Default Pages/Blank page.html";
+            string filename = HostingEnvironment.MapPath(htmlFile);
+            string htmlText = System.IO.File.ReadAllText(filename);
+            return new { PageId = -1, Location = string.Empty, HtmlText = htmlText, HtmlStyles = string.Empty };
+        }
+        //private Data.Page GetAlternatePage(Page referencePage)
         //{
-        //    Data.PanelPage panelPage = referencePage.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
-        //    Data.Page sidePage = panelPage != null ? panelPage.Page : null;
-        //    if (sidePage == null)
+        //    Data.Page alternatePage = null;
+        //    if (!string.IsNullOrWhiteSpace(referencePage.InheritSideContentFromUrl))
         //    {
-        //        Data.Page alternatePage = GetAlternatePage(referencePage);
-        //        if (alternatePage != null)
-        //        {
-        //            sidePage = FindSidePage(alternatePage, panel);
-        //        }
+        //        long id = Convert.ToInt64(referencePage.InheritSideContentFromUrl.Split('/')[2]);
+        //        alternatePage = DataContext.Pages.SingleOrDefault(x => x.PageId == id);
         //    }
-        //    if (sidePage == null)
-        //    {
-        //        Data.Page closest = GetClosestHomePage(referencePage);
-        //        if (closest != null)
-        //        {
-        //            sidePage = FindSidePage(closest, panel);
-        //        }
-        //    }
-        //    return sidePage;
+        //    return alternatePage;
         //}
-        private Data.Page GetAlternatePage(Page referencePage)
-        {
-            Data.Page alternatePage = null;
-            if (!string.IsNullOrWhiteSpace(referencePage.InheritSideContentFromUrl))
-            {
-                long id = Convert.ToInt64(referencePage.InheritSideContentFromUrl.Split('/')[2]);
-                alternatePage = DataContext.Pages.SingleOrDefault(x => x.PageId == id);
-            }
-            return alternatePage;
-        }
-        private Data.Page GetClosestHomePage(Page referencePage)
-        {
-            Func<Data.Directory, Data.Page> findLandingPage = (dir) =>
-            {
-                return dir.Pages.SingleOrDefault(x => x.IsLandingPage);
-            };
-            Data.Directory cd = referencePage.Directory;
-            if (referencePage.IsLandingPage)
-            {
-                cd = referencePage.Directory.ParentDirectory;
-            }
-
-            Data.Page lp = null;
-            do
-            {
-                if (cd == null)
-                {
-                    // we have traversed up the entire tree and not found any landing page
-                    break;
-                }
-                else
-                {
-                    lp = findLandingPage(cd);
-                    if (lp == null)
-                    {
-                        cd = cd.ParentDirectory;
-                    }
-                }
-            } while (lp == null);
-            return lp;
-        }
-        //private Data.Member GetCurrentMember()
+        //private Data.Page GetClosestHomePage(Page referencePage)
         //{
-        //    if (User.Identity.IsAuthenticated)
+        //    Func<Data.Directory, Data.Page> findLandingPage = (dir) =>
         //    {
-        //        var userId = Convert.ToInt64(User.Identity.GetUserId());
-        //        return DataContext.Members.Find(userId);
+        //        return dir.Pages.SingleOrDefault(x => x.IsLandingPage);
+        //    };
+        //    Data.Directory cd = referencePage.Directory;
+        //    if (referencePage.IsLandingPage)
+        //    {
+        //        cd = referencePage.Directory.ParentDirectory;
         //    }
-        //    return null;
+
+        //    Data.Page lp = null;
+        //    do
+        //    {
+        //        if (cd == null)
+        //        {
+        //            // we have traversed up the entire tree and not found any landing page
+        //            break;
+        //        }
+        //        else
+        //        {
+        //            lp = findLandingPage(cd);
+        //            if (lp == null)
+        //            {
+        //                cd = cd.ParentDirectory;
+        //            }
+        //        }
+        //    } while (lp == null);
+        //    return lp;
         //}
         private bool IsContentModified(Data.Page page)
         {
@@ -267,19 +242,5 @@ namespace Fastnet.Webframe.Web.Controllers
             string etag = "\"" + t + "\"";
             return etag;
         }
-        //private dynamic GetPanelInfo(Data.Page cp, Data.Panel p)
-        //{
-        //    dynamic x = new ExpandoObject();
-        //    x.Name = p.Name;
-        //    //x.Height = p.PixelHeight;
-        //    //x.Width = p.PixelWidth;
-        //    x.Visible = p.Visible;
-        //    if (x.Visible)
-        //    {
-        //        var sp = FindSidePage(cp, p);
-        //        x.PageId = sp != null ? sp.PageId.ToString() : null;
-        //    }
-        //    return x;
-        //}
     }
 }

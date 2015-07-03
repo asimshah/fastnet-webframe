@@ -67,6 +67,31 @@ namespace Fastnet.Webframe.Web.Controllers
             //ReportRoutes();
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("logaccess")]
+        public HttpResponseMessage LogAccess()
+        {
+            foreach (Member m in DataContext.Members)
+            {
+                foreach (Page page in DataContext.Pages)
+                {
+                    m.GetAccessResult(page);
+                }
+            }
+            return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("loglandingpages")]
+        public HttpResponseMessage LogLandingPages()
+        {
+            foreach (Member m in DataContext.Members)
+            {
+                Page lp = m.FindLandingPage();
+            }
+            return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
         //private void ReportRoutes()
         //{
         //    try

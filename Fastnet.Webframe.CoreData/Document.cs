@@ -27,7 +27,7 @@ namespace Fastnet.Webframe.CoreData
         public byte[] TimeStamp { get; set; }
         public virtual ICollection<Page> Pages { get; set; } // these pages hyperlink to this document
         public virtual Directory Directory { get; set; }
-        public virtual ICollection<MarkupDocumentLink> MarkupLinks { get; set; }
+        //public virtual ICollection<MarkupDocumentLink> MarkupLinks { get; set; }
         [NotMapped]
         public string Url
         {

@@ -1,11 +1,9 @@
 ﻿using Fastnet.EventSystem;
+using Fastnet.Web.Common;
 using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Common;
-using Fastnet.Webframe.Web.Models;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -16,8 +14,6 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.SessionState;
 using System.Web.WebPages;
-using Autofac;
-using Fastnet.Common;
 
 
 namespace Fastnet.Webframe.Web

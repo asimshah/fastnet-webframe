@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.15
+    // Version 1.0.16
     var $T;
     var $U;
     var modelessTemplate =
@@ -96,8 +96,7 @@
     var formList = {};
     var formCount = 0;
     function frm(template, options, data) {
-        this.options = $.extend({
-            
+        this.options = $.extend({            
             _container: ".forms-container",
             _template: template,
             _id: $U.Format("fn-{0}", formCount++),
@@ -110,6 +109,7 @@
             DisableSystemClose: false,
             Title: "Form Title",
             IsModal: true,
+            ShowErrorSummary: false,
             IsResizable: false,
             AfterItemValidation: null,
             OnChange: null,
@@ -591,8 +591,8 @@
                 var propElement = $(this).closest("[data-property");
                 $(propElement).find(".message").html("");                
                 $(propElement).attr("data-validation-state", "visiting");
-                var es = _updateErrorSummary.bind(me);
-                es();
+                //var es = _updateErrorSummary.bind(me);
+                //es();
             });
             //var selector = "textarea, input[type=text], input[type=password], input[type=email], input[type=checkbox]";
             root.find(me.options.allControlsSelector).on("blur", function (e) {
@@ -603,8 +603,8 @@
                     //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
                     //    result.totalValid, result.totalInitial,
                     //    result.totalErrors + result.totalValid + result.totalInitial);
-                    var es = _updateErrorSummary.bind(me);
-                    es();
+                    //var es = _updateErrorSummary.bind(me);
+                    //es();
                     if (me.options.AfterItemValidation !== null) {
                         me.options.AfterItemValidation(me, result);
                     }
@@ -668,6 +668,7 @@
                         //    me.options.AfterItemValidation(me, { success: true, dataItem: dataItem });
                         //}
                     }
+                    _updateErrorSummary.call(me);
                 }
             });
         }
@@ -786,15 +787,16 @@
         }
         function _updateErrorSummary() {
             var me = this;
-            var root = me.options._froot;
-            var totals = me.getValidationCounts();
-            if (totals.totalErrors > 0) {
-                var fmt = totals.totalErrors === 1 ? "There is 1 error" : "There are {0} errors";
-                root.find(".error-summary").text($U.Format(fmt, totals.totalErrors));
-            } else {
-                root.find(".error-summary").text("");
+            if (me.options.ShowErrorSummary) {
+                var root = me.options._froot;
+                var totals = me.getValidationCounts();
+                if (totals.totalErrors > 0) {
+                    var fmt = totals.totalErrors === 1 ? "There is 1 error" : "There are {0} errors";
+                    root.find(".error-summary").text($U.Format(fmt, totals.totalErrors));
+                } else {
+                    root.find(".error-summary").text("");
+                }
             }
-            
         }
         frm.prototype.clearMessages = function () {
             var me = this;
