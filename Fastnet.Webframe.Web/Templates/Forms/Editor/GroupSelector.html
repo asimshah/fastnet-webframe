@@ -1,0 +1,33 @@
+﻿<div class="editor-dialog group-selector">
+    <div class="form-body">
+        {{#data}}
+        <div class="group-box {{#Selected}} group-selected {{/Selected}}" data-id="{{Group.Id}}">
+            <div class="form-group-sm" data-property>
+                <input type="checkbox" class="group-checkbox" id="gid-1-{{Group.Id}}" data-item="group-item-{{Group.Id}}" }>
+                <label class="checkbox-label {{#Group.IsSystem}}system-group{{/Group.IsSystem}}" for="gid-1-{{Group.Id}}">
+                    <span class="group-name">{{Group.Name}}</span>
+                    <span class="group-parent">({{Parent.FullName}})</span>
+                </label>
+                <div class="message"></div>
+            </div>
+            <div class="form-group-sm row access-settings" data-property>
+                <div class="col-xs-offset-1 col-xs-2">
+                    <input type="checkbox" class="view-checkbox" id="gid-{{Group.Id}}" data-item="view-item-{{Group.Id}}">
+                    <label class="checkbox-label" for="gid-{{Group.Id}}">View</label>
+                    <div class="message"></div>
+                </div>
+                <div class="col-xs-2">
+                    <input type="checkbox" class="edit-checkbox" id="gid-{{Group.Id}}" data-item="edit-item-{{Group.Id}}">
+                    <label class="checkbox-label" for="gid-{{Group.Id}}">Edit</label>
+                    <div class="message"></div>
+                </div>
+
+            </div>
+        </div>
+        {{/data}}
+    </div>
+    <div class="form-footer">
+        <button class="btn btn-primary" data-cmd="save-changes">Save</button>
+        <button class="btn btn-default" data-cmd="cancel">Cancel</button>
+    </div>
+</div>
