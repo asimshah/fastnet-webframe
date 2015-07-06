@@ -90,9 +90,11 @@
         IsLinkInternal: function (url) {
             var result = false;
             url = $T.StandardiseUrl(url);
+            //var builtIn = [
+            //    "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
+            //    "studio", "membership"];
             var builtIn = [
-                "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
-                "studio", "membership"];
+               "login", "logon", "login", "logoff", "register", "recoverpassword" ];
             function isBuiltIn(url) {
                 var r = false;
                 $.each(builtIn, function (i, item) {
