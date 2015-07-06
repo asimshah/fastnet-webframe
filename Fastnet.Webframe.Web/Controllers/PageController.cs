@@ -6,11 +6,13 @@ using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.WebApi;
 //using Fastnet.Webframe.Web.Models.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Web.Http;
 using Data = Fastnet.Webframe.CoreData;
@@ -119,8 +121,40 @@ namespace Fastnet.Webframe.Web.Controllers
         public HttpResponseMessage GetMenuInfo()
         {
             //bool isVisible = Data.Panel.MenuPanel.Visible;
-            var info = new {  MenuHtml = "" };//DataContext.GetMenuHtml(GetCurrentMember()) };
-            return this.Request.CreateResponse(HttpStatusCode.OK, info);
+            var masterList = DataContext.MenuMasters;
+            var result = masterList.Select(x => new
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Panel = x.PanelName.ToString().ToLower()
+            });
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        [Route("menu/{id}")]
+        public async Task<HttpResponseMessage> GetMenu(long id)
+        {
+            Func<Menu2, bool> canAccess = (m) =>
+            {
+                return true;
+            };
+            Func<IEnumerable<Menu2>, int, dynamic> getSubmenus = null;
+            getSubmenus = (menus, l) =>
+            {
+                var r = menus.Where(x => canAccess(x)).OrderBy(x => x.Index).Select(x => new
+                {
+                    Level = l,
+                    Index = x.Index,
+                    Text = x.Text,
+                    Url = x.Url,
+                    Submenus = getSubmenus(x.Submenus, l + 1),                    
+                });
+                return r;
+            };
+            int level = 0;
+            var mm = await DataContext.MenuMasters.FindAsync(id);
+            object result = getSubmenus(mm.Menus.ToArray(), level);
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
         [Route("~/image/{id}")]

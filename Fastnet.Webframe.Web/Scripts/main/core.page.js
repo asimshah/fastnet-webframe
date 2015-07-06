@@ -57,11 +57,21 @@
             });
         },
 
-        CreateMenus: function (menuHtml) {
-            var menus = $(menuHtml);
-            var toplevel = menus.first();
-            toplevel.addClass("nav navbar-nav");
-            $(".MenuPanel").empty().append(menus);
+        CreateMenus: function (menuList) {
+            function createMenu(panelSelector, masterInfo) {
+                var url = $U.Format("pageapi/menu/{0}", masterInfo.Id);
+                $.when($U.AjaxGet({ url: url })).then(function (r) {
+                    var menu = Menu.get();
+                    var menuId = menu.create(panelSelector, r, {});
+                    menu.logDetails(menuId);
+                });
+            }
+            $.each(menuList, function (i, item) {
+                if (item.Panel === "menupanel") {
+                    // support only menus in menu panels for now
+                    createMenu(".MenuPanel", item);
+                }
+            });
         },
         GotoInternalLink: function (url) {
             switch (url) {
@@ -138,13 +148,13 @@
             var pageId = startPage;
             $.when(
                 $U.AjaxGet({ url: "pageapi/menuinfo" })).then(function (menuInfo) {
-                    var menuInfoResult = menuInfo;
-                    var menuVisible = false;
-                    if (menuVisible) {
-                        var menuHtml = menuInfoResult.MenuHtml;
-                        $T.CreateMenus(menuHtml);
-                    }
-
+                    $T.CreateMenus(menuInfo);
+                    //var menuInfoResult = menuInfo;
+                    //var menuVisible = false;
+                    //if (menuVisible) {
+                    //    var menuHtml = menuInfoResult.MenuHtml;
+                    //    $T.CreateMenus(menuHtml);
+                    //}
                     $T.SetPage(pageId);
                     $T.QueryAuthentication();
                 });

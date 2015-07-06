@@ -1,0 +1,135 @@
+﻿body {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+
+    .banner-panel {
+        height: 80px;
+    }
+
+    .menu-panel {
+        background-color: gray;
+        height: 48px;
+    }
+
+    #menu-0 {
+        top: 10px;
+        left: 20px;
+        .horizontal {
+
+        }
+        .menu-item {
+            width: 128px;
+            line-height: 2.0em;
+            border: 2px solid yellow;
+            margin: 1px;
+            border-radius: 3px;
+            font-size: x-small;
+        }
+
+        .menu-item-panel {
+
+            &.level-0 {
+                background-color: pink;
+
+                .menu-item:nth-child(even) {
+                    background-color: white;
+                    color: black;
+
+                    &:hover {
+                        color: white;
+                        background-color: black;
+                    }
+                }
+
+                .menu-item:nth-child(odd) {
+                    color: white;
+                    background-color: black;
+
+                    &:hover {
+                        background-color: white;
+                        color: black;
+                    }
+                }
+            }
+
+            &.level-1 {
+                .menu-item:nth-child(even) {
+                    background-color: yellow;
+                    color: blue;
+                }
+
+                .menu-item:nth-child(odd) {
+                    color: yellow;
+                    background-color: blue;
+                }
+            }
+
+            &.level-2 {
+                //left: 128px;
+                .menu-item:nth-child(even) {
+                    background-color: red;
+                    color: white;
+                }
+
+                .menu-item:nth-child(odd) {
+                    color: red;
+                    background-color: white;
+                }
+            }
+        }
+    }
+}
+
+.fastnet-menu {
+    position: relative;
+    //display: inline-block;
+
+    *:focus {
+        outline: none;
+    }
+
+    a {
+        color: inherit;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    a:hover, a:visited {
+        text-decoration: none;
+    }
+
+    &.horizontal {
+        position:relative;
+        .menu-item-panel {
+            position: relative;
+
+            &.level-0 {
+                > .menu-item {
+                    display: inline-block;
+                }
+            }
+            &.level-1 {
+                display:none;
+            }
+            &.level-2 {
+                display:none;
+            }
+        }
+
+        .menu-item {
+            position: relative;
+
+            .indicator {
+                position: absolute;
+                top: 0;
+                right: 4px;
+            }
+
+            &:not(.has-submenus) .indicator {
+                display: none;
+            }
+        }
+    }
+}

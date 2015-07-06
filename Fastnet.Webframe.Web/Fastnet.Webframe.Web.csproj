@@ -772,6 +772,15 @@
     <Content Include="Content\datatables\swf\copy_csv_xls_pdf.swf" />
     <Content Include="Content\fastnet\forms.css" />
     <Content Include="Content\fastnet\forms.min.css" />
+    <Content Include="Content\fastnet\menu-test.css">
+      <DependentUpon>menu-test.less</DependentUpon>
+    </Content>
+    <Content Include="Content\fastnet\menu-test.min.css">
+      <DependentUpon>menu-test.css</DependentUpon>
+    </Content>
+    <Content Include="Content\fastnet\Menu.min.css">
+      <DependentUpon>Menu.css</DependentUpon>
+    </Content>
     <Content Include="Content\fastnet\treeview.css" />
     <Content Include="Content\fastnet\treeview.min.css" />
     <Content Include="Content\font-awesome\css\font-awesome.css" />
@@ -827,11 +836,14 @@
     <Content Include="Content\Main\DefaultCSS\LeftPanel.css">
       <DependentUpon>LeftPanel.less</DependentUpon>
     </Content>
-    <Content Include="Content\Main\DefaultCSS\Menu.css">
+    <Content Include="Content\fastnet\Menu.css">
       <DependentUpon>Menu.less</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\MenuPanel.css">
       <DependentUpon>MenuPanel.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\MenuPanel.min.css">
+      <DependentUpon>MenuPanel.css</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\RightPanel.css">
       <DependentUpon>RightPanel.less</DependentUpon>
@@ -925,6 +937,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Icon.png" />
+    <Content Include="menutest.html" />
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
@@ -962,6 +975,7 @@
     <Content Include="Scripts\fastnet\fastnet.account.js" />
     <Content Include="Scripts\fastnet\fastnet.contextmenu.js" />
     <Content Include="Scripts\fastnet\fastnet.forms.js" />
+    <Content Include="Scripts\fastnet\fastnet.menus.js" />
     <Content Include="Scripts\fastnet\fastnet.treeview.js" />
     <Content Include="Scripts\fastnet\fastnet.utilities.js" />
     <Content Include="Scripts\fastnet\fastnet.validators.js" />
@@ -1050,6 +1064,16 @@
     <Content Include="Content\bootstrap\bootstrap.less" />
     <Content Include="Content\bootstrap\badges.less" />
     <Content Include="Content\bootstrap\alerts.less" />
+    <Content Include="Content\Main\DefaultCSS\MenuPanel.css.map">
+      <DependentUpon>MenuPanel.css</DependentUpon>
+    </Content>
+    <Content Include="Content\fastnet\Menu.css.map">
+      <DependentUpon>Menu.css</DependentUpon>
+    </Content>
+    <Content Include="Content\fastnet\menu-test.less" />
+    <Content Include="Content\fastnet\menu-test.css.map">
+      <DependentUpon>menu-test.css</DependentUpon>
+    </Content>
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
@@ -1080,6 +1104,7 @@
     <Content Include="Scripts\main\core.pagetoolbar.js" />
     <Content Include="Scripts\main\core.storebrowser.js" />
     <Content Include="Scripts\main\core.test.js" />
+    <Content Include="Scripts\main\menutest.js" />
     <Content Include="Scripts\moment-with-locales.js" />
     <Content Include="Scripts\moment-with-locales.min.js" />
     <Content Include="Scripts\moment.js" />
@@ -1328,7 +1353,7 @@
     <Content Include="Content\Main\DefaultCSS\BannerPanel.less" />
     <Content Include="Content\Main\DefaultCSS\CentrePanel.less" />
     <Content Include="Content\Main\DefaultCSS\LeftPanel.less" />
-    <Content Include="Content\Main\DefaultCSS\Menu.less" />
+    <Content Include="Content\fastnet\Menu.less" />
     <Content Include="Content\Main\DefaultCSS\MenuPanel.less" />
     <Content Include="Content\Main\DefaultCSS\RightPanel.less" />
     <Content Include="Content\Main\DefaultCSS\SitePanel.less" />
@@ -1439,9 +1464,6 @@
       <Project>{f780da43-e8f6-4dab-bc5f-e637414d1e17}</Project>
       <Name>Fastnet.Webframe.CoreData</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="Scripts\main\test2.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

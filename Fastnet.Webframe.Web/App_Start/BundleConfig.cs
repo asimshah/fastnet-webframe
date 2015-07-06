@@ -55,6 +55,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
+                    "~/Scripts/fastnet/fastnet.menus.js",
                     "~/Scripts/main/core.pagetoolbar.js",
                     "~/Scripts/main/core.page.js",
                     "~/Scripts/main/core.storebrowser.js",
@@ -91,6 +92,7 @@ namespace Fastnet.Webframe.Web
             bundles.Add(new StyleBundle("~/Content/css").Include(
                   "~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
                   .Include("~/Content/bootstrap.css",
+                   "~/Content/fastnet/menu.css",
                   "~/Content/fastnet/treeview.css",
                   "~/Content/fastnet/forms.css",
                   "~/Content/main/main.css"));
@@ -120,9 +122,9 @@ namespace Fastnet.Webframe.Web
                 "~/Content/main/DefaultCSS/centrepanel.css",
                 "~/Content/main/DefaultCSS/centrepanel.user.css",
                 "~/Content/main/DefaultCSS/rightpanel.css",
-                "~/Content/main/DefaultCSS/rightpanel.user.css",
-                "~/Content/main/DefaultCSS/menu.css",
-                "~/Content/main/DefaultCSS/menu.user.css"
+                "~/Content/main/DefaultCSS/rightpanel.user.css"
+                //"~/Content/main/DefaultCSS/menu.css",
+                //"~/Content/main/DefaultCSS/menu.user.css"
                 ));
 
 

@@ -227,9 +227,6 @@ body {
   margin: 2px;
   line-height: 1.4;
 }
-.edit-panel .toolbar .testing-command {
-  display: none;
-}
 .edit-panel .toolbar .page-info-command {
   background: transparent;
   color: white;

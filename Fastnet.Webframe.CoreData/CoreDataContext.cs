@@ -27,11 +27,6 @@ using LDB = Fastnet.Webframe.Web.DataModel;
 
 namespace Fastnet.Webframe.CoreData
 {
-    //public interface IHierarchical<T>
-    //{
-    //    T Parent { get; set; }
-    //    ICollection<T> Children { get;  }
-    //}
     public enum Roles
     {
         Administrator,
@@ -137,6 +132,8 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<ClientApp> ClientApps { get; set; }
         public DbSet<CloneInformation> CloneInformata { get; set; }
         public DbSet<Directory> Directories { get; set; }
+        public DbSet<Menu2> NewMenus { get; set; }
+        public DbSet<MenuMaster> MenuMasters { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<FileChunk> FileChunks { get; set; }
         public DbSet<Font> Fonts { get; set; }
@@ -153,7 +150,7 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<UploadFile> UploadFiles { get; set; }
         public DbSet<ActionBase> Actions { get; set; }
         public DbSet<Recorder> Recorders { get; set; }
-        public DbSet<Record> Records { get; set;}
+        public DbSet<Record> Records { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -241,6 +238,7 @@ namespace Fastnet.Webframe.CoreData
                 EnsureRequiredGroups();
                 EnsureRequiredPanels();
                 EnsureInitialPages();
+                CreateTestMenus();
                 SetSiteVersion("4.0.0.0");
                 // this will need addtion in cases of a v4 upgrade
                 WriteMainStylesheets();
@@ -248,6 +246,39 @@ namespace Fastnet.Webframe.CoreData
             }
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
+        }
+
+        private void CreateTestMenus()
+        {
+            MenuMaster mm = new MenuMaster { Name = "Main", PanelName = PanelNames.MenuPanel };
+            Menu2 m1 = new Menu2 { Text = "Login", Index = 0, Url = "login" };
+            ctx.NewMenus.Add(m1);
+            Menu2 m2 = new Menu2 { Text = "Menu 2", Index = 1 };
+            {
+                Menu2 m2_s1 = new Menu2 { Text = "Submenu 2.1", ParentMenu = m2, Index = 0 };
+                ctx.NewMenus.Add(m2_s1);
+                {
+                    Menu2 m2_s1_s1 = new Menu2 { Text = "page/24", ParentMenu = m2_s1, Index = 0, Url = "page/24" };
+                    ctx.NewMenus.Add(m2_s1_s1);
+                }
+                Menu2 m2_s2 = new Menu2 { Text = "page/1", ParentMenu = m2, Index = 0, Url = "page/1" };
+                Menu2 m2_s3 = new Menu2 { Text = "CMS", ParentMenu = m2, Index = 0, Url = "cms" };
+            }
+
+            Menu2 m3 = new Menu2 { Text = "Menu 3", Index = 3 };
+            {
+                Menu2 m3_s1 = new Menu2 { Text = "Home", ParentMenu = m3, Index = 0, Url = "home" };
+                ctx.NewMenus.Add(m3_s1);
+            }
+            ctx.NewMenus.Add(m3);
+            Menu2 m4 = new Menu2 { Text = "Membership", Index = 4, Url = "membership" };
+            ctx.NewMenus.Add(m4);
+            //
+            mm.Menus.Add(m1);
+            mm.Menus.Add(m2);
+            mm.Menus.Add(m3);
+            mm.Menus.Add(m4);
+            ctx.MenuMasters.Add(mm);
         }
 
         private void EnsureRootDirectoryRestrictions()
@@ -350,7 +381,7 @@ namespace Fastnet.Webframe.CoreData
             CSSRule rightRule = CSSRule.ParseForRules(rightCss).First();
             string width = getRule("width", centreRule);
             int cw = 0;
-            if(width == null || ((cw = getLeadingNumber(width)) == 0))
+            if (width == null || ((cw = getLeadingNumber(width)) == 0))
             {
                 // centre panel has no width, i.e. fluid layout
                 siteRule.RemoveRule("width");
@@ -373,7 +404,7 @@ namespace Fastnet.Webframe.CoreData
                 int sw = lw + cw + rw;
                 centreRule.RemoveRule("width");
                 siteRule.RemoveRule("width");
-                siteRule.AddRule("width: {0}px", sw);               
+                siteRule.AddRule("width: {0}px", sw);
             }
             writeStylesheets("BannerPanel", bannerRule.ToString());
             writeStylesheets("MenuPanel", menuRule.ToString());
@@ -427,7 +458,7 @@ namespace Fastnet.Webframe.CoreData
                 writeStylesheet(sheetName, cssText);
             }
             var userFiles = System.IO.Directory.EnumerateFiles(folder, "*.user.css");
-            foreach(var userFile in userFiles)
+            foreach (var userFile in userFiles)
             {
                 System.IO.File.Delete(userFile);
                 Log.Write("{0} deleted", userFile);
@@ -447,8 +478,8 @@ namespace Fastnet.Webframe.CoreData
             {
                 {"BrowserPanel", ".BrowserPanel\n{\n}\n"},
                 {"SitePanel", ".SitePanel\n{\n    margin: 0 auto;\n    font-family: verdana;\n    font-size: 10.5pt;\n    width: 840px;\n}\n"},
-                {"BannerPanel", ".BannerPanel\n{\n    height: 90px;\n}\n"},
-                {"MenuPanel", ".MenuPanel\n{\n    background-color: #1b76bc;\n    color: #ffffff;\n    border: 0 none transparent;\n    display: none;\n}\n"},
+                {"BannerPanel", ".BannerPanel\n{\n    height: 88px;\n}\n"},
+                {"MenuPanel", ".MenuPanel\n{\n    background-color: #aaaaaa;\n    border: 0 none transparent;\n    height:45px;\n}\n"},
                 {"ContentPanel", ".ContentPanel\n{\n}\n"},
                 {"LeftPanel", ".LeftPanel\n{\n    width: 210px;\n}\n"},
                 {"CentrePanel", ".CentrePanel\n{\n}\n"},
@@ -461,9 +492,9 @@ namespace Fastnet.Webframe.CoreData
                 string sheetName = System.IO.Path.Combine(folder, panel);
                 writeStylesheets(sheetName, cssText);
             }
-            var menuCssText = ".menu-normal\n{\n    font-family: Arial Black;\n    font-size: 10pt;\n    background-color: #1b76bc;\n    color: #ffffff;\n}\n\n.menu-hover:hover\n{\n    background-color: #28aae1;\n    color: #000000;\n}\n";
-            string menuCssFile = System.IO.Path.Combine(folder, "Menu");
-            writeStylesheets(menuCssFile, menuCssText);
+            //var menuCssText = ".menu-normal\n{\n    font-family: Arial Black;\n    font-size: 10pt;\n    background-color: #1b76bc;\n    color: #ffffff;\n}\n\n.menu-hover:hover\n{\n    background-color: #28aae1;\n    color: #000000;\n}\n";
+            //string menuCssFile = System.IO.Path.Combine(folder, "Menu");
+            //writeStylesheets(menuCssFile, menuCssText);
         }
         private void EnsureInitialPages()
         {
@@ -484,38 +515,38 @@ namespace Fastnet.Webframe.CoreData
                 ctx.SaveChanges();
                 //
                 Page landingPage = AddInitialPages(root);
-                CreateDefaultMenu(landingPage);
+                //CreateDefaultMenu(landingPage);
             }
         }
-        private Menu CreateDefaultMenu(Page landingPage)
-        {
-            Menu defaultMenu = new Menu();
-            defaultMenu.LastModified = DateTime.UtcNow;
-            defaultMenu.Page = landingPage;
-            defaultMenu.Url = string.Format("/page/{0}", landingPage.PageId);
-            defaultMenu.SubMenuPixelHeight = 34;
-            defaultMenu.SubMenuPixelWidth = 162;
-            defaultMenu.Text = "Master Style";
-            defaultMenu.InheritParentStyles = false;
-            defaultMenu.Visible = true;
-            ctx.Menus.Add(defaultMenu);
-            defaultMenu.NormalStyle = new Style();
-            defaultMenu.NormalStyle.VerticalAlignment = "Middle";
-            defaultMenu.NormalStyle.Background = new Background { Colour = "#1b76bc" };// a kind of blue
-            defaultMenu.NormalStyle.Colour = "#ffffff";
-            defaultMenu.NormalStyle.Font = new Font { Name = "Arial Black", PointSize = 10 };
-            defaultMenu.HoverStyle = new Style();
-            defaultMenu.HoverStyle.Background = new Background { Colour = "#28aae1" };
-            defaultMenu.HoverStyle.Colour = "#000000";
-            ctx.Fonts.Add(defaultMenu.NormalStyle.Font);
-            ctx.Backgrounds.Add(defaultMenu.NormalStyle.Background);
-            ctx.Backgrounds.Add(defaultMenu.HoverStyle.Background);
-            ctx.Styles.Add(defaultMenu.NormalStyle);
-            ctx.Styles.Add(defaultMenu.HoverStyle);
+        //private Menu CreateDefaultMenu(Page landingPage)
+        //{
+        //    Menu defaultMenu = new Menu();
+        //    defaultMenu.LastModified = DateTime.UtcNow;
+        //    defaultMenu.Page = landingPage;
+        //    defaultMenu.Url = string.Format("/page/{0}", landingPage.PageId);
+        //    defaultMenu.SubMenuPixelHeight = 34;
+        //    defaultMenu.SubMenuPixelWidth = 162;
+        //    defaultMenu.Text = "Master Style";
+        //    defaultMenu.InheritParentStyles = false;
+        //    defaultMenu.Visible = true;
+        //    ctx.Menus.Add(defaultMenu);
+        //    defaultMenu.NormalStyle = new Style();
+        //    defaultMenu.NormalStyle.VerticalAlignment = "Middle";
+        //    defaultMenu.NormalStyle.Background = new Background { Colour = "#1b76bc" };// a kind of blue
+        //    defaultMenu.NormalStyle.Colour = "#ffffff";
+        //    defaultMenu.NormalStyle.Font = new Font { Name = "Arial Black", PointSize = 10 };
+        //    defaultMenu.HoverStyle = new Style();
+        //    defaultMenu.HoverStyle.Background = new Background { Colour = "#28aae1" };
+        //    defaultMenu.HoverStyle.Colour = "#000000";
+        //    ctx.Fonts.Add(defaultMenu.NormalStyle.Font);
+        //    ctx.Backgrounds.Add(defaultMenu.NormalStyle.Background);
+        //    ctx.Backgrounds.Add(defaultMenu.HoverStyle.Background);
+        //    ctx.Styles.Add(defaultMenu.NormalStyle);
+        //    ctx.Styles.Add(defaultMenu.HoverStyle);
 
-            ctx.SaveChanges();
-            return defaultMenu;
-        }
+        //    ctx.SaveChanges();
+        //    return defaultMenu;
+        //}
         private Page AddInitialPages(Directory directory)
         {
             var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
@@ -929,7 +960,7 @@ namespace Fastnet.Webframe.CoreData
             Group anon = addgroup(SystemGroups.Anonymous, "All visitors that have not logged in - this group excludes those that have logged in", GroupTypes.System | GroupTypes.SystemDefinedMembers, everyone);
             Group admins = addgroup(SystemGroups.Administrators, "Site Administrators - members who can do everything", GroupTypes.System, all);
             Group designers = addgroup(SystemGroups.Designers, "Site Designers - members who can modify layout and style", GroupTypes.System, all);
-            Group editors = addgroup(SystemGroups.Editors, "Site Editors - members who can add, modify and delete pages and folders" , GroupTypes.System, all);
+            Group editors = addgroup(SystemGroups.Editors, "Site Editors - members who can add, modify and delete pages and folders", GroupTypes.System, all);
             ctx.SaveChanges();
         }
         private void EnsureAdministratorInAdministratorsGroup()
@@ -1356,7 +1387,7 @@ namespace Fastnet.Webframe.CoreData
                             FirstName = item.FirstName,
                             LastName = item.LastName,
                             CreationDate = item.CreationDate,
-                            LastLoginDate =  item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
+                            LastLoginDate = item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
                             Disabled = !item.Active,
                             //Disabled = item.Active,
                             //EmailValidated = item.EmailValidated,
@@ -1466,7 +1497,7 @@ namespace Fastnet.Webframe.CoreData
                                 image.CreatedOn = p.CreatedOn;
                                 image.Data = ti.ImageData;
                                 image.Directory = p.Directory;
-                                image.Height = ti.Height;                                
+                                image.Height = ti.Height;
                                 image.ImageType = (ImageType)(int)ti.ImageType;
                                 image.Width = ti.Width;
                                 image.TimeStamp = BitConverter.GetBytes(-1);
