@@ -172,8 +172,8 @@ namespace Fastnet.Webframe.CoreData
         public MemberActionTypes Action { get; set; }
         [NotMapped]
         public bool IsModification { get { return Action == MemberActionTypes.Modification; } }
-        //[NotMapped]
-        //public string ActionName { get { return Action.GetDescription(); } }
+        [NotMapped]
+        public string ActionName { get { return Action.GetDescription(); } }
     }
     public class GroupAction : DataEntityActionBase
     {
@@ -194,8 +194,8 @@ namespace Fastnet.Webframe.CoreData
         public string FullName { get; set; }
         public GroupActionTypes Action { get; set; }
         public string MemberEmailAddress { get; set; }
-        //[NotMapped]
-        //public string ActionName { get { return Action.GetDescription(); } }
+        [NotMapped]
+        public string ActionName { get { return Action.GetDescription(); } }
         [NotMapped]
         public bool IsModification { get { return Action == GroupActionTypes.Modification; } }
         [NotMapped]
