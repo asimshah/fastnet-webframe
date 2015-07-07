@@ -21,9 +21,10 @@
                 <td><div class="Name">{{Folder}}</div></td>
                 <td><div class="actionBy">{{ActionBy}}</div></td>
                 {{#IsModification}}
-                <td><div class="propertyChanged">{{PropertyChanged}}</div></td>
-                <td><div class="oldValue">{{OldValue}}</div></td>
-                <td><div class="newValue">{{NewValue}}</div></td>
+                <td  class="page-url">{{Url}}</td>
+                <!--<td><div class="propertyChanged">{{PropertyChanged}}</div></td>-->
+                <td class="hidden"><div class="oldValue"></div></td>
+                <td class="hidden"><div class="newValue"></div></td>
                 {{/IsModification}}
                 {{#IsCollectionChanged}}
                 <td><div class="propertyChanged"></div></td>

@@ -285,11 +285,15 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> CreateMember(dynamic data)
         {
             string emailAddress = data.emailAddress;
-            string firstName = data.firstname;
+            string firstName = data.firstName;
             string lastName = data.lastName;
             string password = data.password;
             bool isDisabled = data.isDisabled;
 
+            Debug.Assert(emailAddress != null);
+            Debug.Assert(firstName != null);
+            Debug.Assert(lastName != null);
+            Debug.Assert(password != null);
             var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
             var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
             var result = await appUserManager.CreateAsync(user, password);
@@ -481,7 +485,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             };
             bool currentIsAdministrator = this.GetCurrentMember().IsAdministrator;
             var temp = await DataContext.Members
-                .Where(x => currentIsAdministrator || x.IsAdministrator == false)
+                .Where(x => (currentIsAdministrator || x.IsAdministrator == false) && !x.IsAnonymous)
                 .Select(m => new { Id = m.Id, m.FirstName, m.LastName } ).ToArrayAsync();
 
             var selectedMembers = temp.Where(x => match(x.FirstName, x.LastName));

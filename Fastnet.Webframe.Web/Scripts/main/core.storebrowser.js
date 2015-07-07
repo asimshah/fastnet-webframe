@@ -191,7 +191,7 @@
             function savePage(f) {
                 var data = f.getData();
                 var url = "store/update/page";
-                var postData = { id: id, name: data.name };
+                var postData = { id: id, name: data.name, isLandingPage: data["landing-page"] };
                 $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
                     f.close();
                     loadDirectoryContent();
