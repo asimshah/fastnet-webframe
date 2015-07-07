@@ -1,0 +1,142 @@
+﻿body {
+}.fastnet-menu {
+    @menu-item-background: white;
+    @menu-item-foreground: black;
+    position: relative;
+
+    *:focus {
+        outline: none;
+    }
+
+    a {
+        color: inherit;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        &:hover, &:visited {
+            text-decoration: none;
+        }
+    }
+    // this is achieved by
+    // (1) setting level-0 menu-items to display inline-block (but not
+    //     level-1 and level-2 as they must appear in vertical alignment
+    // (2) ensure that the level-2 panel (which contains the leve-2 menu-items)
+    //     has its left value set to the width of the level-1 panel so that
+    //     it will appear on the right hand side of its parent menu-item and
+    //     it's top value set to 0 to ensure that it aligns to the top of its
+    //     parent menu-item.
+    //  Of these the only setting that needs to be determined at run time is
+    //  the left value of the level-2 menu panel - the rest are in the menu.css file
+    //  Apart from the position, display and top settings in menu.css for for panel and
+    //  menu-items, there are also ssettings that ensure that <a> tags centre the menu labels
+    // q.v. _setHorizontalPositioning() in fastnet.menus.js
+    &.horizontal {
+        .menu-item-panel {
+            position: relative;// absolute;
+
+            .menu-item {
+                position: relative;
+
+                .indicator {
+                    position: absolute;
+                    top: 0;
+                    right: 4px;
+                }
+
+                &:not(.has-submenus) {
+                    .indicator {
+                        display: none;
+                    }
+                }
+            }
+
+            &.level-0 {
+                > .menu-item {
+                    display: inline-block;
+
+                    .menu-item-panel.level-1 {
+                        display: none;
+                        > .menu-item {
+                            //display: none;
+                        }
+
+                        .menu-item-panel.level-2 {
+                            top: 0;
+                            display: none;
+                            > .menu-item {
+                                //display: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+//vv for testing
+#menu-0 {
+    top: 2px;
+    left: 2px;
+
+    .menu-item {
+        width: 128px;
+        line-height: 2.0em;
+        border: 2px solid yellow;
+        margin: 1px;
+        border-radius: 3px;
+        font-size: x-small;
+    }
+
+    .menu-item-panel {
+        
+        &.level-0 {
+            background-color: pink;
+            .menu-item:nth-child(even) {
+                background-color: white;
+                color: black;
+
+                &:hover {
+                    color: white;
+                    background-color: black;
+                }
+            }
+
+            .menu-item:nth-child(odd) {
+                color: white;
+                background-color: black;
+
+                &:hover {
+                    background-color: white;
+                    color: black;
+                }
+            }
+        }
+
+        &.level-1 {
+            .menu-item:nth-child(even) {
+                background-color: yellow;
+                color: blue;
+            }
+
+            .menu-item:nth-child(odd) {
+                color: yellow;
+                background-color: blue;
+            }
+        }
+
+        &.level-2 {
+            //left: 128px;
+            .menu-item:nth-child(even) {
+                background-color: red;
+                color: white;
+            }
+
+            .menu-item:nth-child(odd) {
+                color: red;
+                background-color: white;
+            }
+        }
+    }
+
+}
+// ^^ for testing
