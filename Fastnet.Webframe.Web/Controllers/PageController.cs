@@ -7,6 +7,9 @@ using Fastnet.Webframe.WebApi;
 //using Fastnet.Webframe.Web.Models.Core;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,7 +18,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using System.Web.Http;
-using Data = Fastnet.Webframe.CoreData;
+//using Data = Fastnet.Webframe.CoreData;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
@@ -57,8 +60,8 @@ namespace Fastnet.Webframe.Web.Controllers
             long pageId = Int64.Parse(id);
             Member m = GetCurrentMember();
             //HttpContext.Current.Session["CurrentPage"] = pageId;
-            Data.Page page = DataContext.Pages.Find(pageId);
-            
+            Page page = DataContext.Pages.Find(pageId);
+
             AccessResult ar = m.GetAccessResult(page);
             object data = null;
             if (ar == AccessResult.Rejected)
@@ -76,29 +79,27 @@ namespace Fastnet.Webframe.Web.Controllers
                 {
                     data = PrepareHTMLPage(page);
                 }
-                
+
             }
             return this.Request.CreateCacheableResponse(HttpStatusCode.OK, data, page.PageMarkup.LastModifiedOn, page.PageId);
         }
-
-
         [HttpGet]
         [Route("page/access/{id}")]
         public HttpResponseMessage GetAccessResult(string id)
         {
             var admins = Group.Administrators;
             long pageId = Int64.Parse(id);
-            Data.Page page = DataContext.Pages.Find(pageId);
+            Page page = DataContext.Pages.Find(pageId);
             Member m = GetCurrentMember();
             AccessResult ar = m.GetAccessResult(page);
             //bool result = admins.Members.Contains(m) || m.CanEdit(page);
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { Access  = ar.ToString().ToLower() });
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { Access = ar.ToString().ToLower() });
         }
         [HttpGet]
         [Route("sidepages/{id}")]
         public HttpResponseMessage GetSidePages(string id)
         {
-            Data.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
+            Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
             var Banner = centrePage.FindSidePage(PageType.Banner, true);
             var Left = centrePage.FindSidePage(PageType.Left, true);
             var Right = centrePage.FindSidePage(PageType.Right, true);
@@ -125,43 +126,18 @@ namespace Fastnet.Webframe.Web.Controllers
             var result = masterList.Select(x => new
             {
                 Id = x.Id,
-                Name = x.Name,
+                Name = x.Name.ToLower(),
                 Panel = x.PanelName.ToString().ToLower()
             });
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
-        [HttpGet]
-        [Route("menu/{id}")]
-        public async Task<HttpResponseMessage> GetMenu(long id)
-        {
-            Func<Menu2, bool> canAccess = (m) =>
-            {
-                return true;
-            };
-            Func<IEnumerable<Menu2>, int, dynamic> getSubmenus = null;
-            getSubmenus = (menus, l) =>
-            {
-                var r = menus.Where(x => canAccess(x)).OrderBy(x => x.Index).Select(x => new
-                {
-                    Level = l,
-                    Index = x.Index,
-                    Text = x.Text,
-                    Url = x.Url,
-                    Submenus = getSubmenus(x.Submenus, l + 1),                    
-                });
-                return r;
-            };
-            int level = 0;
-            var mm = await DataContext.MenuMasters.FindAsync(id);
-            object result = getSubmenus(mm.Menus.ToArray(), level);
-            return this.Request.CreateResponse(HttpStatusCode.OK, result);
-        }
+
         [HttpGet]
         [Route("~/image/{id}")]
         public HttpResponseMessage GetImage(long id)
         {
             //Data.ImageInformation image = DataContext.ImageInformata.Find(id);
-            Data.Image image = DataContext.Images.Find(id);
+            Image image = DataContext.Images.Find(id);
             MemoryStream ms = new MemoryStream(image.Data);
             HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK);
             response.Content = new StreamContent(ms);
@@ -194,7 +170,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             string htmlText = page.PageMarkup.HtmlText;
             var location = page.Directory.DisplayName;//.Replace("$root", "Store");
-            return new { PageId = page.PageId,  Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
+            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
         }
         private dynamic PrepareDocXpage(Page page)
         {
@@ -205,7 +181,7 @@ namespace Fastnet.Webframe.Web.Controllers
             // now merge multiple styles into one
             var allRules = styleRules.SelectMany(x => x);
             var location = page.Directory.DisplayName;//.Replace("$root", "Store");
-            return new { PageId = page.PageId,  Location = location, HtmlText = htmlText, HtmlStyles = allRules };
+            return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = allRules };
         }
         private dynamic PrepareAccessDenied(Page page)
         {
@@ -255,7 +231,7 @@ namespace Fastnet.Webframe.Web.Controllers
         //    } while (lp == null);
         //    return lp;
         //}
-        private bool IsContentModified(Data.Page page)
+        private bool IsContentModified(Page page)
         {
             var ifModifiedSince = Request.Headers.IfModifiedSince;
             var ifNoneMatch = Request.Headers.IfNoneMatch;
@@ -276,5 +252,60 @@ namespace Fastnet.Webframe.Web.Controllers
             string etag = "\"" + t + "\"";
             return etag;
         }
+
+        [HttpGet]
+        [Route("menu/{id}")]
+        public async Task<HttpResponseMessage> GetMenu(long id)
+        {
+            Func<Menu2, bool> canAccess = (m) =>
+            {
+                switch (m.Url)
+                {
+                    case "cms":
+                    //case "designer":
+                    case "membership":
+                        return false;
+                }
+                return true;
+            };
+            Func<Menu2, bool> canInclude = null;
+            canInclude = (m) =>
+            {
+                bool r = false;
+                if (canAccess(m))
+                {
+                    if (m.Url != null)
+                    {
+                        r = true;
+                    }
+                    else
+                    {
+                        r = m.Submenus.Any(x => canInclude(x));
+                    }
+                }
+                return r;
+            };
+
+            Func<IEnumerable<Menu2>, int, dynamic> getSubmenus = null;
+            getSubmenus = (menus, l) =>
+            {
+                var r = menus.Where(x => canInclude(x)).OrderBy(x => x.Index).Select(x => new
+                {
+                    Level = l,
+                    Index = x.Index,
+                    Text = x.Text,
+                    Url = x.Url,
+                    Submenus = getSubmenus(x.Submenus, l + 1),
+                });
+
+                return r;
+            };
+            int level = 0;
+            var mm = await DataContext.MenuMasters.FindAsync(id);
+            object result = getSubmenus(mm.Menus.ToArray(), level);
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+
+        }
     }
+
 }

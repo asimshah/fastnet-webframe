@@ -3,54 +3,283 @@
     var instances = [];;
     function createInstance(opts) {
         var _instance = instances.length;
+        var menuData = { container: null, menuId: "", menuBox: null, panels: [] };
         var menuSelector = null;
-        var options = $.extend({menuId: "" + _instance, direction: "horizontal"}, opts);
-        function _createMenu(selector, menuData, opts) {
+        var options = $.extend({ menuId: "" + _instance, menuClass: null, direction: "horizontal" }, opts);
+        function _positionPanel(panel) {
+            var panelId = "#" + panel.id;
+            $(panelId).css("position", "absolute");
+            var parentMenuItemId = panel.parentId;
+            var parent = _findMenuItemById(parentMenuItemId);
+            var top = null;
+            var left = null;
+            if (panel.level === 1) {
+                top = parent.box.coords.top + parent.box.height;
+                left = parent.box.coords.left;
+
+            } else if (panel.level === 2) {
+                top = parent.box.coords.top;
+                left = parent.box.coords.left + parent.box.width;
+            }
+            $(panelId).css("left", left);
+            $(panelId).css("top", top);
+        }
+        function _unbindPanelMenuItems(panel) {
+            var menuId = "#" + menuData.menuId;
+            var panelId = "#" + panel.id;
+            $(menuId).find(panelId).find(".menu-item.has-submenus").off();
+        }
+        function _bindPanelMenuItems(panel) {
+            var menuId = "#" + menuData.menuId;
+            var panelId = "#" + panel.id;
+            $(menuId).find(panelId).find(".menu-item.has-submenus").on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var id = $(this).attr("id");
+                $("#" + id).siblings().each(function (i, sib) {
+                    var sibId = $(sib).attr("id");
+                    var sib_subPanel = _findPanelByParentId(sibId);
+                    if (sib_subPanel !== null) {
+                        _hidePanel(sib_subPanel);
+                    }
+                });
+                var subPanel = _findPanelByParentId(id);
+
+                if (subPanel.visible) {
+                    _hidePanel(subPanel);
+                } else {
+                    _showPanel(subPanel);
+                    _discoverDimensions(subPanel);
+                    _setPositioningAttributes(subPanel);
+                }
+            })
+        }
+        function _setAttributes(tagId, box) {
+            $(tagId).attr("data-box", _box2String(tagId, box));
+        }
+        function _setPositioningAttributes(panel) {
+
+            var panelId = "#" + panel.id;
+            _setAttributes(panelId, panel.box);
+            $.each(panel.menuItems, function (i, mi) {
+                var tagId = "#" + mi.id;
+                _setAttributes(tagId, mi.box);
+            });
+        }
+        function _box2String(tagId, box) {
+            return $U.Format("({0}, {1}) [{2}w {3}h] [[{4}w {5}h]]",
+                box.coords.left, box.coords.top,
+                box.width, box.height,
+                box.mwidth, box.mheight
+                );
+        }
+        function _getBox(tagId) {
+            var menuLocation = $("#" + menuData.menuId).offset();
+            var location = $(tagId).offset();
+            return {
+                coords: { left: location.left - menuLocation.left, top: location.top - menuLocation.top },
+                container_offset: null,
+                mwidth: $(tagId).outerWidth(true),
+                mheight: $(tagId).outerHeight(true),
+                width: $(tagId).outerWidth(false),
+                height: $(tagId).outerHeight(false)
+            };
+        }
+        function _discoverDimensions(panel) {
+            var parentBox = null;
+            if (panel.level === 0) {
+                parentBox = menuData.menuBox;
+            } else {
+                var parentMenuItemId = panel.parentId;
+                var parent = _findMenuItemById(parentMenuItemId);
+                parentBox = parent.box;
+            }
+            var panelId = "#" + panel.id;
+            panel.box = _getBox(panelId);
+            //_setContainerOffset(parentBox, panel.box);
+            $.each(panel.menuItems, function (i, mi) {
+                var tagId = "#" + mi.id;
+                mi.box = _getBox(tagId);
+               // _setContainerOffset(panel.box, mi.box);
+            });
+        }
+        function _showCurrentBox(tagId) {
+            return _box2String(tagId, _getBox(tagId));
+        }
+        function _closeOpenPanels() {
+            $.each(menuData.panels, function (i, panel) {
+                if (panel.level > 0) {
+                    _hidePanel(panel);
+                }
+            });
+        }
+        function _hidePanel(panel) {
+            if (panel.visible) {
+                var tagId = "#" + panel.id;
+                $.each(panel.menuItems, function (i, mi) {
+                    var subPanel = _findPanelByParentId(mi.id);
+                    if (subPanel !== null) {
+                        _hidePanel(subPanel);
+                    }
+                });
+                _unbindPanelMenuItems(panel);
+                panel.visible = false;
+                $(tagId).slideUp();
+            }
+        }
+        function _showPanel(panel, onComplete) {
+            var tagId = "#" + panel.id;
+            if (options.direction === "horizontal" && panel.level === 0) {
+                $(tagId).find(".menu-item").css("display", "inline-block");
+            }
+            if (panel.level > 0) {
+                _positionPanel(panel);
+            }
+            $(tagId).slideDown(function () {
+                if($.isFunction(onComplete)) {
+                    onComplete();
+                }
+            });
+            panel.visible = true;
+            _bindPanelMenuItems(panel);
+        }
+        function _findPanelById(id) {
+            var result = null;
+            $.each(menuData.panels, function (i, panel) {
+                if (panel.id === id) {
+                    result = panel;
+                    return false;
+                }
+            });
+            return result;
+        }
+        function _findMenuItemById(id) {
+            var rOuter = null;
+            $.each(menuData.panels, function (i, panel) {
+                var rInner = null;
+                $.each(panel.menuItems, function (j, mi) {
+                    if (mi.id === id) {
+                        rInner = mi;
+                        return false;
+                    }
+                })
+                rOuter = rInner;
+                if (rOuter !== null) {
+                    return false;
+                }
+            });
+            return rOuter;
+        }
+        function _findPanelByParentId(parentId) {
+            var result = null;
+            $.each(menuData.panels, function (i, panel) {
+                if (panel.parentId === parentId) {
+                    result = panel;
+                    return false;
+                }
+            });
+            return result;
+        }
+        function _parseMenuData(containerId, md) {
+            var pn = 0;
+            var min = 0;
+            function _parsePanel(parentId, level, list) {
+                var panelId = $U.Format("mp-{0}", pn++);
+                var panel = { id: panelId, parentId: parentId, level: level, visible: false, menuItems: [] };
+                $.each(list, function (i, item) {
+                    // item.Index, item.Text, item.Url, item.Submenus
+                    // each array of these is in a panel                    
+                    var id = $U.Format("mi-{0}", min++);
+                    panel.menuItems.push({
+                        panelId: panelId,
+                        id: id,
+                        index: item.Index,
+                        text: item.Text,
+                        url: item.Url,
+                        //menuItemTotal: item.Submenus.length ,                        
+                    });
+                    if (item.Submenus.length > 0) {
+                        _parsePanel(id, level + 1, item.Submenus);
+                    }
+                });
+                menuData.panels.push(panel);
+                $U.Debug("Panel {0}, child of {1}, level {2}, {3} menuItems", panel.id, panel.parentId, level, panel.menuItems.length)
+            }
+            _parsePanel(containerId, 0, md);
+        }
+        function _createMenuHtml(mid) {
+            var menuHtml = $($U.Format("<div id='{0}' class='fastnet-menu {1}'></div>", mid, options.direction));
+            if (options.menuClass !== null) {
+                menuHtml.addClass(options.menuClass);
+            }
+            $.each(menuData.panels, function (i, panel) {
+                var panelHtml = $($U.Format("<div id='{0}' class='menu-item-panel level-{1}' data-parent='{2}' ></div>",
+                    panel.id, panel.level, panel.parentId));
+                panel.menuItems.sort(function (first, second) {
+                    if (first.index === second.index) {
+                        return 0;
+                    } else if (first.index < second.index) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                });
+                $.each(panel.menuItems, function (j, mi) {
+                    var menuItemHtml = $($U.Format("<div id='{0}' class='menu-item'></div>", mi.id));
+                    if (mi.url === null) {
+                        menuItemHtml.addClass("has-submenus");
+                        menuItemHtml.append($($U.Format("<a href='#'><span>{0}</span></a>", mi.text)));
+                        if (options.direction === "horizontal" && panel.level > 0) {
+                            menuItemHtml.append($("<span class='fa fa-caret-right indicator'></span>"));
+                        } else {
+                            menuItemHtml.append($("<span class='fa fa-caret-down indicator'></span>"));
+                        }
+                    } else {
+                        menuItemHtml.append($($U.Format("<a href='{0}'><span>{1}</span></a>", mi.url, mi.text)));
+                    }
+                    //if (options.direction === "horizontal") {
+                    //    if (panel.level > 0) {
+                    //        menuItemHtml.css("margin-left", 0);
+                    //    }
+                    //}
+                    panelHtml.append(menuItemHtml);
+                });
+                menuHtml.append(panelHtml);
+            });
+            $(menuHtml).find(".menu-item-panel").hide();
+            return menuHtml;
+        }
+        function _discoverStartingDimensions() {
+            // allow rendering to complete
+            setTimeout(function () {
+                menuData.menuBox = _getBox("#" + menuData.menuId);
+                _setAttributes("#" + menuData.menuId, menuData.menuBox);
+                //var rootPanelId = _findPanelIdByParent(menuData.menuId);
+                var panel = _findPanelByParentId(menuData.menuId);// _findPanelById(rootPanelId);
+                _discoverDimensions(panel);
+                _setPositioningAttributes(panel);
+            }, 500);
+        }
+        function _createMenu(selector, md, opts) {
             // selector = the  menu html will be appended to this selector
             // menudata = an md[] where md is an object of the form
             //   { Index: (number), Text: (menu label), Url: (menu hyperlink), Submenus: (an md[]) }
-            // this data is converted into a <ul><li><ul> type structure
             var panelNumber = 0;
             var menuItemNumber = 0;
-            function _items2html(menuItems) {
-                var text = "";
-                $.each(menuItems, function (i, item) {
-                    var hasSubmenus = item.Submenus.length > 0;
-                    var t = null;
-                    if (item.Url === null) {
-                        t = $U.Format("<a href='#'><span>{0}</span></a>", item.Text);
-                    } else {
-                        t = $U.Format("<a href='{0}'>{1}</a>", item.Url, item.Text);
-                    }
-                    t += $U.Format("<span class='fa fa-caret-down indicator'></span>");
-                    if (item.Submenus.length > 0) {
-                        t += _items2html(item.Submenus);
-                    }
-                    text += $U.Format("<div id='mi-{1}' class='menu-item{2}'>{0}</div>", t,
-                        menuItemNumber++, hasSubmenus ? " has-submenus" : "");
-                });
-
-                return $U.Format("<div id='mp-{2}' class='menu-item-panel level-{1}'>{0}</div>", text, menuItems[0].Level, panelNumber++);
-            }
             $.extend(options, opts);
-            var menuHtml = _items2html(menuData);
-            var id = $U.Format("menu-{0}", options.menuId.toLowerCase());
-            var html = $("<div class='fastnet-menu'></div>").attr("id", id).append(menuHtml);
-            $(selector).append($(html));
-            $(selector).find(".fastnet-menu").addClass(options.direction);
-            menuSelector = "#" + id;
-            if (options.direction === "horizontal") {
-                //_setHorizontalPositioning();
-            }
-            _bindMenus();
-            return id;
-        }
-        function _bindMenus() {
-            $(menuSelector).find(".menu-item.has-submenus").on("click", function () {
-                var id = $(this).attr("id");
-                $U.Debug("menu-item id {0} clicked", id);
-                $(this).find("> .menu-item-panel").show();
+            menuData.container = selector;// typically a panel selector like .MenuPanel
+            menuData.menuId = $U.Format("menu-{0}", options.menuId.toLowerCase());
+            _parseMenuData(menuData.menuId, md);
+            var menu2Html = _createMenuHtml(menuData.menuId);
+            $(menuData.container).append($(menu2Html));
+            var rootPanel = _findPanelByParentId(menuData.menuId);
+            _showPanel(rootPanel, function () { 
+                _discoverStartingDimensions();
             });
+            $("body").on("click", function () {
+                _closeOpenPanels();
+            });
+            return menuData.menuId;
         }
         function _setHorizontalPositioning() {
             var l2Panels = $(menuSelector).find(".menu-item-panel.level-2");
@@ -67,40 +296,17 @@
                 var bottomMarginWidth = parseInt($(parentItem).css("margin-bottom"));
                 var bottomBorderWidth = parseInt($(parentItem).css("border-bottom-width"));
                 var height = $(parentItem).height();
-                $(lp).css({ left: -(leftMarginWidth + leftBorderWidth), top: height + bottomBorderWidth + bottomMarginWidth});
+                $(lp).css({ left: -(leftMarginWidth + leftBorderWidth), top: height + bottomBorderWidth + bottomMarginWidth });
             });
         }
         function _traceInstance() {
             $U.Debug("Menu: created instance {0}", _instance);
         }
-        function _logPrintSizeAndPosition(menuId) {
-            function recordDetails(element) {
-                var el = $(element);
-                var id = el.attr("id");
-                var label = "";
-                if (el.hasClass("menu-item")) {
-                    label = el.find("> a").text();
-                }
-                // jquery outerWidth(true) and outerheight(true) includes margins (because parameter is true)
-                // but includes padding and border
-                var h = el.outerHeight(true);
-                var w = el.outerWidth(true);
-                //getBoundingClientRect excludes margin
-                // but includes padding and border
-                var rect = el[0].getBoundingClientRect();
-                $U.Debug("Element {0} \"{5}\": width: {1}, height: {2} (also w {3} h {4})", id, w, h, rect.width, rect.height, label);
-            }
-            var selector = "#" + menuId;
-            recordDetails(selector);
-            $(selector).find("div").each(function (i, item) {
-                recordDetails(item);
-            });
-            //debugger;
-        }
         return {
             traceInstance: _traceInstance,
             create: _createMenu,
-            logDetails: _logPrintSizeAndPosition
+            //logDetails: _logPrintSizeAndPosition,
+            showBox: _showCurrentBox
         };
     }
     function getInstance(opts) {

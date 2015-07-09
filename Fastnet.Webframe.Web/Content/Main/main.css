@@ -328,7 +328,7 @@ i.mce-i-deletepage:before {
   top: 60px;
   margin-right: 4px;
   background: transparent;
-  color: red;
+  color: white;
 }
 .modal .message,
 .modeless .message {

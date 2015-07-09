@@ -1,4 +1,5 @@
-﻿(function ($) {
+﻿var t$m = null;
+(function ($) {
     function test() {
         //debugger;
 
@@ -62,8 +63,9 @@
                 var url = $U.Format("pageapi/menu/{0}", masterInfo.Id);
                 $.when($U.AjaxGet({ url: url })).then(function (r) {
                     var menu = Menu.get();
-                    var menuId = menu.create(panelSelector, r, {});
-                    menu.logDetails(menuId);
+                    t$m = menu;// for diagnostics
+                    var menuId = menu.create(panelSelector, r, {menuClass: masterInfo.Name});
+                    //menu.logDetails(menuId);
                 });
             }
             $.each(menuList, function (i, item) {

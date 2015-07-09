@@ -772,11 +772,8 @@
     <Content Include="Content\datatables\swf\copy_csv_xls_pdf.swf" />
     <Content Include="Content\fastnet\forms.css" />
     <Content Include="Content\fastnet\forms.min.css" />
-    <Content Include="Content\fastnet\menu-test.css">
-      <DependentUpon>menu-test.less</DependentUpon>
-    </Content>
-    <Content Include="Content\fastnet\menu-test.min.css">
-      <DependentUpon>menu-test.css</DependentUpon>
+    <Content Include="Content\fastnet\Menu.css">
+      <DependentUpon>Menu.less</DependentUpon>
     </Content>
     <Content Include="Content\fastnet\Menu.min.css">
       <DependentUpon>Menu.css</DependentUpon>
@@ -809,6 +806,7 @@
     <Content Include="Content\images\documentTypes\WordSmall.png" />
     <Content Include="Content\images\homepage.png" />
     <Content Include="Content\images\image.png" />
+    <Content Include="Content\images\layout_grid.gif" />
     <Content Include="Content\images\leftpage.png" />
     <Content Include="Content\images\panelwire.jpg" />
     <Content Include="Content\images\rightpage.png" />
@@ -835,9 +833,6 @@
     </Content>
     <Content Include="Content\Main\DefaultCSS\LeftPanel.css">
       <DependentUpon>LeftPanel.less</DependentUpon>
-    </Content>
-    <Content Include="Content\fastnet\Menu.css">
-      <DependentUpon>Menu.less</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\MenuPanel.css">
       <DependentUpon>MenuPanel.less</DependentUpon>
@@ -908,6 +903,7 @@
     <Content Include="Content\zebra\metallic\selected-date.png" />
     <Content Include="Content\zebra\themes.png" />
     <Content Include="Default Pages\AccessDenied.html" />
+    <Content Include="Default Pages\Banner.html" />
     <Content Include="Default Pages\Blank Page.html" />
     <Content Include="Default Pages\Home Page.html" />
     <Content Include="Default Pages\Left side panel.html" />
@@ -937,7 +933,6 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Icon.png" />
-    <Content Include="menutest.html" />
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
@@ -1067,12 +1062,9 @@
     <Content Include="Content\Main\DefaultCSS\MenuPanel.css.map">
       <DependentUpon>MenuPanel.css</DependentUpon>
     </Content>
+    <Content Include="Content\fastnet\Menu.less" />
     <Content Include="Content\fastnet\Menu.css.map">
       <DependentUpon>Menu.css</DependentUpon>
-    </Content>
-    <Content Include="Content\fastnet\menu-test.less" />
-    <Content Include="Content\fastnet\menu-test.css.map">
-      <DependentUpon>menu-test.css</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
@@ -1104,7 +1096,6 @@
     <Content Include="Scripts\main\core.pagetoolbar.js" />
     <Content Include="Scripts\main\core.storebrowser.js" />
     <Content Include="Scripts\main\core.test.js" />
-    <Content Include="Scripts\main\menutest.js" />
     <Content Include="Scripts\moment-with-locales.js" />
     <Content Include="Scripts\moment-with-locales.min.js" />
     <Content Include="Scripts\moment.js" />
@@ -1353,7 +1344,6 @@
     <Content Include="Content\Main\DefaultCSS\BannerPanel.less" />
     <Content Include="Content\Main\DefaultCSS\CentrePanel.less" />
     <Content Include="Content\Main\DefaultCSS\LeftPanel.less" />
-    <Content Include="Content\fastnet\Menu.less" />
     <Content Include="Content\Main\DefaultCSS\MenuPanel.less" />
     <Content Include="Content\Main\DefaultCSS\RightPanel.less" />
     <Content Include="Content\Main\DefaultCSS\SitePanel.less" />

@@ -1,10 +1,8 @@
-﻿body {
-}
-.fastnet-menu {
+﻿.fastnet-menu {
     @menu-item-background: white;
     @menu-item-foreground: black;
     position: relative;
-
+    display: inline-block;
     *:focus {
         outline: none;
     }
@@ -75,15 +73,16 @@
     }
 }
 //vv for testing
-#menu-0 {
-    top: 2px;
-    left: 2px;
+.main-menu {
+    /*top: 2px;
+    left: 2px;*/
 
     .menu-item {
-        width: 128px;
+        //width: 128px;
+        padding: 2px 12px 2px 12px;
+        margin: 2px 12px 2px 12px;
         line-height: 2.0em;
         border: 2px solid yellow;
-        margin: 1px;
         border-radius: 3px;
         font-size: x-small;
     }

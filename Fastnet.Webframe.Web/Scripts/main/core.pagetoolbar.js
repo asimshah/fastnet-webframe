@@ -22,7 +22,7 @@
         function _activateToolbarShim() {
             $(".edit-panel").on("click", function (e) {
                 e.preventDefault();
-                e.stopPropagation();
+                //e.stopPropagation();
                 _open();
             });
         }

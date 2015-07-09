@@ -249,35 +249,39 @@ namespace Fastnet.Webframe.CoreData
         }
 
         private void CreateTestMenus()
-        {
-            MenuMaster mm = new MenuMaster { Name = "Main", PanelName = PanelNames.MenuPanel };
-            Menu2 m1 = new Menu2 { Text = "Login", Index = 0, Url = "login" };
-            ctx.NewMenus.Add(m1);
-            Menu2 m2 = new Menu2 { Text = "Menu 2", Index = 1 };
+        {                       
+            Menu2 home = new Menu2 { Text = "Home", Index = 0, Url = "home" };
+            ctx.NewMenus.Add(home);
+            Menu2 apps = new Menu2 { Text = "Apps", Index = 1 };
             {
-                Menu2 m2_s1 = new Menu2 { Text = "Submenu 2.1", ParentMenu = m2, Index = 0 };
-                ctx.NewMenus.Add(m2_s1);
-                {
-                    Menu2 m2_s1_s1 = new Menu2 { Text = "page/24", ParentMenu = m2_s1, Index = 0, Url = "page/24" };
-                    ctx.NewMenus.Add(m2_s1_s1);
-                }
-                Menu2 m2_s2 = new Menu2 { Text = "page/1", ParentMenu = m2, Index = 0, Url = "page/1" };
-                Menu2 m2_s3 = new Menu2 { Text = "CMS", ParentMenu = m2, Index = 0, Url = "cms" };
+                Menu2 cms = new Menu2 { Text = "CMS", ParentMenu = apps, Index = 0, Url = "cms" };
+                ctx.NewMenus.Add(cms);
+                //{
+                //    Menu2 m2_s1_s1 = new Menu2 { Text = "page/24", ParentMenu = m2_s1, Index = 0, Url = "page/24" };
+                //    ctx.NewMenus.Add(m2_s1_s1);
+                //    Menu2 m2_s1_s2 = new Menu2 { Text = "page/28", ParentMenu = m2_s1, Index = 0, Url = "page/28" };
+                //    ctx.NewMenus.Add(m2_s1_s2);
+                //}
+                Menu2 designer = new Menu2 { Text = "Designer", ParentMenu = apps, Index = 1, Url = "designer" };
+                ctx.NewMenus.Add(designer);
+                Menu2 membership = new Menu2 { Text = "Membership", ParentMenu = apps, Index = 2, Url = "membership" };
+                ctx.NewMenus.Add(membership);
             }
 
-            Menu2 m3 = new Menu2 { Text = "Menu 3", Index = 3 };
-            {
-                Menu2 m3_s1 = new Menu2 { Text = "Home", ParentMenu = m3, Index = 0, Url = "home" };
-                ctx.NewMenus.Add(m3_s1);
-            }
-            ctx.NewMenus.Add(m3);
-            Menu2 m4 = new Menu2 { Text = "Membership", Index = 4, Url = "membership" };
-            ctx.NewMenus.Add(m4);
+            Menu2 login = new Menu2 { Text = "Login", Index = 2, Url = "login" };
+            //{
+            //    Menu2 m3_s1 = new Menu2 { Text = "Home", ParentMenu = login, Index = 0, Url = "home" };
+            //    ctx.NewMenus.Add(m3_s1);
+            //}
+            ctx.NewMenus.Add(login);
+            Menu2 logout = new Menu2 { Text = "Logout", Index = 4, Url = "logout" };
+            ctx.NewMenus.Add(logout);
             //
-            mm.Menus.Add(m1);
-            mm.Menus.Add(m2);
-            mm.Menus.Add(m3);
-            mm.Menus.Add(m4);
+            MenuMaster mm = new MenuMaster { Name = "main-menu", PanelName = PanelNames.MenuPanel };
+            mm.Menus.Add(home);
+            mm.Menus.Add(apps);
+            mm.Menus.Add(login);
+            mm.Menus.Add(logout);
             ctx.MenuMasters.Add(mm);
         }
 
@@ -479,7 +483,7 @@ namespace Fastnet.Webframe.CoreData
                 {"BrowserPanel", ".BrowserPanel\n{\n}\n"},
                 {"SitePanel", ".SitePanel\n{\n    margin: 0 auto;\n    font-family: verdana;\n    font-size: 10.5pt;\n    width: 840px;\n}\n"},
                 {"BannerPanel", ".BannerPanel\n{\n    height: 88px;\n}\n"},
-                {"MenuPanel", ".MenuPanel\n{\n    background-color: #aaaaaa;\n    border: 0 none transparent;\n    height:45px;\n}\n"},
+                {"MenuPanel", ".MenuPanel\n{\n    background-color: #aaaaaa;\n}\n"},
                 {"ContentPanel", ".ContentPanel\n{\n}\n"},
                 {"LeftPanel", ".LeftPanel\n{\n    width: 210px;\n}\n"},
                 {"CentrePanel", ".CentrePanel\n{\n}\n"},
@@ -552,7 +556,7 @@ namespace Fastnet.Webframe.CoreData
             var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
             var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
 
-            Page bannerPage = AddPage(directory, "Site Banner.docx", PageType.Banner);
+            Page bannerPage = AddHtmlPage(directory, "Banner.html", PageType.Banner);
             Page homePage = AddHtmlPage(directory, "Home Page.html", PageType.Centre);
             homePage.IsLandingPage = true;
             //AccessRule rule = GetAccessRule(Permission.ViewPages, true);
@@ -588,10 +592,10 @@ namespace Fastnet.Webframe.CoreData
             {
                 string defaultPagesFolder = HostingEnvironment.MapPath("~/Default Pages");
                 //string docxFullname = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
-                string htmlFileName = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
+                htmlFilename = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
                 //byte[] docxData = System.IO.File.ReadAllBytes(docxFullname);
-                byte[] htmlData = System.IO.File.ReadAllBytes(htmlFileName);
-                string htmlString = Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
+                //byte[] htmlData = System.IO.File.ReadAllBytes(htmlFileName);
+                string htmlString = System.IO.File.ReadAllText(htmlFilename);// Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
                 Page page = ctx.CreateNewPage();// new Page();
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(htmlFilename);
                 page.Type = type;
