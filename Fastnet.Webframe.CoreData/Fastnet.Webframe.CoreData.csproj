@@ -169,9 +169,6 @@
     <Compile Include="Activity.cs" />
     <Compile Include="Autofac\Core.cs" />
     <Compile Include="Autofac\DataModule.cs" />
-    <Compile Include="Background.cs" />
-    <Compile Include="ClientApp.cs" />
-    <Compile Include="CloneInformation.cs" />
     <Compile Include="CoreDataContext.cs" />
     <Compile Include="CoreDbInitializer.cs" />
     <Compile Include="CSS\CSSRule.cs" />
@@ -179,7 +176,6 @@
     <Compile Include="DirectoryGroup.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="FileChunk.cs" />
-    <Compile Include="Font.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="Actions.cs" />
     <Compile Include="IdentityModels.cs" />
@@ -195,12 +191,9 @@
     <Compile Include="Page.cs" />
     <Compile Include="PageAccessRule.cs" />
     <Compile Include="PageMarkup.cs" />
-    <Compile Include="Panel.cs" />
-    <Compile Include="PanelPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Role.cs" />
     <Compile Include="SiteSetting.cs" />
-    <Compile Include="Style.cs" />
     <Compile Include="UploadFile.cs" />
     <Compile Include="UserClaim.cs" />
     <Compile Include="UserLogin.cs" />
