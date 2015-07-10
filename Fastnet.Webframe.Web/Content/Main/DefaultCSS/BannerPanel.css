@@ -1,4 +1,8 @@
-.BannerPanel
-{
-    height: 88px;
+﻿.BannerPanel {
+  padding-left: 4px;
+  padding-right: 4px;
+  height: 88px;
+  background-color: #1b76bc;
+  color: white;
 }
+/*# sourceMappingURL=BannerPanel.css.map */
