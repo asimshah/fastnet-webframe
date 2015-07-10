@@ -280,7 +280,8 @@ namespace Fastnet.Webframe.CoreData
             //
             MenuMaster mm = new MenuMaster
             {
-                Name = "default-menu",
+                Name = "MainMenu",
+                ClassName = "default-menu",
                 PanelName = PanelNames.MenuPanel,
                 IsDisabled = disable
             };

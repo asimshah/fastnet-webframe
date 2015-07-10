@@ -126,6 +126,7 @@ namespace Fastnet.Webframe.Web.Controllers
             var result = masterList.Where(x => x.IsDisabled == false).Select(x => new
             {
                 Id = x.Id,
+                ClassName = x.ClassName.ToLower(),
                 Name = x.Name.ToLower(),
                 Panel = x.PanelName.ToString().ToLower()
             });

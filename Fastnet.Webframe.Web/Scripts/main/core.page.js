@@ -64,7 +64,7 @@
                 $.when($U.AjaxGet({ url: url })).then(function (r) {
                     var menu = Menu.get();
                     t$m = menu;// for diagnostics
-                    var menuId = menu.create(panelSelector, r, {menuClass: masterInfo.Name});
+                    var menuId = menu.create(panelSelector, r, { menuClasses: [masterInfo.Name, masterInfo.ClassName] });
                     //menu.logDetails(menuId);
                 });
             }
@@ -106,7 +106,7 @@
             //    "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
             //    "studio", "membership"];
             var builtIn = [
-               "login", "logon", "login", "logoff", "register", "recoverpassword" ];
+               "login", "logon", "login", "logoff", "register", "recoverpassword"];
             function isBuiltIn(url) {
                 var r = false;
                 $.each(builtIn, function (i, item) {
@@ -190,7 +190,7 @@
         SetPage: function (pageId) {
             $.when(
                 $U.AjaxGet({ url: "pageapi/sidepages/" + pageId })
-                ,$U.AjaxGet({ url: "pageapi/page/access/" + pageId })
+                , $U.AjaxGet({ url: "pageapi/page/access/" + pageId })
                 ).then(function (q0, q1) {
                     var sidePages = q0[0];
                     var centrePageId = pageId;
@@ -213,7 +213,7 @@
                     });
                     $T.currentPage.Access = access;
                     if ($T.currentPage.Access == "editallowed") {
-                    //if (canEdit) {
+                        //if (canEdit) {
                         $T.toolbar.show();
                     } else {
                         $T.toolbar.hide();

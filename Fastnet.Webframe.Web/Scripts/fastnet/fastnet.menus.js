@@ -5,7 +5,7 @@
         var _instance = instances.length;
         var menuData = { container: null, menuId: "", menuBox: null, panels: [] };
         var menuSelector = null;
-        var options = $.extend({ menuId: "" + _instance, menuClass: null, direction: "horizontal" }, opts);
+        var options = $.extend({ menuId: "" + _instance, menuClasses: null, direction: "horizontal" }, opts);
         function _positionPanel(panel) {
             var panelId = "#" + panel.id;
             $(panelId).css("position", "absolute");
@@ -209,8 +209,10 @@
         }
         function _createMenuHtml(mid) {
             var menuHtml = $($U.Format("<div id='{0}' class='fastnet-menu {1}'></div>", mid, options.direction));
-            if (options.menuClass !== null) {
-                menuHtml.addClass(options.menuClass);
+            if (options.menuClasses !== null && options.menuClasses.length > 0) {
+                $.each(options.menuClasses, function (i, mc) {
+                    menuHtml.addClass(mc);
+                });
             }
             $.each(menuData.panels, function (i, panel) {
                 var panelHtml = $($U.Format("<div id='{0}' class='menu-item-panel level-{1}' data-parent='{2}' ></div>",

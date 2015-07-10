@@ -22,6 +22,7 @@ namespace Fastnet.Webframe.CoreData
         public long Id { get; set; }
         public string Name { get; set; }
         public bool IsDisabled { get; set; }
+        public string ClassName { get; set; }
         public PanelNames PanelName { get; set; }
         public virtual ICollection<Menu> Menus
         {
