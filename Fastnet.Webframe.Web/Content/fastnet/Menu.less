@@ -37,23 +37,13 @@
 
             &.level-1 {
                 .menu-item {
-                    margin-left: 0 !important;
-                    margin-right: 0 !important;
-
-                    &:first-child {
-                        margin-top: 1px !important;
-                    }
+                    margin: 1px 0 0 0 !important;
                 }
             }
 
             &.level-2 {
                 .menu-item {
-                    margin-left: 1px !important;
-                    margin-right: 0 !important;
-
-                    &:first-child {
-                        margin-top: 1px !important;
-                    }
+                    margin:  1px 0 0 1px !important;
                 }
             }
         }
@@ -62,6 +52,7 @@
 
 .default-menu {
     @base-background-colour: #1b76bc;
+
     .menu-item {
         padding: 2px 12px 2px 12px;
         margin: 8px 12px 8px 12px;
@@ -73,8 +64,7 @@
 
         &:hover {
             background-color: darken(white, 10%);
-            color:darken(@base-background-colour, 10%);
+            color: darken(@base-background-colour, 10%);
         }
     }
 }
-
