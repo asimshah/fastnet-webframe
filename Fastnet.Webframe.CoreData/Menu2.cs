@@ -6,43 +6,23 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
-    public enum PanelNames
-    {
-        SitePanel,
-        BannerPanel,
-        MenuPanel,
-        ContentPanel,
-        LeftPanel,
-        CentrePanel,
-        RightPanel
-    }
-    public partial class MenuMaster
-    {
-        private ICollection<Menu2> menus;
-        public long Id { get; set; }
-        public string Name { get; set; }
-        public PanelNames PanelName { get; set; }
-        public virtual ICollection<Menu2> Menus
-        {
-            get { return menus ?? (menus = new HashSet<Menu2>()); }
-            set { menus = value; }
-        }
-    }
-    public partial class Menu2 : Hierarchy<Menu2>
+
+    public partial class Menu : Hierarchy<Menu>
     {
         public long Id { get; set; }
         public int Index { get; set; }
         public string Text { get; set; }
         public string Url { get; set; }
-        public virtual Menu2 ParentMenu { get; set; }
-        public virtual ICollection<Menu2> Submenus { get; set; }
+        public virtual Page  Page { get; set; }
+        public virtual Menu ParentMenu { get; set; }
+        public virtual ICollection<Menu> Submenus { get; set; }
 
-        internal override Menu2 GetParent()
+        internal override Menu GetParent()
         {
             return ParentMenu;
         }
 
-        internal override IEnumerable<Menu2> GetChildren()
+        internal override IEnumerable<Menu> GetChildren()
         {
             return this.Submenus;
         }

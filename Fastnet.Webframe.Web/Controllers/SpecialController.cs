@@ -23,13 +23,13 @@ namespace Fastnet.Webframe.Web.Controllers
     public class SpecialController : ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
-        [HttpGet]
-        [Route("updateCSSFromDB")]
-        public HttpResponseMessage WriteCSSFromDB()
-        {
-            DataContext.CreateCSSFromPanels();
-            return this.Request.CreateResponse(HttpStatusCode.OK);
-        }
+        //[HttpGet]
+        //[Route("updateCSSFromDB")]
+        //public HttpResponseMessage WriteCSSFromDB()
+        //{
+        //    DataContext.CreateCSSFromPanels();
+        //    return this.Request.CreateResponse(HttpStatusCode.OK);
+        //}
 
         [HttpGet]
         [Route("echo/{counter?}")]

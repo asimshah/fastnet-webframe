@@ -128,25 +128,25 @@ namespace Fastnet.Webframe.CoreData
         }
         //public DbSet<AccessRule> AccessRules { get; set; }
         //public DbSet<Activity> Activities { get; set; }
-        public DbSet<Background> Backgrounds { get; set; }
-        public DbSet<ClientApp> ClientApps { get; set; }
-        public DbSet<CloneInformation> CloneInformata { get; set; }
+        //public DbSet<Background> Backgrounds { get; set; }
+        //public DbSet<ClientApp> ClientApps { get; set; }
+        //public DbSet<CloneInformation> CloneInformata { get; set; }
         public DbSet<Directory> Directories { get; set; }
-        public DbSet<Menu2> NewMenus { get; set; }
+        public DbSet<Menu> Menus { get; set; }
         public DbSet<MenuMaster> MenuMasters { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<FileChunk> FileChunks { get; set; }
-        public DbSet<Font> Fonts { get; set; }
+        //public DbSet<Font> Fonts { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<DirectoryGroup> DirectoryGroups { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Member> Members { get; set; }
-        public DbSet<Menu> Menus { get; set; }
+        //public DbSet<Menu> Menus { get; set; }
         public DbSet<Page> Pages { get; set; }
         public DbSet<PageMarkup> PageMarkups { get; set; }
-        public DbSet<Panel> Panels { get; set; }
+        //public DbSet<Panel> Panels { get; set; }
         public DbSet<SiteSetting> SiteSettings { get; set; }
-        public DbSet<Style> Styles { get; set; }
+        //public DbSet<Style> Styles { get; set; }
         public DbSet<UploadFile> UploadFiles { get; set; }
         public DbSet<ActionBase> Actions { get; set; }
         public DbSet<Recorder> Recorders { get; set; }
@@ -227,6 +227,7 @@ namespace Fastnet.Webframe.CoreData
             if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
             {
                 LoadLegacyData();
+                CreateDefaultMenu(true); // create the default menu but disable it
                 EnsureRequiredGroups();
                 EnsureAdministratorInAdministratorsGroup();
                 SetSiteVersion("4.0.0.0");
@@ -234,50 +235,55 @@ namespace Fastnet.Webframe.CoreData
             }
             else
             {
-                EnsureClientApplications();
+                //EnsureClientApplications();
                 EnsureRequiredGroups();
-                EnsureRequiredPanels();
+                //EnsureRequiredPanels();
                 EnsureInitialPages();
-                CreateTestMenus();
+                CreateDefaultMenu();
                 SetSiteVersion("4.0.0.0");
-                // this will need addtion in cases of a v4 upgrade
-                WriteMainStylesheets();
-                //ClearCustomStylesheets();
+                //// this will need addtion in cases of a v4 upgrade
+                //WriteMainStylesheets();
+                ////ClearCustomStylesheets();
             }
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
         }
 
-        private void CreateTestMenus()
-        {                       
-            Menu2 home = new Menu2 { Text = "Home", Index = 0, Url = "home" };
-            ctx.NewMenus.Add(home);
-            Menu2 apps = new Menu2 { Text = "Apps", Index = 1 };
+        private void CreateDefaultMenu(bool disable = false)
+        {
+            Menu home = new Menu { Text = "Home", Index = 0, Url = "home" };
+            ctx.Menus.Add(home);
+            Menu apps = new Menu { Text = "Apps", Index = 1 };
             {
-                Menu2 cms = new Menu2 { Text = "CMS", ParentMenu = apps, Index = 0, Url = "cms" };
-                ctx.NewMenus.Add(cms);
+                Menu cms = new Menu { Text = "CMS", ParentMenu = apps, Index = 0, Url = "cms" };
+                ctx.Menus.Add(cms);
                 //{
                 //    Menu2 m2_s1_s1 = new Menu2 { Text = "page/24", ParentMenu = m2_s1, Index = 0, Url = "page/24" };
                 //    ctx.NewMenus.Add(m2_s1_s1);
                 //    Menu2 m2_s1_s2 = new Menu2 { Text = "page/28", ParentMenu = m2_s1, Index = 0, Url = "page/28" };
                 //    ctx.NewMenus.Add(m2_s1_s2);
                 //}
-                Menu2 designer = new Menu2 { Text = "Designer", ParentMenu = apps, Index = 1, Url = "designer" };
-                ctx.NewMenus.Add(designer);
-                Menu2 membership = new Menu2 { Text = "Membership", ParentMenu = apps, Index = 2, Url = "membership" };
-                ctx.NewMenus.Add(membership);
+                Menu designer = new Menu { Text = "Designer", ParentMenu = apps, Index = 1, Url = "designer" };
+                ctx.Menus.Add(designer);
+                Menu membership = new Menu { Text = "Membership", ParentMenu = apps, Index = 2, Url = "membership" };
+                ctx.Menus.Add(membership);
             }
 
-            Menu2 login = new Menu2 { Text = "Login", Index = 2, Url = "login" };
+            Menu login = new Menu { Text = "Login", Index = 2, Url = "login" };
             //{
             //    Menu2 m3_s1 = new Menu2 { Text = "Home", ParentMenu = login, Index = 0, Url = "home" };
             //    ctx.NewMenus.Add(m3_s1);
             //}
-            ctx.NewMenus.Add(login);
-            Menu2 logout = new Menu2 { Text = "Logout", Index = 4, Url = "logout" };
-            ctx.NewMenus.Add(logout);
+            ctx.Menus.Add(login);
+            Menu logout = new Menu { Text = "Logout", Index = 4, Url = "logout" };
+            ctx.Menus.Add(logout);
             //
-            MenuMaster mm = new MenuMaster { Name = "main-menu", PanelName = PanelNames.MenuPanel };
+            MenuMaster mm = new MenuMaster
+            {
+                Name = "default-menu",
+                PanelName = PanelNames.MenuPanel,
+                IsDisabled = disable
+            };
             mm.Menus.Add(home);
             mm.Menus.Add(apps);
             mm.Menus.Add(login);
@@ -340,101 +346,101 @@ namespace Fastnet.Webframe.CoreData
             }
             var test = ctx.Members.SingleOrDefault(x => x.IsAnonymous);
         }
-        private void WriteCustomStylesheets()
-        {
-            var customStylesheetFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
-            var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
-            Action<string, string> writeStylesheets = (sheetName, text) =>
-            {
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
-                string filename = System.IO.Path.Combine(mainStylesheetFolder, sheetName + ".user.css");
-                System.IO.File.WriteAllText(filename, text);
-                filename = System.IO.Path.Combine(customStylesheetFolder, sheetName + ".less");// sheetName + ".less";
-                System.IO.File.WriteAllText(filename, text);
-            };
-            Func<string, int> getLeadingNumber = (s) =>
-            {
-                var chars = s.TakeWhile(c => char.IsDigit(c));//.ToString();
-                string text = new string(chars.ToArray());
-                return Convert.ToInt32(text);
-            };
-            Func<string, CSSRule, string> getRule = (name, rule) =>
-            {
-                string text = rule.Rules.SingleOrDefault(x => x.StartsWith(name));
-                //string text = set.SelectMany(x => x.Rules).SingleOrDefault(x => x.StartsWith(name));
-                if (text != null)
-                {
-                    string[] parts = text.Split(':');
-                    return parts[1].Trim();
-                }
-                return string.Empty;
-            };
+        //private void WriteCustomStylesheets()
+        //{
+        //    var customStylesheetFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
+        //    var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
+        //    Action<string, string> writeStylesheets = (sheetName, text) =>
+        //    {
+        //        //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
+        //        //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
+        //        string filename = System.IO.Path.Combine(mainStylesheetFolder, sheetName + ".user.css");
+        //        System.IO.File.WriteAllText(filename, text);
+        //        filename = System.IO.Path.Combine(customStylesheetFolder, sheetName + ".less");// sheetName + ".less";
+        //        System.IO.File.WriteAllText(filename, text);
+        //    };
+        //    Func<string, int> getLeadingNumber = (s) =>
+        //    {
+        //        var chars = s.TakeWhile(c => char.IsDigit(c));//.ToString();
+        //        string text = new string(chars.ToArray());
+        //        return Convert.ToInt32(text);
+        //    };
+        //    Func<string, CSSRule, string> getRule = (name, rule) =>
+        //    {
+        //        string text = rule.Rules.SingleOrDefault(x => x.StartsWith(name));
+        //        //string text = set.SelectMany(x => x.Rules).SingleOrDefault(x => x.StartsWith(name));
+        //        if (text != null)
+        //        {
+        //            string[] parts = text.Split(':');
+        //            return parts[1].Trim();
+        //        }
+        //        return string.Empty;
+        //    };
 
-            string siteCss = Panel.SitePanel.GetCSSString();
-            string bannerCss = Panel.BannerPanel.GetCSSString();
-            string menuCss = Panel.MenuPanel.GetCSSString();
-            string leftCss = Panel.LeftPanel.GetCSSString();
-            string centreCss = Panel.CentrePanel.GetCSSString();
-            string rightCss = Panel.RightPanel.GetCSSString();
-            CSSRule bannerRule = CSSRule.ParseForRules(bannerCss).First();
-            CSSRule menuRule = CSSRule.ParseForRules(menuCss).First();
-            CSSRule siteRule = CSSRule.ParseForRules(siteCss).First();
-            CSSRule centreRule = CSSRule.ParseForRules(centreCss).First();
-            CSSRule leftRule = CSSRule.ParseForRules(leftCss).First();
-            CSSRule rightRule = CSSRule.ParseForRules(rightCss).First();
-            string width = getRule("width", centreRule);
-            int cw = 0;
-            if (width == null || ((cw = getLeadingNumber(width)) == 0))
-            {
-                // centre panel has no width, i.e. fluid layout
-                siteRule.RemoveRule("width");
-            }
-            else
-            {
-                // centre panel has a width - fixed width
-                // we need to add up left + centre + right and make that the site panel
-                int lw = 0, rw = 0;
-                string leftDisplay = getRule("display", leftRule);
-                if (leftDisplay != "none")
-                {
-                    lw = getLeadingNumber(getRule("width", leftRule));
-                }
-                string rightDisplay = getRule("display", rightRule);
-                if (rightDisplay != "none")
-                {
-                    rw = getLeadingNumber(getRule("width", rightRule));
-                }
-                int sw = lw + cw + rw;
-                centreRule.RemoveRule("width");
-                siteRule.RemoveRule("width");
-                siteRule.AddRule("width: {0}px", sw);
-            }
-            writeStylesheets("BannerPanel", bannerRule.ToString());
-            writeStylesheets("MenuPanel", menuRule.ToString());
-            writeStylesheets("SitePanel", siteRule.ToString());
-            writeStylesheets("LeftPanel", leftRule.ToString());
-            writeStylesheets("CentrePanel", centreRule.ToString());
-            writeStylesheets("RightPanel", rightRule.ToString());
+        //    string siteCss = Panel.SitePanel.GetCSSString();
+        //    string bannerCss = Panel.BannerPanel.GetCSSString();
+        //    string menuCss = Panel.MenuPanel.GetCSSString();
+        //    string leftCss = Panel.LeftPanel.GetCSSString();
+        //    string centreCss = Panel.CentrePanel.GetCSSString();
+        //    string rightCss = Panel.RightPanel.GetCSSString();
+        //    CSSRule bannerRule = CSSRule.ParseForRules(bannerCss).First();
+        //    CSSRule menuRule = CSSRule.ParseForRules(menuCss).First();
+        //    CSSRule siteRule = CSSRule.ParseForRules(siteCss).First();
+        //    CSSRule centreRule = CSSRule.ParseForRules(centreCss).First();
+        //    CSSRule leftRule = CSSRule.ParseForRules(leftCss).First();
+        //    CSSRule rightRule = CSSRule.ParseForRules(rightCss).First();
+        //    string width = getRule("width", centreRule);
+        //    int cw = 0;
+        //    if (width == null || ((cw = getLeadingNumber(width)) == 0))
+        //    {
+        //        // centre panel has no width, i.e. fluid layout
+        //        siteRule.RemoveRule("width");
+        //    }
+        //    else
+        //    {
+        //        // centre panel has a width - fixed width
+        //        // we need to add up left + centre + right and make that the site panel
+        //        int lw = 0, rw = 0;
+        //        string leftDisplay = getRule("display", leftRule);
+        //        if (leftDisplay != "none")
+        //        {
+        //            lw = getLeadingNumber(getRule("width", leftRule));
+        //        }
+        //        string rightDisplay = getRule("display", rightRule);
+        //        if (rightDisplay != "none")
+        //        {
+        //            rw = getLeadingNumber(getRule("width", rightRule));
+        //        }
+        //        int sw = lw + cw + rw;
+        //        centreRule.RemoveRule("width");
+        //        siteRule.RemoveRule("width");
+        //        siteRule.AddRule("width: {0}px", sw);
+        //    }
+        //    writeStylesheets("BannerPanel", bannerRule.ToString());
+        //    writeStylesheets("MenuPanel", menuRule.ToString());
+        //    writeStylesheets("SitePanel", siteRule.ToString());
+        //    writeStylesheets("LeftPanel", leftRule.ToString());
+        //    writeStylesheets("CentrePanel", centreRule.ToString());
+        //    writeStylesheets("RightPanel", rightRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "MenuPanel.less"), menuRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "MenuPanel.less"), menuRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "SitePanel.less"), siteRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "SitePanel.less"), siteRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "LeftPanel.less"), leftRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "LeftPanel.less"), leftRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "CentrePanel.less"), centreRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "CentrePanel.less"), centreRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
 
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "RightPanel.less"), rightRule.ToString());
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
-        }
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "RightPanel.less"), rightRule.ToString());
+        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
+        //}
         private void ClearCustomStylesheets()
         {
             Action<string, string> writeStylesheet = (sheetName, text) =>
@@ -553,8 +559,8 @@ namespace Fastnet.Webframe.CoreData
         //}
         private Page AddInitialPages(Directory directory)
         {
-            var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
-            var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
+            //var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
+            //var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
 
             Page bannerPage = AddHtmlPage(directory, "Banner.html", PageType.Banner);
             Page homePage = AddHtmlPage(directory, "Home Page.html", PageType.Centre);
@@ -595,7 +601,7 @@ namespace Fastnet.Webframe.CoreData
                 htmlFilename = System.IO.Path.Combine(defaultPagesFolder, htmlFilename);
                 //byte[] docxData = System.IO.File.ReadAllBytes(docxFullname);
                 //byte[] htmlData = System.IO.File.ReadAllBytes(htmlFileName);
-                string htmlString = System.IO.File.ReadAllText(htmlFilename);// Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
+                string htmlString = System.IO.File.ReadAllText(htmlFilename, Encoding.Default);// Encoding.Default.GetString(htmlData);// System.IO.File.ReadAllText(htmlFileName);
                 Page page = ctx.CreateNewPage();// new Page();
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(htmlFilename);
                 page.Type = type;
@@ -775,63 +781,63 @@ namespace Fastnet.Webframe.CoreData
                 }
             }
         }
-        private void EnsureRequiredPanels()
-        {
-            Func<string, Panel, bool, int?, int?, Panel> createPanel = (name, parentPanel, visible, pixelHeight, pixelWidth) =>
-                {
-                    Panel panel = new Panel();
-                    panel.ParentPanel = parentPanel;
-                    panel.Name = name;
-                    panel.Visible = visible;
-                    panel.LastModified = DateTime.UtcNow;
+        //private void EnsureRequiredPanels()
+        //{
+        //    Func<string, Panel, bool, int?, int?, Panel> createPanel = (name, parentPanel, visible, pixelHeight, pixelWidth) =>
+        //        {
+        //            Panel panel = new Panel();
+        //            panel.ParentPanel = parentPanel;
+        //            panel.Name = name;
+        //            panel.Visible = visible;
+        //            panel.LastModified = DateTime.UtcNow;
 
-                    panel.PixelHeight = pixelHeight;
-                    panel.PixelWidth = pixelWidth;
-                    panel.Style = new Style();
-                    ctx.Panels.Add(panel);
-                    ctx.Styles.Add(panel.Style);
-                    return panel;
-                };
-            bool panelsExist = ctx.Panels.SingleOrDefault(x => x.Name == "Root") != null;
-            if (!panelsExist)
-            {
-                Panel rootPanel = createPanel("Root", null, true, null, null);
-                Panel browserPanel = createPanel("BrowserPanel", rootPanel, true, null, null);
-                //
-                int leftPanelWidth = 210;
-                int rightPanelWidth = 151;// but note that is not visible, so excluded from sitePanelWidth calculation
-                int centrePanelWidth = 630;
-                int sitePanelWidth = leftPanelWidth + centrePanelWidth; // to create a nonfluid centre
-                Panel sitePanel = createPanel("SitePanel", browserPanel, true, null, sitePanelWidth);
-                sitePanel.Style.Font = new Font();
-                sitePanel.Style.Font.Name = "verdana";
-                sitePanel.Style.Font.PointSize = 10.5;
-                ctx.Fonts.Add(sitePanel.Style.Font);
-                //
-                Panel contentPanel = createPanel("ContentPanel", sitePanel, true, null, null);
-                Panel bannerPanel = createPanel("BannerPanel", sitePanel, true, 90, null);
-                //
-                Panel menuPanel = createPanel("MenuPanel", sitePanel, true, 31, null);
-                menuPanel.Style.Colour = "#ffffff";
-                BorderedRectangle br = new BorderedRectangle();
-                br.Bottom = new BorderInfo();
-                br.Bottom.Color = "#bb006d";
-                br.Bottom.Width = 3.0;
-                br.Bottom.Style = BorderLineStyle.Solid;
-                menuPanel.Style.Border = br.ToString();
-                menuPanel.Style.Background = new Background();
-                menuPanel.Style.Background.Colour = "#1b76bc"; // a kind of blue
-                menuPanel.Visible = false;
-                ctx.Backgrounds.Add(menuPanel.Style.Background);
-                //
-                Panel leftPanel = createPanel("LeftPanel", contentPanel, true, null, leftPanelWidth);
-                Panel centrePanel = createPanel("CentrePanel", contentPanel, true, null, null); // width excluded as included within sitePanelWidth
-                //
-                Panel rightPanel = createPanel("RightPanel", contentPanel, true, null, rightPanelWidth);
-                rightPanel.Visible = false;
-                ctx.SaveChanges();
-            }
-        }
+        //            panel.PixelHeight = pixelHeight;
+        //            panel.PixelWidth = pixelWidth;
+        //            panel.Style = new Style();
+        //            ctx.Panels.Add(panel);
+        //            ctx.Styles.Add(panel.Style);
+        //            return panel;
+        //        };
+        //    bool panelsExist = ctx.Panels.SingleOrDefault(x => x.Name == "Root") != null;
+        //    if (!panelsExist)
+        //    {
+        //        Panel rootPanel = createPanel("Root", null, true, null, null);
+        //        Panel browserPanel = createPanel("BrowserPanel", rootPanel, true, null, null);
+        //        //
+        //        int leftPanelWidth = 210;
+        //        int rightPanelWidth = 151;// but note that is not visible, so excluded from sitePanelWidth calculation
+        //        int centrePanelWidth = 630;
+        //        int sitePanelWidth = leftPanelWidth + centrePanelWidth; // to create a nonfluid centre
+        //        Panel sitePanel = createPanel("SitePanel", browserPanel, true, null, sitePanelWidth);
+        //        sitePanel.Style.Font = new Font();
+        //        sitePanel.Style.Font.Name = "verdana";
+        //        sitePanel.Style.Font.PointSize = 10.5;
+        //        ctx.Fonts.Add(sitePanel.Style.Font);
+        //        //
+        //        Panel contentPanel = createPanel("ContentPanel", sitePanel, true, null, null);
+        //        Panel bannerPanel = createPanel("BannerPanel", sitePanel, true, 90, null);
+        //        //
+        //        Panel menuPanel = createPanel("MenuPanel", sitePanel, true, 31, null);
+        //        menuPanel.Style.Colour = "#ffffff";
+        //        BorderedRectangle br = new BorderedRectangle();
+        //        br.Bottom = new BorderInfo();
+        //        br.Bottom.Color = "#bb006d";
+        //        br.Bottom.Width = 3.0;
+        //        br.Bottom.Style = BorderLineStyle.Solid;
+        //        menuPanel.Style.Border = br.ToString();
+        //        menuPanel.Style.Background = new Background();
+        //        menuPanel.Style.Background.Colour = "#1b76bc"; // a kind of blue
+        //        menuPanel.Visible = false;
+        //        ctx.Backgrounds.Add(menuPanel.Style.Background);
+        //        //
+        //        Panel leftPanel = createPanel("LeftPanel", contentPanel, true, null, leftPanelWidth);
+        //        Panel centrePanel = createPanel("CentrePanel", contentPanel, true, null, null); // width excluded as included within sitePanelWidth
+        //        //
+        //        Panel rightPanel = createPanel("RightPanel", contentPanel, true, null, rightPanelWidth);
+        //        rightPanel.Visible = false;
+        //        ctx.SaveChanges();
+        //    }
+        //}
         private void LoadLegacyData()
         {
             string configConnectionString = ApplicationSettings.Key<string>("LegacyDataConnection", null);
@@ -856,24 +862,24 @@ namespace Fastnet.Webframe.CoreData
                         Log.Write("legacyData: Members loaded");
                         //ll.LoadAccessRules();
                         //Log.Write("legacyData: AccessRules loaded");
-                        ll.LoadBackgrounds();
-                        Log.Write("legacyData: Backgrounds loaded");
+                        //ll.LoadBackgrounds();
+                        //Log.Write("legacyData: Backgrounds loaded");
                         ll.LoadDirectories();
                         Log.Write("legacyData: Directories loaded");
                         ll.LoadDirectoryGroups();
                         Log.Write("legacyData: DirectoryAccessRules loaded");
-                        ll.LoadFonts();
-                        Log.Write("legacyData: Fonts loaded");
-                        ll.LoadStyles();
-                        Log.Write("legacyData: Styles loaded");
-                        ll.LoadPanels();
-                        Log.Write("legacyData: Panels loaded");
+                        //ll.LoadFonts();
+                        //Log.Write("legacyData: Fonts loaded");
+                        //ll.LoadStyles();
+                        //Log.Write("legacyData: Styles loaded");
+                        //ll.LoadPanels();
+                        //Log.Write("legacyData: Panels loaded");
                         ll.LoadDocuments();
                         Log.Write("legacyData: Documents loaded");
                         ll.LoadPages();
                         Log.Write("legacyData: Pages loaded");
-                        ll.LoadPanelPages();
-                        Log.Write("legacyData: PanelPages loaded");
+                        //ll.LoadPanelPages();
+                        //Log.Write("legacyData: PanelPages loaded");
                         //ll.LoadPageAccessRules();
                         //Log.Write("legacyData: PageAccessRules loaded");
                         ll.LoadImages();
@@ -896,24 +902,24 @@ namespace Fastnet.Webframe.CoreData
         }
         private bool IsDatabaseCompletelyEmpty()
         {
-            int c1 = ctx.ClientApps.Count();
+            int c1 = ctx.Members.Count();
             //int c2 = ctx.Roles.Count();
             int c3 = ctx.Groups.Count();
             return (c1 + c3) == 0;
         }
-        private void EnsureClientApplications()
-        {
-            Action<string, bool, string> ensureApplication = (name, isInstalled, url) =>
-            {
-                if (ctx.ClientApps.SingleOrDefault(ca => ca.Name == name) == null)
-                {
-                    ctx.ClientApps.Add(new ClientApp { Name = name, IsInstalled = isInstalled, Url = url, Timestamp = BitConverter.GetBytes(-1) });
-                }
-            };
-            ensureApplication("Webframe Studio", true, "/studio");
-            ensureApplication("Membership Manager", false, "/membership");
-            ctx.SaveChanges();
-        }
+        //private void EnsureClientApplications()
+        //{
+        //    Action<string, bool, string> ensureApplication = (name, isInstalled, url) =>
+        //    {
+        //        if (ctx.ClientApps.SingleOrDefault(ca => ca.Name == name) == null)
+        //        {
+        //            ctx.ClientApps.Add(new ClientApp { Name = name, IsInstalled = isInstalled, Url = url, Timestamp = BitConverter.GetBytes(-1) });
+        //        }
+        //    };
+        //    ensureApplication("Webframe Studio", true, "/studio");
+        //    ensureApplication("Membership Manager", false, "/membership");
+        //    ctx.SaveChanges();
+        //}
         //private void EnsureRequiredRoles()
         //{
         //    //Action<string> ensureRole = (name) =>
@@ -1108,24 +1114,24 @@ namespace Fastnet.Webframe.CoreData
         //    }
         //    coreDb.SaveChanges();
         //}
-        internal void LoadBackgrounds()
-        {
-            foreach (var item in legacyDb.Backgrounds)
-            {
-                Background bg = new Background { Colour = item.Colour, BackgroundImageUrl = item.BackgroundImageUrl, BackgroundPosition = item.BackgroundPosition, BackgroundRepeat = item.BackgroundRepeat };
-                coreDb.Backgrounds.Add(bg);
-            }
-            coreDb.SaveChanges();
-        }
-        internal void LoadClientApps()
-        {
-            foreach (var item in legacyDb.ClientApps)
-            {
-                ClientApp ca = new ClientApp { Name = item.Name, IsInstalled = item.IsInstalled, Url = item.Url };
-                coreDb.ClientApps.Add(ca);
-            }
-            coreDb.SaveChanges();
-        }
+        //internal void LoadBackgrounds()
+        //{
+        //    foreach (var item in legacyDb.Backgrounds)
+        //    {
+        //        Background bg = new Background { Colour = item.Colour, BackgroundImageUrl = item.BackgroundImageUrl, BackgroundPosition = item.BackgroundPosition, BackgroundRepeat = item.BackgroundRepeat };
+        //        coreDb.Backgrounds.Add(bg);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
+        //internal void LoadClientApps()
+        //{
+        //    foreach (var item in legacyDb.ClientApps)
+        //    {
+        //        ClientApp ca = new ClientApp { Name = item.Name, IsInstalled = item.IsInstalled, Url = item.Url };
+        //        coreDb.ClientApps.Add(ca);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
         internal void LoadDirectories()
         {
             Action<LDB.Directory, Directory> addDirectory = null;
@@ -1251,15 +1257,15 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        internal void LoadFonts()
-        {
-            foreach (var item in legacyDb.Fonts)
-            {
-                Font f = new Font { Name = item.Name, PointSize = item.PointSize, Style = item.Style, Weight = item.Weight };
-                coreDb.Fonts.Add(f);
-            }
-            coreDb.SaveChanges();
-        }
+        //internal void LoadFonts()
+        //{
+        //    foreach (var item in legacyDb.Fonts)
+        //    {
+        //        Font f = new Font { Name = item.Name, PointSize = item.PointSize, Style = item.Style, Weight = item.Weight };
+        //        coreDb.Fonts.Add(f);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
         internal void LoadRoles()
         {
             //foreach (var item in wde.Roles)
@@ -1289,80 +1295,80 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        internal void LoadPanels()
-        {
-            Action<LDB.Panel, Panel> addPanel = null;
-            addPanel = (item, parent) =>
-            {
-                Style style = FindStyle(item.Style);
-                Panel panel = new Panel
-                {
-                    Name = item.Name,
-                    ParentPanel = parent,
-                    Visible = item.Visible,
-                    LastModified = item.LastModified,
-                    PixelHeight = item.PixelHeight,
-                    PixelWidth = item.PixelWidth,
-                    Style = style,
-                };
-                coreDb.Panels.Add(panel);
-                foreach (var child in item.ChildPanels)
-                {
-                    addPanel(child, panel);
-                }
-            };
-            foreach (var item in legacyDb.Panels.Where(g => g.ParentPanel == null))
-            {
-                addPanel(item, null);
-            }
-            coreDb.SaveChanges();
-        }
-        internal void LoadPanelPages()
-        {
-            foreach (var item in legacyDb.PanelPages)
-            {
-                Panel panel = coreDb.Panels.Single(x => x.Name == item.Panel.Name);
-                Page cp = coreDb.Pages.Find(item.CentrePage.PageId);
-                Page p = coreDb.Pages.Find(item.Page.PageId);
-                switch (item.Panel.Name)
-                {
-                    case "BannerPanel":
-                        p.Type = PageType.Banner;
-                        break;
-                    case "LeftPanel":
-                        p.Type = PageType.Left;
-                        break;
-                    case "RightPanel":
-                        p.Type = PageType.Right;
-                        break;
-                }
-                //PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
-                //coreDb.PanelPages.Add(r);
-            }
-            coreDb.SaveChanges();
-        }
-        internal void LoadStyles()
-        {
-            foreach (var item in legacyDb.Styles)
-            {
-                Background b = FindBackground(item.Background);
-                Font font = FindFont(item.Font);
-                Style style = new Style
-                {
-                    Font = font,
-                    Background = b,
-                    Border = item.Border,
-                    Margin = item.Margin,
-                    Padding = item.Padding,
-                    Colour = item.Colour,
-                    TextAlignment = item.TextAlignment,
-                    VerticalAlignment = item.VerticalAlignment,
-                    OriginalStyleId = item.StyleId
-                };
-                coreDb.Styles.Add(style);
-            }
-            coreDb.SaveChanges();
-        }
+        //internal void LoadPanels()
+        //{
+        //    Action<LDB.Panel, Panel> addPanel = null;
+        //    addPanel = (item, parent) =>
+        //    {
+        //        Style style = FindStyle(item.Style);
+        //        Panel panel = new Panel
+        //        {
+        //            Name = item.Name,
+        //            ParentPanel = parent,
+        //            Visible = item.Visible,
+        //            LastModified = item.LastModified,
+        //            PixelHeight = item.PixelHeight,
+        //            PixelWidth = item.PixelWidth,
+        //            Style = style,
+        //        };
+        //        coreDb.Panels.Add(panel);
+        //        foreach (var child in item.ChildPanels)
+        //        {
+        //            addPanel(child, panel);
+        //        }
+        //    };
+        //    foreach (var item in legacyDb.Panels.Where(g => g.ParentPanel == null))
+        //    {
+        //        addPanel(item, null);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
+        //internal void LoadPanelPages()
+        //{
+        //    foreach (var item in legacyDb.PanelPages)
+        //    {
+        //        Panel panel = coreDb.Panels.Single(x => x.Name == item.Panel.Name);
+        //        Page cp = coreDb.Pages.Find(item.CentrePage.PageId);
+        //        Page p = coreDb.Pages.Find(item.Page.PageId);
+        //        switch (item.Panel.Name)
+        //        {
+        //            case "BannerPanel":
+        //                p.Type = PageType.Banner;
+        //                break;
+        //            case "LeftPanel":
+        //                p.Type = PageType.Left;
+        //                break;
+        //            case "RightPanel":
+        //                p.Type = PageType.Right;
+        //                break;
+        //        }
+        //        //PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
+        //        //coreDb.PanelPages.Add(r);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
+        //internal void LoadStyles()
+        //{
+        //    foreach (var item in legacyDb.Styles)
+        //    {
+        //        Background b = FindBackground(item.Background);
+        //        Font font = FindFont(item.Font);
+        //        Style style = new Style
+        //        {
+        //            Font = font,
+        //            Background = b,
+        //            Border = item.Border,
+        //            Margin = item.Margin,
+        //            Padding = item.Padding,
+        //            Colour = item.Colour,
+        //            TextAlignment = item.TextAlignment,
+        //            VerticalAlignment = item.VerticalAlignment,
+        //            OriginalStyleId = item.StyleId
+        //        };
+        //        coreDb.Styles.Add(style);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
         internal void LoadMembers()
         {
             bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
@@ -1538,87 +1544,121 @@ namespace Fastnet.Webframe.CoreData
         }
         internal void LoadMenus()
         {
-            Action<LDB.Menu, Menu> addMenu = null;
+            Func<LDB.Menu, Menu, Menu> addMenu = null;
             addMenu = (item, parent) =>
             {
                 Page p = item.Page == null ? null : coreDb.Pages.Find(item.Page.PageId);
-                Style normalStyle = FindStyle(item.NormalStyle);
-                Style hoverStyle = FindStyle(item.HoverStyle);
-                Style selectedStyle = FindStyle(item.SelectedStyle);
                 Menu menu = new Menu
                 {
                     ParentMenu = parent,
-                    Sequence = item.Sequence,
                     Text = item.Text,
-                    AccessibilityCode = item.AccessibilityCode,
                     Page = p,
-                    Url = item.Url,
-                    Visible = item.Visible,
-                    LastModified = item.LastModified,
-                    PixelHeight = item.PixelHeight,
-                    PixelWidth = item.PixelWidth,
-                    SubMenuPixelHeight = item.SubMenuPixelHeight,
-                    SubMenuPixelWidth = item.SubMenuPixelWidth,
-                    InheritParentStyles = item.InheritParentStyles,
-                    NormalStyle = normalStyle,
-                    HoverStyle = hoverStyle,
-                    SelectedStyle = selectedStyle,
-                    UseStandardArrows = item.UseStandardArrows,
-                    NormalArrowColour = item.NormalArrowColour,
-                    HighlitArrowColour = item.HighlitArrowColour
+                    Index = item.Sequence,
+                    Url = item.Url,                    
                 };
                 coreDb.Menus.Add(menu);
                 foreach (var child in item.SubMenus)
                 {
                     addMenu(child, menu);
                 }
+                return menu;
+            };
+            MenuMaster mm = new MenuMaster
+            {
+                Name = "main-menu",
+                PanelName = PanelNames.MenuPanel,
+                IsDisabled = false
             };
             foreach (var item in legacyDb.Menus.Where(g => g.ParentMenu == null))
             {
-                addMenu(item, null);
+                mm.Menus.Add( addMenu(item, null));
             }
+            coreDb.MenuMasters.Add(mm);
             coreDb.SaveChanges();
         }
+        //internal void LoadMenusOld()
+        //{
+        //    Action<LDB.Menu, Menu> addMenu = null;
+        //    addMenu = (item, parent) =>
+        //    {
+        //        Page p = item.Page == null ? null : coreDb.Pages.Find(item.Page.PageId);
+        //        Style normalStyle = FindStyle(item.NormalStyle);
+        //        Style hoverStyle = FindStyle(item.HoverStyle);
+        //        Style selectedStyle = FindStyle(item.SelectedStyle);
+        //        Menu menu = new Menu
+        //        {
+        //            ParentMenu = parent,
+        //            Sequence = item.Sequence,
+        //            Text = item.Text,
+        //            AccessibilityCode = item.AccessibilityCode,
+        //            Page = p,
+        //            Url = item.Url,
+        //            Visible = item.Visible,
+        //            LastModified = item.LastModified,
+        //            PixelHeight = item.PixelHeight,
+        //            PixelWidth = item.PixelWidth,
+        //            SubMenuPixelHeight = item.SubMenuPixelHeight,
+        //            SubMenuPixelWidth = item.SubMenuPixelWidth,
+        //            InheritParentStyles = item.InheritParentStyles,
+        //            NormalStyle = normalStyle,
+        //            HoverStyle = hoverStyle,
+        //            SelectedStyle = selectedStyle,
+        //            UseStandardArrows = item.UseStandardArrows,
+        //            NormalArrowColour = item.NormalArrowColour,
+        //            HighlitArrowColour = item.HighlitArrowColour
+        //        };
+        //        coreDb.Menus.Add(menu);
+        //        foreach (var child in item.SubMenus)
+        //        {
+        //            addMenu(child, menu);
+        //        }
+        //    };
+        //    foreach (var item in legacyDb.Menus.Where(g => g.ParentMenu == null))
+        //    {
+        //        addMenu(item, null);
+        //    }
+        //    coreDb.SaveChanges();
+        //}
 
-        private Style FindStyle(LDB.Style ls)
-        {
-            return ls == null ? null : coreDb.Styles.Single(s => s.OriginalStyleId == ls.StyleId);
-            //Font f = FindFont(ls.Font);
-            //Background b = FindBackground(ls.Background);
-            //Func<Style, bool> isMatch = (s) =>
-            //    {
-            //        bool result = (f == null && s.Font == null || (s.Font != null && f != null && s.Font.FontId == f.FontId))
-            //            && (b == null && s.Background == null ||(s.Background != null && b != null) && s.Background.BackgroundId == b.BackgroundId)
-            //            && s.Border == ls.Border && s.Margin == ls.Margin && s.Padding == ls.Padding && s.Colour == ls.Colour
-            //            && s.TextAlignment == ls.TextAlignment && s.VerticalAlignment == ls.VerticalAlignment;
-            //        return result;
-            //    };
-            //return ctx.Styles.AsEnumerable().First(x => isMatch(x));
-        }
-        private Font FindFont(LDB.Font font)
-        {
-            if (font == null)
-            {
-                return null;
-            }
-            return FindFont(font.Name, font.PointSize, font.Style, font.Weight);
-        }
-        private Font FindFont(string name, double? pointsize, string style, string weight)
-        {
-            return coreDb.Fonts.First(f => f.Name == name && f.PointSize == pointsize && f.Style == style && f.Weight == weight);
-        }
-        private Background FindBackground(LDB.Background background)
-        {
-            if (background == null)
-            {
-                return null;
-            }
-            return FindBackground(background.Colour, background.BackgroundImageUrl, background.BackgroundPosition, background.BackgroundRepeat);
-        }
-        private Background FindBackground(string colour, string imageUrl, string position, string repeat)
-        {
-            return coreDb.Backgrounds.First(b => b.Colour == colour && b.BackgroundImageUrl == imageUrl && b.BackgroundPosition == position && b.BackgroundRepeat == repeat);
-        }
+        //private Style FindStyle(LDB.Style ls)
+        //{
+        //    return ls == null ? null : coreDb.Styles.Single(s => s.OriginalStyleId == ls.StyleId);
+        //    //Font f = FindFont(ls.Font);
+        //    //Background b = FindBackground(ls.Background);
+        //    //Func<Style, bool> isMatch = (s) =>
+        //    //    {
+        //    //        bool result = (f == null && s.Font == null || (s.Font != null && f != null && s.Font.FontId == f.FontId))
+        //    //            && (b == null && s.Background == null ||(s.Background != null && b != null) && s.Background.BackgroundId == b.BackgroundId)
+        //    //            && s.Border == ls.Border && s.Margin == ls.Margin && s.Padding == ls.Padding && s.Colour == ls.Colour
+        //    //            && s.TextAlignment == ls.TextAlignment && s.VerticalAlignment == ls.VerticalAlignment;
+        //    //        return result;
+        //    //    };
+        //    //return ctx.Styles.AsEnumerable().First(x => isMatch(x));
+        //}
+        //private Font FindFont(LDB.Font font)
+        //{
+        //    if (font == null)
+        //    {
+        //        return null;
+        //    }
+        //    return FindFont(font.Name, font.PointSize, font.Style, font.Weight);
+        //}
+        //private Font FindFont(string name, double? pointsize, string style, string weight)
+        //{
+        //    return coreDb.Fonts.First(f => f.Name == name && f.PointSize == pointsize && f.Style == style && f.Weight == weight);
+        //}
+        //private Background FindBackground(LDB.Background background)
+        //{
+        //    if (background == null)
+        //    {
+        //        return null;
+        //    }
+        //    return FindBackground(background.Colour, background.BackgroundImageUrl, background.BackgroundPosition, background.BackgroundRepeat);
+        //}
+        //private Background FindBackground(string colour, string imageUrl, string position, string repeat)
+        //{
+        //    return coreDb.Backgrounds.First(b => b.Colour == colour && b.BackgroundImageUrl == imageUrl && b.BackgroundPosition == position && b.BackgroundRepeat == repeat);
+        //}
         private string GetEntityConnectionString(string cs)
         {
             string sqlConnectionString = ConfigurationManager.ConnectionStrings[cs].ConnectionString;

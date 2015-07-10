@@ -123,7 +123,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             //bool isVisible = Data.Panel.MenuPanel.Visible;
             var masterList = DataContext.MenuMasters;
-            var result = masterList.Select(x => new
+            var result = masterList.Where(x => x.IsDisabled == false).Select(x => new
             {
                 Id = x.Id,
                 Name = x.Name.ToLower(),
@@ -132,6 +132,59 @@ namespace Fastnet.Webframe.Web.Controllers
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
 
+        [HttpGet]
+        [Route("menu/{id}")]
+        public async Task<HttpResponseMessage> GetMenu(long id)
+        {
+            Func<Menu, bool> canAccess = (m) =>
+            {
+                switch (m.Url)
+                {
+                    case "cms":
+                    //case "designer":
+                    case "membership":
+                        return false;
+                }
+                return true;
+            };
+            Func<Menu, bool> canInclude = null;
+            canInclude = (m) =>
+            {
+                bool r = false;
+                if (canAccess(m))
+                {
+                    if (m.Url != null)
+                    {
+                        r = true;
+                    }
+                    else
+                    {
+                        r = m.Submenus.Any(x => canInclude(x));
+                    }
+                }
+                return r;
+            };
+
+            Func<IEnumerable<Menu>, int, dynamic> getSubmenus = null;
+            getSubmenus = (menus, l) =>
+            {
+                var r = menus.Where(x => canInclude(x)).OrderBy(x => x.Index).Select(x => new
+                {
+                    Level = l,
+                    Index = x.Index,
+                    Text = x.Text,
+                    Url = x.Url,
+                    Submenus = getSubmenus(x.Submenus, l + 1),
+                });
+
+                return r;
+            };
+            int level = 0;
+            var mm = await DataContext.MenuMasters.FindAsync(id);
+            object result = getSubmenus(mm.Menus.ToArray(), level);
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+
+        }
         [HttpGet]
         [Route("~/image/{id}")]
         public HttpResponseMessage GetImage(long id)
@@ -253,59 +306,6 @@ namespace Fastnet.Webframe.Web.Controllers
             return etag;
         }
 
-        [HttpGet]
-        [Route("menu/{id}")]
-        public async Task<HttpResponseMessage> GetMenu(long id)
-        {
-            Func<Menu2, bool> canAccess = (m) =>
-            {
-                switch (m.Url)
-                {
-                    case "cms":
-                    //case "designer":
-                    case "membership":
-                        return false;
-                }
-                return true;
-            };
-            Func<Menu2, bool> canInclude = null;
-            canInclude = (m) =>
-            {
-                bool r = false;
-                if (canAccess(m))
-                {
-                    if (m.Url != null)
-                    {
-                        r = true;
-                    }
-                    else
-                    {
-                        r = m.Submenus.Any(x => canInclude(x));
-                    }
-                }
-                return r;
-            };
-
-            Func<IEnumerable<Menu2>, int, dynamic> getSubmenus = null;
-            getSubmenus = (menus, l) =>
-            {
-                var r = menus.Where(x => canInclude(x)).OrderBy(x => x.Index).Select(x => new
-                {
-                    Level = l,
-                    Index = x.Index,
-                    Text = x.Text,
-                    Url = x.Url,
-                    Submenus = getSubmenus(x.Submenus, l + 1),
-                });
-
-                return r;
-            };
-            int level = 0;
-            var mm = await DataContext.MenuMasters.FindAsync(id);
-            object result = getSubmenus(mm.Menus.ToArray(), level);
-            return this.Request.CreateResponse(HttpStatusCode.OK, result);
-
-        }
     }
 
 }

@@ -822,11 +822,17 @@
     <Content Include="Content\Main\DefaultCSS\CentrePanel.css">
       <DependentUpon>CentrePanel.less</DependentUpon>
     </Content>
+    <Content Include="Content\Main\DefaultCSS\CentrePanel.min.css">
+      <DependentUpon>CentrePanel.css</DependentUpon>
+    </Content>
     <Content Include="Content\Main\DefaultCSS\ContentPanel.css">
       <DependentUpon>ContentPanel.less</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\LeftPanel.css">
       <DependentUpon>LeftPanel.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\LeftPanel.min.css">
+      <DependentUpon>LeftPanel.css</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\MenuPanel.css">
       <DependentUpon>MenuPanel.less</DependentUpon>
@@ -836,6 +842,9 @@
     </Content>
     <Content Include="Content\Main\DefaultCSS\RightPanel.css">
       <DependentUpon>RightPanel.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\RightPanel.min.css">
+      <DependentUpon>RightPanel.css</DependentUpon>
     </Content>
     <Content Include="Content\Main\DefaultCSS\SitePanel.css">
       <DependentUpon>SitePanel.less</DependentUpon>
@@ -1059,6 +1068,15 @@
     <Content Include="Content\fastnet\Menu.less" />
     <Content Include="Content\fastnet\Menu.css.map">
       <DependentUpon>Menu.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\CentrePanel.css.map">
+      <DependentUpon>CentrePanel.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\LeftPanel.css.map">
+      <DependentUpon>LeftPanel.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Main\DefaultCSS\RightPanel.css.map">
+      <DependentUpon>RightPanel.css</DependentUpon>
     </Content>
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />

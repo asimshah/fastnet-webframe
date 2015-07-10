@@ -192,6 +192,7 @@
     <Compile Include="Member.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="Menu2.cs" />
+    <Compile Include="MenuMaster.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="PageAccessRule.cs" />
     <Compile Include="PageMarkup.cs" />
