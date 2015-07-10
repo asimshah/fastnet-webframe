@@ -182,6 +182,7 @@
     <Compile Include="Hierarchy.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
+    <Compile Include="LegacyLoader.cs" />
     <Compile Include="Logs.cs" />
     <Compile Include="MarkupDocumentLink.cs" />
     <Compile Include="MarkupPageLink.cs" />

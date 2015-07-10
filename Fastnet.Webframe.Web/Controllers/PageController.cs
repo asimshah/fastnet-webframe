@@ -139,12 +139,27 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             Func<Menu, bool> canAccess = (m) =>
             {
-                switch (m.Url)
+                if (m.Url != null)
                 {
-                    case "cms":
-                    //case "designer":
-                    case "membership":
-                        return false;
+                    string loweredurl = m.Url.ToLower();
+                    if (loweredurl.StartsWith("/"))
+                    {
+                        loweredurl = loweredurl.Substring(1);
+                    }
+                    switch (loweredurl)
+                    {
+                        case "cms":
+                        case "designer":
+                        case "membership":
+                            return canAccessBuiltinApps(loweredurl);
+                        case "login":
+                        case "logout":
+                            return canAccessLoginOut(loweredurl);
+                    }
+                    if (loweredurl.StartsWith("page/") || loweredurl.StartsWith("document/") || loweredurl.StartsWith("image/"))
+                    {
+                        return canAccessInternalUrl(loweredurl);
+                    }
                 }
                 return true;
             };
@@ -186,6 +201,8 @@ namespace Fastnet.Webframe.Web.Controllers
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
 
         }
+
+
         [HttpGet]
         [Route("~/image/{id}")]
         public HttpResponseMessage GetImage(long id)
@@ -244,69 +261,103 @@ namespace Fastnet.Webframe.Web.Controllers
             string htmlText = System.IO.File.ReadAllText(filename);
             return new { PageId = -1, Location = string.Empty, HtmlText = htmlText, HtmlStyles = string.Empty };
         }
-        //private Data.Page GetAlternatePage(Page referencePage)
-        //{
-        //    Data.Page alternatePage = null;
-        //    if (!string.IsNullOrWhiteSpace(referencePage.InheritSideContentFromUrl))
-        //    {
-        //        long id = Convert.ToInt64(referencePage.InheritSideContentFromUrl.Split('/')[2]);
-        //        alternatePage = DataContext.Pages.SingleOrDefault(x => x.PageId == id);
-        //    }
-        //    return alternatePage;
-        //}
-        //private Data.Page GetClosestHomePage(Page referencePage)
-        //{
-        //    Func<Data.Directory, Data.Page> findLandingPage = (dir) =>
-        //    {
-        //        return dir.Pages.SingleOrDefault(x => x.IsLandingPage);
-        //    };
-        //    Data.Directory cd = referencePage.Directory;
-        //    if (referencePage.IsLandingPage)
-        //    {
-        //        cd = referencePage.Directory.ParentDirectory;
-        //    }
 
-        //    Data.Page lp = null;
-        //    do
-        //    {
-        //        if (cd == null)
-        //        {
-        //            // we have traversed up the entire tree and not found any landing page
-        //            break;
-        //        }
-        //        else
-        //        {
-        //            lp = findLandingPage(cd);
-        //            if (lp == null)
-        //            {
-        //                cd = cd.ParentDirectory;
-        //            }
-        //        }
-        //    } while (lp == null);
-        //    return lp;
+        //private bool IsContentModified(Page page)
+        //{
+        //    var ifModifiedSince = Request.Headers.IfModifiedSince;
+        //    var ifNoneMatch = Request.Headers.IfNoneMatch;
+        //    var temp = ifNoneMatch.FirstOrDefault();
+        //    string receivedTag = temp == null ? null : temp.Tag;
+        //    var modifiedOn = page.PageMarkup.LastModifiedOn;// DateTime.SpecifyKind(page.PageMarkup.CreatedOn, DateTimeKind.Utc);
+        //    string etag = CreateEtag(page.PageId, page.PageMarkup.LastModifiedOn);
+        //    return etag != receivedTag || ifModifiedSince.HasValue == false || (modifiedOn - ifModifiedSince.Value) > TimeSpan.FromSeconds(1);
         //}
-        private bool IsContentModified(Page page)
+        //private string CreateEtag(params object[] args)
+        //{
+        //    string t = "";
+        //    foreach (object arg in args)
+        //    {
+        //        //Debug.Print("Etag: {0} {1:x}", arg.ToString(), arg.GetHashCode());
+        //        t += string.Format("{0:x}", arg.GetHashCode());
+        //    }
+        //    string etag = "\"" + t + "\"";
+        //    return etag;
+        //}
+
+        private bool canAccessInternalUrl(string loweredurl)
         {
-            var ifModifiedSince = Request.Headers.IfModifiedSince;
-            var ifNoneMatch = Request.Headers.IfNoneMatch;
-            var temp = ifNoneMatch.FirstOrDefault();
-            string receivedTag = temp == null ? null : temp.Tag;
-            var modifiedOn = page.PageMarkup.LastModifiedOn;// DateTime.SpecifyKind(page.PageMarkup.CreatedOn, DateTimeKind.Utc);
-            string etag = CreateEtag(page.PageId, page.PageMarkup.LastModifiedOn);
-            return etag != receivedTag || ifModifiedSince.HasValue == false || (modifiedOn - ifModifiedSince.Value) > TimeSpan.FromSeconds(1);
-        }
-        private string CreateEtag(params object[] args)
-        {
-            string t = "";
-            foreach (object arg in args)
+            try
             {
-                //Debug.Print("Etag: {0} {1:x}", arg.ToString(), arg.GetHashCode());
-                t += string.Format("{0:x}", arg.GetHashCode());
+                Member m = GetCurrentMember();
+                //string entity = null;
+                long id = 0;
+                AccessResult ar = AccessResult.Rejected;
+                if (loweredurl.StartsWith("page/"))
+                {
+                    //entity = "page";
+                    id = Convert.ToInt64(loweredurl.Substring(5));
+                    Page p = DataContext.Pages.Find(id);
+                    if (p != null)
+                    {
+                        ar = m.GetAccessResult(p);
+                    }
+                }
+                else if (loweredurl.StartsWith("document/"))
+                {
+                    //entity = "document";
+                    id = Convert.ToInt64(loweredurl.Substring(9));
+                    Document d = DataContext.Documents.Find(id);
+                    if (d != null)
+                    {
+                        ar = m.GetAccessResult(d);
+                    }
+                }
+                else
+                {
+                    //entity = "image";
+                    id = Convert.ToInt64(loweredurl.Substring(6));
+                    Image img = DataContext.Images.Find(id);
+                    if (img != null)
+                    {
+                        ar = m.GetAccessResult(img);
+                    }
+                }
+                return ar != AccessResult.Rejected;
             }
-            string etag = "\"" + t + "\"";
-            return etag;
+            catch (Exception xe)
+            {
+                Log.Write(xe, "Invalid internal url {0}", loweredurl);
+                throw;
+            }
         }
 
+        private bool canAccessLoginOut(string loweredurl)
+        {
+            Member m = GetCurrentMember();
+            if (loweredurl == "login")
+            {
+                return Group.Anonymous.Members.Contains(m);
+            }
+            if (loweredurl == "logout")
+            {
+                return Group.AllMembers.Members.Contains(m);
+            }
+            return false;
+        }
+        private bool canAccessBuiltinApps(string loweredurl)
+        {
+            Member m = GetCurrentMember();
+            switch (loweredurl)
+            {
+                case "cms":
+                case "membership":
+                    return Group.Administrators.Members.Contains(m);
+                case "designer":
+                    return Group.Designers.Members.Contains(m);
+
+            }
+            return false;
+        }
     }
 
 }
