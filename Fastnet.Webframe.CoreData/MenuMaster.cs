@@ -24,6 +24,7 @@ namespace Fastnet.Webframe.CoreData
         public bool IsDisabled { get; set; }
         public string ClassName { get; set; }
         public PanelNames PanelName { get; set; }
+        //public virtual Page Page { get; set; }
         public virtual ICollection<Menu> Menus
         {
             get { return menus ?? (menus = new HashSet<Menu>()); }

@@ -110,20 +110,68 @@ namespace Fastnet.Webframe.Web.Controllers
                     Left == null ? "none" : Left.Url,
                     Right == null ? "none" : Right.Url);
             }
-
-            var b = Banner == null ? default(long?) : Banner.PageId;
-            var l = Left == null ? default(long?) : Left.PageId;
-            var r = Right == null ? default(long?) : Right.PageId;
-            var result = new { Banner = b, Left = l, Right = r };
+            Func<Page, dynamic> getInfo = (p) =>
+            {
+                object nullObject = null;
+                if (p == null)
+                {
+                    //return new { Id = default(long?), Menu = default(long?) };
+                    return new { Id = nullObject, Menu = nullObject };
+                }
+                else
+                {
+                    if (p.PageMenu != null && p.PageMenu.IsDisabled == false)
+                    {
+                        return new { Id = p.PageId, Menu = p.PageMenu.Id };
+                    }
+                    else
+                    {
+                        return new { Id = p.PageId, Menu = nullObject };
+                    }
+                }
+            };
+            var result = new
+            {
+                Banner = getInfo(Banner),
+                Left = getInfo(Left),
+                Right = getInfo(Right)
+            };
+            //var b = Banner == null ? default(long?) : Banner.PageId;
+            //var l = Left == null ? default(long?) : Left.PageId;
+            //var r = Right == null ? default(long?) : Right.PageId;
+            //var result = new { Banner = b, Left = l, Right = r };
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
+        //[HttpGet]
+        //[Route("menupanelinfo")]
+        //public HttpResponseMessage GetMenuInfo()
+        //{
+        //    //bool isVisible = Data.Panel.MenuPanel.Visible;
+        //    var masterList = DataContext.MenuMasters;
+        //    var result = masterList.Where(x => x.PanelName == PanelNames.MenuPanel && x.IsDisabled == false).Select(x => new
+        //    {
+        //        Id = x.Id,
+        //        ClassName = x.ClassName.ToLower(),
+        //        Name = x.Name.ToLower(),
+        //        Panel = x.PanelName.ToString().ToLower()
+        //    });
+        //    return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        //}
         [HttpGet]
-        [Route("menuinfo")]
-        public HttpResponseMessage GetMenuInfo()
+        [Route("menumaster/{id?}")]
+        public HttpResponseMessage GetMenuInfo(long? id = null)
         {
-            //bool isVisible = Data.Panel.MenuPanel.Visible;
-            var masterList = DataContext.MenuMasters;
-            var result = masterList.Where(x => x.IsDisabled == false).Select(x => new
+            // if id is null, we assume menupanel masters
+            var masterList = DataContext.MenuMasters.AsQueryable();
+            if (id.HasValue)
+            {
+                masterList = masterList.Where(x => x.Id == id.Value);
+            }
+            else
+            {
+                masterList = masterList.Where(x => x.PanelName == PanelNames.MenuPanel && x.IsDisabled == false);
+            }
+            var result = masterList.Select(x => new
             {
                 Id = x.Id,
                 ClassName = x.ClassName.ToLower(),
@@ -132,7 +180,6 @@ namespace Fastnet.Webframe.Web.Controllers
             });
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
-
         [HttpGet]
         [Route("menu/{id}")]
         public async Task<HttpResponseMessage> GetMenu(long id)
@@ -145,6 +192,10 @@ namespace Fastnet.Webframe.Web.Controllers
                     if (loweredurl.StartsWith("/"))
                     {
                         loweredurl = loweredurl.Substring(1);
+                    }
+                    if (loweredurl.StartsWith("cms/"))
+                    {
+                        loweredurl = "cms";
                     }
                     switch (loweredurl)
                     {

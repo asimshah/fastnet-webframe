@@ -1,6 +1,6 @@
 ﻿.fastnet-menu {
     position: relative;
-    display: inline-block;
+
 
     *:focus {
         outline: none;
@@ -17,22 +17,29 @@
         }
     }
 
+    .menu-item-panel {
+        .menu-item {
+            position: relative;
+
+            .indicator {
+                position: absolute;
+                top: 0;
+                right: 4px;
+            }
+
+            &:not(.has-submenus) {
+                .indicator {
+                    display: none;
+                }
+            }
+        }
+    }
+
     &.horizontal {
+        display: inline-block;
+
         .menu-item-panel {
             .menu-item {
-                position: relative;
-
-                .indicator {
-                    position: absolute;
-                    top: 0;
-                    right: 4px;
-                }
-
-                &:not(.has-submenus) {
-                    .indicator {
-                        display: none;
-                    }
-                }
             }
 
             &.level-1 {
@@ -43,12 +50,17 @@
 
             &.level-2 {
                 .menu-item {
-                    margin:  1px 0 0 1px !important;
+                    margin: 1px 0 0 1px !important;
                 }
             }
         }
     }
 }
+
+/*.menu-location {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}*/
 
 .default-menu {
     @base-background-colour: #1b76bc;
@@ -65,6 +77,32 @@
         &:hover {
             background-color: darken(white, 10%);
             color: darken(@base-background-colour, 10%);
+        }
+    }
+
+    &.sidemenu {
+        margin-top: 12px;
+        margin-bottom: 12px;
+        .menu-item-panel.level-1 {
+            background-color: lightgray;
+            border-radius: 3px;
+        }
+        .menu-item {
+            padding: 3px;
+            margin: 3px;
+            width: 75%;
+            line-height: 1.0em;
+            font-size: small;
+            color:@base-background-colour;
+            background-color:transparent;
+
+            &:hover {
+                //background-color: darken(white, 10%);
+                //color: darken(@base-background-colour, 10%);
+            }
+            a {
+                text-align:left;
+            }
         }
     }
 }

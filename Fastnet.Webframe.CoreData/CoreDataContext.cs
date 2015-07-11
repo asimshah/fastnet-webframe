@@ -149,16 +149,6 @@ namespace Fastnet.Webframe.CoreData
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
             modelBuilder.Conventions.Add(new NonPublicColumnAttributeConvention());
             modelBuilder.Properties<DateTime>().Configure(c => c.HasColumnType("datetime2"));
-
-            //modelBuilder.Entity<Group>()
-            //    .HasMany(t => t.RegistrationKeys)
-            //    .WithMany(t => t.Groups)
-            //    .Map(m =>
-            //    {
-            //        m.MapLeftKey("GroupId");
-            //        m.MapRightKey("RegistrationKeyId");
-            //        m.ToTable("GroupRegistrationKey");
-            //    });
             modelBuilder.Entity<Group>()
                 .HasMany(t => t.Members)
                 .WithMany(t => t.Groups)
@@ -231,6 +221,7 @@ namespace Fastnet.Webframe.CoreData
                 //EnsureRequiredPanels();
                 EnsureInitialPages();
                 CreateDefaultMenu();
+                CreateLeftSidePanelMenu();
                 SetSiteVersion("4.0.0.0");
                 //// this will need addtion in cases of a v4 upgrade
                 //WriteMainStylesheets();
@@ -239,7 +230,43 @@ namespace Fastnet.Webframe.CoreData
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
         }
+        private void CreateLeftSidePanelMenu(bool disable = false)
+        {
+            Menu designer = new Menu { Text = "Designer", Index = 0, Url = "designer" };
+            ctx.Menus.Add(designer);
 
+            Menu membership = new Menu { Text = "Membership", Index = 1, Url = "membership" };
+            ctx.Menus.Add(membership);
+            Menu reports = new Menu { Text = "Reports", Index = 2 };
+            {
+                Menu sc = new Menu { Text = "Site Content", ParentMenu = reports, Index = 0, Url = "cms/report/site-content" };
+                ctx.Menus.Add(sc);
+                Menu ml = new Menu { Text = "Member List", ParentMenu = reports, Index = 0, Url = "cms/report/member-list" };
+                ctx.Menus.Add(ml);
+                //Menu designer = new Menu { Text = "Designer", ParentMenu = apps, Index = 1, Url = "designer" };
+                //ctx.Menus.Add(designer);
+                //Menu membership = new Menu { Text = "Membership", ParentMenu = apps, Index = 2, Url = "membership" };
+                //ctx.Menus.Add(membership);
+            }
+            ctx.Menus.Add(reports);
+            Directory root = ctx.Directories.Single(x => x.ParentDirectory == null);
+           
+            MenuMaster mm = new MenuMaster
+            {
+                Name = "SideMenu",
+                ClassName = "default-menu",
+                PanelName = PanelNames.LeftPanel,
+                IsDisabled = disable,
+            };
+            mm.Menus.Add(designer);
+            mm.Menus.Add(membership);
+            mm.Menus.Add(reports);
+            //mm.Menus.Add(logout);
+            Page leftPage = root.Pages.Single(x => x.Type == PageType.Left);
+            leftPage.PageMenu = mm;
+            ctx.MenuMasters.Add(mm);
+            ctx.SaveChanges();
+        }       
         private void CreateDefaultMenu(bool disable = false)
         {
             Menu home = new Menu { Text = "Home", Index = 0, Url = "home" };
@@ -253,7 +280,7 @@ namespace Fastnet.Webframe.CoreData
                 Menu membership = new Menu { Text = "Membership", ParentMenu = apps, Index = 2, Url = "membership" };
                 ctx.Menus.Add(membership);
             }
-
+            ctx.Menus.Add(apps);
             Menu login = new Menu { Text = "Login", Index = 2, Url = "login" };
             ctx.Menus.Add(login);
             Menu logout = new Menu { Text = "Logout", Index = 4, Url = "logout" };
@@ -271,6 +298,7 @@ namespace Fastnet.Webframe.CoreData
             mm.Menus.Add(login);
             mm.Menus.Add(logout);
             ctx.MenuMasters.Add(mm);
+            ctx.SaveChanges();
         }
 
         private void EnsureRootDirectoryRestrictions()
@@ -507,6 +535,7 @@ namespace Fastnet.Webframe.CoreData
                 //CreateDefaultMenu(landingPage);
             }
         }
+
         //private Menu CreateDefaultMenu(Page landingPage)
         //{
         //    Menu defaultMenu = new Menu();
@@ -538,27 +567,11 @@ namespace Fastnet.Webframe.CoreData
         //}
         private Page AddInitialPages(Directory directory)
         {
-            //var lPanel = ctx.Panels.Where(p => p.Name == "LeftPanel").Single();
-            //var bPanel = ctx.Panels.Where(p => p.Name == "BannerPanel").Single();
-
             Page bannerPage = AddHtmlPage(directory, "Banner.html", PageType.Banner);
             Page homePage = AddHtmlPage(directory, "Home Page.html", PageType.Centre);
             homePage.IsLandingPage = true;
-            //AccessRule rule = GetAccessRule(Permission.ViewPages, true);
-            //int groupType = (int)GroupTypes.System | (int)GroupTypes.SystemDefinedMembers;
-            //GroupTypes gt = GroupTypes.System | GroupTypes.SystemDefinedMembers;
-            //Group group = ctx.Groups.Single(g => g.Name == "Everyone" && g.Type.HasFlag(gt));
-            //PageAccessRule par = new PageAccessRule();
-            //par.AccessRule = rule;
-            //par.Group = group;
-            //par.Page = homePage;
-            //ctx.PageAccessRules.Add(par);
             Page leftPage = AddHtmlPage(directory, "Left side panel.html", PageType.Left);// AddPage(directory, "Left side panel.docx");
-            //leftPage.IsSidePage = bannerPage.IsSidePage = true;
-            //ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = bPanel, Page = bannerPage, Timestamp = BitConverter.GetBytes(1) });
-            //ctx.PanelPages.Add(new PanelPage { CentrePage = homePage, Panel = lPanel, Page = leftPage, Timestamp = BitConverter.GetBytes(1) });
             ctx.SaveChanges();
-
             return homePage;
         }
         //private AccessRule GetAccessRule(Permission permission, bool allow)

@@ -88,6 +88,7 @@
                 $("div[contenteditable='true'").removeAttr('contenteditable');
                 $(window).off(".editor");
             }
+            var result = false;
             if (_changesPending()) {
                 $U.Confirm("There are unsaved changes which will be lost. Please confirm", function () {
                     __unloadEditorsAndClose();
@@ -99,13 +100,16 @@
                     pages.left.savedHtml = null;
                     pages.centre.savedHtml = null;
                     pages.right.savedHtml = null;
+                    result = true;
                 });
             } else {
                 __unloadEditorsAndClose();
+                result = true;
             }
             if ($(".login-status").hasClass("enable")) {
                 $(".login-status").show();
             }
+            return result;
         }
         function _findPageForMce(mce) {
             // i.e. find entry in pages[]
@@ -145,8 +149,8 @@
             var baseUrl = $("head base").prop("href");
             _tinymceUrl = baseUrl + "Scripts/tinymce/";
             _toolbar = PageToolbar.get();
-            _toolbar.addHandler("toolbar-opened", _toolbarOpened);
-            _toolbar.addHandler("exit-edit-mode", _exitEditRequested);
+            //_toolbar.addHandler("toolbar-opened", _toolbarOpened);
+            //_toolbar.addHandler("exit-edit-mode", _exitEditRequested);
             _toolbar.addHandler("save-changes", _savePageChanges);
             _toolbar.addHandler("open-store-browser", function () {
                 _openStoreBrowser("normal");
@@ -455,7 +459,9 @@
         //
         _initialize();
         return {
-            SetChangePageHandler: _setChangePageHandler
+            SetChangePageHandler: _setChangePageHandler,
+            LoadEditors: _toolbarOpened,
+            UnloadEditors : _exitEditRequested
             // expose instance methods here
         };
 

@@ -62,6 +62,9 @@
             $U.SetEnabled($(selector), false);
         }
         function _addHandler(cmd, handler) {
+            //if (typeof handlers[cmd] === "undefined" || handlers[cmd] === null) {
+            //    debugger;
+            //}
             handlers[cmd] = handler;
         }
         function _onCommand(cmd) {

@@ -36,6 +36,7 @@ namespace Fastnet.Webframe.CoreData
         public byte[] TimeStamp { get; set; }
         public virtual PageMarkup PageMarkup { get; set; }
         public virtual Directory Directory { get; set; }
+        public virtual MenuMaster PageMenu { get; set; }
         //public virtual ICollection<Menu> LegacyMenus { get; set; }
         public virtual ICollection<Menu> Menus { get; set; }
         public virtual ICollection<Document> Documents // this page hyperlinks to these document

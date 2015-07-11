@@ -103,8 +103,8 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Url = p.Url,
                 LandingPage = p.IsLandingPage,
                 PageType = p.Type,
-                LandingPageImage = Page.GetLandingPageImageUrl(),
-                PageTypeImage = p.GetTypeImageUrl(),
+                LandingPageImage = "/" + Page.GetLandingPageImageUrl(),
+                PageTypeImage = "/" + p.GetTypeImageUrl(),
                 PageTypeTooltip = p.GetTypeTooltip(),
                 LastModifiedOn = p.ModifiedOn ?? p.CreatedOn,
                 LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy: p.CreatedBy
@@ -115,7 +115,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Id = d.DocumentId,
                 Name = d.Name,
                 Url = d.Url,
-                DocumentTypeImage = d.GetTypeImageUrl(),
+                DocumentTypeImage = "/" + d.GetTypeImageUrl(),
                 LastModifiedOn = d.CreatedOn,
                 LastModifiedBy = d.CreatedBy
             }));
@@ -128,7 +128,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Info = x.Size,
                 LastModifiedOn = x.CreatedOn,
                 LastModifiedBy = x.CreatedBy,
-                ImageTypeImage = x.GetImageTypeImage()
+                ImageTypeImage = "/" + x.GetImageTypeImage()
             }));
             return this.Request.CreateResponse(HttpStatusCode.OK, list);
         }

@@ -1,6 +1,5 @@
 ﻿.fastnet-menu {
   position: relative;
-  display: inline-block;
 }
 .fastnet-menu *:focus {
   outline: none;
@@ -15,16 +14,19 @@
 .fastnet-menu a:visited {
   text-decoration: none;
 }
-.fastnet-menu.horizontal .menu-item-panel .menu-item {
+.fastnet-menu .menu-item-panel .menu-item {
   position: relative;
 }
-.fastnet-menu.horizontal .menu-item-panel .menu-item .indicator {
+.fastnet-menu .menu-item-panel .menu-item .indicator {
   position: absolute;
   top: 0;
   right: 4px;
 }
-.fastnet-menu.horizontal .menu-item-panel .menu-item:not(.has-submenus) .indicator {
+.fastnet-menu .menu-item-panel .menu-item:not(.has-submenus) .indicator {
   display: none;
+}
+.fastnet-menu.horizontal {
+  display: inline-block;
 }
 .fastnet-menu.horizontal .menu-item-panel.level-1 .menu-item {
   margin: 1px 0 0 0 !important;
@@ -32,6 +34,10 @@
 .fastnet-menu.horizontal .menu-item-panel.level-2 .menu-item {
   margin: 1px 0 0 1px !important;
 }
+/*.menu-location {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}*/
 .default-menu .menu-item {
   padding: 2px 12px 2px 12px;
   margin: 8px 12px 8px 12px;
@@ -44,5 +50,25 @@
 .default-menu .menu-item:hover {
   background-color: #e6e6e6;
   color: #155a8f;
+}
+.default-menu.sidemenu {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+.default-menu.sidemenu .menu-item-panel.level-1 {
+  background-color: lightgray;
+  border-radius: 3px;
+}
+.default-menu.sidemenu .menu-item {
+  padding: 3px;
+  margin: 3px;
+  width: 75%;
+  line-height: 1.0em;
+  font-size: small;
+  color: #1b76bc;
+  background-color: transparent;
+}
+.default-menu.sidemenu .menu-item a {
+  text-align: left;
 }
 /*# sourceMappingURL=Menu.css.map */

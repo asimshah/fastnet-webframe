@@ -219,31 +219,12 @@
         cms.prototype.echo = function (text) {
             alert(text);
         };
-        cms.prototype.start = function () {
-            $(".toolbar button[data-cmd='back-to-cms']").hide();
-            // load the banner panel content
-            var url = "cmsapi/banner";
-            $.when($U.AjaxGet({ url: url }).then(function (r) {
-                if (r.Success) {
-                    $(r.Styles).find("style").each(function (index, style) {
-                        var html = style.outerHTML;
-                        $("head").append($(html));
-                    });
-                    $(".BannerPanel").html(r.Html);
-                }
-            }));
-            $(".toolbar button").on("click", function () {
-                var cmd = $(this).attr("data-cmd");
-                switch (cmd) {
-                    case "back-to-cms":
-                        clearAllContent();
+        cms.prototype.start = function (report) {
+            function gotoReport(name) {
+                switch (name) {
+                    default:
                         openNavigationTable();
                         break;
-                }
-            });
-            $(".navigation-table button").on("click", function () {
-                var cmd = $(this).attr("data-cmd");
-                switch (cmd) {
                     case "site-content":
                         closeNavigationTable();
                         showSiteContent();
@@ -281,7 +262,116 @@
                         sendTestMail();
                         break;
                 }
+            }
+            $(".toolbar button[data-cmd='back-to-cms']").hide();
+            // load the banner panel content
+            var url = "cmsapi/banner";
+            $.when($U.AjaxGet({ url: url }).then(function (r) {
+                if (r.Success) {
+                    $(r.Styles).find("style").each(function (index, style) {
+                        var html = style.outerHTML;
+                        $("head").append($(html));
+                    });
+                    $(".BannerPanel").html(r.Html);
+                }
+            }));
+            $(".toolbar button").on("click", function () {
+                var cmd = $(this).attr("data-cmd");
+                switch (cmd) {
+                    case "back-to-cms":
+                        clearAllContent();
+                        openNavigationTable();
+                        break;
+                }
             });
+            $(".navigation-table button").on("click", function () {
+                var cmd = $(this).attr("data-cmd");
+                gotoReport(cmd);
+                //switch (cmd) {
+                //    case "site-content":
+                //        closeNavigationTable();
+                //        showSiteContent();
+                //        break;
+                //    case "member-list":
+                //        closeNavigationTable();
+                //        showMemberList();
+                //        break;
+                //    case "group-list":
+                //        closeNavigationTable();
+                //        showGroupList();
+                //        break;
+                //    case "session-history":
+                //        closeNavigationTable();
+                //        showSessionHistory();
+                //        break;
+                //    case "membership-history":
+                //        closeNavigationTable();
+                //        showMembershipHistory();
+                //        break;
+                //    case "group-history":
+                //        closeNavigationTable();
+                //        showGroupHistory();
+                //        break;
+                //    case "mail-history":
+                //        closeNavigationTable();
+                //        showMailHistory();
+                //        break;
+                //    case "content-history":
+                //        closeNavigationTable();
+                //        showContentHistory();
+                //        break;
+                //    case "test-mail":
+                //        closeNavigationTable();
+                //        sendTestMail();
+                //        break;
+                //}
+            });
+            if (typeof report === "undefined") {
+                openNavigationTable();
+            }  else  {
+                gotoReport(report);
+                //switch (report) {
+                //    default:
+                //        openNavigationTable();
+                //        break;
+                //    case "site-content":
+                //        closeNavigationTable();
+                //        showSiteContent();
+                //        break;
+                //    case "member-list":
+                //        closeNavigationTable();
+                //        showMemberList();
+                //        break;
+                //    case "group-list":
+                //        closeNavigationTable();
+                //        showGroupList();
+                //        break;
+                //    case "session-history":
+                //        closeNavigationTable();
+                //        showSessionHistory();
+                //        break;
+                //    case "membership-history":
+                //        closeNavigationTable();
+                //        showMembershipHistory();
+                //        break;
+                //    case "group-history":
+                //        closeNavigationTable();
+                //        showGroupHistory();
+                //        break;
+                //    case "mail-history":
+                //        closeNavigationTable();
+                //        showMailHistory();
+                //        break;
+                //    case "content-history":
+                //        closeNavigationTable();
+                //        showContentHistory();
+                //        break;
+                //    //case "test-mail":
+                //    //    closeNavigationTable();
+                //    //    sendTestMail();
+                //        break;
+                //}
+            }
         };
 
     };

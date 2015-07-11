@@ -12,7 +12,7 @@
     </div>
 </div>
 <div class="row">
-    <table class="navigation-table table">
+    <table class="navigation-table table" style="display:none">
         <tbody class="content-reports">
             <tr>
                 <td>Contents</td>
@@ -77,7 +77,7 @@
     <script>
         $(function () {
             var cms = new $.webframe$cms();
-            cms.start();
+            cms.start("@ViewBag.RunReport");
         });
     </script>
 }

@@ -1,11 +1,24 @@
 ﻿var Menu = (function ($) {
     var $U = $.fastnet$utilities;
-    var instances = [];;
+    var instances = [];
     function createInstance(opts) {
         var _instance = instances.length;
-        var menuData = { container: null, menuId: "", menuBox: null, panels: [] };
+        var menuData = { container: null, menuId: "", menuBox: null, panels: [] , parkedHTML: null};
         var menuSelector = null;
         var options = $.extend({ menuId: "" + _instance, menuClasses: null, direction: "horizontal" }, opts);
+        function _parkMenu() {
+            menuData.parkedHTML = $("#" + menuData.menuId)[0].outerHTML;
+            $("#" + menuData.menuId).remove();
+            $(menuData.container).find(".menu-location").empty();
+        }
+        function _unparkMenu() {
+            if ($(menuData.container).find(".menu-location").length > 0) {
+                $(menuData.container).find(".menu-location").replaceWith(menuData.parkedHTML);
+            } else {
+                $(menuData.container).append($(menuData.parkedHTML));
+            }
+            menuData.parkedHTML = null;
+        }
         function _positionPanel(panel) {
             var panelId = "#" + panel.id;
             $(panelId).css("position", "absolute");
@@ -33,9 +46,14 @@
             var menuId = "#" + menuData.menuId;
             var panelId = "#" + panel.id;
             $(menuId).find(panelId).find(".menu-item.has-submenus").on("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+                var e_targetId = $(e.target).attr("id");
                 var id = $(this).attr("id");
+                $U.Debug("click this.id {0}, e.target.id {1}", id, e_targetId);
+                if ($(e.target).tagName === "A" && $(e.target).attr("href") === "#") {
+                    e.preventDefault();
+                }
+                e.stopPropagation();
+                
                 $("#" + id).siblings().each(function (i, sib) {
                     var sibId = $(sib).attr("id");
                     var sib_subPanel = _findPanelByParentId(sibId);
@@ -129,10 +147,18 @@
         }
         function _showPanel(panel, onComplete) {
             var tagId = "#" + panel.id;
-            if (options.direction === "horizontal" && panel.level === 0) {
-                $(tagId).find(".menu-item").css("display", "inline-block");
+            if (panel.level === 0) {
+                switch (options.direction) {
+                    case "horizontal":
+                        $(tagId).find(".menu-item").css("display", "inline-block");
+                        break;
+                    case "vertical":
+                        $(tagId).find(".menu-item").css("display", "block");
+                        break;
+                }
             }
-            if (panel.level > 0) {
+
+            if (options.direction === "horizontal" && panel.level > 0) {
                 _positionPanel(panel);
             }
             $(tagId).slideDown(function () {
@@ -184,12 +210,12 @@
             var pn = 0;
             var min = 0;
             function _parsePanel(parentId, level, list) {
-                var panelId = $U.Format("mp-{0}", pn++);
+                var panelId = $U.Format("{0}-mp-{1}", containerId, pn++);
                 var panel = { id: panelId, parentId: parentId, level: level, visible: false, menuItems: [] };
                 $.each(list, function (i, item) {
                     // item.Index, item.Text, item.Url, item.Submenus
                     // each array of these is in a panel                    
-                    var id = $U.Format("mi-{0}", min++);
+                    var id = $U.Format("{0}-mi-{1}", panelId, min++);
                     panel.menuItems.push({
                         panelId: panelId,
                         id: id,
@@ -239,15 +265,16 @@
                     } else {
                         menuItemHtml.append($($U.Format("<a href='{0}'><span>{1}</span></a>", mi.url, mi.text)));
                     }
-                    //if (options.direction === "horizontal") {
-                    //    if (panel.level > 0) {
-                    //        menuItemHtml.css("margin-left", 0);
-                    //    }
-                    //}
                     panelHtml.append(menuItemHtml);
                 });
                 menuHtml.append(panelHtml);
             });
+            if (options.direction === "vertical") {
+                $(menuHtml).find(".menu-item-panel:not(.level-0)").each(function (i, mp) {
+                    var parentId = $(mp).attr("data-parent");
+                    $(menuHtml).find("#" + parentId).append(mp);
+                });
+            }
             $(menuHtml).find(".menu-item-panel").hide();
             return menuHtml;
         }
@@ -273,7 +300,11 @@
             menuData.menuId = $U.Format("menu-{0}", options.menuId.toLowerCase());
             _parseMenuData(menuData.menuId, md);
             var menu2Html = _createMenuHtml(menuData.menuId);
-            $(menuData.container).append($(menu2Html));
+            if ($(menuData.container).find(".menu-location").length > 0) {
+                $(menuData.container).find(".menu-location").append(menu2Html);
+            } else {
+                $(menuData.container).append($(menu2Html));
+            }
             var rootPanel = _findPanelByParentId(menuData.menuId);
             _showPanel(rootPanel, function () { 
                 _discoverStartingDimensions();
@@ -308,7 +339,9 @@
             traceInstance: _traceInstance,
             create: _createMenu,
             //logDetails: _logPrintSizeAndPosition,
-            showBox: _showCurrentBox
+            showBox: _showCurrentBox,
+            park: _parkMenu,
+            restore: _unparkMenu
         };
     }
     function getInstance(opts) {
