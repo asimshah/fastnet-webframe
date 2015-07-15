@@ -32,6 +32,10 @@ namespace Fastnet.Webframe.Web.Areas.Designer
                     "~/Areas/designer/Content/main.css"
                 ));
 
+            bundles.Add(new StyleBundle("~/Content/bootstrap-select/css")
+                .Include(
+                    "~/Content/bootstrap-select.css"
+                ));
 
             bundles.Add(new ScriptBundle("~/bundles/designer").Include(
                 //"~/Scripts/moment.js",
@@ -39,6 +43,10 @@ namespace Fastnet.Webframe.Web.Areas.Designer
                 "~/Scripts/fastnet/fastnet.validators.js",
                 "~/Scripts/fastnet/fastnet.forms.js",
                 "~/Areas/Designer/Scripts/webframe.designer.js"
+                ));
+
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap-select").Include(
+                "~/Scripts/bootstrap-select.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/designer/ace").Include(

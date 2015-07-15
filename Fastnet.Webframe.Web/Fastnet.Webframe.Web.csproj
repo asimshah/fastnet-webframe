@@ -64,8 +64,8 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5660.20725, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5660.20725\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5674.24789, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5674.24789\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5641.32231, Culture=neutral, processorArchitecture=MSIL">
@@ -241,9 +241,10 @@
     </Compile>
     <Compile Include="Areas\Designer\Common\Templates.cs" />
     <Compile Include="Areas\Designer\Controllers\HomeController.cs" />
-    <Compile Include="Areas\Designer\Controllers\LayoutController.cs" />
+    <Compile Include="Areas\Designer\Controllers\MenuApiController.cs" />
+    <Compile Include="Areas\Designer\Controllers\StyleSheetController.cs" />
     <Compile Include="Areas\Designer\Controllers\LayoutEditorController.cs" />
-    <Compile Include="Areas\Designer\Controllers\TemplateController.cs" />
+    <Compile Include="Areas\Designer\Controllers\SiteMenuController.cs" />
     <Compile Include="Areas\Designer\DesignerAreaRegistration.cs" />
     <Compile Include="Areas\Designer\Models\SavePanelCSS.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
@@ -677,6 +678,8 @@
     <Content Include="Areas\Designer\Scripts\ace editor\src\worker-xquery.js" />
     <Content Include="Areas\Designer\Scripts\webframe.designer.js" />
     <Content Include="Areas\Designer\Templates\Forms\LayoutCSSEditor.html" />
+    <Content Include="Areas\Designer\Templates\Forms\MenuEditor.html" />
+    <Content Include="Areas\Designer\Templates\Forms\MenuItem.html" />
     <Content Include="Areas\HelpPage\HelpPage.css" />
     <Content Include="Areas\Designer\Templates\Forms\LayoutHome.html" />
     <Content Include="Areas\membership\Content\bootstrap.vertical-tabs.css" />
@@ -699,6 +702,8 @@
     <Content Include="Content\archive\bootstrap.min.css" />
     <Content Include="Content\bootstrap-datetimepicker.css" />
     <Content Include="Content\bootstrap-datetimepicker.min.css" />
+    <Content Include="Content\bootstrap-select.css" />
+    <Content Include="Content\bootstrap-select.min.css" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css">
@@ -942,6 +947,8 @@
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
+    <Content Include="Scripts\bootstrap-select.js" />
+    <Content Include="Scripts\bootstrap-select.min.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.min.js" />
     <Content Include="Scripts\datatables\datatables.bootstrap.js" />
@@ -1084,7 +1091,60 @@
     <Content Include="Content\Main\DefaultCSS\SitePanel.css.map">
       <DependentUpon>SitePanel.css</DependentUpon>
     </Content>
+    <Content Include="Areas\Designer\Views\SiteMenu\Index.cshtml" />
+    <Content Include="Scripts\bootstrap-select.js.map" />
+    <Content Include="Content\bootstrap-select.css.map" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="Scripts\i18n\defaults-bg_BG.js" />
+    <Content Include="Scripts\i18n\defaults-bg_BG.min.js" />
+    <Content Include="Scripts\i18n\defaults-cs_CZ.js" />
+    <Content Include="Scripts\i18n\defaults-cs_CZ.min.js" />
+    <Content Include="Scripts\i18n\defaults-da_DK.js" />
+    <Content Include="Scripts\i18n\defaults-da_DK.min.js" />
+    <Content Include="Scripts\i18n\defaults-de_DE.js" />
+    <Content Include="Scripts\i18n\defaults-de_DE.min.js" />
+    <Content Include="Scripts\i18n\defaults-en_US.js" />
+    <Content Include="Scripts\i18n\defaults-en_US.min.js" />
+    <Content Include="Scripts\i18n\defaults-es_CL.js" />
+    <Content Include="Scripts\i18n\defaults-es_CL.min.js" />
+    <Content Include="Scripts\i18n\defaults-eu.js" />
+    <Content Include="Scripts\i18n\defaults-eu.min.js" />
+    <Content Include="Scripts\i18n\defaults-fa_IR.js" />
+    <Content Include="Scripts\i18n\defaults-fa_IR.min.js" />
+    <Content Include="Scripts\i18n\defaults-fr_FR.js" />
+    <Content Include="Scripts\i18n\defaults-fr_FR.min.js" />
+    <Content Include="Scripts\i18n\defaults-hu_HU.js" />
+    <Content Include="Scripts\i18n\defaults-hu_HU.min.js" />
+    <Content Include="Scripts\i18n\defaults-it_IT.js" />
+    <Content Include="Scripts\i18n\defaults-it_IT.min.js" />
+    <Content Include="Scripts\i18n\defaults-ko_KR.js" />
+    <Content Include="Scripts\i18n\defaults-ko_KR.min.js" />
+    <Content Include="Scripts\i18n\defaults-nl_NL.js" />
+    <Content Include="Scripts\i18n\defaults-nl_NL.min.js" />
+    <Content Include="Scripts\i18n\defaults-pl_PL.js" />
+    <Content Include="Scripts\i18n\defaults-pl_PL.min.js" />
+    <Content Include="Scripts\i18n\defaults-pt_BR.js" />
+    <Content Include="Scripts\i18n\defaults-pt_BR.min.js" />
+    <Content Include="Scripts\i18n\defaults-pt_PT.js" />
+    <Content Include="Scripts\i18n\defaults-pt_PT.min.js" />
+    <Content Include="Scripts\i18n\defaults-ro_RO.js" />
+    <Content Include="Scripts\i18n\defaults-ro_RO.min.js" />
+    <Content Include="Scripts\i18n\defaults-ru_RU.js" />
+    <Content Include="Scripts\i18n\defaults-ru_RU.min.js" />
+    <Content Include="Scripts\i18n\defaults-sk_SK.js" />
+    <Content Include="Scripts\i18n\defaults-sk_SK.min.js" />
+    <Content Include="Scripts\i18n\defaults-sl_SI.js" />
+    <Content Include="Scripts\i18n\defaults-sl_SI.min.js" />
+    <Content Include="Scripts\i18n\defaults-sv_SE.js" />
+    <Content Include="Scripts\i18n\defaults-sv_SE.min.js" />
+    <Content Include="Scripts\i18n\defaults-tr_TR.js" />
+    <Content Include="Scripts\i18n\defaults-tr_TR.min.js" />
+    <Content Include="Scripts\i18n\defaults-ua_UA.js" />
+    <Content Include="Scripts\i18n\defaults-ua_UA.min.js" />
+    <Content Include="Scripts\i18n\defaults-zh_CN.js" />
+    <Content Include="Scripts\i18n\defaults-zh_CN.min.js" />
+    <Content Include="Scripts\i18n\defaults-zh_TW.js" />
+    <Content Include="Scripts\i18n\defaults-zh_TW.min.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
     <Content Include="Scripts\jquery-2.1.4.min.js" />
     <Content Include="Scripts\jquery-ui-1.11.4.js" />
@@ -1356,7 +1416,7 @@
     <Content Include="Areas\Designer\Content\main.css.map">
       <DependentUpon>main.css</DependentUpon>
     </Content>
-    <Content Include="Areas\Designer\Views\Layout\Index.cshtml" />
+    <Content Include="Areas\Designer\Views\StyleSheet\Index.cshtml" />
     <Content Include="Content\datatables\images\Sorting icons.psd" />
     <Content Include="Content\Main\DefaultCSS\BrowserPanel.less" />
     <Content Include="Content\Main\DefaultCSS\BannerPanel.less" />
@@ -1459,7 +1519,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
-    <Folder Include="Areas\Designer\Views\Style\" />
     <Folder Include="Areas\membership\Common\" />
     <Folder Include="Content\Main\CustomLess\" />
   </ItemGroup>

@@ -1,0 +1,72 @@
+﻿<div class="designer menu-editor">
+    <div class="form-body ">
+        {{#masters}}
+        <div class="row menu-master" data-masterid="{{Id}}">
+            <div class="col-xs-12">
+                <div class="form-group" data-property>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <span class="fa fa-plus-square" title="Open this menu" data-cmd="open-menu"></span>
+                            <span class="fa fa-minus-square hidden" title="close this menu" data-cmd="close-menu"></span>
+                        </span>
+                        <input type="text" class="form-control" value="{{Name}}" data-item="name">
+
+                        <span class="input-group-addon">                            
+                            <button class="btn btn-xs" data-cmd="delete-menumaster">
+                                <span class="fa fa-remove" title="Delete this menu"></span>
+                            </button>
+                        </span>
+                    </div>
+                    <div class="message"></div>
+                </div>
+
+                <table class="menu-details" style="display:none" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <div class="menu-type">
+                                <div data-property>
+                                    <div class="checkbox">
+                                        <label><input type="checkbox" disabled data-item="for-menu-panel"> Menu Panel</label>
+                                    </div>
+                                </div>
+                                <div class="menu-url" data-property>
+                                    <span>Url:</span>
+                                    <input type="text" class="form-control" value="{{PageUrl}}" data-item="page-url">
+                                    <button class="btn btn-xs pull-right" title="Search Store" data-cmd="mm-search-store">
+                                        <span class="fa fa-search"></span>
+                                    </button>
+                                </div>
+                                <div class="help-block">
+                                    There can be only one menu defined for the menu panel.
+                                    If the checkbox above is greyed out then some other menu is already marked for the menu panel.
+                                    To enable the checkbox redefine the other menu first.
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div data-property>
+                                <label>
+                                    <span>Class name(s)</span>
+                                    <input type="text" class="form-control" value="{{ClassName}}" data-item="class-name">
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <table class="menu-items"></table>
+            </div>
+        </div>
+        {{/masters}}
+    </div>
+    <div class="form-footer clearfix">
+        <div>
+            <div class="btn-group pull-right">
+                <button class="btn btn-primary" data-cmd="save-changes">Save Changes</button>
+                <button class="btn btn-default" data-cmd="close-form">Cancel</button>
+            </div>
+            <div class="pull-left">
+                <button class="btn btn-primary pull-left" data-cmd="new-menumaster">Add New Menu</button>
+            </div>
+        </div>
+    </div>
+</div>

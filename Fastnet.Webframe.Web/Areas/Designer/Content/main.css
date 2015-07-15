@@ -94,4 +94,103 @@
 #less-editor {
   height: 300px;
 }
+.menu-editor .form-footer {
+  float: none;
+}
+.menu-editor .form-body {
+  border: 1px solid gray;
+  background-color: #e6e6e6;
+  border-radius: 3px;
+  padding: 12px;
+  margin-bottom: 24px;
+}
+.menu-editor .btn.dropdown-toggle span.caret {
+  margin-left: 4px;
+}
+.menu-editor label input {
+  font-weight: normal;
+}
+.menu-editor .checkbox-label {
+  font-weight: normal;
+  vertical-align: middle;
+}
+.menu-editor .checkbox-label input[type=checkbox] {
+  vertical-align: text-top;
+}
+.menu-editor .menu-master {
+  margin-bottom: 4px;
+}
+.menu-editor .menu-master button[data-cmd='delete-menumaster'] {
+  background-color: transparent;
+  padding: 0;
+}
+.menu-editor .menu-master button[data-cmd='delete-menumaster'][disabled] span {
+  color: #808080;
+}
+.menu-editor .menu-master label {
+  font-weight: normal;
+}
+.menu-editor .menu-master .menu-details td {
+  vertical-align: top;
+}
+.menu-editor .menu-master .menu-details .menu-type {
+  border: 1px solid #9d9b9b;
+  border-radius: 3px;
+  padding: 8px;
+  margin-right: 24px;
+}
+.menu-editor .menu-master .menu-details .menu-type .checkbox {
+  margin-top: 0;
+}
+.menu-editor .menu-master .menu-details .menu-type .btn {
+  background-color: transparent;
+}
+.menu-editor .menu-master .menu-details .menu-type .help-block {
+  font-style: italic;
+  font-size: x-small;
+  max-width: 200px;
+}
+.menu-editor .menu-master .menu-url {
+  display: flex;
+}
+.menu-editor .menu-master .menu-url > span {
+  margin-left: 6px;
+  margin-top: 6px;
+  margin-right: 2px;
+}
+.menu-editor .menu-master span.fa {
+  margin-bottom: 2px;
+  color: #1e9cd4;
+  cursor: pointer;
+}
+.menu-editor .menu-master span.fa.fa-remove {
+  color: red;
+}
+.menu-editor .menu-master .menu-items {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.menu-editor .menu-master .menu-items .menu-item:first-child button[data-cmd='move-up'] {
+  visibility: hidden;
+}
+.menu-editor .menu-master .menu-items .menu-item:last-child button[data-cmd='move-down'] {
+  visibility: hidden;
+}
+.menu-editor .menu-master .menu-item span.fa {
+  font-size: xx-small;
+}
+.menu-editor .menu-master .menu-item button {
+  background-color: transparent;
+}
+.menu-editor .menu-master .menu-item button[data-cmd='delete-menu'][disabled] span {
+  color: #808080;
+}
+.menu-editor .menu-master .menu-item .url-item {
+  display: flex;
+}
+.menu-editor .menu-master .menu-item .url-item > span {
+  margin-left: 6px;
+  margin-top: 6px;
+  margin-right: 2px;
+}
 /*# sourceMappingURL=main.css.map */

@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.16
+    // Version 1.0.19
     var $T;
     var $U;
     var modelessTemplate =
@@ -498,8 +498,7 @@
                     });
                 }
             }
-
-            root.find("button, input[type=button]").on("click", function (e) {
+            root.find("button[data-cmd], input[type=button][data-cmd], span[data-cmd]").on("click", function (e) {
                 var cmd = $(this).attr("data-cmd");
                 if (cmd === "cancel") {
                     if (me.options.IsModal) {

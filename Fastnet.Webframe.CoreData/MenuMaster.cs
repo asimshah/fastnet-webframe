@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,12 +9,21 @@ namespace Fastnet.Webframe.CoreData
 {
     public enum PanelNames
     {
+        [Description("None")]
+        None,
+        [Description("Site Panel")]
         SitePanel,
+        [Description("Banner Panel")]
         BannerPanel,
+        [Description("Menu Panel")]
         MenuPanel,
+        [Description("Content Panel")]
         ContentPanel,
+        [Description("Left Panel")]
         LeftPanel,
+        [Description("Centre Panel")]
         CentrePanel,
+        [Description("Right Panel")]
         RightPanel
     }
     public partial class MenuMaster
