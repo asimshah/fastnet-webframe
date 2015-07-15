@@ -1,0 +1,19 @@
+﻿@{
+
+    ViewBag.Title = "Webframe Designer - Menus";
+}
+@section styles {
+    @Styles.Render("~/Content/bootstrap-select/css")
+}
+<h2>Menu Editor</h2>
+@section scripts {
+    @Scripts.Render("~/bundles/bootstrap-select")
+    @Scripts.Render("~/bundles/designer")
+    <script>
+        $(function () {
+            var menuEditor = MenuEditor.get();
+            menuEditor.start();
+        });
+    </script>
+}
+
