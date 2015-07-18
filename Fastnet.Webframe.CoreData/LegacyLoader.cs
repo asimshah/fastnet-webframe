@@ -120,10 +120,10 @@ namespace Fastnet.Webframe.CoreData
                     Type = PageType.Centre, // the default
                     Directory = d,
                     IsLandingPage = item.IsLandingPage,
-                    InheritSideContentFromUrl = item.InheritSideContentFromUrl,
-                    Visible = item.Visible,
-                    Locked = item.Locked,
-                    Deleted = item.Deleted
+                    //InheritSideContentFromUrl = item.InheritSideContentFromUrl,
+                    //Visible = item.Visible,
+                    //Locked = item.Locked,
+                    //Deleted = item.Deleted
                 };
                 coreDb.Pages.Add(p);
                 LDB.PageMarkup pm = item.PageMarkups.First();

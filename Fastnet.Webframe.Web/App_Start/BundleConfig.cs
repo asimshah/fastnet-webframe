@@ -8,11 +8,11 @@ namespace Fastnet.Webframe.Web
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
-//#if DEBUG
-//            BundleTable.EnableOptimizations = false;
-//#else
-//            BundleTable.EnableOptimizations = true;
-//#endif
+            //#if DEBUG
+            //            BundleTable.EnableOptimizations = false;
+            //#else
+            //            BundleTable.EnableOptimizations = true;
+            //#endif
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 
@@ -83,19 +83,14 @@ namespace Fastnet.Webframe.Web
 
             // css bundles below here
 
-            //bundles.Add(new Bundle("~/Content/jqueryui/css")
-            //     .Include(
-            //     "~/Content/themes/base/core.css",
-            //     "~/Content/themes/base/datepicker.css",
-            //     "~/Content/themes/base/theme.css"
-            //     ));
             bundles.Add(new StyleBundle("~/Content/css").Include(
                   "~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
                   .Include("~/Content/bootstrap.css",
+                   "~/Content/fastnet/menusystem.css",
                    "~/Content/fastnet/menu.css",
-                  "~/Content/fastnet/treeview.css",
-                  "~/Content/fastnet/forms.css",
-                  "~/Content/main/main.css"));
+                   "~/Content/fastnet/treeview.css",
+                   "~/Content/fastnet/forms.css",
+                   "~/Content/main/main.css"));
 
             bundles.Add(new StyleBundle("~/Content/datepicker/css").Include(
                 "~/Content/bootstrap-datetimepicker.css"
@@ -113,6 +108,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new StyleBundle("~/Content/page/css")
                 .Include(
+                "~/Content/main/DefaultCSS/menu.user.css",
                 "~/Content/main/DefaultCSS/menupanel.css",
                 "~/Content/main/DefaultCSS/menupanel.user.css",
                 "~/Content/main/DefaultCSS/contentpanel.css",
@@ -123,8 +119,6 @@ namespace Fastnet.Webframe.Web
                 "~/Content/main/DefaultCSS/centrepanel.user.css",
                 "~/Content/main/DefaultCSS/rightpanel.css",
                 "~/Content/main/DefaultCSS/rightpanel.user.css"
-                //"~/Content/main/DefaultCSS/menu.css",
-                //"~/Content/main/DefaultCSS/menu.user.css"
                 ));
 
 

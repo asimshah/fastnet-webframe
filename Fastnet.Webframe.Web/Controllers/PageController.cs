@@ -120,14 +120,23 @@ namespace Fastnet.Webframe.Web.Controllers
                 }
                 else
                 {
-                    if (p.PageMenu != null && p.PageMenu.IsDisabled == false)
+                    // for the time being only return the first
+                    if (p.MenuMasters.Count() > 0)
                     {
-                        return new { Id = p.PageId, Menu = p.PageMenu.Id };
+                        return new { Id = p.PageId, Menu = p.MenuMasters.First().Id };
                     }
                     else
                     {
                         return new { Id = p.PageId, Menu = nullObject };
                     }
+                    //if (p.PageMenu != null && p.PageMenu.IsDisabled == false)
+                    //{
+                    //    return new { Id = p.PageId, Menu = p.PageMenu.Id };
+                    //}
+                    //else
+                    //{
+                    //    return new { Id = p.PageId, Menu = nullObject };
+                    //}
                 }
             };
             var result = new

@@ -94,6 +94,12 @@
 #less-editor {
   height: 300px;
 }
+.menu-editor .error-message {
+  margin-left: 20px;
+  color: red;
+  font-style: italic;
+  font-size: smaller;
+}
 .menu-editor .form-footer {
   float: none;
 }
@@ -120,6 +126,11 @@
 .menu-editor .menu-master {
   margin-bottom: 4px;
 }
+.menu-editor .menu-master .help-block {
+  font-style: italic;
+  font-size: x-small;
+  max-width: 300px;
+}
 .menu-editor .menu-master button[data-cmd='delete-menumaster'] {
   background-color: transparent;
   padding: 0;
@@ -129,6 +140,10 @@
 }
 .menu-editor .menu-master label {
   font-weight: normal;
+}
+.menu-editor .menu-master .menu-details {
+  clear: both;
+  margin-top: 20px;
 }
 .menu-editor .menu-master .menu-details td {
   vertical-align: top;
@@ -145,13 +160,11 @@
 .menu-editor .menu-master .menu-details .menu-type .btn {
   background-color: transparent;
 }
-.menu-editor .menu-master .menu-details .menu-type .help-block {
-  font-style: italic;
-  font-size: x-small;
-  max-width: 200px;
-}
 .menu-editor .menu-master .menu-url {
   display: flex;
+}
+.menu-editor .menu-master .menu-url input {
+  width: auto;
 }
 .menu-editor .menu-master .menu-url > span {
   margin-left: 6px;
@@ -169,11 +182,15 @@
 .menu-editor .menu-master .menu-items {
   margin-top: 8px;
   margin-bottom: 8px;
+  width: 100%;
 }
-.menu-editor .menu-master .menu-items .menu-item:first-child button[data-cmd='move-up'] {
+.menu-editor .menu-master .menu-items .menu-item button.is-first[data-cmd='move-up'] {
   visibility: hidden;
 }
-.menu-editor .menu-master .menu-items .menu-item:last-child button[data-cmd='move-down'] {
+.menu-editor .menu-master .menu-items .menu-item button.is-last[data-cmd='move-down'] {
+  visibility: hidden;
+}
+.menu-editor .menu-master .menu-items.level-2 button[data-cmd='add-sub-choice'] {
   visibility: hidden;
 }
 .menu-editor .menu-master .menu-item span.fa {

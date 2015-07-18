@@ -777,6 +777,12 @@
     <Content Include="Content\fastnet\Menu.min.css">
       <DependentUpon>Menu.css</DependentUpon>
     </Content>
+    <Content Include="Content\fastnet\menusystem.css">
+      <DependentUpon>menusystem.less</DependentUpon>
+    </Content>
+    <Content Include="Content\fastnet\menusystem.min.css">
+      <DependentUpon>menusystem.css</DependentUpon>
+    </Content>
     <Content Include="Content\fastnet\treeview.css" />
     <Content Include="Content\fastnet\treeview.min.css" />
     <Content Include="Content\font-awesome\css\font-awesome.css" />
@@ -1094,6 +1100,10 @@
     <Content Include="Areas\Designer\Views\SiteMenu\Index.cshtml" />
     <Content Include="Scripts\bootstrap-select.js.map" />
     <Content Include="Content\bootstrap-select.css.map" />
+    <Content Include="Content\fastnet\menusystem.less" />
+    <Content Include="Content\fastnet\menusystem.css.map">
+      <DependentUpon>menusystem.css</DependentUpon>
+    </Content>
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.min.js" />

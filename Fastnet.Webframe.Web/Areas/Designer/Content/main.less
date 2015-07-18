@@ -136,6 +136,13 @@
 .menu-editor {
     @panel-border-colour: gray;
 
+    .error-message {
+        margin-left: 20px;
+        color: red;
+        font-style: italic;
+        font-size: smaller;
+    }
+
     .form-footer {
         float: none;
     }
@@ -170,6 +177,12 @@
     .menu-master {
         margin-bottom: 4px;
 
+        .help-block {
+            font-style: italic;
+            font-size: x-small;
+            max-width: 300px;
+        }
+
         button[data-cmd='delete-menumaster'] {
             background-color: transparent;
             padding: 0;
@@ -184,7 +197,8 @@
         }
 
         .menu-details {
-
+            clear: both;
+            margin-top: 20px;
 
             td {
                 vertical-align: top;
@@ -203,12 +217,6 @@
                 .btn {
                     background-color: transparent;
                 }
-
-                .help-block {
-                    font-style: italic;
-                    font-size: x-small;
-                    max-width: 200px;
-                }
             }
         }
 
@@ -216,7 +224,7 @@
             display: flex;
 
             input {
-                //max-width: 120px;
+                width: auto;
             }
 
             > span {
@@ -239,15 +247,21 @@
         .menu-items {
             margin-top: 8px;
             margin-bottom: 8px;
+            width: 100%;
 
-            .menu-item:first-child {
-                button[data-cmd='move-up'] {
+            .menu-item {
+                button.is-first[data-cmd='move-up'] {
+                    visibility: hidden;
+                }
+
+                button.is-last[data-cmd='move-down'] {
                     visibility: hidden;
                 }
             }
 
-            .menu-item:last-child {
-                button[data-cmd='move-down'] {
+
+            &.level-2 {
+                button[data-cmd='add-sub-choice'] {
                     visibility: hidden;
                 }
             }
@@ -260,10 +274,11 @@
 
             button {
                 background-color: transparent;
+
                 &[data-cmd='delete-menu'] {
-                &[disabled] span {
-                    color: #808080;
-                }
+                    &[disabled] span {
+                        color: #808080;
+                    }
                 }
             }
 
@@ -276,7 +291,6 @@
                     margin-right: 2px;
                 }
             }
-
         }
     }
 }

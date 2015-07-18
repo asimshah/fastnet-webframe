@@ -311,6 +311,7 @@
             } else {
                 sb.show({
                     Mode: "select",
+                    Filter: (2+4+8),
                     User: userData,
                     OnClose: null,
                     OnCancel: null,

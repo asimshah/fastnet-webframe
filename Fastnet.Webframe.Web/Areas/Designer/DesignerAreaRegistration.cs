@@ -29,6 +29,7 @@ namespace Fastnet.Webframe.Web.Areas.Designer
 
             bundles.Add(new StyleBundle("~/Content/designer/css")
                 .Include(
+                    "~/Content/fastnet/treeview.css",
                     "~/Areas/designer/Content/main.css"
                 ));
 
@@ -42,6 +43,8 @@ namespace Fastnet.Webframe.Web.Areas.Designer
                 "~/Scripts/mustache.js",
                 "~/Scripts/fastnet/fastnet.validators.js",
                 "~/Scripts/fastnet/fastnet.forms.js",
+                "~/Scripts/fastnet/fastnet.treeview.js",
+                "~/Scripts/main/core.storebrowser.js",
                 "~/Areas/Designer/Scripts/webframe.designer.js"
                 ));
 

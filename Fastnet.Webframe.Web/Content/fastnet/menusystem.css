@@ -1,0 +1,37 @@
+﻿.fastnet-menu {
+  position: relative;
+}
+.fastnet-menu *:focus {
+  outline: none;
+}
+.fastnet-menu a {
+  color: inherit;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+.fastnet-menu a:hover,
+.fastnet-menu a:visited {
+  text-decoration: none;
+}
+.fastnet-menu .menu-item-panel .menu-item {
+  position: relative;
+}
+.fastnet-menu .menu-item-panel .menu-item .indicator {
+  position: absolute;
+  top: 0;
+  right: 4px;
+}
+.fastnet-menu .menu-item-panel .menu-item:not(.has-submenus) .indicator {
+  display: none;
+}
+.fastnet-menu.horizontal {
+  display: inline-block;
+}
+.fastnet-menu.horizontal .menu-item-panel.level-1 .menu-item {
+  margin: 1px 0 0 0 !important;
+}
+.fastnet-menu.horizontal .menu-item-panel.level-2 .menu-item {
+  margin: 1px 0 0 1px !important;
+}
+/*# sourceMappingURL=menusystem.css.map */

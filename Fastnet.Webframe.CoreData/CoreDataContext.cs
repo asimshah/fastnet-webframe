@@ -263,7 +263,8 @@ namespace Fastnet.Webframe.CoreData
             mm.Menus.Add(reports);
             //mm.Menus.Add(logout);
             Page leftPage = root.Pages.Single(x => x.Type == PageType.Left);
-            leftPage.PageMenu = mm;
+            //leftPage.PageMenu = mm;
+            leftPage.MenuMasters.Add(mm);
             ctx.MenuMasters.Add(mm);
             ctx.SaveChanges();
         }       
@@ -356,134 +357,39 @@ namespace Fastnet.Webframe.CoreData
             }
             var test = ctx.Members.SingleOrDefault(x => x.IsAnonymous);
         }
-        //private void WriteCustomStylesheets()
+        //private void ClearCustomStylesheets()
         //{
-        //    var customStylesheetFolder = LayoutFiles.GetCustomStylesheetFolder();// CSSRule.GetCustomCSSFolder();
-        //    var mainStylesheetFolder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();
-        //    Action<string, string> writeStylesheets = (sheetName, text) =>
+        //    Action<string, string> writeStylesheet = (sheetName, text) =>
         //    {
-        //        //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
-        //        //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
-        //        string filename = System.IO.Path.Combine(mainStylesheetFolder, sheetName + ".user.css");
-        //        System.IO.File.WriteAllText(filename, text);
-        //        filename = System.IO.Path.Combine(customStylesheetFolder, sheetName + ".less");// sheetName + ".less";
+        //        string filename = sheetName + ".less";
         //        System.IO.File.WriteAllText(filename, text);
         //    };
-        //    Func<string, int> getLeadingNumber = (s) =>
+        //    Dictionary<string, string> emptyCSS = new Dictionary<string, string>()
         //    {
-        //        var chars = s.TakeWhile(c => char.IsDigit(c));//.ToString();
-        //        string text = new string(chars.ToArray());
-        //        return Convert.ToInt32(text);
+        //        //{"BrowserPanel", ".BrowserPanel\n{\n}\n"},
+        //        {"SitePanel", ".SitePanel\n{\n}\n"},
+        //        {"BannerPanel", ".BannerPanel\n{\n}\n"},
+        //        {"MenuPanel", ".MenuPanel\n{\n}\n"},
+        //        {"ContentPanel", ".ContentPanel\n{\n}\n"},
+        //        {"LeftPanel", ".LeftPanel\n{\n}\n"},
+        //        {"CentrePanel", ".CentrePanel\n{\n}\n"},
+        //        {"RightPanel", ".RightPanel\n{\n}\n"},
         //    };
-        //    Func<string, CSSRule, string> getRule = (name, rule) =>
+        //    var folder = LayoutFiles.GetCustomStylesheetFolder();
+        //    foreach (var item in emptyCSS)
         //    {
-        //        string text = rule.Rules.SingleOrDefault(x => x.StartsWith(name));
-        //        //string text = set.SelectMany(x => x.Rules).SingleOrDefault(x => x.StartsWith(name));
-        //        if (text != null)
-        //        {
-        //            string[] parts = text.Split(':');
-        //            return parts[1].Trim();
-        //        }
-        //        return string.Empty;
-        //    };
-
-        //    string siteCss = Panel.SitePanel.GetCSSString();
-        //    string bannerCss = Panel.BannerPanel.GetCSSString();
-        //    string menuCss = Panel.MenuPanel.GetCSSString();
-        //    string leftCss = Panel.LeftPanel.GetCSSString();
-        //    string centreCss = Panel.CentrePanel.GetCSSString();
-        //    string rightCss = Panel.RightPanel.GetCSSString();
-        //    CSSRule bannerRule = CSSRule.ParseForRules(bannerCss).First();
-        //    CSSRule menuRule = CSSRule.ParseForRules(menuCss).First();
-        //    CSSRule siteRule = CSSRule.ParseForRules(siteCss).First();
-        //    CSSRule centreRule = CSSRule.ParseForRules(centreCss).First();
-        //    CSSRule leftRule = CSSRule.ParseForRules(leftCss).First();
-        //    CSSRule rightRule = CSSRule.ParseForRules(rightCss).First();
-        //    string width = getRule("width", centreRule);
-        //    int cw = 0;
-        //    if (width == null || ((cw = getLeadingNumber(width)) == 0))
-        //    {
-        //        // centre panel has no width, i.e. fluid layout
-        //        siteRule.RemoveRule("width");
+        //        var panel = item.Key;
+        //        var cssText = item.Value;
+        //        string sheetName = System.IO.Path.Combine(folder, panel);
+        //        writeStylesheet(sheetName, cssText);
         //    }
-        //    else
+        //    var userFiles = System.IO.Directory.EnumerateFiles(folder, "*.user.css");
+        //    foreach (var userFile in userFiles)
         //    {
-        //        // centre panel has a width - fixed width
-        //        // we need to add up left + centre + right and make that the site panel
-        //        int lw = 0, rw = 0;
-        //        string leftDisplay = getRule("display", leftRule);
-        //        if (leftDisplay != "none")
-        //        {
-        //            lw = getLeadingNumber(getRule("width", leftRule));
-        //        }
-        //        string rightDisplay = getRule("display", rightRule);
-        //        if (rightDisplay != "none")
-        //        {
-        //            rw = getLeadingNumber(getRule("width", rightRule));
-        //        }
-        //        int sw = lw + cw + rw;
-        //        centreRule.RemoveRule("width");
-        //        siteRule.RemoveRule("width");
-        //        siteRule.AddRule("width: {0}px", sw);
+        //        System.IO.File.Delete(userFile);
+        //        Log.Write("{0} deleted", userFile);
         //    }
-        //    writeStylesheets("BannerPanel", bannerRule.ToString());
-        //    writeStylesheets("MenuPanel", menuRule.ToString());
-        //    writeStylesheets("SitePanel", siteRule.ToString());
-        //    writeStylesheets("LeftPanel", leftRule.ToString());
-        //    writeStylesheets("CentrePanel", centreRule.ToString());
-        //    writeStylesheets("RightPanel", rightRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "BannerPanel.less"), bannerRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "BannerPanel.user.css"), bannerRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "MenuPanel.less"), menuRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "MenuPanel.user.css"), menuRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "SitePanel.less"), siteRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "SitePanel.user.css"), siteRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "LeftPanel.less"), leftRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "LeftPanel.user.css"), leftRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "CentrePanel.less"), centreRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "CentrePanel.user.css"), centreRule.ToString());
-
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(customStylesheetFolder, "RightPanel.less"), rightRule.ToString());
-        //    //System.IO.File.WriteAllText(System.IO.Path.Combine(mainStylesheetFolder, "RightPanel.user.css"), rightRule.ToString());
         //}
-        private void ClearCustomStylesheets()
-        {
-            Action<string, string> writeStylesheet = (sheetName, text) =>
-            {
-                string filename = sheetName + ".less";
-                System.IO.File.WriteAllText(filename, text);
-            };
-            Dictionary<string, string> emptyCSS = new Dictionary<string, string>()
-            {
-                //{"BrowserPanel", ".BrowserPanel\n{\n}\n"},
-                {"SitePanel", ".SitePanel\n{\n}\n"},
-                {"BannerPanel", ".BannerPanel\n{\n}\n"},
-                {"MenuPanel", ".MenuPanel\n{\n}\n"},
-                {"ContentPanel", ".ContentPanel\n{\n}\n"},
-                {"LeftPanel", ".LeftPanel\n{\n}\n"},
-                {"CentrePanel", ".CentrePanel\n{\n}\n"},
-                {"RightPanel", ".RightPanel\n{\n}\n"},
-            };
-            var folder = LayoutFiles.GetCustomStylesheetFolder();
-            foreach (var item in emptyCSS)
-            {
-                var panel = item.Key;
-                var cssText = item.Value;
-                string sheetName = System.IO.Path.Combine(folder, panel);
-                writeStylesheet(sheetName, cssText);
-            }
-            var userFiles = System.IO.Directory.EnumerateFiles(folder, "*.user.css");
-            foreach (var userFile in userFiles)
-            {
-                System.IO.File.Delete(userFile);
-                Log.Write("{0} deleted", userFile);
-            }
-        }
         private void WriteMainStylesheets()
         {
             Action<string, string> writeStylesheets = (sheetName, text) =>
@@ -598,9 +504,9 @@ namespace Fastnet.Webframe.CoreData
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(htmlFilename);
                 page.Type = type;
                 //page.TimeStamp = BitConverter.GetBytes(-1);
-                page.Visible = true;
-                page.VersionCount = 0;
-                page.Locked = true;
+                //page.Visible = true;
+                //page.VersionCount = 0;
+                //page.Locked = true;
                 directory.Pages.Add(page);
                 //
                 PageMarkup pm = page.PageMarkup;// new PageMarkup();
@@ -640,9 +546,9 @@ namespace Fastnet.Webframe.CoreData
                 page.Type = type;
                 page.Name = System.IO.Path.GetFileNameWithoutExtension(docxFilename);
                 //page.TimeStamp = BitConverter.GetBytes(-1);
-                page.Visible = true;
-                page.VersionCount = 0;
-                page.Locked = true;
+                //page.Visible = true;
+                //page.VersionCount = 0;
+                //page.Locked = true;
                 directory.Pages.Add(page);
                 //
                 PageMarkup pm = page.PageMarkup;// new PageMarkup();

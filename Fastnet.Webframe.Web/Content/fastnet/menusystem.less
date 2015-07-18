@@ -1,0 +1,58 @@
+﻿.fastnet-menu {
+    position: relative;
+
+
+    *:focus {
+        outline: none;
+    }
+
+    a {
+        color: inherit;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+
+        &:hover, &:visited {
+            text-decoration: none;
+        }
+    }
+
+    .menu-item-panel {
+        .menu-item {
+            position: relative;
+
+            .indicator {
+                position: absolute;
+                top: 0;
+                right: 4px;
+            }
+
+            &:not(.has-submenus) {
+                .indicator {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    &.horizontal {
+        display: inline-block;
+
+        .menu-item-panel {
+            .menu-item {
+            }
+
+            &.level-1 {
+                .menu-item {
+                    margin: 1px 0 0 0 !important;
+                }
+            }
+
+            &.level-2 {
+                .menu-item {
+                    margin: 1px 0 0 1px !important;
+                }
+            }
+        }
+    }
+}

@@ -1,9 +1,11 @@
-﻿<tr class="menu-item" data-menuId="{{Id}}">
+﻿<tr class="menu-item" data-menuId="{{Id}}" data-index="{{Index}}">
     <td>
-        <button class="btn btn-xs" title="Move Up" data-cmd="move-up"><span class=" fa fa-arrow-up"></span></button>
-        <button class="btn btn-xs" title="Move Down" data-cmd="move-down"><span class=" fa fa-arrow-down"></span></button>
-        <button class="btn btn-xs" title="Add Menu" data-cmd="add-menu"><span class=" fa fa-plus"></span></button>
-        <button class="btn btn-xs" title="Delete" data-cmd="delete-menu"><span class=" fa fa-remove"></span></button>
+        <div class="menu-item-buttons">
+            <button class="btn btn-xs {{IsFirst}}" title="Move Up" data-cmd="move-up"><span class=" fa fa-arrow-up"></span></button>
+            <button class="btn btn-xs {{IsLast}}" title="Move Down" data-cmd="move-down"><span class=" fa fa-arrow-down"></span></button>
+            <button class="btn btn-xs" title="Add Choice (sub item)" data-cmd="add-sub-choice"><span class=" fa fa-plus"></span></button>
+            <button class="btn btn-xs" title="Delete" data-cmd="delete-menu"><span class=" fa fa-remove"></span></button>
+        </div>
     </td>
     <td>
         <div data-property>
@@ -26,7 +28,7 @@
     {{/SubMenus.length}}
 </tr>
 {{#SubMenus.length}}
-<tr>
+<tr class="menu-item-children" data-menuid="{{Id}}">
     <td></td>
     <td colspan="200">
         <table class="menu-items level-{{NextLevel}}">

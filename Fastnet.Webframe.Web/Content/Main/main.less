@@ -404,7 +404,17 @@ i.mce-i-deletepage:before {
         @totalHeight: 400px;
         @dataHeight: @totalHeight - 30px;
         width: 650px;
-
+        &.edit-disabled {
+            button[data-cmd='add-new-page'] {
+                display: none;
+            }
+            button[data-cmd='upload-files'] {
+                display: none;
+            }
+            .folder-content .buttons {
+                display: none;
+            }
+        }
         div[class*='col-xs'] {
             padding-left: 8px;
             padding-right: 8px;
