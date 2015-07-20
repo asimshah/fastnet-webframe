@@ -258,7 +258,7 @@ var MenuEditor = (function ($) {
             target.append($("<div>" + errorMessage + "</div>"));
         }
         function _validateIsPageUrl(data) {
-            // nullor empty is allowed
+            // null or empty is allowed
             var r = _validateIsRequired(data);
             if (r) {
                 data.regex = /^page\/[0-9]+$/;
@@ -281,16 +281,22 @@ var MenuEditor = (function ($) {
             return r;
         }
         function _validateIsNotCentrePageUrl(data) {
-            var pageId = parseInt(data.value.substring(5));// strip off leading "page/" and convert to a number
-            var url = $U.Format("designer/menuapi/get/pagetype/{0}", pageId);
-            $.when($U.AjaxGet({ url: url })).then(function (r) {
-                if (r.PageTypeName === "centre") {
-                    data.validator.result = "false";
-                    _appendErrorMessage(data.source, data.validator.errorMessage);
-                } else {
-                    data.validator.result = null;
-                }
-            });
+            // null or empty is allowed
+            var r = _validateIsRequired(data);
+            if (r) {
+                var pageId = parseInt(data.value.substring(5));// strip off leading "page/" and convert to a number
+                var url = $U.Format("designer/menuapi/get/pagetype/{0}", pageId);
+                $.when($U.AjaxGet({ url: url })).then(function (r) {
+                    if (r.PageTypeName === "centre") {
+                        data.validator.result = "false";
+                        _appendErrorMessage(data.source, data.validator.errorMessage);
+                    } else {
+                        data.validator.result = null;
+                    }
+                });
+            } else {
+                return true;
+            }
         }
         function _validateIsOnlyCentrePageUrl(data) {
             var pageId = parseInt(data.value.substring(5));// strip off leading "page/" and convert to a number
@@ -362,7 +368,6 @@ var MenuEditor = (function ($) {
             $(itemsSelector).off("blur");
             $(itemsSelector).off("focus");
         }
-
         function _unbindMenuItems() {
             var itemsSelector = $U.Format(".menu-editor .menu-master[data-masterid='{0}'] .menu-items", currentMenu.masterId);
             $(itemsSelector).off();

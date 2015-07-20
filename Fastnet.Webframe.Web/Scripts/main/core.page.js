@@ -5,8 +5,38 @@
     }
     var $T;
     var $U;
-    $.core$page = {
-
+    var MenuData = function () {
+        var instance = null;
+        function createInstance() {
+            var mmid = null;
+            var menuList = [];
+            var loaded = false;
+            var data = null;
+            //function _getMenuList() {
+            //    return menuList;
+            //}
+            function _addMenu(menu) {
+                menuList.push(menu);
+            }
+            return {
+                masterId: mmid,
+                addMenu: _addMenu,
+                loaded: loaded,
+                data: data,
+                menuList: menuList
+            }
+        }
+        function getInstance() {
+            if (!instance) {
+                instance = new createInstance();
+            }
+            return instance;
+        }
+        return {
+            get: getInstance
+        }
+    }
+    $.core$page = {        
         toolbar: null,
         pageEditor: null,
         isEditing: false,
@@ -14,17 +44,17 @@
         panelData: {
             Access: null,
             EditablePanels: [
-                { pageId: null, selector: ".CentrePanel", menuMasterId: null, menu: null },
-                { pageId: null, selector: ".BannerPanel", menuMasterId: null, menu: null },
-                { pageId: null, selector: ".LeftPanel", menuMasterId: null, menu: null },
-                { pageId: null, selector: ".RightPanel", menuMasterId: null, menu: null }
+                { pageId: null, selector: ".CentrePanel", masterMenus: [], menuList: [],  menuIdList: null, menuData: [] },
+                { pageId: null, selector: ".BannerPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] },
+                { pageId: null, selector: ".LeftPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] },
+                { pageId: null, selector: ".RightPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] }
             ],
-            MenuPanel: { menuList: [] },
+            MenuPanel: {masterMenus: [], menuList: [], menuData: [] },
         },
         Init: function () {
             function _toolbarOpened() {
                 // before we load editors we need to park all menus
-                // we should also turn off the login control here
+
                 $T.ParkAllMenus();
                 $T.pageEditor.LoadEditors();
             }
@@ -33,7 +63,7 @@
                 if(result){
                     // as we have unloaded editors
                     // we need to restore all menus
-                    // we should also turn on the login control here if it is supposed to be on
+
                     $T.RestoreAllMenus();
                 }
             }
@@ -54,11 +84,24 @@
                 }
             });
         },
+        FindEditablePanel: function (panelSelector) {
+            var result = null;
+            $.each($T.panelData.EditablePanels, function (i, ep) {
+                if (ep.selector === panelSelector) {
+                    result = ep;
+                    return false;
+                }
+            });
+            return result;
+        },
         RestoreAllMenus: function() {
             $.each($T.panelData.EditablePanels, function (i, ep) {
-                if (ep.menu !== null) {
-                    ep.menu.restore();
-                }
+                //if (ep.menu !== null) {
+                //    ep.menu.restore();
+                //}
+                $.each(ep.menuList, function (j, m) {
+                    m.restore();
+                });
             });
             $.each($T.panelData.MenuPanel.menuList, function (i, m) {
                 m.restore();
@@ -66,64 +109,121 @@
         },
         ParkAllMenus: function() {
             $.each($T.panelData.EditablePanels, function (i, ep) {
-                if (ep.menu !== null) {
-                    ep.menu.park();
-                }
+                //if (ep.menu !== null) {
+                //    ep.menu.park();
+                //}
+                $.each(ep.masterMenus, function (i, master) {
+                    if (master.data !== null) {
+                        $.each(master.data, function (j, menu) { });
+                    }
+                });
+                $.each(ep.menuList, function (j, m) {
+                    m.park();
+                });
             });           
             $.each($T.panelData.MenuPanel.menuList, function (i, m) {
                 m.park();
             });
         },
-        FindEditablePanel: function (panelSelector) {
-            var result = null;
-            $.each($T.panelData.EditablePanels, function (i, ep) {
-                if(ep.selector === panelSelector) {
-                    result = ep;
-                    return false;
-                }
-            });
-            return result;
-        },
-        CreateMenus: function (menuList) {
-            function createMenu(panelSelector, masterInfo, opts) {
-                var url = $U.Format("pageapi/menu/{0}", masterInfo.Id);
-                $.when($U.AjaxGet({ url: url })).then(function (r) {
-                    var menu = Menu.get();
-                    t$m = menu;// for diagnostics
-                    var options = $.extend({ menuClasses: [masterInfo.Name, masterInfo.ClassName] }, opts);
-                    var menuId = menu.create(panelSelector, r, options);
-                    if (panelSelector === ".MenuPanel") {
-                        $T.panelData.MenuPanel.menuList.push(menu);
-                    } else {
-                        var ep = $T.FindEditablePanel(panelSelector);
-                        ep.menu = menu;
+        //CreateMenus: function (menuList) {
+        //    function createMenu(panelSelector, masterInfo, opts) {
+        //        var url = $U.Format("pageapi/menu/{0}", masterInfo.Id);
+        //        $.when($U.AjaxGet({ url: url })).then(function (r) {
+        //            if (r.length > 0) {
+        //                var menu = Menu.get();
+        //                t$m = menu;// for diagnostics
+        //                var options = $.extend({ menuClasses: [masterInfo.Name, masterInfo.ClassName] }, opts);
+        //                var menuId = menu.create(panelSelector, r, options);
+        //                if (panelSelector === ".MenuPanel") {
+        //                    $T.panelData.MenuPanel.menuList.push(menu);
+        //                    $T.panelData.MenuPanel.menuData.push(r);
+        //                } else {
+        //                    var ep = $T.FindEditablePanel(panelSelector);
+        //                    ep.menuData.push(r);
+        //                    ep.menuList.push(menu);
+        //                    $(ep).trigger("menuadded");
+        //                }
+        //            }
+        //        });
+        //    }
+        //    $.each(menuList, function (i, item) {
+        //        switch (item.Panel) {
+        //            case "menupanel":
+        //                createMenu(".MenuPanel", item);
+        //                break;
+        //            case "bannerpanel":
+        //                createMenu(".BannerPanel", item);
+        //                break;
+        //            case "leftpanel":
+        //                createMenu(".LeftPanel", item, { direction: "vertical"});
+        //                break;
+        //            case "rightpanel":
+        //                createMenu(".RightPanel", item, { direction: "vertical"});
+        //                break;
+        //        }
+
+        //    });
+        //},
+        CreateMenus2: function (panelSelector, panelCtx) {
+            // panelCtx is either one of the EditablePanels or $T.panelData.MenuPanel
+            // menuDataArray is a MenuData[]
+            var menuDataArray = panelCtx.masterMenus;
+            function findMenuData(masterId) {
+                var md = null;
+                $.each(menuDataArray, function (i, entry) {
+                    if (entry.masterId === masterId) {
+                        md = entry;
+                        return false;
                     }
-                    //$("#" + menuId).find('a').on("click", function () {
-                    //    var id = $(this).closest(".menu-item").attr("id");
-                    //    $U.Debug("menu id {0} clicked", id);
-                    //});
+                });
+                return md;
+            }
+            function createMenu(panelSelector, mm, opts) {
+                var url = $U.Format("pageapi/menu/{0}", mm.Id);
+                $.when($U.AjaxGet({ url: url })).then(function (r) {
+                    var md = findMenuData(mm.Id);
+                    md.loaded = true;
+                    if (r.length > 0) {
+                        var menu = Menu.get();
+                        t$m = menu;// for diagnostics
+                        var options = $.extend({ menuClasses: [mm.Name, mm.ClassName] }, opts);
+                        var menuid = menu.create(panelSelector, r, options);
+                        //md.menu = menu;
+                        md.addMenu(menu);
+                        md.data = r;
+                        $U.Debug("Panel {0}, master {1}, added menu {2}", panelSelector, mm.Id, menu.getId());
+                    }
+
                 });
             }
-            // Note: menuList contains only one menu when called in the context of a sidepanel page.
-            // In theory, at least, there might be noew than one when called in the context of the MenuPanel
-            // In practice, this will occur only if the designer menu UI allows it
-            // 
-            $.each(menuList, function (i, item) {
-                switch (item.Panel) {
-                    case "menupanel":
-                        createMenu(".MenuPanel", item);
-                        break;
-                    case "bannerpanel":
-                        createMenu(".BannerPanel", item);
-                        break;
-                    case "leftpanel":
-                        createMenu(".LeftPanel", item, { direction: "vertical"});
-                        break;
-                    case "rightpanel":
-                        createMenu(".RightPanel", item, { direction: "vertical"});
-                        break;
-                }
+            // first build a list masterIds to get from the server
+            var mmIdList = [];
+            $.each(menuDataArray, function (i, item) {
+                mmIdList.push(item.masterId);
+            });
+            // now get details from the server
+            var url = "pageapi/menu/master";
+            var postData = { option: null, idList: mmIdList};
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                // r is an array of {Id, ClassName, Name, Panel}
+                //$T.CreateMenus(r);
+                $.each(r, function (i, mm) {
+                    switch (mm.Panel) {
+                        case "menupanel":
+                            createMenu(".MenuPanel", mm);
+                            break;
+                        case "bannerpanel":
+                            createMenu(".BannerPanel", mm);
+                            break;
+                        case "leftpanel":
+                            createMenu(".LeftPanel", mm, { direction: "vertical" });
+                            break;
+                        case "rightpanel":
+                            createMenu(".RightPanel", mm, { direction: "vertical" });
+                            break;
+                    }
 
+                });
             });
         },
         GotoInternalLink: function (url) {
@@ -200,13 +300,22 @@
             return url;
         },
         LoadStartPage: function (startPage) {
+            $T.SetReponsiveFeatures();
             var pageId = startPage;
-            $.when(
-                $U.AjaxGet({ url: "pageapi/menumaster" })).then(function (menuInfo) {
-                    $T.CreateMenus(menuInfo);
-                    $T.SetPage(pageId);
-                    $T.QueryAuthentication();
+            var url = "pageapi/menupanel/get/menumasters";
+            $T.panelData.MenuPanel.masterMenus = [];
+            $.when($U.AjaxGet({ url: url }, true)).then(function (r) {
+                // r is an array of mm ids
+                $.each(r, function (i, id) {
+                    var md = new MenuData().get();
+                    md.masterId = id;
+                    $T.panelData.MenuPanel.masterMenus.push(md);
                 });
+                //$T.CreateMenus2($T.panelData.MenuPanel.masterMenus);
+                $T.CreateMenus2(".MenuPanel", $T.panelData.MenuPanel);
+                $T.SetPage(pageId);
+                $T.QueryAuthentication();
+            });
         },
         ParallelCalls: function () {
             $.when(
@@ -240,10 +349,6 @@
                     var sidePages = q0[0];
                     var centrePageId = pageId;
                     var access = q1[0].Access;
-                    //$T.UpdatePanel($T.panelData.BannerPanel, sidePages.Banner);
-                    //$T.UpdatePanel($T.panelData.LeftPanel, sidePages.Left);
-                    //$T.UpdatePanel($T.panelData.RightPanel, sidePages.Right);
-                    //$T.UpdatePanel($T.panelData.CentrePanel, { Id: centrePageId, Menu: null });
                     $T.UpdatePanel($T.FindEditablePanel(".BannerPanel"), sidePages.Banner);
                     $T.UpdatePanel($T.FindEditablePanel(".LeftPanel"), sidePages.Left);
                     $T.UpdatePanel($T.FindEditablePanel(".RightPanel"), sidePages.Right);
@@ -255,7 +360,6 @@
                     });
                     $T.panelData.Access = access;
                     if ($T.panelData.Access == "editallowed") {
-                        //if (canEdit) {
                         $T.toolbar.show();
                     } else {
                         $T.toolbar.hide();
@@ -294,6 +398,28 @@
             ep.pageId == null;
             ep.Menu = null;
         },
+        UpdatePanel: function (ep, pageData) {
+            if (ep.pageId !== pageData.Id) {
+                if (pageData.Id != null) {
+                    ep.masterMenus = [];
+                    ep.pageId = pageData.Id;
+                    ep.menuIdList = pageData.MenuList;
+                    if (pageData.MenuList != null) {
+                        $.each(pageData.MenuList, function (i, mmid) {
+                            // pageData.MenuList is a list of menumaster ids;
+                            var md = new MenuData().get();
+                            md.masterId = mmid;
+                            ep.masterMenus.push(md);
+                        });
+                    }
+                    $.when($U.AjaxGet({ url: "pageapi/page/" + ep.pageId })).then(function (result) {
+                        $T.SetContent(ep, { access: result.Access, styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+                    });
+                } else {
+                    $T.ClearContent(ep);
+                }
+            }
+        },
         SetContent: function (ep, pageInfo) {
             var styleList = pageInfo.styleList;
             var html = pageInfo.html;
@@ -315,7 +441,6 @@
             }
             $(ep.selector).off();
             var content = $(html);
-            //var links = content.find('a');
             content.find('a').on("click", function (e) {
                 var url = $(this).attr("href");
                 if ($T.IsLinkInternal(url)) {
@@ -324,36 +449,103 @@
                     $T.GotoInternalLink(url);
                 }
             });
-            //var panelSelector = "." + panelName;
             var name = ep.selector.substr(1).toLowerCase();
             $(ep.selector).empty().append(content);
             $(ep.selector).attr("data-page-id", pageInfo.pageId);
             $(ep.selector).attr("data-panel", name);
             $(ep.selector).attr("data-location", pageInfo.location);
-            if (ep.menuMasterId != null) {
-                $U.Debug("Panel selector {0} needs menu id {1}", ep.selector, ep.menuMasterId);
-                var url = $U.Format("pageapi/menumaster/{0}", ep.menuMasterId);
-                $.when($U.AjaxGet({ url: url })).then(function (r) {
-                    $T.CreateMenus(r);
+            $(ep.selector).find(".menu-location").empty();// make sure menu locations are clean
+            $T.CreateMenus2(ep.selector, ep);
+        },
+        OnBarCommand: function (cmd) {
+            var masterList = null;
+            switch (cmd) {
+                case "show-main-menu":
+                    masterList = $T.panelData.MenuPanel.masterMenus
+                    break;
+                case "show-left-menu":
+                    var ep = $T.FindEditablePanel(".LeftPanel")
+                    masterList = ep.masterMenus;
+                    break;
+                case "show-right-menu":
+                    var ep = $T.FindEditablePanel(".RightPanel")
+                    masterList = ep.masterMenus;
+                    break;
+                default:
+                    $U.Debug("bars: {0}", cmd);
+                    break;
+            }
+            $T.ShowBarMenu(cmd, masterList);
+        },
+        ShowBarMenu: function (cmd, masterList) {
+            function insertBarMenuHtml() {
+                function _insertMenuHTML(root_ul, md, level) {
+                    // md is the data returned originally by /pageapi/get/menu
+                    // {Level, Index, Text, Url, Submenus}
+                    if (md.Submenus.length > 0) {
+                        var s1 = "<li class='has-children is-closed'><a><span>{0}</span> <span class='fa fa-arrow-circle-down'></span></a><ul data-level='{1}'></ul></li>";
+                        var html1 = $U.Format(s1, md.Text, level);
+                        var x = $(html1);
+                        var next = $(x).find("ul");
+                        root_ul.append(x);
+                        $.each(md.Submenus, function (k, sub_md) {
+                            _insertMenuHTML(next, sub_md, level + 1);
+                        });
+                    } else {
+                        var s2 = "<li><a href='{0}'><span>{1}</span></a></li>";
+                        var html2 = $U.Format(s2, md.Url, md.Text);
+                        root_ul.append($(html2));
+                    }
+                }
+                $(".bar-menu").empty();
+                $.each(masterList, function (i, master) {
+                    // each master is start of an independent menu
+                    if(master.data !== null) {                    
+                        var l0ul = $("<ul data-level='0'></ul>").appendTo($(".bar-menu"));
+                        $.each(master.data, function (j, md) {
+                            _insertMenuHTML(l0ul, md, 1);
+                        });
+                    }
                 });
             }
-            //if (pageEntry === $T.panelData.CentrePanel) {
-            //    $T.panelData.Access = pageInfo.access;
-            //    debugger;
-            //}
-        },
-        UpdatePanel: function (ep, pageData) {
-            //var newPageId = pageData.Id;
-            if (ep.pageId !== pageData.Id) {
-                if (pageData.Id != null) {
-                    $.when($U.AjaxGet({ url: "pageapi/page/" + pageData.Id })).then(function (result) {
-                        $T.SetContent(ep, { access: result.Access, styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+            var currentCmd = $(".bar-menu").attr("data-current");
+            $(".bar-menu").slideUp();
+            if (currentCmd !== cmd) {
+                insertBarMenuHtml();
+                var h = $(".menu-bars-container").outerHeight();
+                $("ul[data-level='1'], ul[data-level='2']").slideUp();
+                $(".bar-menu").css({ top: h }).slideDown();
+                $(".bar-menu").attr("data-current", cmd);
+                $(".bar-menu a").on("click", function (e) {
+                    var li = $(this).closest("li");
+                    var siblings = $(li).siblings();
+                    siblings.each(function (i, sibling) {
+                        if ($(sibling).hasClass("is-open")) {
+                            $(sibling).find("li.is-open").removeClass("is-open").addClass("is-closed");
+                            $(sibling).find("ul").slideUp();
+                            $(sibling).removeClass("is-open").addClass("is-closed");
+                        }
                     });
-                } else {
-                    $T.ClearContent(ep);
-                }
-                ep.pageId = pageData.Id;
-                ep.menuMasterId = pageData.Menu;
+                    if ($(li).hasClass("has-children")) {
+                        e.stopPropagation();
+                        var level = parseInt($(li).closest("ul").attr("data-level"));
+                        level++;
+                        if ($(li).hasClass("is-closed")) {
+                            $(li).find("ul[data-level='" + level + "']").slideDown();
+                            $(li).removeClass("is-closed").addClass("is-open");
+                            $(li).find("> a span.fa").removeClass("fa-arrow-circle-down").addClass("fa-arrow-circle-up");
+                        } else {
+                            $(li).find("ul[data-level='" + level + "']").slideUp();
+                            $(li).addClass("is-closed").removeClass("is-open");
+                            $(li).find("> a span.fa").removeClass("fa-arrow-circle-up").addClass("fa-arrow-circle-down");
+                        }
+                    } else {
+                        $(".bar-menu").removeAttr("data-current");
+                        $(".bar-menu").slideUp();
+                    }
+                });
+            } else {
+                $(".bar-menu").removeAttr("data-current");
             }
         },
         LoadEditor: function (afterLoad) {
@@ -395,6 +587,48 @@
                 crossDomain: true
             });
         },
+        SetReponsiveFeatures: function () {
+            function countMenus(panelSelector) {
+                var count = 0;
+                var lp = $T.FindEditablePanel(panelSelector);
+                $.each(lp.masterMenus, function (i, masater) {
+                    if (master.data != null) {
+                        count += master.data.length;
+                    }
+                });
+                return count;
+            }
+            function onWidthChange(mql) {
+                if (mql.matches) {
+                    $(".SitePanel").removeClass("normal-width").addClass("narrow-width");
+                    $U.Debug("query match");
+                } else {
+                    $(".SitePanel").removeClass("narrow-width").addClass("normal-width");
+                    $U.Debug("query does not match");
+                }
+            }
+            //if (countMenus(".LeftPanel") === 0) {
+            //    $(".left-bars").hide();
+            //}
+            //if (countMenus(".RightPanel") === 0) {
+            //    $(".right-bars").hide();
+            //}
+            
+            if (!$(".LeftPanel").is(":visible")) {
+                $(".left-bars").hide();
+            }
+            if (!$(".RightPanel").is(":visible")) {
+                $(".right-bars").hide();
+            }
+            $(".SitePanel .bars").on("click", function (e) {
+                e.stopPropagation();
+                var cmd = $(this).attr("data-cmd");
+                $T.OnBarCommand(cmd);
+            });
+            var mql = window.matchMedia("(max-width: 768px)");
+            mql.addListener(onWidthChange);
+            onWidthChange(mql);// sync with current state
+        }
     };
     $(function () {
         $.core$page.Init();

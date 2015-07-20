@@ -11,15 +11,15 @@
   background-color: #e6e6e6;
   color: #155a8f;
 }
-.default-menu.sidemenu {
+.default-menu.vertical {
   margin-top: 12px;
   margin-bottom: 12px;
 }
-.default-menu.sidemenu .menu-item-panel.level-1 {
+.default-menu.vertical .menu-item-panel.level-1 {
   background-color: lightgray;
   border-radius: 3px;
 }
-.default-menu.sidemenu .menu-item {
+.default-menu.vertical .menu-item {
   padding: 3px;
   margin: 3px;
   width: 75%;
@@ -28,7 +28,13 @@
   color: #1b76bc;
   background-color: transparent;
 }
-.default-menu.sidemenu .menu-item a {
+.default-menu.vertical .menu-item a {
   text-align: left;
+}
+.editable-content .fastnet-menu.vertical:first-child {
+  margin-bottom: 0;
+}
+.editable-content .fastnet-menu.vertical:last-child {
+  margin-top: 0;
 }
 /*# sourceMappingURL=Menu.css.map */

@@ -12,10 +12,47 @@
     @Styles.Render("~/Content/site/css")
     @RenderSection("styles", required: false)
 </head>
-<body >
+<body>
     <div class="fastnet-error-panel hide">
     </div>
-    <div class="SitePanel">
+    <div class="SitePanel normal-width">
+        <div class="menu-bars-container">
+            <div class="left-bars bars pull-left" data-cmd="show-left-menu">
+                <span class="fa fa-bars"></span>
+            </div>
+            <div class="right-bars bars pull-right" data-cmd="show-right-menu">
+                <span class="fa fa-bars"></span>
+            </div>
+            <div class="main-bars bars pull-right" data-cmd="show-main-menu">
+                <span class="fa fa-bars"></span>
+            </div>
+            <div class="bar-menu" style="display:none">
+                <ul data-level="0">
+                    <li ><a>Menu T1</a></li>
+                    <li class="has-children is-closed">
+                        <a>
+                            <span>Menu T2, Menu T4, Menu T4</span>
+                            <span class="fa fa-arrow-circle-down"></span>
+                        </a>
+                        <ul data-level="1">
+                            <li class="has-children is-closed">
+                                <a>
+                                    <span>Menu A1</span>
+                                    <span class="fa fa-arrow-circle-down"></span>
+                                </a>
+                                <ul data-level="2">
+                                    <li><a>Final Level</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Menu A2, Menu A4, Menu A4</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="home">Home</a></li>
+                    <li><a>Menu T4, Menu T4</a></li>
+                </ul>
+            </div>
+        </div>
+
         <div class="edit-panel">
             <div class="row">
                 <div class="toolbar closed">

@@ -6,6 +6,9 @@
         var menuData = { container: null, menuId: "", menuBox: null, panels: [] , parkedHTML: null};
         var menuSelector = null;
         var options = $.extend({ menuId: "" + _instance, menuClasses: null, direction: "horizontal" }, opts);
+        function _getId() {
+            return menuData.menuId;
+        }
         function _parkMenu() {
             menuData.parkedHTML = $("#" + menuData.menuId)[0].outerHTML;
             $("#" + menuData.menuId).remove();
@@ -13,7 +16,7 @@
         }
         function _unparkMenu() {
             if ($(menuData.container).find(".menu-location").length > 0) {
-                $(menuData.container).find(".menu-location").replaceWith(menuData.parkedHTML);
+                $(menuData.container).find(".menu-location").empty().append(menuData.parkedHTML);
             } else {
                 $(menuData.container).append($(menuData.parkedHTML));
             }
@@ -94,14 +97,19 @@
         function _getBox(tagId) {
             var menuLocation = $("#" + menuData.menuId).offset();
             var location = $(tagId).offset();
-            return {
-                coords: { left: location.left - menuLocation.left, top: location.top - menuLocation.top },
-                container_offset: null,
-                mwidth: $(tagId).outerWidth(true),
-                mheight: $(tagId).outerHeight(true),
-                width: $(tagId).outerWidth(false),
-                height: $(tagId).outerHeight(false)
-            };
+            if (typeof location != "undefined") {
+                return {
+                    coords: { left: location.left - menuLocation.left, top: location.top - menuLocation.top },
+                    container_offset: null,
+                    mwidth: $(tagId).outerWidth(true),
+                    mheight: $(tagId).outerHeight(true),
+                    width: $(tagId).outerWidth(false),
+                    height: $(tagId).outerHeight(false)
+                };
+            }
+            else {
+                return null;
+            }
         }
         function _discoverDimensions(panel) {
             var parentBox = null;
@@ -282,11 +290,11 @@
             // allow rendering to complete
             setTimeout(function () {
                 menuData.menuBox = _getBox("#" + menuData.menuId);
-                _setAttributes("#" + menuData.menuId, menuData.menuBox);
-                //var rootPanelId = _findPanelIdByParent(menuData.menuId);
-                var panel = _findPanelByParentId(menuData.menuId);// _findPanelById(rootPanelId);
+                //_setAttributes("#" + menuData.menuId, menuData.menuBox);
+
+                var panel = _findPanelByParentId(menuData.menuId);
                 _discoverDimensions(panel);
-                _setPositioningAttributes(panel);
+                //_setPositioningAttributes(panel);
             }, 500);
         }
         function _createMenu(selector, md, opts) {
@@ -341,7 +349,9 @@
             //logDetails: _logPrintSizeAndPosition,
             showBox: _showCurrentBox,
             park: _parkMenu,
-            restore: _unparkMenu
+            restore: _unparkMenu,
+            menuId: menuData.menuId,
+            getId : _getId
         };
     }
     function getInstance(opts) {

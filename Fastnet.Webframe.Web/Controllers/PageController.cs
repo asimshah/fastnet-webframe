@@ -4,6 +4,7 @@ using Fastnet.Web.Common;
 using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.WebApi;
+using Newtonsoft.Json.Linq;
 //using Fastnet.Webframe.Web.Models.Core;
 using System;
 using System.Collections.Generic;
@@ -31,24 +32,6 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("home")]
         public HttpResponseMessage GetHomePage()
         {
-            //reminder I need to find the current user to do home page correctly!
-            //if (id.HasValue)
-            //{
-            //    //var httpResponseMessage =  this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = id.Value.ToString() });
-            //    var httpResponseMessage = this.Request.CreateResponse(HttpStatusCode.Found);
-            //    httpResponseMessage.Headers.Location = new Uri(string.Format("/pageapi/page/{0}", id.Value ), UriKind.Relative);
-            //    return httpResponseMessage;
-            //}
-            //var allLandingPages = DataContext.FindAllLandingPages();
-            //Data.Page page = null;
-            //if (allLandingPages.Count() > 1)
-            //{
-            //    page = allLandingPages.OrderByDescending(p => p.PageId).First();
-            //}
-            //else
-            //{
-            //    page = allLandingPages.First();
-            //}
             Page defaultlandingPage = Member.Anonymous.FindLandingPage();
             this.SetCurrentPage(defaultlandingPage);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = defaultlandingPage.PageId.ToString() });
@@ -59,9 +42,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             long pageId = Int64.Parse(id);
             Member m = GetCurrentMember();
-            //HttpContext.Current.Session["CurrentPage"] = pageId;
             Page page = DataContext.Pages.Find(pageId);
-
             AccessResult ar = m.GetAccessResult(page);
             object data = null;
             if (ar == AccessResult.Rejected)
@@ -115,7 +96,6 @@ namespace Fastnet.Webframe.Web.Controllers
                 object nullObject = null;
                 if (p == null)
                 {
-                    //return new { Id = default(long?), Menu = default(long?) };
                     return new { Id = nullObject, Menu = nullObject };
                 }
                 else
@@ -123,20 +103,12 @@ namespace Fastnet.Webframe.Web.Controllers
                     // for the time being only return the first
                     if (p.MenuMasters.Count() > 0)
                     {
-                        return new { Id = p.PageId, Menu = p.MenuMasters.First().Id };
+                        return new { Id = p.PageId, Menu = p.MenuMasters.First().Id, MenuList = p.MenuMasters.Select(x => x.Id) };
                     }
                     else
                     {
-                        return new { Id = p.PageId, Menu = nullObject };
+                        return new { Id = p.PageId, Menu = nullObject, MenuList = nullObject };
                     }
-                    //if (p.PageMenu != null && p.PageMenu.IsDisabled == false)
-                    //{
-                    //    return new { Id = p.PageId, Menu = p.PageMenu.Id };
-                    //}
-                    //else
-                    //{
-                    //    return new { Id = p.PageId, Menu = nullObject };
-                    //}
                 }
             };
             var result = new
@@ -145,19 +117,31 @@ namespace Fastnet.Webframe.Web.Controllers
                 Left = getInfo(Left),
                 Right = getInfo(Right)
             };
-            //var b = Banner == null ? default(long?) : Banner.PageId;
-            //var l = Left == null ? default(long?) : Left.PageId;
-            //var r = Right == null ? default(long?) : Right.PageId;
-            //var result = new { Banner = b, Left = l, Right = r };
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        [Route("menupanel/get/menumasters")]
+        public async Task<HttpResponseMessage> GetMenuPanelMenuMaster()
+        {
+            var masterList = DataContext.MenuMasters.Where(x => x.PanelName == PanelNames.MenuPanel);
+            var result = await masterList.Select(mm => mm.Id).ToArrayAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         //[HttpGet]
-        //[Route("menupanelinfo")]
-        //public HttpResponseMessage GetMenuInfo()
+        //[Route("menumaster/{id?}")]
+        //public HttpResponseMessage GetMenuInfo(long? id = null)
         //{
-        //    //bool isVisible = Data.Panel.MenuPanel.Visible;
-        //    var masterList = DataContext.MenuMasters;
-        //    var result = masterList.Where(x => x.PanelName == PanelNames.MenuPanel && x.IsDisabled == false).Select(x => new
+        //    // if id is null, we assume menupanel masters
+        //    var masterList = DataContext.MenuMasters.AsQueryable();
+        //    if (id.HasValue)
+        //    {
+        //        masterList = masterList.Where(x => x.Id == id.Value);
+        //    }
+        //    else
+        //    {
+        //        masterList = masterList.Where(x => x.PanelName == PanelNames.MenuPanel && x.IsDisabled == false);
+        //    }
+        //    var result = masterList.Select(x => new
         //    {
         //        Id = x.Id,
         //        ClassName = x.ClassName.ToLower(),
@@ -166,26 +150,56 @@ namespace Fastnet.Webframe.Web.Controllers
         //    });
         //    return this.Request.CreateResponse(HttpStatusCode.OK, result);
         //}
-        [HttpGet]
-        [Route("menumaster/{id?}")]
-        public HttpResponseMessage GetMenuInfo(long? id = null)
+        [HttpPost]
+        [Route("menu/master")]
+        public async Task<HttpResponseMessage> GetMasters(dynamic data)
         {
-            // if id is null, we assume menupanel masters
-            var masterList = DataContext.MenuMasters.AsQueryable();
-            if (id.HasValue)
+            Func<MenuMaster, string> getPanelName = (mm) =>
             {
-                masterList = masterList.Where(x => x.Id == id.Value);
+                if (mm.PanelName == PanelNames.MenuPanel)
+                {
+                    return mm.PanelName.ToString().ToLower();
+                }
+                else
+                {
+                    if (mm.Page != null)
+                    {
+                        switch (mm.Page.Type)
+                        {
+                            case PageType.Banner:
+                                return "bannerpanel";
+                            case PageType.Left:
+                                return "leftpanel";
+                            case PageType.Right:
+                                return "rightpanel";
+                        }
+                    }
+                    return "none";
+                }
+            };
+            string option = data.option;
+            IEnumerable<MenuMaster> masterList = null;
+            if (option == "formenupanel") // soon obsolete
+            {
+                masterList = DataContext.MenuMasters.Where(x => x.PanelName == PanelNames.MenuPanel);
             }
             else
             {
-                masterList = masterList.Where(x => x.PanelName == PanelNames.MenuPanel && x.IsDisabled == false);
+                long[] idList = ((JArray)data.idList).ToObject<long[]>();
+                var list = new List<MenuMaster>();
+                foreach (var id in idList)
+                {
+                    var mm = await DataContext.MenuMasters.FindAsync(id);
+                    list.Add(mm);
+                }
+                masterList = list.OrderBy(x => x.Name);
             }
             var result = masterList.Select(x => new
             {
                 Id = x.Id,
                 ClassName = x.ClassName.ToLower(),
                 Name = x.Name.ToLower(),
-                Panel = x.PanelName.ToString().ToLower()
+                Panel = getPanelName(x)// x.PanelName.ToString().ToLower()
             });
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
@@ -259,15 +273,11 @@ namespace Fastnet.Webframe.Web.Controllers
             var mm = await DataContext.MenuMasters.FindAsync(id);
             object result = getSubmenus(mm.Menus.ToArray(), level);
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
-
         }
-
-
         [HttpGet]
         [Route("~/image/{id}")]
         public HttpResponseMessage GetImage(long id)
         {
-            //Data.ImageInformation image = DataContext.ImageInformata.Find(id);
             Image image = DataContext.Images.Find(id);
             MemoryStream ms = new MemoryStream(image.Data);
             HttpResponseMessage response = this.Request.CreateResponse(HttpStatusCode.OK);
@@ -281,26 +291,15 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("banner")]
         public HttpResponseMessage GetDefaultBannerPageId()
         {
-            //var allLandingPages = DataContext.FindAllLandingPages();
-            //Data.Page page = null;
-            //if (allLandingPages.Count() > 1)
-            //{
-            //    page = allLandingPages.OrderByDescending(p => p.PageId).First();
-            //}
-            //else
-            //{
-            //    page = allLandingPages.First();
-            //}
             Page defaultlandingPage = Member.Anonymous.FindLandingPage();
             Page bannerPage = defaultlandingPage.FindSidePage(PageType.Banner, true);
-            //var bannerPanel = GetPanelInfo(defaultlandingPage, Data.Panel.BannerPanel);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { PageId = bannerPage.PageId });
         }
         //
         private dynamic PrepareHTMLPage(Page page)
         {
             string htmlText = page.PageMarkup.HtmlText;
-            var location = page.Directory.DisplayName;//.Replace("$root", "Store");
+            var location = page.Directory.DisplayName;
             return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = string.Empty };
         }
         private dynamic PrepareDocXpage(Page page)
@@ -311,7 +310,7 @@ namespace Fastnet.Webframe.Web.Controllers
             var styleRules = hp.GetLegacyStyleRules();
             // now merge multiple styles into one
             var allRules = styleRules.SelectMany(x => x);
-            var location = page.Directory.DisplayName;//.Replace("$root", "Store");
+            var location = page.Directory.DisplayName;
             return new { PageId = page.PageId, Location = location, HtmlText = htmlText, HtmlStyles = allRules };
         }
         private dynamic PrepareAccessDenied(Page page)

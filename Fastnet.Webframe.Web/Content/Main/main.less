@@ -3,10 +3,11 @@
 @import (reference) "../bootstrap/mixins.less";
 @import (reference) "../bootstrap.css";*/
 @import (reference) "constants.less";
+@wide-screen-threshold: 768px;
 
-/*@-ms-viewport {
+@-ms-viewport {
     width: device-width;
-}*/
+}
 
 body {
     margin: 0;
@@ -48,6 +49,142 @@ body {
 }
 // now follow default values for all the panels
 .SitePanel {
+    &.normal-width {
+        .menu-bars-container {
+            display: none;
+        }
+    }
+
+    &.narrow-width {
+        margin: 0 !important;
+        width: auto !important;
+
+        .LeftPanel, .RightPanel {
+            width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+    }
+
+    .menu-bars-container {
+        width: 100%;
+        //display: none;
+        position: absolute;
+
+        .bars {
+            cursor: pointer;
+            color: white;
+            margin: 2px;
+            font-size: 36px;
+            height: 48px;
+            width: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &.right-bars, &.left-bars {
+                color: rgba(75, 74, 71, 0.98);
+            }
+        }
+
+        .bar-menu {
+            position: absolute;
+            z-index: 66666;
+            border-radius: 3px;
+
+            ul {
+                list-style-type: none;
+                list-style-position: outside;
+                display: flex;
+                padding: 0;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 0;
+            }
+
+            li {
+                cursor: pointer;
+                width: 100%;
+                //min-width: 120px;
+                display: block;
+                text-align: left;
+                line-height: 4.0em;
+                color: white;
+                background-color: black;
+
+                a {
+                    color: inherit;
+                    display: flex;
+                    outline: none;
+                    -ms-flex-direction: row;
+                    flex-direction: row;
+                    justify-content:flex-start;
+                    align-items: center;
+                    -ms-align-content: stretch;
+                    -webkit-align-content: stretch;
+                    align-content: stretch;
+                    padding-left: 20px;
+                    padding-right: 20px;
+                    text-decoration: none;
+                    
+                    &:visited, &:link, &:active {
+                        color: inherit;
+                        text-decoration: none;
+                    }
+
+                    &:hover {
+                        background-color: blue;
+                    }
+
+                    span {
+                        &:last-child {
+                            margin-left: 4px;
+                        }
+                    }
+                }
+
+                li > a, li > span {
+                    background-color: rgba(114, 108, 97, 1.0);
+                }
+
+                li li > a {
+                    background-color: #ef9a12;
+                }
+            }
+        }
+    }
+    /*@media only screen and (max-width: @wide-screen-threshold) {
+        .menu-bars-container {
+            width: 100%;
+            
+            display: block;
+
+            .bars {
+                margin: 2px;
+                font-size: 36px;
+                height: 48px;
+                width: 48px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+
+        .SitePanel {
+            margin: 0 !important;
+            width: auto !important;
+        }
+
+        .LeftPanel, .RightPanel {
+            width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+        }
+    }*/
 }
 
 .BannerPanel {
@@ -66,6 +203,19 @@ body {
     display: -ms-flexbox; /* TWEENER - IE 10 */
     display: -webkit-flex; /* NEW - Chrome */
     display: flexbox; /* NEW, Spec - Opera 12.1, Firefox 20+ */
+    .editable-content[contenteditable=true] {
+        .menu-location {
+            background-color: green;
+            //height: 24px;
+            font-size: x-small;
+            text-align: center;
+            color: white;
+
+            &:before {
+                content: " menu placeholder";
+            }
+        }
+    }
 }
 
 .CentrePanel {
@@ -84,15 +234,6 @@ body {
     }
 }
 
-@media only screen and (max-width: 768px) {
-    .SitePanel {
-        margin: 0 !important;
-        width: auto !important;
-    }
-    .LeftPanel, .RightPanel {
-        display: none;
-    }
-}
 
 .context-menu-container {
     border: 2px solid @context-menu-border-colour;
@@ -265,6 +406,10 @@ body {
             }
         }
     }
+
+    @media only screen and (max-width: @wide-screen-threshold) {
+        display: none;
+    }
 }
 
 .editor-side-panel {
@@ -305,6 +450,8 @@ i.mce-i-deletepage:before {
 }
 
 .login-status {
+    z-index: 33333;
+
     &.enable {
         display: block;
     }
@@ -404,17 +551,21 @@ i.mce-i-deletepage:before {
         @totalHeight: 400px;
         @dataHeight: @totalHeight - 30px;
         width: 650px;
+
         &.edit-disabled {
             button[data-cmd='add-new-page'] {
                 display: none;
             }
+
             button[data-cmd='upload-files'] {
                 display: none;
             }
+
             .folder-content .buttons {
                 display: none;
             }
         }
+
         div[class*='col-xs'] {
             padding-left: 8px;
             padding-right: 8px;

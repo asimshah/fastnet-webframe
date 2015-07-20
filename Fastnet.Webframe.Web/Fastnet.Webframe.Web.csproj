@@ -1174,7 +1174,6 @@
     <Content Include="Scripts\jspanel\jquery.jspanel.min.js" />
     <Content Include="Scripts\less\less.js" />
     <Content Include="Scripts\less\less.min.js" />
-    <Content Include="Scripts\main\Archive\core.editor.25jun15.js" />
     <Content Include="Scripts\main\core.admin.setup.js" />
     <Content Include="Scripts\main\core.editor.js" />
     <Content Include="Scripts\main\core.page.js" />
@@ -1184,6 +1183,7 @@
     <Content Include="Scripts\main\core.pagetoolbar.js" />
     <Content Include="Scripts\main\core.storebrowser.js" />
     <Content Include="Scripts\main\core.test.js" />
+    <Content Include="Scripts\modernizr.custom.24233.js" />
     <Content Include="Scripts\moment-with-locales.js" />
     <Content Include="Scripts\moment-with-locales.min.js" />
     <Content Include="Scripts\moment.js" />
@@ -1531,6 +1531,7 @@
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Areas\membership\Common\" />
     <Folder Include="Content\Main\CustomLess\" />
+    <Folder Include="Scripts\main\Archive\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

@@ -255,7 +255,7 @@ namespace Fastnet.Webframe.CoreData
             {
                 Name = "SideMenu",
                 ClassName = "default-menu",
-                PanelName = PanelNames.LeftPanel,
+                PanelName = PanelNames.None, // panel will be dtermined by the attached page
                 IsDisabled = disable,
             };
             mm.Menus.Add(designer);

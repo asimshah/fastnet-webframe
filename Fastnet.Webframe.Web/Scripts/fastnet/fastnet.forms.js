@@ -1,9 +1,9 @@
 ﻿(function ($) {
-    // Version 1.0.19
+    // Version 1.0.20
     var $T;
     var $U;
     var modelessTemplate =
-"<div class='modeless hide' >" +
+"<div class='modeless hide' id='{{Id}}' >" +
 "    <div class='modeless-content content-root'>" +
 "        <div class='form-section'>{{{BodyHtml}}}</div>" +
 "        <div class='form-section'>{{{FooterHtml}}}</div>" +
