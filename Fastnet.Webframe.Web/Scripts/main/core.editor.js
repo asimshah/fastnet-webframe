@@ -226,6 +226,9 @@
                                 f.disableCommand("insertlink");
                             }
                         },
+                        OnChange: function(f, dataItem) {
+                            f.enableCommand("insertlink");
+                        },
                         OnCommand: function (f, cmd) {
                             switch (cmd) {
                                 case "find-link":
