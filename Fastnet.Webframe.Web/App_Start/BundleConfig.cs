@@ -1,4 +1,5 @@
 ﻿using System.Web;
+using System.Web.Hosting;
 using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web
@@ -82,6 +83,7 @@ namespace Fastnet.Webframe.Web
                 ));
 
             // css bundles below here
+            EnsureUserCssFilesArePresent();
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                   "~/Content/font-awesome/css/font-awesome.min.css", new CssRewriteUrlTransform())
@@ -139,6 +141,30 @@ namespace Fastnet.Webframe.Web
                 ));
             //bundles.Add(new StyleBundle("~/Content/themes/base/editorcss")
             //    .IncludeDirectory("~/Content/themes/base", "*.css"));
+        }
+
+        private static void EnsureUserCssFilesArePresent()
+        {
+
+            string[] cssFiles = new string[] {
+                "~/Content/main/DefaultCSS/menu.user.css",
+                "~/Content/main/DefaultCSS/browserpanel.user.css",
+                "~/Content/main/DefaultCSS/sitepanel.user.css",
+                "~/Content/main/DefaultCSS/bannerpanel.user.css",
+                "~/Content/main/DefaultCSS/menupanel.user.css",
+                "~/Content/main/DefaultCSS/contentpanel.user.css",
+                "~/Content/main/DefaultCSS/leftpanel.user.css",
+                "~/Content/main/DefaultCSS/centrepanel.user.css",
+                "~/Content/main/DefaultCSS/rightpanel.user.css"
+            };
+            foreach (string usercss in cssFiles)
+            {
+                string fullname = HostingEnvironment.MapPath(usercss);
+                if (!System.IO.File.Exists(fullname))
+                {
+                    System.IO.File.WriteAllText(fullname, string.Empty);
+                }
+            }
         }
     }
 }

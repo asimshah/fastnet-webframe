@@ -107,17 +107,7 @@
             $.each($T.panelData.EditablePanels, function (i, ep) {
                 _restoreList(ep.selector, ep.masterMenus);
             });
-            //$.each($T.panelData.EditablePanels, function (i, ep) {
-            //    //if (ep.menu !== null) {
-            //    //    ep.menu.restore();
-            //    //}
-            //    $.each(ep.menuList, function (j, m) {
-            //        m.restore();
-            //    });
-            //});
-            //$.each($T.panelData.MenuPanel.menuList, function (i, m) {
-            //    m.restore();
-            //});
+
         },
         ParkAllMenus: function () {
             function _parkList(selector, masterMenus) {
@@ -131,49 +121,9 @@
             $.each($T.panelData.EditablePanels, function (i, ep) {
                 _parkList(ep.selector, ep.masterMenus);
             });
-            //$.each($T.panelData.MenuPanel.menuList, function (i, m) {
-            //    m.park();
-            //});
-        },
-        //CreateMenus: function (menuList) {
-        //    function createMenu(panelSelector, masterInfo, opts) {
-        //        var url = $U.Format("pageapi/menu/{0}", masterInfo.Id);
-        //        $.when($U.AjaxGet({ url: url })).then(function (r) {
-        //            if (r.length > 0) {
-        //                var menu = Menu.get();
-        //                t$m = menu;// for diagnostics
-        //                var options = $.extend({ menuClasses: [masterInfo.Name, masterInfo.ClassName] }, opts);
-        //                var menuId = menu.create(panelSelector, r, options);
-        //                if (panelSelector === ".MenuPanel") {
-        //                    $T.panelData.MenuPanel.menuList.push(menu);
-        //                    $T.panelData.MenuPanel.menuData.push(r);
-        //                } else {
-        //                    var ep = $T.FindEditablePanel(panelSelector);
-        //                    ep.menuData.push(r);
-        //                    ep.menuList.push(menu);
-        //                    $(ep).trigger("menuadded");
-        //                }
-        //            }
-        //        });
-        //    }
-        //    $.each(menuList, function (i, item) {
-        //        switch (item.Panel) {
-        //            case "menupanel":
-        //                createMenu(".MenuPanel", item);
-        //                break;
-        //            case "bannerpanel":
-        //                createMenu(".BannerPanel", item);
-        //                break;
-        //            case "leftpanel":
-        //                createMenu(".LeftPanel", item, { direction: "vertical"});
-        //                break;
-        //            case "rightpanel":
-        //                createMenu(".RightPanel", item, { direction: "vertical"});
-        //                break;
-        //        }
 
-        //    });
-        //},
+        },
+
         CreateMenus2: function (panelSelector, panelCtx) {
             // panelCtx is either one of the EditablePanels or $T.panelData.MenuPanel
             // menuDataArray is a MenuData[]
@@ -201,7 +151,8 @@
                         //md.menu = menu;
                         md.addMenu(menu);
                         md.data = r;
-                        $U.Debug("Panel {0}, master {1}, added menu {2}", panelSelector, mm.Id, menu.getId());
+                        //$U.Debug("Panel {0}, master {1}, added menu {2}", panelSelector, mm.Id, menu.getId());
+                        $($T.panelData).trigger("menucreated", { selector: panelSelector, menuId: menu.getId() });
                     }
 
                 });
@@ -617,19 +568,23 @@
                     $U.Debug("query does not match");
                 }
             }
-            //if (countMenus(".LeftPanel") === 0) {
-            //    $(".left-bars").hide();
-            //}
-            //if (countMenus(".RightPanel") === 0) {
-            //    $(".right-bars").hide();
-            //}
 
-            if (!$(".LeftPanel").is(":visible")) {
-                $(".left-bars").hide();
-            }
-            if (!$(".RightPanel").is(":visible")) {
-                $(".right-bars").hide();
-            }
+            $(".main-bars").hide();
+            $(".left-bars").hide();
+            $(".right-bars").hide();
+
+            $($T.panelData).on("menucreated", function (e, data) {
+                switch (data.selector) {
+                    case ".MenuPanel":
+                        $(".main-bars").show();
+                        break;
+                    case ".LeftPanel":
+                        $(".left-bars").show();
+                        break;
+                    case ".RightPanel":
+                        $(".right-bars").show();
+                }
+            });
             $(".SitePanel .bars").on("click", function (e) {
                 e.stopPropagation();
                 var cmd = $(this).attr("data-cmd");

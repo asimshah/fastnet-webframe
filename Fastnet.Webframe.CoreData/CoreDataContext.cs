@@ -208,7 +208,7 @@ namespace Fastnet.Webframe.CoreData
             if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
             {
                 LoadLegacyData();
-                CreateDefaultMenu(true); // create the default menu but disable it
+                //CreateDefaultMenu(true); // create the default menu but disable it
                 EnsureRequiredGroups();
                 EnsureAdministratorInAdministratorsGroup();
                 SetSiteVersion("4.0.0.0");
