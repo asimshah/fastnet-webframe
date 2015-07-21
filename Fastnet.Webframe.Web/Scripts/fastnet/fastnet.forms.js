@@ -695,7 +695,10 @@
                     case "input":
                     case "textarea":
                         var item = $(this).attr("data-item");
-                        //$(this).closest("[data-property]").find(".message").html("");
+                        var val = $(this).val();
+                        var placeholder = $(this).attr("placeholder");
+
+                        $U.Debug("on input: {0} value is {1}", item, val);
                         if (me.options.OnChange !== null) {
                             me.options.OnChange(me, item);
                         }

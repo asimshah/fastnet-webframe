@@ -284,21 +284,27 @@
                 //var lf = new $.fastnet$forms.CreateForm("template/form/login", {
                 var lf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/login", {
                     Title: "Login",
+                    OnChange: function (f, dataItem) {
+                        //$U.Debug("OnChange: {0}", cmd);
+                        if (f.isValid()) {
+                            f.enableCommand("login");
+                        } else {
+                            f.disableCommand("login");
+                        }
+                    },
                     OnCommand: function (f, cmd) {
+                        $U.Debug("OnCommand: {0}", cmd);
                         switch (cmd) {
                             case "login":
                                 login(lf);
-                                //ctx.Login(ctx);
                                 break;
                             case "passwordreset":
                                 lf.close();
                                 _loadModel("passwordreset", $T.ResetPassword.Start);
                                 break;
                             case "register":
-                                //var url = $U.Format("model/{0}", dialoguename);
                                 lf.close();
                                 _loadModel("register", $T.Registration.Start);
-                                //$T.SwitchDialogue(cmd);
                                 break;
                         }
                     },
@@ -312,20 +318,9 @@
                 }, {});
                 var validator = new $.fastnet$validators.Create(lf);
                 validator.AddIsRequired("email", "An email address is required");
-                //lf.addIsRequiredValidator("email", "An email address is required");
                 validator.AddIsRequired("password", "A password is required");
-                //lf.addIsRequiredValidator("password", "A password is required");
                 lf.disableCommand("login");
                 lf.show();
-                //var $this = this;
-                //$.when($F.LoadForm($this, "Login", "template/form/login", "identity-dialog login", $T.options)
-                //    ).then(function () {
-                //        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
-                //        $F.AddValidation("password", $T.ValidateIsRequired, "A password is required");
-                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                //        $F.DisableCommand("login");
-                //        $F.Show();
-                //    });
             },
         },
         PasswordResetFailed: {
@@ -387,28 +382,6 @@
                             }
                         });
                 };
-                //var rf = new $.fastnet$form("template/form/register", {
-                //    Title: "Registration",
-                //    AfterItemValidation: function (r) {
-                //        if (rf.isValid() === true) {
-                //            rf.enableCommand("register");
-                //        } else {
-                //            rf.disableCommand("register");
-                //        }
-                //    },
-                //    OnCommand: function (form, cmd) {
-                //        switch (cmd) {
-                //            case "register":
-                //                register(form);
-                //                break;
-                //            case "registration-close":
-                //                if ($.isFunction($T.onComplete)) {
-                //                    $T.onComplete();
-                //                }
-                //                break;
-                //        }
-                //    }
-                //});
                 var rf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/register", {
                     Title: "Registration",
                     AfterItemValidation: function (r) {
@@ -416,6 +389,13 @@
                             rf.enableCommand("register");
                         } else {
                             rf.disableCommand("register");
+                        }
+                    },
+                    OnChange: function(f, dataItem) {
+                        if(f.isValid()) {
+                            f.enableCommand("register");
+                        } else {
+                            f.disableCommand("register");
                         }
                     },
                     OnCommand: function (form, cmd) {
@@ -435,47 +415,12 @@
                 validator.AddIsRequired("email", "An email address is required");
                 validator.AddEmailAddress("email", "This is not a valid email address");
                 validator.AddEmailAddressNotInUse("email", "This email address is already in use");
-                //rf.addIsRequiredValidator("email", "An email address is required");
-                //rf.addValidators("email", [
-                //    {
-                //        func: validateEmailAddress,
-                //        isDeferred: false,
-                //        errorMessage: "This is not a valid email address"
-                //    },
-                //    {
-                //        func: validEmailAddressNotInUse,
-                //        isDeferred: true,
-                //        errorMessage: "This email address is already in use"
-                //    }
-                //]);
                 validator.AddIsRequired("password", "A password is required");
-                //rf.addIsRequiredValidator("password", "A password is required");
                 validator.AddPasswordLength("password", "Minimum length for a password is {0} chars");
                 validator.AddPasswordComplexity("password", "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
-                //rf.addValidators("password", [
-                //    {
-                //        func: validatePasswordLength,
-                //        isDeferred: false,
-                //        errorMessage: "Minimum length for a password is {0} chars"
-                //    },
-                //    {
-                //        func: validatePasswordComplexity,
-                //        isDeferred: true,
-                //        errorMessage: "At least one non-alphanumeric, one digit, one upper case and one lower case char is required"
-                //    }
-                //]);
                 validator.AddConfirmPassword("confirm-password", "Passwords do not match", "password");
-                //rf.addValidator("confirm-password",
-                //    {
-                //        func: validateConfirmPassword,
-                //        isDeferred: false,
-                //        errorMessage: "Passwords do not match"
-                //    }
-                //);
                 validator.AddIsRequired("first-name", "A first name is required");
-                //rf.addIsRequiredValidator("first-name", "A first name is required");
                 validator.AddIsRequired("last-name", "A last name is required");
-                //rf.addIsRequiredValidator("last-name", "A last name is required");
                 rf.disableCommand("register");
                 rf.show();
             },
@@ -493,10 +438,9 @@
                             var success = result.Success;
                             if (success) {
                                 f.close();
-                                //ctx.Confirmation(emailAddress);
                                 var cf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/passwordresetconfirmation", {
                                     Title: "Reset Email Sent",
-                                    //EmailAddress: emailAddress,
+
                                     OnCommand: function (tf, cmd) {
                                         switch (cmd) {
                                             case "request-reset-close":
@@ -520,6 +464,13 @@
                             rpf.disableCommand("request-reset");
                         }
                     },
+                    OnChange: function (f, dataItem) {
+                        if (f.isValid()) {
+                            f.enableCommand("request-reset");
+                        } else {
+                            f.disableCommand("request-reset");
+                        }
+                    },
                     OnCommand: function (form, cmd) {
                         switch (cmd) {
                             case "request-reset":
@@ -530,33 +481,10 @@
                 }, {});
                 var validator = new $.fastnet$validators.Create(rpf);
                 validator.AddIsRequired("email", "An email address is required");
-                //rpf.addIsRequiredValidator("email", "An email address is required");
                 validator.AddEmailAddress("email", "This is not a valid email address");
                 validator.AddEmailAddressInUse("email", "This email address not recognised");
-                //rpf.addValidators("email", [
-                //    {
-                //        func: validateEmailAddress,
-                //        isDeferred: false,
-                //        errorMessage: "This is not a valid email address"
-                //    },
-                //    {
-                //        func: validEmailAddressInUse,
-                //        isDeferred: true,
-                //        errorMessage: "This email address not recognised"
-                //    }
-                //]);
                 rpf.disableCommand("request-reset");
                 rpf.show();
-                //var $this = this;
-                //$.when($F.LoadForm($this, "Password Reset", "template/form/passwordreset", "identity-dialog passwordreset", $T.options)
-                //    ).then(function () {
-                //        $F.AddValidation("email", $T.ValidateIsRequired, "An email address is required");
-                //        $F.AddValidation("email", $T.ValidateEmailAddress, "This is not a valid email address");
-                //        $F.AddValidation("email", $this.ValidEmailAddressInUse, "This email address not recognised");
-                //        $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                //        $F.DisableCommand("request-reset");
-                //        $F.Show();
-                //    });
             },
         },
         UserProfile: {
@@ -591,9 +519,13 @@
                             _loadModel("userprofile", function () {
                                 var upf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/userprofile", {
                                     Title: "User Profile",
-                                    //EmailAddress: $T.options.ClientAction.EmailAddress,
-                                    //FirstName: $T.options.ClientAction.FirstName,
-                                    //LastName: $T.options.ClientAction.LastName,
+                                    OnChange: function(f, dataItem) {
+                                        if (f.isValid()) {
+                                            f.enableCommand("save-changes");
+                                        } else {
+                                            f.disableCommand("save-changes");
+                                        }
+                                    },
                                     AfterItemValidation: function (r) {
                                         if (upf.isValid() === true) {
                                             upf.enableCommand("save-changes");
@@ -615,31 +547,12 @@
                                 });
                                 var validator = new $.fastnet$validators.Create(upf);
                                 validator.AddIsRequired("first-name", "A first name is required");
-                                //upf.addIsRequiredValidator("first-name", "A first name is required");
                                 validator.AddIsRequired("last-name", "A last name is required");
-                                //upf.addIsRequiredValidator("last-name", "A last name is required");
                                 upf.disableCommand("save-changes");
                                 upf.show();
                             });
-                            //url = "model/userprofile";
-                            //$.when($U.AjaxGet({ url: url })).then(function (r) {
-                            //    var upf = new $.fastnet$form("template/form/userprofile", {
-                            //        Title: "User Profile",
-                            //        EmailAddress: $T.options.ClientAction.EmailAddress
-                            //    });
-                            //    $T.options = r;
-                            //    $this.emailAddress = $T.options.ClientAction.EmailAddress;
-                            //    $.when($F.LoadForm($this, "User Profile", "template/form/userprofile", "identity-dialog uerprofile", $T.options, $T.options.ClientAction)
-                            //        ).then(function () {
-                            //            $F.AddValidation("first-name", $T.ValidateIsRequired, "A first name is required");
-                            //            $F.AddValidation("last-name", $T.ValidateIsRequired, "A last name is required");
-                            //            $F.Bind({ afterItemValidation: $this.AfterItemValidation, onCommand: $this.OnCommand });
-                            //            $F.DisableCommand("save-changes");
-                            //            $F.Show();
-                            //        });
-                            //});
                         } else {
-                            $U.MessageBox("Please login first.");
+                            $U.MessageBox(result.Reason);
                         }
                     });
             },
