@@ -559,15 +559,15 @@
                 });
                 return count;
             }
-            function onWidthChange(mql) {
-                if (mql.matches) {
-                    $(".SitePanel").removeClass("normal-width").addClass("narrow-width");
-                    $U.Debug("query match");
-                } else {
-                    $(".SitePanel").removeClass("narrow-width").addClass("normal-width");
-                    $U.Debug("query does not match");
-                }
-            }
+            //function onWidthChange(mql) {
+            //    if (mql.matches) {
+            //        $(".SitePanel").removeClass("normal-width").addClass("narrow-width");
+            //        $U.Debug("query match");
+            //    } else {
+            //        $(".SitePanel").removeClass("narrow-width").addClass("normal-width");
+            //        $U.Debug("query does not match");
+            //    }
+            //}
 
             $(".main-bars").hide();
             $(".left-bars").hide();
@@ -590,9 +590,9 @@
                 var cmd = $(this).attr("data-cmd");
                 $T.OnBarCommand(cmd);
             });
-            var mql = window.matchMedia("(max-width: 768px)");
-            mql.addListener(onWidthChange);
-            onWidthChange(mql);// sync with current state
+            //var mql = window.matchMedia("(max-width: 768px)");
+            //mql.addListener(onWidthChange);
+            //onWidthChange(mql);// sync with current state
         }
     };
     $(function () {
