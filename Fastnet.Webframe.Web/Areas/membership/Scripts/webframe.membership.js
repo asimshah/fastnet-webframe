@@ -30,13 +30,13 @@
             }
             subformName = null;
         }
-        function switchToDetails() {
-            $(".details-panel").addClass("active");
+        function switchToMain() {
+            $(".main-panel").addClass("active");
             $(".lookup-panel").removeClass("active");
         }
         function switchToLookup() {
             $(".lookup-panel").addClass("active");
-            $(".details-panel").removeClass("active");
+            $(".main-panel").removeClass("active");
         }
 
         var clearMemberList = function () {
@@ -55,20 +55,20 @@
                         validator.AddPasswordLength("password", "Minimum password length is {0}");
                         validator.AddPasswordComplexity("password", "At least one non-alphanumeric, one digit, one upper case and one lower case char is required");
                     }
-
-                    validator.AddIsRequired("email-address", "An email address is required");
-                    validator.AddEmailAddress("email-address", "This is not a valid email address");
-                    validator.AddEmailAddressNotInUse("email-address", "This email address is already in use");
-                    validator.AddIsRequired("first-name", "A first name is required");
-                    validator.AddIsRequired("last-name", "A last name is required");
-                    subformName = "memberDetails";
-                    currentForm.disableCommand("save-changes");
-                    switchToDetails();
-                    //currentForm.checkForm();
-                    if ($.isFunction(onComplete)) {
-                        onComplete();
-                    }
                 }
+                validator.AddIsRequired("email-address", "An email address is required");
+                validator.AddEmailAddress("email-address", "This is not a valid email address");
+                validator.AddEmailAddressNotInUse("email-address", "This email address is already in use");
+                validator.AddIsRequired("first-name", "A first name is required");
+                validator.AddIsRequired("last-name", "A last name is required");
+                subformName = "memberDetails";
+                currentForm.disableCommand("save-changes");
+                switchToMain();
+                //currentForm.checkForm();
+                if ($.isFunction(onComplete)) {
+                    onComplete();
+                }
+
             });
         }
         var loadMemberDetails = function (memberId) {
@@ -94,12 +94,21 @@
                         var item = Mustache.to_html(memberItemTemplate, m);
                         $(".member-manager .lookup-panel .member-list").append(item);
                     });
-                    $(".member-manager .lookup-panel .member-list .member").on("click", function () {
-                        var id = $(this).attr("data-member-id");
-                        $U.Debug("load details for member {0}", id);
-                        loadMemberDetails(id);
-                    });
+                    bindMembers();
+                    //$(".member-manager .lookup-panel .member-list .member").on("click", function () {
+                    //    var id = $(this).attr("data-member-id");
+                    //    $U.Debug("load details for member {0}", id);
+                    //    loadMemberDetails(id);
+                    //});
                 });
+        }
+        var bindMembers = function () {
+            $(".member-manager .lookup-panel .member-list .member").off();
+            $(".member-manager .lookup-panel .member-list .member").on("click", function () {
+                var id = $(this).attr("data-member-id");
+                $U.Debug("load details for member {0}", id);
+                loadMemberDetails(id);
+            });
         }
         var clearSearchMode = function () {
             clearMemberList();
@@ -121,20 +130,21 @@
                 letter = encodeURIComponent(letter);
             }
             var url = $U.Format("membershipapi/get/members/{0}/true", letter);
-            $.when(
-                $U.AjaxGet({ url: url }, true)
-                ).then(function (r) {
-                    clearMemberList();
-                    $.each(r, function (i, m) {
-                        var item = Mustache.to_html(memberItemTemplate, m);
-                        $(".member-manager .lookup-panel .member-list").append(item);
-                    });
-                    $(".member-manager .lookup-panel .member-list .member").on("click", function () {
-                        var id = $(this).attr("data-member-id");
-                        $U.Debug("load details for member {0}", id);
-                        loadMemberDetails(id);
-                    });
-                });
+            getMembers(url);
+            //$.when(
+            //    $U.AjaxGet({ url: url }, true)
+            //    ).then(function (r) {
+            //        clearMemberList();
+            //        $.each(r, function (i, m) {
+            //            var item = Mustache.to_html(memberItemTemplate, m);
+            //            $(".member-manager .lookup-panel .member-list").append(item);
+            //        });
+            //        $(".member-manager .lookup-panel .member-list .member").on("click", function () {
+            //            var id = $(this).attr("data-member-id");
+            //            $U.Debug("load details for member {0}", id);
+            //            loadMemberDetails(id);
+            //        });
+            //    });
         }
         var onNavigationCommand = function (cmd) {
             $U.Debug("navigation command {0}", cmd);
@@ -160,6 +170,7 @@
                 //currentForm.disableCommand("add-new-member");
                 currentForm.find(".existing-member-commands").hide();
                 currentForm.find(".date-time-info").hide();
+                currentForm.find(".activation-info").hide();
                 mode.newMember = true;
             });
         };
@@ -207,8 +218,10 @@
                     $(".member-manager .lookup-panel .member-list")
                         .find(".member[data-member-id='" + id + "']")
                         .replaceWith($(Mustache.to_html(memberItemTemplate, r)));
-                    currentForm.resetOriginalData();
-                    currentForm.disableCommand("save-changes");
+                    bindMembers();
+                    loadMemberDetails(id);
+                    //currentForm.resetOriginalData();
+                    //currentForm.disableCommand("save-changes");
                 });
             }
             if (newMember) {
@@ -219,15 +232,6 @@
                     $U.Confirm(message, function () {
                         performUpdate();
                     });
-                    //var mb = new $.fastnet$messageBox({
-                    //    CancelButton: true
-                    //});
-                    //var message = "<div>Changing the email address will: <ul><li>Deactivate the member's account</li><li>Send an activation email using the new email address</li></ul></div><div>Please confirm</div>";
-                    //mb.show(message, function (cmd) {
-                    //    if (cmd === "ok") {
-                    //        performUpdate();
-                    //    }
-                    //});
                 } else {
                     performUpdate();
                 }
@@ -330,12 +334,12 @@
                             resetIndexTabs();
                             $(src).removeClass("btn-primary").addClass("btn-warning");
                             loadMembersWithPrefix(letter);
-                            //$U.Debug("showMemberManager: search for prefix {0}", letter);
+                            //switchToMain();
                             break;
                         case "search-cmd":
                             var searchText = currentForm.getData("search-text");
-
                             loadMembersWithSearch(searchText);
+                            //switchToMain();
                             break;
                         case "clear-search":
                             clearSearchMode();
@@ -391,7 +395,7 @@
                     $U.Debug("Command {0}", cmd);
                     var groupId = $(src).closest(".group-details").attr("data-id");
                     switch (cmd) {
-                        case "add-members":                            
+                        case "add-members":
                             addMembers(groupId);
                             break;
                         case "remove-members":
@@ -430,7 +434,7 @@
                     }
                 },
                 OnChange: function (f, dataItem, checked) {
-                  $U.Debug("Changed {0} checked = {1}", dataItem, checked);
+                    $U.Debug("Changed {0} checked = {1}", dataItem, checked);
                     if (dataItem === "group-name" || dataItem === "group-descr" || dataItem === "group-weight") {
                         f.enableCommand("save-group-changes");
                     }
@@ -480,7 +484,7 @@
         }
         var updateGroupProperties = function (groupId, name, description, weight, updateChildren) {
             var url = "membershipapi/update/group";
-            var postData = {groupId: groupId, name: name, descr: description, weight: weight, updateChildren: updateChildren};
+            var postData = { groupId: groupId, name: name, descr: description, weight: weight, updateChildren: updateChildren };
             $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
                 $(".group-details .command-strip .message").text("Changes saved");
                 var selector = $U.Format(".group-tree span[data-id='{0}']", groupId);
@@ -640,7 +644,7 @@
                         loadGroupTreeData(newNode, r, onItemLoad);
                     });
                 }
-                
+
             });
 
         };

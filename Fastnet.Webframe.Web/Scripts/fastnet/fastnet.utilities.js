@@ -1,7 +1,8 @@
 ﻿(function ($) {
-    // Version 1.0.6
+    // Version 1.0.7
     // Notes
     // 1. moment.js is required (to mark log/debug with date time info)
+    // 2. built-in media query - for the time being 768px and .SitePanel are hard coded
     var $T;
     $.fastnet$utilities = {
         options: {},
@@ -11,6 +12,15 @@
         localPlayerName: "",
         localDataNamespace: "fastnet-",
         Init: function () {
+            function onWidthChange(mql) {
+                if (mql.matches) {
+                    $(".SitePanel").removeClass("normal-width").addClass("narrow-width");
+                    //$U.Debug("query match");
+                } else {
+                    $(".SitePanel").removeClass("narrow-width").addClass("normal-width");
+                    //$U.Debug("query does not match");
+                }
+            }
             $T = this;
             if ($.blockUI !== undefined) {
                 $.blockUI.defaults.css = {};
@@ -41,6 +51,9 @@
                 }
             });
             $(document).ajaxError($T.AjaxCallFailed);
+            var mql = window.matchMedia("(max-width: 768px)");
+            mql.addListener(onWidthChange);
+            onWidthChange(mql);// sync with current state
         },
         AddOptions: function(options) {
             $.extend($T.options, options);

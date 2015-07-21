@@ -261,6 +261,9 @@
         }
         function loadDirectoryContent() {
             var url = $U.Format("store/content/{0}", currentDirectoryId);
+            if (options.Filter !== 0) {
+                url += "/" + options.Filter;
+            }
             $.when(
                 $U.AjaxGet({ url: url }, true),
                  $U.AjaxGet({ url: "template/get/main-forms-editor/storecontent" })
@@ -326,10 +329,11 @@
                                     var type = dataRow.attr("data-type");
                                     switch (type) {
                                         case "page":
-                                            var pt = dataRow.attr("data-pagetype");
-                                            if (pt === "centre") {
-                                                isSelectable = true;
-                                            }
+                                            //var pt = dataRow.attr("data-pagetype");
+                                            //if (pt === "centre") {
+                                            //    isSelectable = true;
+                                            //}
+                                            isSelectable = true;
                                             break;
                                         default:
                                             isSelectable = true;
@@ -611,6 +615,8 @@
         }
         function _show(opts) {
             options = $.extend({
+                Filter: 0, // 0 means all - wish javascript had enums!
+                AllowEditing: true,
                 User: null,
                 OnClose: null,
                 OnCancel: null,
@@ -627,8 +633,9 @@
                         onCommand(cmd);
                     }
                 }, {});
+
             tview = $.fastnet$treeview.NewTreeview({
-                EnableContextMenu: true,
+                EnableContextMenu: options.AllowEditing,
                 Selector: ".store-browser .browser-tree",
                 OnSelectChanged: function (d) { onFolderSelectChanged( d) },
                 OnExpandCollapse: function (d) { onExpandCollapse( d) },
@@ -659,6 +666,9 @@
                 form.show(function (f) {
                     if (options.Mode === "select") {
                         f.find(".store-browser-commands").removeClass("normal-mode").addClass("select-mode");
+                    }
+                    if (options.AllowEditing === false) {
+                        f.find(".store-browser").addClass("edit-disabled");
                     }
                     // I am assuming here that on this first call for directories
                     // I will always get an array of one entry and that

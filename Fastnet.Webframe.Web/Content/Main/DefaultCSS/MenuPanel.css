@@ -1,7 +1,5 @@
-.MenuPanel
-{
-    background-color: #1b76bc;
-    color: #ffffff;
-    border: 0 none transparent;
-    display: none;
+﻿.MenuPanel {
+  background-color: #2a91e0;
+  text-align: right;
 }
+/*# sourceMappingURL=MenuPanel.css.map */

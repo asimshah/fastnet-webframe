@@ -1,0 +1,43 @@
+﻿<tr class="menu-item" data-menuId="{{Id}}" data-index="{{Index}}">
+    <td>
+        <div class="menu-item-buttons">
+            <button class="btn btn-xs {{IsFirst}}" title="Move Up" data-cmd="move-up"><span class=" fa fa-arrow-up"></span></button>
+            <button class="btn btn-xs {{IsLast}}" title="Move Down" data-cmd="move-down"><span class=" fa fa-arrow-down"></span></button>
+            <button class="btn btn-xs" title="Add Choice (sub item)" data-cmd="add-sub-choice"><span class=" fa fa-plus"></span></button>
+            <button class="btn btn-xs" title="Delete" data-cmd="delete-menu"><span class=" fa fa-remove"></span></button>
+        </div>
+    </td>
+    <td>
+        <div data-property>
+            <input type="text" class="form-control" value="{{Text}}" data-item="menuitem-text">
+        </div>
+    </td>
+    {{^SubMenus.length}}
+    <td>
+        <div class="url-item" data-property>
+            <span>Url:</span>
+            <input type="text" class="form-control " value="{{Url}}" data-item="menuitem-url">
+            <button class="btn btn-xs pull-right" data-cmd="search-store" title="Search Store">
+                <span class="fa fa-search"></span>
+            </button>
+        </div>
+    </td>
+    {{/SubMenus.length}}
+    {{#SubMenus.length}}
+    <td></td>
+    {{/SubMenus.length}}
+</tr>
+{{#SubMenus.length}}
+<tr class="menu-item-children" data-menuid="{{Id}}">
+    <td></td>
+    <td colspan="200">
+        <table class="menu-items level-{{NextLevel}}">
+            {{#SubMenus}}
+            {{>asim}}
+            {{/SubMenus}}
+        </table>
+    </td>
+</tr>
+{{/SubMenus.length}}
+
+

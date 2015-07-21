@@ -1,0 +1,26 @@
+﻿@using System.Diagnostics
+@{
+    ViewBag.Title = "Webframe Designer - Layout";
+    //Debug.Print("Designer layout index view");
+}
+<h2>Layout Editor</h2>
+@section scripts {
+    <script>
+        less = {
+            env: "production"
+        }
+    </script>
+    @Scripts.Render("~/bundles/designer")
+    @Scripts.Render("~/bundles/designer/ace")
+    <script>
+        //var designerStarted = false;
+        $(function () {
+            //if (!designerStarted) {
+            //    $.fastnet$utilities.Debug("about to call Layout.Home");
+            //    $.webframe$designer.Layout.Home();
+            //    designerStarted = true;
+            //}
+            $.webframe$designer.Layout.Home();
+        });
+    </script>
+}

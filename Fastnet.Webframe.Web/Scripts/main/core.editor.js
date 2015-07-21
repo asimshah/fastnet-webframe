@@ -4,10 +4,10 @@
     var instance = null;
     function createInstance() {
         var pages = {
-            banner: { key: "banner", panelSelector: ".BannerPanel", eid: "#bannerPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true },
-            centre: { key: "centre", panelSelector: ".CentrePanel", eid: "#centrePanel", pageId: null, savedHtml: null, mce: null, allowDelete: false },
-            left: { key: "left", panelSelector: ".LeftPanel", eid: "#leftPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true },
-            right: { key: "right", panelSelector: ".RightPanel", eid: "#rightPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true }
+            banner: { key: "banner", panelSelector: ".BannerPanel", eid: "#bannerPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true, allowMenuPlaceHolder: true},
+            centre: { key: "centre", panelSelector: ".CentrePanel", eid: "#centrePanel", pageId: null, savedHtml: null, mce: null, allowDelete: false, allowMenuPlaceHolder: false },
+            left: { key: "left", panelSelector: ".LeftPanel", eid: "#leftPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true, allowMenuPlaceHolder: true },
+            right: { key: "right", panelSelector: ".RightPanel", eid: "#rightPanel", pageId: null, savedHtml: null, mce: null, allowDelete: true, allowMenuPlaceHolder: true }
         };
         var _onChangePageHandler = null;
         var _tinymceUrl = null;
@@ -88,6 +88,7 @@
                 $("div[contenteditable='true'").removeAttr('contenteditable');
                 $(window).off(".editor");
             }
+            var result = false;
             if (_changesPending()) {
                 $U.Confirm("There are unsaved changes which will be lost. Please confirm", function () {
                     __unloadEditorsAndClose();
@@ -99,13 +100,16 @@
                     pages.left.savedHtml = null;
                     pages.centre.savedHtml = null;
                     pages.right.savedHtml = null;
+                    result = true;
                 });
             } else {
                 __unloadEditorsAndClose();
+                result = true;
             }
-            if ($(".login-status").hasClass("enable")) {
-                $(".login-status").show();
-            }
+            //if ($(".login-status").hasClass("enable")) {
+            //    $(".login-status").show();
+            //}
+            return result;
         }
         function _findPageForMce(mce) {
             // i.e. find entry in pages[]
@@ -145,8 +149,8 @@
             var baseUrl = $("head base").prop("href");
             _tinymceUrl = baseUrl + "Scripts/tinymce/";
             _toolbar = PageToolbar.get();
-            _toolbar.addHandler("toolbar-opened", _toolbarOpened);
-            _toolbar.addHandler("exit-edit-mode", _exitEditRequested);
+            //_toolbar.addHandler("toolbar-opened", _toolbarOpened);
+            //_toolbar.addHandler("exit-edit-mode", _exitEditRequested);
             _toolbar.addHandler("save-changes", _savePageChanges);
             _toolbar.addHandler("open-store-browser", function () {
                 _openStoreBrowser("normal");
@@ -222,6 +226,9 @@
                                 f.disableCommand("insertlink");
                             }
                         },
+                        OnChange: function(f, dataItem) {
+                            f.enableCommand("insertlink");
+                        },
                         OnCommand: function (f, cmd) {
                             switch (cmd) {
                                 case "find-link":
@@ -251,6 +258,14 @@
                     break;
             }
         }
+        function _insertMenuPlaceHolder() {
+            function pastePlaceHolder(mce, linkurl, linktext) {
+                mce.focus();
+                mce.execCommand("mceReplaceContent", 0, "<div class='menu-location'></div>");
+            };
+            var currentMce = tinymce.EditorManager.activeEditor;
+            pastePlaceHolder(currentMce);
+        }
         function _openMce(page) {
             page.savedHtml = $(page.panelSelector).html();
             tinymce.baseURL = _tinymceUrl;
@@ -278,17 +293,25 @@
                             }
                         });
                     }
+                    var insertmenu = [
+                            { text: 'Insert link/image ...', onclick: function () { _openInsertLinkForm({ mode: 'prompt' }); } },
+                            { text: 'Insert link to new page', onclick: function () { _openInsertLinkForm({ mode: 'createnew' }); } },
+                            { text: 'Insert link & edit new page ...', onclick: function () { _openInsertLinkForm({ mode: 'createandedit' }); } }
+                    ];
+                    if (page.allowMenuPlaceHolder) {
+                        insertmenu.push({ text: 'Insert menu placeholder', onclick: function () { _insertMenuPlaceHolder(); } });
+                    }
                     editor.addButton('insertlinks', {
                         type: 'menubutton',
                         text: 'Links|Images',
                         title: "insert links & images",
                         icon: 'link',
-                        menu: [
-                            { text: 'Insert link/image ...', onclick: function () { _openInsertLinkForm({ mode: 'prompt' }); } },
-                            { text: 'Insert link to new page', onclick: function () { _openInsertLinkForm({ mode: 'createnew' }); } },
-                            { text: 'Insert link & edit new page ...', onclick: function () { _openInsertLinkForm({ mode: 'createandedit' }); } }
-                            //,{ text: 'break ...', onclick: function () { debugger; } }
-                        ]
+                        menu: insertmenu
+                        //menu: [
+                        //    { text: 'Insert link/image ...', onclick: function () { _openInsertLinkForm({ mode: 'prompt' }); } },
+                        //    { text: 'Insert link to new page', onclick: function () { _openInsertLinkForm({ mode: 'createnew' }); } },
+                        //    { text: 'Insert link & edit new page ...', onclick: function () { _openInsertLinkForm({ mode: 'createandedit' }); } }                            
+                        //]
                     });
                     editor.on('change', function (e) {
                         _toolbar.enableCommand("save-changes");
@@ -307,6 +330,7 @@
             } else {
                 sb.show({
                     Mode: "select",
+                    Filter: (2+4+8),
                     User: userData,
                     OnClose: null,
                     OnCancel: null,
@@ -372,9 +396,9 @@
         }
         function _toolbarOpened() {
             // load up all editors
-            if ($(".login-status").hasClass("enable")) {
-                $(".login-status").hide();
-            }
+            //if ($(".login-status").hasClass("enable")) {
+            //    $(".login-status").hide();
+            //}
             _toolbar.disableCommand("save-changes");
             pages.centre.pageId = $(".CentrePanel").attr("data-page-id");
             var url = $U.Format("store/sidepages/{0}", pages.centre.pageId);
@@ -455,7 +479,9 @@
         //
         _initialize();
         return {
-            SetChangePageHandler: _setChangePageHandler
+            SetChangePageHandler: _setChangePageHandler,
+            LoadEditors: _toolbarOpened,
+            UnloadEditors : _exitEditRequested
             // expose instance methods here
         };
 

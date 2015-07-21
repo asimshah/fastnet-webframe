@@ -18,25 +18,32 @@ namespace Fastnet.Webframe.CoreData
     {
         private ICollection<Document> documents;
         private ICollection<Page> forwardLinks;
+        private ICollection<MenuMaster> menuMasters;
         //
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long PageId { get; set; }
         public string Name { get; set; }
         public MarkupType MarkupType { get; set; }
         public PageType Type { get; set; }
-        public int VersionCount { get; set; }
+        //public int VersionCount { get; set; }
         public long DirectoryId { get; set; }
         public bool IsLandingPage { get; set; }
-        public string InheritSideContentFromUrl { get; set; }
-        public bool Visible { get; set; }
-        public bool Locked { get; set; }
-        public bool Deleted { get; set; }
-        public long? OriginalTopicId { get; set; }
-        [Timestamp]
-        public byte[] TimeStamp { get; set; }
+        //public string InheritSideContentFromUrl { get; set; }
+        //public bool Visible { get; set; }
+        //public bool Locked { get; set; }
+        //public bool Deleted { get; set; }
+        //public long? OriginalTopicId { get; set; }
+        //[Timestamp]
+        //public byte[] TimeStamp { get; set; }
         public virtual PageMarkup PageMarkup { get; set; }
         public virtual Directory Directory { get; set; }
-        public virtual ICollection<Menu> Menus { get; set; }
+        public virtual ICollection<MenuMaster> MenuMasters
+        {
+            get { return menuMasters ?? (menuMasters = new HashSet<MenuMaster>()); }
+            set { menuMasters = value; }
+        }
+        //public virtual ICollection<Menu> LegacyMenus { get; set; }
+        //public virtual ICollection<Menu> Menus { get; set; }
         public virtual ICollection<Document> Documents // this page hyperlinks to these document
         {
             get { return documents ?? (documents = new HashSet<Document>()); }
@@ -86,7 +93,7 @@ namespace Fastnet.Webframe.CoreData
         }
         public static string GetLandingPageImageUrl()
         {
-            return "content/images/homepage.png";
+            return "/content/images/homepage.png";
         }
         public string GetTypeImageUrl()
         {
@@ -94,19 +101,19 @@ namespace Fastnet.Webframe.CoreData
             switch (this.Type)
             {
                 case PageType.Centre:
-                    r = "Content/images/centrepage.png";
+                    r = "/Content/images/centrepage.png";
                     break;
                 case PageType.Left:
-                    r = "Content/images/leftpage.png";
+                    r = "/Content/images/leftpage.png";
                     break;
                 case PageType.Right:
-                    r = "Content/images/rightpage.png";
+                    r = "/Content/images/rightpage.png";
                     break;
                 case PageType.Banner:
-                    r = "Content/images/bannerpage.png";
+                    r = "/Content/images/bannerpage.png";
                     break;
                 default:
-                    r = "Content/images/panelwire.jpg";
+                    r = "/Content/images/panelwire.jpg";
                     break;
             }
             return r;

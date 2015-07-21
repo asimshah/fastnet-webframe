@@ -215,59 +215,7 @@ namespace Fastnet.Webframe.CoreData
             return rules;
         }
     }
-    public partial class CoreDataContext
-    {
-        public void CreateCSSFromPanels()
-        {
-            var folder = LayoutFiles.GetMainStylesheetFolder();// CSSRule.GetDefaultCSSFolder();// HostingEnvironment.MapPath("~/Content/Main/AppCSS");
-            string[] panelList = new string[] {
-                     "BrowserPanel",
-                     "SitePanel",
-                     "CentrePanel",
-                     "BannerPanel",
-                     "MenuPanel",
-                     "ContentPanel",
-                     "LeftPanel",
-                     "RightPanel"
-            };
-            foreach (var panel in panelList)
-            {
-                string cssText;
-                switch (panel)
-                {
-                    case "BrowserPanel":
-                        cssText = Panel.BrowserPanel.GetCSSString();
-                        break;
-                    case "SitePanel":
-                        cssText = Panel.SitePanel.GetCSSString();
-                        break;
-                    case "CentrePanel":
-                        cssText = Panel.CentrePanel.GetCSSString();
-                        break;
-                    case "BannerPanel":
-                        cssText = Panel.BannerPanel.GetCSSString();
-                        break;
-                    case "MenuPanel":
-                        cssText = Panel.MenuPanel.GetCSSString();
-                        break;
-                    case "ContentPanel":
-                        cssText = Panel.ContentPanel.GetCSSString();
-                        break;
-                    case "LeftPanel":
-                        cssText = Panel.LeftPanel.GetCSSString();
-                        break;
-                    case "RightPanel":
-                        cssText = Panel.RightPanel.GetCSSString();
-                        break;
-                    default:
-                        throw new ApplicationException("CreateCSSFiles(): unknown panel");
-                }
-                string cssFileName = System.IO.Path.Combine(folder, panel + ".user" + ".css");
-                System.IO.File.WriteAllText(cssFileName, cssText);
-            }
-            string menuCssText = Menu.GetCSSString();
-            string menuCssFile = System.IO.Path.Combine(folder, "Menu.user.css");
-            System.IO.File.WriteAllText(menuCssFile, menuCssText);
-        }
-    }
+   // public partial class CoreDataContext
+    //{
+    //}
 }

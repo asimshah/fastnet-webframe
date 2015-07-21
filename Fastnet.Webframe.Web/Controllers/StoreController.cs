@@ -19,6 +19,15 @@ using CD = Fastnet.Webframe.CoreData;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
+    [Flags]
+    public enum ContentFilter
+    {
+        SidePages = 1,
+        CentrePages = 2,
+        Documents = 4,
+        Images = 8,
+        All = 15 // all the above
+    }
     [RoutePrefix("store")]
     //[PermissionFilter(CD.SystemGroups.Editors)]
     public class StoreController : BaseApiController //: ApiController
@@ -42,48 +51,68 @@ namespace Fastnet.Webframe.Web.Controllers
             return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, directories));
         }
         [HttpGet]
-        [Route("content/{id}")]
-        public Task<HttpResponseMessage> GetDirectoryContent(long id)
+        [Route("content/{id}/{filter?}")]
+        public Task<HttpResponseMessage> GetDirectoryContent(long id, ContentFilter filter = ContentFilter.All)
         {
+            Func<CD.PageType, bool> isSidePage = (t) =>
+            {
+                switch (t)
+                {
+                    case CD.PageType.Centre:
+                        return false;
+                    default:
+                        return true;
+                }
+            };
             var directory = DataContext.Directories.Find(id);
             List<dynamic> folderContent = new List<dynamic>();
             foreach (var page in directory.Pages.OrderBy(x => x.PageId))
             {
-                folderContent.Add(new
+                if (filter.HasFlag(ContentFilter.CentrePages)  && page.Type == CD.PageType.Centre
+                    || filter.HasFlag(ContentFilter.SidePages) && isSidePage(page.Type))
                 {
-                    Type = "page",
-                    Id = page.PageId,
-                    Url = page.Url,
-                    Name = page.Name,
-                    PageType = page.Type.ToString().ToLower(),
-                    LandingPage = page.IsLandingPage,
-                    LandingPageImage = CD.Page.GetLandingPageImageUrl(),
-                    PageTypeImage = page.GetTypeImageUrl(),
-                    PageTypeTooltip = page.GetTypeTooltip()
-                });
+                    folderContent.Add(new
+                    {
+                        Type = "page",
+                        Id = page.PageId,
+                        Url = page.Url,
+                        Name = page.Name,
+                        PageType = page.Type.ToString().ToLower(),
+                        LandingPage = page.IsLandingPage,
+                        LandingPageImage = CD.Page.GetLandingPageImageUrl(),
+                        PageTypeImage = page.GetTypeImageUrl(),
+                        PageTypeTooltip = page.GetTypeTooltip()
+                    });
+                }
             }
             foreach (var image in directory.Images.OrderBy(x => x.ImageId))
             {
-                folderContent.Add(new
+                if (filter.HasFlag(ContentFilter.Images))
                 {
-                    Type = "image",
-                    Id = image.ImageId,
-                    Url = image.Url,
-                    Name = image.Name,
-                    Size = image.Size,
-                    ImageTypeImage = image.GetImageTypeImage()
-                });
+                    folderContent.Add(new
+                    {
+                        Type = "image",
+                        Id = image.ImageId,
+                        Url = image.Url,
+                        Name = image.Name,
+                        Size = image.Size,
+                        ImageTypeImage = image.GetImageTypeImage()
+                    });
+                }
             }
             foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
             {
-                folderContent.Add(new
+                if (filter.HasFlag(ContentFilter.Documents))
                 {
-                    Type = "document",
-                    Id = document.DocumentId,
-                    Url = document.Url,
-                    Name = document.Name,
-                    DocumentTypeImage = document.GetTypeImageUrl()
-                });
+                    folderContent.Add(new
+                    {
+                        Type = "document",
+                        Id = document.DocumentId,
+                        Url = document.Url,
+                        Name = document.Name,
+                        DocumentTypeImage = document.GetTypeImageUrl()
+                    });
+                }
             }
             return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, folderContent));
         }
@@ -605,9 +634,9 @@ namespace Fastnet.Webframe.Web.Controllers
             pm.TimeStamp = BitConverter.GetBytes(-1);
 
 
-            page.TimeStamp = BitConverter.GetBytes(-1);
-            page.Visible = true;
-            page.VersionCount = 0;
+            //page.TimeStamp = BitConverter.GetBytes(-1);
+            //page.Visible = true;
+            //page.VersionCount = 0;
             page.Type = type;
             page.Name = GetUniquePageName(dir, type);
             page.Directory = dir;

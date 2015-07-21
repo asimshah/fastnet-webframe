@@ -1,4 +1,5 @@
 ﻿using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
 {
     [RouteArea("designer")]
     //[RoutePrefix("designer")]
-    public class HomeController : Controller
+    public class HomeController : BaseMvcController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         // GET: Designer/Home

@@ -507,16 +507,31 @@ namespace Fastnet.Webframe.Web.Controllers
         public ActionResult PageIsDialogPermittedModel(string dialogue)
         {
             bool permitted = false;
+            string reason = string.Empty;
             ClientSideActions name = (ClientSideActions)Enum.Parse(typeof(ClientSideActions), dialogue);
             switch (name)
             {
                 case ClientSideActions.userprofile:
-                    permitted = Request.IsAuthenticated;
+                    var m = this.GetCurrentMember();
+                    if (m.IsAdministrator)
+                    {
+                        permitted = false;
+                        reason = "The Administrator account has no user profile";
+                    }
+                    else if (m.IsAnonymous)
+                    {
+                        permitted = false;
+                        reason = "PLease login first";
+                    }
+                    else
+                    {
+                        permitted = true;
+                    }
                     break;
                 default:
                     break;
             }
-            return Json(new { Permitted = permitted }, JsonRequestBehavior.AllowGet);
+            return Json(new { Permitted = permitted, Reason = reason }, JsonRequestBehavior.AllowGet);
         }
         [HttpGet]
         [AllowAnonymous]

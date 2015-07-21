@@ -111,7 +111,8 @@ namespace Fastnet.Webframe.Mvc
                     {
                         username = filterContext.HttpContext.User.Identity.Name;
                     }
-                    Log.Write("mvc {0}:{1}(), user {2}, {3}", filterContext.Controller.GetType().Name,
+                    string controllerName = filterContext.Controller.GetType().FullName.Replace("Fastnet.Webframe.Web.", "");
+                    Log.Write("mvc {0}:{1}(), user {2}, {3}", controllerName,
                         filterContext.ActionDescriptor.ActionName, username, filterContext.RequestContext.HttpContext.Request.Url.PathAndQuery);
                 }
             }

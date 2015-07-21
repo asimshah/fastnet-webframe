@@ -8,12 +8,12 @@
     @Styles.Render("~/Content/css")
     @Styles.Render("~/Content/designer/css")
     @Scripts.Render("~/bundles/modernizr")
+    @RenderSection("styles", required: false)
 </head>
 <body>
     <div class="fastnet-error-panel hide">
 
     </div>
-    @*<div class="navbar navbar-inverse navbar-fixed-top">*@
     <div class="navbar navbar-inverse ">
         <div class="container">
             <div class="navbar-header">
@@ -26,10 +26,8 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    @*<li>@Html.ActionLink("Home", "Index", "Home")</li>*@
-                    <li>@Html.ActionLink("Layout", "Index", "Layout")</li>
-                    @*<li>@Html.ActionLink("Styles", "Index", "Style")</li>*@
-                    <li>@Html.ActionLink("Menus", "Menu", "Home")</li>
+                    <li>@Html.ActionLink("Layout", "Index", "StyleSheet")</li>
+                    <li>@Html.ActionLink("Menus", "Index", "SiteMenu")</li>
                     <li>@Html.ActionLink("Back", "Index", "Home", new { area = "" }, null)</li>
                 </ul>
             </div>
@@ -37,14 +35,22 @@
     </div>
 
     <div class="container body-content">
-        @RenderBody()
-        <div id="form" class="forms-container">
+        <div class="row">
+            <div class="col-xs-12">
+                @RenderBody()
+                <div id="form" class="forms-container">
 
+                </div>
+            </div>
         </div>
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year Webframe</p>
-        </footer>
+        <div class="row">
+            <div class="col-xs-12">
+                <hr />
+                <footer>
+                    <p>&copy; @DateTime.Now.Year Webframe</p>
+                </footer>
+            </div>
+        </div>
     </div>
 
     @Scripts.Render("~/bundles/jquery")

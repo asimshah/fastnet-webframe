@@ -1,9 +1,9 @@
 ﻿(function ($) {
-    // Version 1.0.16
+    // Version 1.0.20
     var $T;
     var $U;
     var modelessTemplate =
-"<div class='modeless hide' >" +
+"<div class='modeless hide' id='{{Id}}' >" +
 "    <div class='modeless-content content-root'>" +
 "        <div class='form-section'>{{{BodyHtml}}}</div>" +
 "        <div class='form-section'>{{{FooterHtml}}}</div>" +
@@ -498,8 +498,7 @@
                     });
                 }
             }
-
-            root.find("button, input[type=button]").on("click", function (e) {
+            root.find("button[data-cmd], input[type=button][data-cmd], span[data-cmd]").on("click", function (e) {
                 var cmd = $(this).attr("data-cmd");
                 if (cmd === "cancel") {
                     if (me.options.IsModal) {
@@ -696,7 +695,10 @@
                     case "input":
                     case "textarea":
                         var item = $(this).attr("data-item");
-                        //$(this).closest("[data-property]").find(".message").html("");
+                        var val = $(this).val();
+                        var placeholder = $(this).attr("placeholder");
+
+                        $U.Debug("on input: {0} value is {1}", item, val);
                         if (me.options.OnChange !== null) {
                             me.options.OnChange(me, item);
                         }

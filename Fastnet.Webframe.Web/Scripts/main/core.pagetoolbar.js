@@ -22,7 +22,7 @@
         function _activateToolbarShim() {
             $(".edit-panel").on("click", function (e) {
                 e.preventDefault();
-                e.stopPropagation();
+                //e.stopPropagation();
                 _open();
             });
         }
@@ -62,6 +62,9 @@
             $U.SetEnabled($(selector), false);
         }
         function _addHandler(cmd, handler) {
+            //if (typeof handlers[cmd] === "undefined" || handlers[cmd] === null) {
+            //    debugger;
+            //}
             handlers[cmd] = handler;
         }
         function _onCommand(cmd) {
