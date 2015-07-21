@@ -219,8 +219,9 @@
                         .find(".member[data-member-id='" + id + "']")
                         .replaceWith($(Mustache.to_html(memberItemTemplate, r)));
                     bindMembers();
-                    currentForm.resetOriginalData();
-                    currentForm.disableCommand("save-changes");
+                    loadMemberDetails(id);
+                    //currentForm.resetOriginalData();
+                    //currentForm.disableCommand("save-changes");
                 });
             }
             if (newMember) {
@@ -231,15 +232,6 @@
                     $U.Confirm(message, function () {
                         performUpdate();
                     });
-                    //var mb = new $.fastnet$messageBox({
-                    //    CancelButton: true
-                    //});
-                    //var message = "<div>Changing the email address will: <ul><li>Deactivate the member's account</li><li>Send an activation email using the new email address</li></ul></div><div>Please confirm</div>";
-                    //mb.show(message, function (cmd) {
-                    //    if (cmd === "ok") {
-                    //        performUpdate();
-                    //    }
-                    //});
                 } else {
                     performUpdate();
                 }
