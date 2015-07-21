@@ -12,11 +12,11 @@
         function _parkMenu() {
             menuData.parkedHTML = $("#" + menuData.menuId)[0].outerHTML;
             $("#" + menuData.menuId).remove();
-            $(menuData.container).find(".menu-location").empty();
+            //$(menuData.container).find(".menu-location").empty();
         }
         function _unparkMenu() {
             if ($(menuData.container).find(".menu-location").length > 0) {
-                $(menuData.container).find(".menu-location").empty().append(menuData.parkedHTML);
+                $(menuData.container).find(".menu-location").append(menuData.parkedHTML);
             } else {
                 $(menuData.container).append($(menuData.parkedHTML));
             }
@@ -51,7 +51,7 @@
             $(menuId).find(panelId).find(".menu-item.has-submenus").on("click", function (e) {
                 var e_targetId = $(e.target).attr("id");
                 var id = $(this).attr("id");
-                $U.Debug("click this.id {0}, e.target.id {1}", id, e_targetId);
+                //$U.Debug("click this.id {0}, e.target.id {1}", id, e_targetId);
                 if ($(e.target).tagName === "A" && $(e.target).attr("href") === "#") {
                     e.preventDefault();
                 }
@@ -237,7 +237,7 @@
                     }
                 });
                 menuData.panels.push(panel);
-                $U.Debug("Panel {0}, child of {1}, level {2}, {3} menuItems", panel.id, panel.parentId, level, panel.menuItems.length)
+                //$U.Debug("Panel {0}, child of {1}, level {2}, {3} menuItems", panel.id, panel.parentId, level, panel.menuItems.length)
             }
             _parsePanel(containerId, 0, md);
         }
@@ -341,7 +341,7 @@
             });
         }
         function _traceInstance() {
-            $U.Debug("Menu: created instance {0}", _instance);
+            //$U.Debug("Menu: created instance {0}", _instance);
         }
         return {
             traceInstance: _traceInstance,

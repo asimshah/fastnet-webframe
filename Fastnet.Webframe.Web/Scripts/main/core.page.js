@@ -36,7 +36,7 @@
             get: getInstance
         }
     }
-    $.core$page = {        
+    $.core$page = {
         toolbar: null,
         pageEditor: null,
         isEditing: false,
@@ -44,12 +44,12 @@
         panelData: {
             Access: null,
             EditablePanels: [
-                { pageId: null, selector: ".CentrePanel", masterMenus: [], menuList: [],  menuIdList: null, menuData: [] },
+                { pageId: null, selector: ".CentrePanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] },
                 { pageId: null, selector: ".BannerPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] },
                 { pageId: null, selector: ".LeftPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] },
                 { pageId: null, selector: ".RightPanel", masterMenus: [], menuList: [], menuIdList: null, menuData: [] }
             ],
-            MenuPanel: {masterMenus: [], menuList: [], menuData: [] },
+            MenuPanel: { masterMenus: [], menuList: [], menuData: [] },
         },
         Init: function () {
             function _toolbarOpened() {
@@ -60,7 +60,7 @@
             }
             function _exitEditRequested() {
                 var result = $T.pageEditor.UnloadEditors();
-                if(result){
+                if (result) {
                     // as we have unloaded editors
                     // we need to restore all menus
 
@@ -94,36 +94,46 @@
             });
             return result;
         },
-        RestoreAllMenus: function() {
-            $.each($T.panelData.EditablePanels, function (i, ep) {
-                //if (ep.menu !== null) {
-                //    ep.menu.restore();
-                //}
-                $.each(ep.menuList, function (j, m) {
-                    m.restore();
+        RestoreAllMenus: function () {
+            function _restoreList(selector, masterMenus) {
+                $(selector).find(".menu-location").empty(); // remove the &nbsp; that somehow gets in here!
+                $.each(masterMenus, function (i, master) {
+                    $.each(master.menuList, function (j, menu) {
+                        $U.Debug("Should restore: {0}, master {1} menu {2}", selector, master.masterId, menu.getId());
+                        menu.restore();
+                    });
                 });
+            }
+            $.each($T.panelData.EditablePanels, function (i, ep) {
+                _restoreList(ep.selector, ep.masterMenus);
             });
-            $.each($T.panelData.MenuPanel.menuList, function (i, m) {
-                m.restore();
-            });
+            //$.each($T.panelData.EditablePanels, function (i, ep) {
+            //    //if (ep.menu !== null) {
+            //    //    ep.menu.restore();
+            //    //}
+            //    $.each(ep.menuList, function (j, m) {
+            //        m.restore();
+            //    });
+            //});
+            //$.each($T.panelData.MenuPanel.menuList, function (i, m) {
+            //    m.restore();
+            //});
         },
-        ParkAllMenus: function() {
+        ParkAllMenus: function () {
+            function _parkList(selector, masterMenus) {
+                $.each(masterMenus, function (i, master) {
+                    $.each(master.menuList, function (j, menu) {
+                        //$U.Debug("Should park: {0}, master {1} menu {2}", selector, master.masterId, menu.getId());
+                        menu.park();
+                    });
+                });
+            }
             $.each($T.panelData.EditablePanels, function (i, ep) {
-                //if (ep.menu !== null) {
-                //    ep.menu.park();
-                //}
-                $.each(ep.masterMenus, function (i, master) {
-                    if (master.data !== null) {
-                        $.each(master.data, function (j, menu) { });
-                    }
-                });
-                $.each(ep.menuList, function (j, m) {
-                    m.park();
-                });
-            });           
-            $.each($T.panelData.MenuPanel.menuList, function (i, m) {
-                m.park();
+                _parkList(ep.selector, ep.masterMenus);
             });
+            //$.each($T.panelData.MenuPanel.menuList, function (i, m) {
+            //    m.park();
+            //});
         },
         //CreateMenus: function (menuList) {
         //    function createMenu(panelSelector, masterInfo, opts) {
@@ -203,7 +213,7 @@
             });
             // now get details from the server
             var url = "pageapi/menu/master";
-            var postData = { option: null, idList: mmIdList};
+            var postData = { option: null, idList: mmIdList };
             $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
                 // r is an array of {Id, ClassName, Name, Panel}
                 //$T.CreateMenus(r);
@@ -500,7 +510,7 @@
                 $(".bar-menu").empty();
                 $.each(masterList, function (i, master) {
                     // each master is start of an independent menu
-                    if(master.data !== null) {                    
+                    if (master.data !== null) {
                         var l0ul = $("<ul data-level='0'></ul>").appendTo($(".bar-menu"));
                         $.each(master.data, function (j, md) {
                             _insertMenuHTML(l0ul, md, 1);
@@ -613,7 +623,7 @@
             //if (countMenus(".RightPanel") === 0) {
             //    $(".right-bars").hide();
             //}
-            
+
             if (!$(".LeftPanel").is(":visible")) {
                 $(".left-bars").hide();
             }

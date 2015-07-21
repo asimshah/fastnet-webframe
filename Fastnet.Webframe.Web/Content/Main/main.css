@@ -112,37 +112,6 @@ body {
 .timeout-page .content .message {
   font-style: italic;
 }
-.SitePanel {
-  /*@media only screen and (max-width: @wide-screen-threshold) {
-        .menu-bars-container {
-            width: 100%;
-            
-            display: block;
-
-            .bars {
-                margin: 2px;
-                font-size: 36px;
-                height: 48px;
-                width: 48px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-        }
-
-        .SitePanel {
-            margin: 0 !important;
-            width: auto !important;
-        }
-
-        .LeftPanel, .RightPanel {
-            width: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden;
-        }
-    }*/
-}
 .SitePanel.normal-width .menu-bars-container {
   display: none;
 }
@@ -156,6 +125,9 @@ body {
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden;
+}
+.SitePanel.narrow-width .MenuPanel {
+  display: none;
 }
 .SitePanel .menu-bars-container {
   width: 100%;
@@ -342,9 +314,6 @@ body {
   -o-transition: height ease 1s;
   -webkit-transition: height ease 1s;
   transition: height ease 1s;
-  /*-moz-transition: opacity ease 2s, top ease 1s;
-        -o-transition: opacity ease 2s, top ease 1s;
-        -webkit-transition: opacity ease 2s, top ease 1s;*/
   margin-left: 15px;
   margin-right: 15px;
   padding-left: 4px;
@@ -371,6 +340,9 @@ body {
 .edit-panel .toolbar .btn {
   margin: 2px;
   line-height: 1.4;
+}
+.edit-panel .toolbar .testing-command {
+  display: none;
 }
 .edit-panel .toolbar .page-info-command {
   background: transparent;

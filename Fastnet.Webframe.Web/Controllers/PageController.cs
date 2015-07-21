@@ -103,7 +103,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     // for the time being only return the first
                     if (p.MenuMasters.Count() > 0)
                     {
-                        return new { Id = p.PageId, Menu = p.MenuMasters.First().Id, MenuList = p.MenuMasters.Select(x => x.Id) };
+                        return new { Id = p.PageId, Menu = p.MenuMasters.First().Id, MenuList = p.MenuMasters.OrderBy(x => x.Name).Select(x => x.Id) };
                     }
                     else
                     {
