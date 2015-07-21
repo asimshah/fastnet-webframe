@@ -1,8 +1,9 @@
 ﻿@import (reference) "../../../Content/bootstrap.less";
 @import (reference) "constants.less";
-
+@-ms-viewport {
+    width: device-width;
+}
 .body-content {
-
 }
 
 .fastnet-error-panel {
@@ -101,34 +102,64 @@
     }
 }
 
-.SitePanel {
-    width: auto;
-}
-
 .AppPanel {
     width: 100%;
 }
 
 @light-border-colour: #045804;
 
+.SitePanel {
+    width: auto;
+    .interaction-panels {
+         display: flex;
+    }
+    &.narrow-width {
+        .interaction-panels {
+            .lookup-panel:not(.active) {
+                display:none;
+                overflow: hidden;
+            }
+            .group-tree-panel:not(.active) {
+                display:none;
+                overflow: hidden;
+            }
+            .main-panel:not(.active) {
+                display:none;
+                overflow: hidden;
+            }
+            .group-content-panel:not(.active) {
+                display:none;
+                overflow: hidden;
+            }
+        }
+    }
+
+    &.normal-width {
+        .interaction-panels {          
+            .lookup-panel, .group-tree-panel {
+                width: 33%;
+            }
+            .main-panel,.group-content-panel {
+                width: 66%;
+            }
+        }
+    }
+}
+
 .member-manager {
 
     .lookup-panel {
-        //position: relative;
         background-color: forestgreen;
         margin-top: 8px;
-        //height: 650px;
+        margin-left: 4px;
+        margin-right: 4px;
         padding-bottom: 4px;
         border-radius: 8px;
         border: 1px solid @light-border-colour;
 
         .search-group {
-            //.make-row();
             margin: 8px 15px 4px 15px;
-            /*margin-left: 15px;
-            margin-right: 15px;
-            margin-top: 8px;
-            margin-bottom: 4px;*/
+
             button[data-cmd='clear-search'] {
                 border-radius: 0;
                 border-left: none;
@@ -141,19 +172,14 @@
         }
 
         .address-book {
-            //.make-row();
             .member-index {
                 .make-xs-column(0.5);
                 padding-left: 19px;
                 padding-top: 0;
-                /*position: absolute;
-                padding: 8px;
-                height: 100%;*/
+
                 button[data-cmd='search-char'] {
                     border-top-left-radius: 8px;
                     border-bottom-left-radius: 8px;
-                    /*border-top-right-radius: -8px;
-                    border-bottom-right-radius: -8px;*/
                     outline: none;
                     height: 24px;
                 }
@@ -165,11 +191,7 @@
                 border-left: 1px solid @btn-info-border;
                 margin-left: 10px;
                 height: 622px;
-                /*position: absolute;
-                top: 0;
-                left: 48px;
-                width: 400px;
-                padding: 8px;*/
+
                 .member {
                     cursor: pointer;
                     color: white;
@@ -201,8 +223,7 @@
 
     .main-panel {
         margin-top: 8px;
-        //.make-xs-column(8);
-        //margin: 8px;
+        margin-left: 4px;
     }
 
     .details-panel {
@@ -224,9 +245,7 @@
                 span:nth-child(2n) {
                     color: #0f69aa;
                 }
-                /*span:nth-child(3):before {
-                    content: ', ';
-                }*/
+
                 span:not(:last-child) {
                     margin-right: 2px;
                 }
@@ -239,50 +258,24 @@
             }
         }
     }
-
-    @media only screen and (max-width: 768px) {
-        .lookup-panel {
-            .make-xs-column(12);
-
-            &:not(.active) {
-                display: none;
-            }
-        }
-
-        .details-panel {
-            .make-xs-column(12);
-
-            &:not(.active) {
-                display: none;
-            }
-
-            .command-strip {
-                .btn-group-vertical;
-                // using .btn-group-vertical as mixin
-                // means that the curved corners do not
-                // work correctly, so fix it here:
-                .btn:first-child:not(:last-child) {
-                    border-top-right-radius: 4px;
-                }
-
-                .btn:last-child:not(:first-child) {
-                    border-bottom-left-radius: 4px;
-                }
-            }
-        }
+    .existing-member-commands {
+        margin-top: 8px;
     }
+
 }
 
 .group-manager {
-        .member-list {
+    .member-list {
         max-height: 300px;
         overflow-y: scroll;
     }
+
     .group-tree-panel {
         min-height: 500px;
         color: @light-border-colour;
         background-color: white;
         margin-top: 8px;
+        margin-right: 8px;
         padding-left: 4px;
         padding-bottom: 4px;
         border-radius: 8px;
@@ -310,7 +303,7 @@
 
     .group-content-panel {
         margin-top: 8px;
-
+        margin-left: 4px;
         .toolbar {
             background-color: lighten(@light-border-colour, 20%);
             padding: 4px;
@@ -324,6 +317,7 @@
             .command-strip {
                 margin-top: 24px;
             }
+
             .group-details {
                 .row:first-child {
                     @form-gutter: 0px;
@@ -333,18 +327,22 @@
                     margin-left: @form-gutter;
                     margin-right: @form-gutter;
                 }
+
                 .row:nth-child(2) {
                     margin-top: 24px;
                 }
+
                 .error-summary {
                     margin-right: 4px;
-                    color: @error-message-text;// red;
+                    color: @error-message-text; // red;
                     font-style: italic;
                     font-size: small;
                 }
+
                 .checkbox-label {
                     font-weight: normal;
                 }
+
                 .system-group-block {
                     font-style: italic;
                 }

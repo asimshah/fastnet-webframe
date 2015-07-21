@@ -35,19 +35,22 @@
         <span>This email address is not confirmed. The member needs to respond to the activation email.</span>
     </div>
     {{/EmailConfirmed}}
-    <div class="form-group command-strip">
+    <div class="form-group ">
+        <div class="btn-group">
+            {{^IsAdministrator}}
+            <button class="btn btn-sm  btn-danger" tabindex="-1" data-cmd="delete-member">Delete</button>
+            {{/IsAdministrator}}
+            <button class="btn btn-sm btn-primary" data-cmd="save-member-changes">Save Changes</button>
+            <button class="btn btn-sm btn-default" data-cmd="close-form">Close</button>
+        </div>
         {{^IsAdministrator}}
         <div class="existing-member-commands">
-            <div class="btn-group pull-left">
-                <button class="btn btn-sm  btn-danger" tabindex="-1" data-cmd="delete-member">Delete</button>
+            <div class="btn-group">
                 <button class="btn btn-sm btn-primary" tabindex="-1" data-cmd="send-activation-email" title="Deactivate member and send an activation email to the current email address">Send Activation Email</button>
                 <button class="btn btn-sm btn-primary" tabindex="-1" data-cmd="send-password-reset" title="Send an email with a change password link to the current email address">Send Password Reset</button>
             </div>
         </div>
         {{/IsAdministrator}}
-        <div class="btn-group pull-right">
-            <button class="btn btn-primary" data-cmd="save-member-changes">Save Changes</button>
-            <button class="btn btn-default" data-cmd="close-form">Cancel</button>
-        </div>
+
     </div>
 </div>

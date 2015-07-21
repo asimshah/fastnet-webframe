@@ -694,6 +694,7 @@
     <Content Include="Areas\membership\Templates\Forms\GroupDetails.html" />
     <Content Include="Areas\membership\Templates\Forms\GroupManager.html" />
     <Content Include="Areas\membership\Templates\Forms\MemberDetails.html" />
+    <Content Include="Areas\membership\Templates\Forms\MemberManager - Copy.html" />
     <Content Include="Areas\membership\Templates\Forms\MemberManager.html" />
     <Content Include="Areas\membership\Templates\Forms\SelectMembers.html" />
     <Content Include="Content\archive\bootstrap-theme.css" />
