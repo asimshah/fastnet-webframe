@@ -86,7 +86,7 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             if (!Request.IsAuthenticated && ApplicationSettings.Key("AutologinAdmin", false))
             {
-                Member admin = DataContext.Members.Single(m => m.IsAdministrator);
+                MemberBase admin = DataContext.Members.Single(m => m.IsAdministrator);
                 var user = await UserManager.FindByIdAsync(admin.Id);
                 await SignInManager.SignInAsync(user, false, false);
                 admin.LastLoginDate = DateTime.UtcNow;
@@ -197,8 +197,8 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             else
             {
-                Member CurrentMember = this.GetCurrentMember();
-                Member member = DataContext.Members.Single(m => m.Id == user.Id);
+                var CurrentMember = this.GetCurrentMember();
+                var member = DataContext.Members.Single(m => m.Id == user.Id);
                 //if (member.IsAdministrator || await UserManager.IsEmailConfirmedAsync(user.Id))
                 if (member.IsAdministrator || (member.EmailAddressConfirmed && !member.Disabled))
                 {
@@ -250,14 +250,15 @@ namespace Fastnet.Webframe.Web.Controllers
             if (result.Succeeded)
             {
                 bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                Member member = new Member
-                {
-                    Id = user.Id,
-                    EmailAddress = model.emailAddress,
-                    FirstName = model.firstName,
-                    LastName = model.lastName,
-                    CreationDate = DateTime.UtcNow
-                };
+                //Member member = new Member
+                //{
+                //    Id = user.Id,
+                //    EmailAddress = model.emailAddress,
+                //    FirstName = model.firstName,
+                //    LastName = model.lastName,
+                //    CreationDate = DateTime.UtcNow
+                //};
+                var member = MemberFactory.CreateNew(user.Id, model.emailAddress, model.firstName, model.lastName);
                 if (visiblePassword)
                 {
                     member.PlainPassword = model.password;
@@ -278,7 +279,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("activate/{userId}/{code}")]
         public async Task<ActionResult> Activate(string userId, string code)
         {
-            Member member = DataContext.Members.SingleOrDefault(m => m.Id == userId);
+            Member member = DataContext.Members.OfType<Member>().SingleOrDefault(m => m.Id == userId);
             if (member != null && member.ActivationCode == code)
             {
                 var user = await UserManager.FindByEmailAsync(member.EmailAddress);
@@ -308,7 +309,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                Member member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
+                Member member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == model.emailAddress);
                 member.PasswordResetCode = Guid.NewGuid().ToString();
                 member.PasswordResetEmailSentDate = DateTime.UtcNow;
                 member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordResetRequest);
@@ -326,7 +327,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("passwordreset/{userId}/{code}")]
         public async Task<ActionResult> PasswordReset(string userId, string code)
         {
-            Member member = DataContext.Members.SingleOrDefault(m => m.Id == userId);
+            Member member = DataContext.Members.OfType<Member>().SingleOrDefault(m => m.Id == userId);
             if (member != null && member.PasswordResetCode == code)
             {
                 member.PasswordResetCode = null; // ensure it cannot be done again
@@ -349,7 +350,7 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 string emailAddress = model.emailAddress;
                 string newPassword = model.password;
-                Member member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
+                Member member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == model.emailAddress);
                 bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false); //SiteSetting.Get("VisiblePassword", false);
                 if (visiblePassword)
                 {
@@ -393,16 +394,19 @@ namespace Fastnet.Webframe.Web.Controllers
                     if (result.Succeeded)
                     {
                         bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                        Member member = new Member
-                        {
-                            Id = user.Id,
-                            EmailAddress = model.Email,
-                            EmailAddressConfirmed = true,
-                            FirstName = "",
-                            LastName = "Administrator",
-                            IsAdministrator = true,
-                            CreationDate = DateTime.UtcNow
-                        };
+                        //Member member = new Member
+                        //{
+                        //    Id = user.Id,
+                        //    EmailAddress = model.Email,
+                        //    EmailAddressConfirmed = true,
+                        //    FirstName = "",
+                        //    LastName = "Administrator",
+                        //    IsAdministrator = true,
+                        //    CreationDate = DateTime.UtcNow
+                        //};
+                        var member = MemberFactory.CreateNew(user.Id, model.Email, "", "Administrator");
+                        member.EmailAddressConfirmed = true;
+                        member.IsAdministrator = true;
                         if (visiblePassword)
                         {
                             member.PlainPassword = model.Password;
@@ -562,7 +566,7 @@ namespace Fastnet.Webframe.Web.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
-                member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+                member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == User.Identity.Name);
             }
             PageModel pm = GetPageModel();// new PageModel(pageId);
             pm.SetClientAction(name, member);

@@ -14,7 +14,7 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Common
 {
-    public class MailHelper
+    public class MailHelper : IDisposable
     {
         private static HttpContext httpCtx;
         private CoreDataContext DataContext;// = Core.GetDataContext();
@@ -45,10 +45,10 @@ namespace Fastnet.Webframe.Web.Common
         {
             DataContext = new CoreDataContext();
         }
-         ~MailHelper()
-        {
-            DataContext.Dispose();
-        }
+        // ~MailHelper()
+        //{
+        //    DataContext.Dispose();
+        //}
         public async Task SendPasswordResetAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string code)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
@@ -303,5 +303,41 @@ namespace Fastnet.Webframe.Web.Common
             string fmt = mailEnabled ? "Mail sent to {0}{2}, subject: {1}" : "Mail to [to {0}{2}, subject: {1}] not sent as mail is not enabled";
             Log.Write(fmt, mail.To.First().Address, mail.Subject, isRedirected ? " (redirected)" : "");
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    DataContext.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~MailHelper() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

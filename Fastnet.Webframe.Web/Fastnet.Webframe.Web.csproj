@@ -25,6 +25,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TypeScriptToolsVersion>1.0</TypeScriptToolsVersion>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -1105,6 +1106,8 @@
     <Content Include="Content\fastnet\menusystem.css.map">
       <DependentUpon>menusystem.css</DependentUpon>
     </Content>
+    <Content Include="customisation.json" />
+    <Content Include="customisation.schema.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.min.js" />
@@ -1571,6 +1574,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
+      <UserProperties customisation_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -1,0 +1,41 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "JSON Schema for customisation JSON file format",
+
+  "type": "object",
+
+  "properties": {
+    "factory": {
+      "default": "None",
+      "description": "This is the name of the factory to use, default is \"None\".",
+      "enum": [ "None", "DonWhillansHut" ],
+      "type": "string"
+    },
+    "legacy": {
+      "type": "object",
+      "properties": {
+        "dataload": {
+          "default": false,
+          "description": "if true and a new database needs to be created, then loads data from a legacy database",
+          "type": "boolean"
+        },
+        "connectionStringName": {
+          "type": "string",
+          "description": "one of the available connectionsStrings in web.config"
+        }
+      }
+    },
+    "templateFolder": {
+      "type": "string",
+      "description": "Folder for custom templates. This must be parallel to the normal Templates folder."
+    }
+    //"versions": {
+    //	"type": "array",
+    //	"description": "An array of version numbers.",
+    //	"minItems": 1,
+    //	"items": {
+    //		"type": "number"
+    //	}
+    //}
+  }
+}

@@ -625,7 +625,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private async Task<CD.Page> CreatePageInternal(long directoryId, CD.PageType type)
         {
-            CD.Member m = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
+            var m = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             CD.Directory dir = DataContext.Directories.Find(directoryId);
             CD.Page page = DataContext.CreateNewPage();
             CD.PageMarkup pm = page.PageMarkup;
@@ -651,7 +651,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private CD.Document CreateDocument(CD.Directory d, string filename, byte[] fileData, string mimetype)
         {
-            CD.Member cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
+            var cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             CD.Document document = DataContext.CreateNewDocument();
             document.CreatedBy = cm.Fullname;
             document.CreatedOn = DateTime.UtcNow;
@@ -667,7 +667,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private CD.Image CreateImage(CD.Directory d, string filename, byte[] fileData, string mimetype)
         {
-            CD.Member cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
+            var cm = this.GetCurrentMember();// DataContext.Members.Find(CurrentMemberId);
             var dimensions = GetDimensions(fileData);
             CD.Image image = DataContext.CreateNewImage();
             image.CreatedBy = cm.Fullname;

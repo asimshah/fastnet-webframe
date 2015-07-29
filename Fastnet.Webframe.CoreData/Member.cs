@@ -20,8 +20,10 @@ namespace Fastnet.Webframe.CoreData
         ViewAllowed,
         EditAllowed
     }
-    public partial class Member
+    [Table("Members")]
+    public abstract partial class MemberBase
     {
+
         // I do not use the Email Confirmation scheme that ias part of the Asp.Net Identity system
         // because the UserManager.GenerateEmailConfirmationTokenAsync method produces a ridiculously
         // long string!
@@ -50,29 +52,29 @@ namespace Fastnet.Webframe.CoreData
         public bool IsAdministrator { get; set; }
         public bool IsAnonymous { get; set; }
         //
-        public string UserString1 { get; set; }
-        public string UserString2 { get; set; }
-        public string UserString3 { get; set; }
-        public string UserString4 { get; set; }
-        public string UserString5 { get; set; }
+        //public string UserString1 { get; set; }
+        //public string UserString2 { get; set; }
+        //public string UserString3 { get; set; }
+        //public string UserString4 { get; set; }
+        //public string UserString5 { get; set; }
 
-        public DateTime UserDate1 { get; set; }
-        public DateTime UserDate2 { get; set; }
-        public DateTime UserDate3 { get; set; }
-        public DateTime UserDate4 { get; set; }
-        public DateTime UserDate5 { get; set; }
+        //public DateTime UserDate1 { get; set; }
+        //public DateTime UserDate2 { get; set; }
+        //public DateTime UserDate3 { get; set; }
+        //public DateTime UserDate4 { get; set; }
+        //public DateTime UserDate5 { get; set; }
 
-        public int UserInteger1 { get; set; }
-        public int UserInteger2 { get; set; }
-        public int UserInteger3 { get; set; }
-        public int UserInteger4 { get; set; }
-        public int UserInteger5 { get; set; }
+        //public int UserInteger1 { get; set; }
+        //public int UserInteger2 { get; set; }
+        //public int UserInteger3 { get; set; }
+        //public int UserInteger4 { get; set; }
+        //public int UserInteger5 { get; set; }
 
-        public bool UserFlag1 { get; set; }
-        public bool UserFlag2 { get; set; }
-        public bool UserFlag3 { get; set; }
-        public bool UserFlag4 { get; set; }
-        public bool UserFlag5 { get; set; }
+        //public bool UserFlag1 { get; set; }
+        //public bool UserFlag2 { get; set; }
+        //public bool UserFlag3 { get; set; }
+        //public bool UserFlag4 { get; set; }
+        //public bool UserFlag5 { get; set; }
 
 
         private ICollection<Group> groups;
@@ -91,10 +93,11 @@ namespace Fastnet.Webframe.CoreData
             get
             {
                 CoreDataContext ctx = Core.GetDataContext();
-                return ctx.Members.Single(x => x.IsAnonymous);
+                return ctx.Members.OfType<Member>().Single(x => x.IsAnonymous);
             }
         }
         //
+
         public static string HashPassword(string password)
         {
             byte[] salt;
@@ -224,18 +227,7 @@ namespace Fastnet.Webframe.CoreData
             TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, result.Url);
             return result;
         }
-        public dynamic GetClientSideMemberDetails()
-        {
-            return new
-            {
-                Id = this.Id,
-                Name = this.Fullname,
-                IsAdministrator = this.IsAdministrator,
-                IsDisabled = this.Disabled,
-                EmailConfirmed = this.EmailAddressConfirmed,
-                EmailAddress = this.EmailAddress,
-            };
-        }
+        public abstract dynamic GetClientSideMemberDetails();
         public void RecordChanges(string actionBy = null, MemberAction.MemberActionTypes actionType = MemberAction.MemberActionTypes.Modification)
         {
             CoreDataContext DataContext = Core.GetDataContext();
@@ -377,6 +369,90 @@ namespace Fastnet.Webframe.CoreData
             }
             Debug.Assert(result >= 0);
             return result;
+        }
+    }
+
+    public partial class Member : MemberBase
+    {
+        internal Member()
+        {
+
+        }
+        public override dynamic GetClientSideMemberDetails()
+        {
+            return new
+            {
+                Id = this.Id,
+                Name = this.Fullname,
+                IsAdministrator = this.IsAdministrator,
+                IsDisabled = this.Disabled,
+                EmailConfirmed = this.EmailAddressConfirmed,
+                EmailAddress = this.EmailAddress,
+            };
+        }
+        //public dynamic GetClientSideMemberDetails()
+        //{
+        //    return new
+        //    {
+        //        Id = this.Id,
+        //        Name = this.Fullname,
+        //        IsAdministrator = this.IsAdministrator,
+        //        IsDisabled = this.Disabled,
+        //        EmailConfirmed = this.EmailAddressConfirmed,
+        //        EmailAddress = this.EmailAddress,
+        //    };
+
+        //}
+    }
+    public partial class DWHMember : MemberBase
+    {
+
+        [MaxLength(128)]
+        public string BMCMembership { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        internal DWHMember()
+        {
+
+        }
+        public override dynamic GetClientSideMemberDetails()
+        {
+            return new
+            {
+                Id = this.Id,
+                Name = this.Fullname,
+                IsAdministrator = this.IsAdministrator,
+                IsDisabled = this.Disabled,
+                EmailConfirmed = this.EmailAddressConfirmed,
+                EmailAddress = this.EmailAddress,
+                BMCMembership = this.BMCMembership,
+                DateOfBirth = this.DateOfBirth
+            };
+        }
+    }
+    public class MemberFactory : CustomFactory
+    {
+        public static MemberBase CreateNew(string id, string emailAddress, string firstName, string lastName)
+        {
+            MemberBase member = null;
+
+            switch (customisation)
+            {
+                case FactoryName.None:
+                    member = new Member();
+                    break;
+                case FactoryName.DonWhillansHut:
+                    var m = new DWHMember();
+                    m.BMCMembership = null;
+                    m.DateOfBirth = null;
+                    member = m;
+                    break;
+            }
+            member.Id = id;
+            member.EmailAddress = emailAddress;
+            member.FirstName = firstName;
+            member.LastName = lastName;
+            member.CreationDate = DateTime.UtcNow;
+            return member;
         }
     }
     //public class DWHMember : Member

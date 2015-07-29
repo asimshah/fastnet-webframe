@@ -1,0 +1,8 @@
+﻿{
+  "factory": "DonWhillansHut",
+  "legacy": {
+    "connectionStringName": "LegacyData",
+    "dataload": true
+  },
+  "templateFolder": "DWHTemplates"
+}

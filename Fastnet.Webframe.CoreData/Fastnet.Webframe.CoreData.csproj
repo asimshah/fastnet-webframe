@@ -172,6 +172,7 @@
     <Compile Include="CoreDataContext.cs" />
     <Compile Include="CoreDbInitializer.cs" />
     <Compile Include="CSS\CSSRule.cs" />
+    <Compile Include="Customisation.cs" />
     <Compile Include="Directory.cs" />
     <Compile Include="DirectoryGroup.cs" />
     <Compile Include="Document.cs" />

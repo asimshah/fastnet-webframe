@@ -22,7 +22,7 @@ namespace Fastnet.Webframe.Mvc
         {
 
         }
-        internal protected Member GetCurrentMember()
+        internal protected MemberBase GetCurrentMember()
         {
             string id = (string)(Session["current-member"] ?? null);
             return id == null ? Member.Anonymous : Core.GetDataContext().Members.Single(m => m.Id == id);
@@ -36,7 +36,7 @@ namespace Fastnet.Webframe.Mvc
             if (string.Compare(actionName, "SessionTimedout", true) != 0)
             {
                 BaseMvcController controller = (BaseMvcController)filterContext.Controller;
-                Member m = controller.GetCurrentMember();
+                MemberBase m = controller.GetCurrentMember();
                 if (controller.User.Identity.IsAuthenticated && m.IsAnonymous)
                 {
                     // we are here because the session has expired but the authentication hasn't
@@ -74,7 +74,7 @@ namespace Fastnet.Webframe.Mvc
                 if (string.Compare(actionName, "permissiondenied", true) != 0)
                 {
                     BaseMvcController controller = (BaseMvcController)filterContext.Controller;
-                    Member m = controller.GetCurrentMember();
+                    MemberBase m = controller.GetCurrentMember();
                     var permittedTo = Core.GetDataContext().Groups.Find(groupPK);
                     if (!permittedTo.Members.Contains(m))
                     {

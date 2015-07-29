@@ -37,7 +37,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
-                Member member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
+                var member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
                 return Group.Administrators.Members.Contains(member);
             }
             else

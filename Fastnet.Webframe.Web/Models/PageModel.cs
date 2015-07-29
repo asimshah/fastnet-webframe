@@ -188,7 +188,7 @@ namespace Fastnet.Webframe.Web.Models
         public string Customer { get; set; }
         public Features Features { get; set; }
         // public PageModel(long? pageId, Member member = null)
-        public PageModel(Page page, Member member = null)
+        public PageModel(Page page, MemberBase member = null)
         {
             this.Options = new OptionsModel();
             ClientSideLog = ApplicationSettings.Key("ClientSideLog", false);

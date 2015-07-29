@@ -201,7 +201,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = await DataContext.Members.FindAsync(key);
+                Member m = (Member) await DataContext.Members.FindAsync(key);
                 group.Members.Add(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberAddition, m.EmailAddress);
             }
@@ -218,7 +218,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = await DataContext.Members.FindAsync(key);
+                Member m = (Member) await DataContext.Members.FindAsync(key);
                 group.Members.Remove(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberRemoval, m.EmailAddress);
             }
@@ -300,14 +300,15 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             if (result.Succeeded)
             {
                 bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                Member member = new Member
-                {
-                    Id = user.Id,
-                    EmailAddress = emailAddress,
-                    FirstName = firstName,
-                    LastName = lastName,
-                    CreationDate = DateTime.UtcNow
-                };
+                //Member member = new Member
+                //{
+                //    Id = user.Id,
+                //    EmailAddress = emailAddress,
+                //    FirstName = firstName,
+                //    LastName = lastName,
+                //    CreationDate = DateTime.UtcNow
+                //};
+                var member = MemberFactory.CreateNew(user.Id, emailAddress, firstName, lastName);
                 if (visiblePassword)
                 {
                     member.PlainPassword = password;
@@ -329,7 +330,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         {
             //MembershipOptions options = new MembershipOptions();
             string id = data.id;
-            Member m = await DataContext.Members.FindAsync(id);
+            Member m = (Member) await DataContext.Members.FindAsync(id);
             if (!m.IsAdministrator)
             {
                 var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
@@ -358,7 +359,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             string newFirstName = data.firstName;
             string newLastName = data.lastName;
             bool newDisabled = data.isDisabled;
-            Member m = await DataContext.Members.FindAsync(id);
+            Member m = (Member) await DataContext.Members.FindAsync(id);
             string oldEmailAddress = m.EmailAddress.ToLower();
             newEmailAddress = newEmailAddress.ToLower();
             bool emailAddressChanged = oldEmailAddress != newEmailAddress;
@@ -418,7 +419,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> SendActivationEmail(dynamic data)
         {
             string id = data.id;
-            Member m = await DataContext.Members.FindAsync(id);
+            Member m = (Member)await DataContext.Members.FindAsync(id);
             bool currentlyActive = m.EmailAddressConfirmed;
             var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
             var user = await appUserManager.FindByIdAsync(id);
@@ -442,7 +443,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> SendPasswordResetRequest(dynamic data)
         {
             string id = data.id;
-            Member member = await DataContext.Members.FindAsync(id);
+            Member member = (Member)await DataContext.Members.FindAsync(id);
             member.PasswordResetCode = Guid.NewGuid().ToString();
             member.PasswordResetEmailSentDate = DateTime.UtcNow;
             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.PasswordResetRequest);
@@ -451,7 +452,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
-        private async Task<IEnumerable<Member>> FindMembers(string searchText, bool prefix)
+        private async Task<IEnumerable<MemberBase>> FindMembers(string searchText, bool prefix)
         {
             Func<string, string, bool> match = (fn, ln) =>
             {

@@ -15,7 +15,7 @@
     [LogActionFilter]
     public class BaseApiController : ApiController
     {
-        internal protected Member GetCurrentMember()
+        internal protected MemberBase GetCurrentMember()
         {
             var session = HttpContext.Current.Session;
             string id = (string)(session["current-member"] ?? null);
@@ -36,7 +36,7 @@
         {
             try
             {
-                Member m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
+                var m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
                 var permittedTo = Core.GetDataContext().Groups.Find(groupPK);
                 if (!permittedTo.Members.Contains(m))
                 {
@@ -60,7 +60,7 @@
             {
                 if (logActions)
                 {
-                    Member m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
+                    var m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
                     string username = "anonymous";
 
                     if (actionContext.RequestContext.Principal.Identity.IsAuthenticated)

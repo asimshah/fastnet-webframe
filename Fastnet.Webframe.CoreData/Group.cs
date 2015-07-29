@@ -23,7 +23,7 @@ namespace Fastnet.Webframe.CoreData
         public byte[] TimeStamp { get; set; }
         public virtual Group ParentGroup { get; set; }
         //
-        private ICollection<Member> members;
+        private ICollection<MemberBase> members;
         private ICollection<DirectoryGroup> directoryGroups;
         public virtual ICollection<Group> Children { get; set; }
         public virtual ICollection<DirectoryGroup> DirectoryGroups
@@ -31,9 +31,9 @@ namespace Fastnet.Webframe.CoreData
             get { return directoryGroups ?? (directoryGroups = new HashSet<DirectoryGroup>()); }
             set { directoryGroups = value; }
         }
-        public virtual ICollection<Member> Members
+        public virtual ICollection<MemberBase> Members
         {
-            get { return members ?? (members = new HashSet<Member>()); }
+            get { return members ?? (members = new HashSet<MemberBase>()); }
             set { members = value; }
         }
         internal override Group GetParent()

@@ -315,7 +315,7 @@ namespace Fastnet.Webframe.CoreData
                             Email = item.Email,
                             UserName = item.Email,
                         };
-                        Member m = new Member
+                        DWHMember m = new DWHMember
                         {
                             Id = user.Id,
                             //UserName = item.Email,
@@ -326,10 +326,8 @@ namespace Fastnet.Webframe.CoreData
                             CreationDate = item.CreationDate,
                             LastLoginDate = item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
                             Disabled = !item.Active,
-                            //Disabled = item.Active,
-                            //EmailValidated = item.EmailValidated,
-                            //EmailValidationKey = item.EmailValidationKey,
-                            //PasswordIsRecoverable = item.PasswordIsRecoverable
+                            DateOfBirth = null,// DateTime.MinValue,
+                            BMCMembership = null, //"(missing)"
                         };
                         if (item.Name == "Administrator")
                         {

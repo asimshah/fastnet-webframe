@@ -41,7 +41,7 @@ namespace Fastnet.Webframe.Web.Controllers
         public HttpResponseMessage GetPage(string id)
         {
             long pageId = Int64.Parse(id);
-            Member m = GetCurrentMember();
+            var m = GetCurrentMember();
             Page page = DataContext.Pages.Find(pageId);
             AccessResult ar = m.GetAccessResult(page);
             object data = null;
@@ -71,7 +71,7 @@ namespace Fastnet.Webframe.Web.Controllers
             var admins = Group.Administrators;
             long pageId = Int64.Parse(id);
             Page page = DataContext.Pages.Find(pageId);
-            Member m = GetCurrentMember();
+            var m = GetCurrentMember();
             AccessResult ar = m.GetAccessResult(page);
             //bool result = admins.Members.Contains(m) || m.CanEdit(page);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Access = ar.ToString().ToLower() });
@@ -347,7 +347,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             try
             {
-                Member m = GetCurrentMember();
+                var m = GetCurrentMember();
                 //string entity = null;
                 long id = 0;
                 AccessResult ar = AccessResult.Rejected;
@@ -392,7 +392,7 @@ namespace Fastnet.Webframe.Web.Controllers
 
         private bool canAccessLoginOut(string loweredurl)
         {
-            Member m = GetCurrentMember();
+            var m = GetCurrentMember();
             if (loweredurl == "login")
             {
                 return Group.Anonymous.Members.Contains(m);
@@ -405,7 +405,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private bool canAccessBuiltinApps(string loweredurl)
         {
-            Member m = GetCurrentMember();
+            var m = GetCurrentMember();
             switch (loweredurl)
             {
                 case "cms":
