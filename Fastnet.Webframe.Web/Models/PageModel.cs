@@ -44,7 +44,7 @@ namespace Fastnet.Webframe.Web.Models
         //    this.Name = name.ToString();
         //    this.IsModal = isModal;
         //}
-        public static ClientSideAction GetAction(ClientSideActions name, Member member)
+        public static ClientSideAction GetAction(ClientSideActions name, MemberBase member)
         {
             ClientSideAction action = null;
             switch (name)
@@ -88,7 +88,7 @@ namespace Fastnet.Webframe.Web.Models
         public string EmailAddress { get; private set; }
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
-        public UserProfileDialogue(Member member) : base(ClientSideActions.userprofile, true)
+        public UserProfileDialogue(MemberBase member) : base(ClientSideActions.userprofile, true)
         {
             this.EmailAddress = member.EmailAddress;
             this.FirstName = member.FirstName;
@@ -136,7 +136,7 @@ namespace Fastnet.Webframe.Web.Models
         public string LastName { get; private set; }
         public int MinimumPasswordLength { get; private set; }
         public bool RequireComplexPassword { get; private set; }
-        public ChangePasswordDialogue(Member member)
+        public ChangePasswordDialogue(MemberBase member)
             : base(ClientSideActions.changepassword, true, true)
         {
             this.EmailAddress = member.EmailAddress;
@@ -207,7 +207,7 @@ namespace Fastnet.Webframe.Web.Models
                 Customer = "default";
             }
         }
-        public void SetClientAction(ClientSideActions name, Member member)
+        public void SetClientAction(ClientSideActions name, MemberBase member)
         {
             this.ClientAction = ClientSideAction.GetAction(name, member);
         }

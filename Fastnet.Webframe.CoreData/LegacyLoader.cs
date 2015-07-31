@@ -1,5 +1,6 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
+
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -14,19 +15,56 @@ using LDB = Fastnet.Webframe.Web.DataModel;
 
 namespace Fastnet.Webframe.CoreData
 {
+
     public class LegacyLoader : IDisposable
     {
         private CoreDataContext coreDb;
         private ApplicationDbContext appDb;
         private LDB.WebframeDataEntities legacyDb;
-        private string configConnectionString;
-        public LegacyLoader(CoreDataContext context, string configConnectionString)
+        //private string configConnectionString;
+        public LegacyLoader(CoreDataContext context, LoaderFactory lf)
         {
+            //LoaderFactory lf = new LoaderFactory();
+            string configConnectionString = lf.LegacyConnectionString;
             coreDb = context;
             appDb = new ApplicationDbContext();
-            this.configConnectionString = configConnectionString;
+            //this.configConnectionString = configConnectionString;
             string connectionString = GetEntityConnectionString(configConnectionString);
             legacyDb = new LDB.WebframeDataEntities(connectionString);
+        }
+        public void Load()
+        {
+            using (var tran = coreDb.Database.BeginTransaction())
+            {
+                try
+                {
+                    LoadGroups();
+                    Log.Write("legacyData: Groups loaded");
+                    LoadMembers();
+                    Log.Write("legacyData: Members loaded");
+                    LoadDirectories();
+                    Log.Write("legacyData: Directories loaded");
+                    LoadDirectoryGroups();
+                    Log.Write("legacyData: DirectoryAccessRules loaded");
+                    LoadDocuments();
+                    Log.Write("legacyData: Documents loaded");
+                    LoadPages();
+                    Log.Write("legacyData: Pages loaded");
+                    LoadImages();
+                    Log.Write("legacyData: Images loaded");
+                    LoadSiteSettings();
+                    Log.Write("legacyData: SiteSettings loaded");
+                    LoadMenus();
+                    Log.Write("legacyData: Menus loaded");
+                    tran.Commit();
+                }
+                catch (Exception xe)
+                {
+                    tran.Rollback();
+                    Log.Write(xe);
+                    throw;
+                }
+            }
         }
         public void Dispose()
         {
@@ -432,8 +470,8 @@ namespace Fastnet.Webframe.CoreData
                                 image.CreatedOn = p.CreatedOn;
                                 image.Data = ti.ImageData;
                                 image.Directory = p.Directory;
-                                image.Height = ti.Height;
-                                image.ImageType = (ImageType)(int)ti.ImageType;
+                                image.Height = ti.Height;                                
+                                image.ImageType = (ImageType)ti.ImageTypeCode;
                                 image.Width = ti.Width;
                                 image.TimeStamp = BitConverter.GetBytes(-1);
                                 image.Name = createName(image);

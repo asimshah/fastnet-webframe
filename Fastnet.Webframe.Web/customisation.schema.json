@@ -5,6 +5,19 @@
   "type": "object",
 
   "properties": {
+    "CSSFiles": {
+      "description": "An array of css files to include in the custom bundle",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
+    "templateFolder": {
+      "type": "string",
+      "description": "Folder for custom templates. This must be parallel structure to the normal Templates folder but in CustomTemplates."
+    }, //"versions": {
     "factory": {
       "default": "None",
       "description": "This is the name of the factory to use, default is \"None\".",
@@ -12,7 +25,6 @@
       "type": "string"
     },
     "legacy": {
-      "type": "object",
       "properties": {
         "dataload": {
           "default": false,
@@ -23,13 +35,9 @@
           "type": "string",
           "description": "one of the available connectionsStrings in web.config"
         }
-      }
-    },
-    "templateFolder": {
-      "type": "string",
-      "description": "Folder for custom templates. This must be parallel to the normal Templates folder."
+      },
+      "type": "object"
     }
-    //"versions": {
     //	"type": "array",
     //	"description": "An array of version numbers.",
     //	"minItems": 1,

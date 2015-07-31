@@ -1,4 +1,6 @@
-﻿using System.Web;
+﻿using Fastnet.Web.Common;
+using Newtonsoft.Json.Linq;
+using System.Web;
 using System.Web.Hosting;
 using System.Web.Optimization;
 
@@ -6,6 +8,21 @@ namespace Fastnet.Webframe.Web
 {
     public class BundleConfig
     {
+        public class BundleFactory : CustomFactory
+        {
+            public string[] CSSFiles { get; set; }
+            public BundleFactory()
+            {
+                if (FactoryName != FactoryName.None)
+                {
+                    CSSFiles = Settings.CSSFiles == null ? new string[0] : ((JArray)Settings.CSSFiles).ToObject<string[]>();
+                }
+                else
+                {
+                    CSSFiles = new string[0];
+                }
+            }
+        }
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
@@ -48,11 +65,6 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/moment.js",
                     "~/Scripts/fastnet/fastnet.utilities.js"
                 ));
-
-            //bundles.Add(new ScriptBundle("~/bundles/main/adminsetup")
-            //    .Include(
-            //        "~/Scripts/main/core.admin.setup.js"
-            //    ));
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
@@ -139,8 +151,8 @@ namespace Fastnet.Webframe.Web
                 //"~/Content/themes/base/theme.css"
                 "~/Content/datatables/css/jquery.datatables.css"
                 ));
-            //bundles.Add(new StyleBundle("~/Content/themes/base/editorcss")
-            //    .IncludeDirectory("~/Content/themes/base", "*.css"));
+
+            AddCustomCSS(bundles);            
         }
 
         private static void EnsureUserCssFilesArePresent()
@@ -165,6 +177,16 @@ namespace Fastnet.Webframe.Web
                     System.IO.File.WriteAllText(fullname, string.Empty);
                 }
             }
+        }
+        private static void AddCustomCSS(BundleCollection bundles)
+        {
+            var customStyle = new StyleBundle("~/Content/customcss");
+            BundleFactory bf = new BundleFactory();
+            foreach(var cssFile in bf.CSSFiles)
+            {
+                customStyle.Include(cssFile);
+            }
+            bundles.Add(customStyle);
         }
     }
 }

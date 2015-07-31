@@ -300,21 +300,24 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             if (result.Succeeded)
             {
                 bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                //Member member = new Member
-                //{
-                //    Id = user.Id,
-                //    EmailAddress = emailAddress,
-                //    FirstName = firstName,
-                //    LastName = lastName,
-                //    CreationDate = DateTime.UtcNow
-                //};
                 var member = MemberFactory.CreateNew(user.Id, emailAddress, firstName, lastName);
+                if(member is DWHMember)
+                {
+                    DWHMember dm = member as DWHMember;
+                    dm.BMCMembership = data.bmcMembership ?? "";
+                    string dob = data.dateOfBirth;
+                    if(dob != null)
+                    {
+                        DateTime dt = DateTime.Parse(dob);
+                        dm.DateOfBirth = dt;
+                    }
+                }
                 if (visiblePassword)
                 {
                     member.PlainPassword = password;
                 }
                 DataContext.Members.Add(member);
-                Fastnet.Webframe.CoreData.Group.AllMembers.Members.Add(member);
+                cd.Group.AllMembers.Members.Add(member);
                 member.ActivationCode = Guid.NewGuid().ToString();
                 member.ActivationEmailSentDate = DateTime.UtcNow;
                 member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);

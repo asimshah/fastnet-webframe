@@ -561,12 +561,11 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private PageModel GetPageModel(ClientSideActions name)
         {
-
-            Member member = null;
+            MemberBase member = null;
             if (User.Identity.IsAuthenticated)
             {
                 //var user = await UserManager.FindByEmailAsync(User.Identity.Name);
-                member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == User.Identity.Name);
+                member = DataContext.Members.Single(m => m.EmailAddress == User.Identity.Name);
             }
             PageModel pm = GetPageModel();// new PageModel(pageId);
             pm.SetClientAction(name, member);

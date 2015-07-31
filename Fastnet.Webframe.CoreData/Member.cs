@@ -1,5 +1,6 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
+using Fastnet.Web.Common;
 using Fastnet.Webframe;
 using Microsoft.AspNet.Identity;
 //using Microsoft.AspNet.Identity;
@@ -52,30 +53,6 @@ namespace Fastnet.Webframe.CoreData
         public bool IsAdministrator { get; set; }
         public bool IsAnonymous { get; set; }
         //
-        //public string UserString1 { get; set; }
-        //public string UserString2 { get; set; }
-        //public string UserString3 { get; set; }
-        //public string UserString4 { get; set; }
-        //public string UserString5 { get; set; }
-
-        //public DateTime UserDate1 { get; set; }
-        //public DateTime UserDate2 { get; set; }
-        //public DateTime UserDate3 { get; set; }
-        //public DateTime UserDate4 { get; set; }
-        //public DateTime UserDate5 { get; set; }
-
-        //public int UserInteger1 { get; set; }
-        //public int UserInteger2 { get; set; }
-        //public int UserInteger3 { get; set; }
-        //public int UserInteger4 { get; set; }
-        //public int UserInteger5 { get; set; }
-
-        //public bool UserFlag1 { get; set; }
-        //public bool UserFlag2 { get; set; }
-        //public bool UserFlag3 { get; set; }
-        //public bool UserFlag4 { get; set; }
-        //public bool UserFlag5 { get; set; }
-
 
         private ICollection<Group> groups;
         public virtual ICollection<Group> Groups
@@ -390,26 +367,14 @@ namespace Fastnet.Webframe.CoreData
                 EmailAddress = this.EmailAddress,
             };
         }
-        //public dynamic GetClientSideMemberDetails()
-        //{
-        //    return new
-        //    {
-        //        Id = this.Id,
-        //        Name = this.Fullname,
-        //        IsAdministrator = this.IsAdministrator,
-        //        IsDisabled = this.Disabled,
-        //        EmailConfirmed = this.EmailAddressConfirmed,
-        //        EmailAddress = this.EmailAddress,
-        //    };
-
-        //}
     }
     public partial class DWHMember : MemberBase
     {
-
         [MaxLength(128)]
         public string BMCMembership { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        [MaxLength(128)]
+        public string Organisation { get; set; }
         internal DWHMember()
         {
 
@@ -425,7 +390,8 @@ namespace Fastnet.Webframe.CoreData
                 EmailConfirmed = this.EmailAddressConfirmed,
                 EmailAddress = this.EmailAddress,
                 BMCMembership = this.BMCMembership,
-                DateOfBirth = this.DateOfBirth
+                DateOfBirth = this.DateOfBirth,
+                Organisation = this.Organisation
             };
         }
     }
@@ -433,9 +399,15 @@ namespace Fastnet.Webframe.CoreData
     {
         public static MemberBase CreateNew(string id, string emailAddress, string firstName, string lastName)
         {
+            MemberFactory mf = new MemberFactory();
+            return mf.Create(id, emailAddress, firstName, lastName);
+        }
+        private MemberBase Create(string id, string emailAddress, string firstName, string lastName)
+        {
+           
             MemberBase member = null;
 
-            switch (customisation)
+            switch (this.FactoryName)
             {
                 case FactoryName.None:
                     member = new Member();
@@ -444,6 +416,7 @@ namespace Fastnet.Webframe.CoreData
                     var m = new DWHMember();
                     m.BMCMembership = null;
                     m.DateOfBirth = null;
+                    m.Organisation = null;
                     member = m;
                     break;
             }
@@ -455,76 +428,5 @@ namespace Fastnet.Webframe.CoreData
             return member;
         }
     }
-    //public class DWHMember : Member
-    //{
-    //    public DateTime DateOfBirth { get { return UserDate1; } set { UserDate1 = value; } }
-    //    public string BMCMembership { get { return UserString1; } set { UserString1 = value; } }
-    //}
-    //public class AccountFactory : CustomFactory
-    //{
-    //    protected AccountFactory()
-    //    {
-
-    //    }
-    //    public static AccountFactory GetAccountFactory()
-    //    {
-    //        AccountFactory af = null;
-    //        switch (customisation)
-    //        {
-    //            case Customisation.DonWhillansHut:
-    //                af = new DWHAccountFactory();
-    //                break;
-    //            default:
-    //                af = new AccountFactory();
-    //                break;
-    //        }
-    //        return af;
-    //    }
-    //    protected virtual Member CreateNewInstance()
-    //    {
-    //        return new Member();
-    //    }
-    //    public virtual Member Create(dynamic data)
-    //    {
-    //        // data.emailAddress, data.password, data.firstName, data.lastName
-    //        Member m = CreateNewInstance();
-    //        m.MemberId = Guid.NewGuid().ToString();
-
-    //        m.Email = data.emailAddress;
-    //        m.UserName = m.Email;
-    //        m.PlainPassword = data.password;
-    //        m.FirstName = data.firstName;
-    //        m.LastName = data.lastName;
-    //        AddCustomFields(m, data);
-
-    //        return m;
-    //    }
-    //    protected virtual void AddCustomFields(Member m, dynamic data)
-    //    {
-
-    //    }
-    //}
-    //public class DWHAccountFactory : AccountFactory
-    //{
-    //    protected override Member CreateNewInstance()
-    //    {
-    //        return new DWHMember();
-    //    }
-    //    protected override void AddCustomFields(Member m, dynamic data)
-    //    {
-    //        // data.dateOfBirth, data.bmcMembership
-    //        try
-    //        {
-    //            DWHMember dm = m as DWHMember;
-    //            dm.DateOfBirth = DateTime.Parse((string)data.dateOfBirth);
-    //            dm.BMCMembership = data.bmcMembership;
-    //        }
-    //        catch (Exception xe)
-    //        {
-    //            Debugger.Break();
-    //            throw;
-    //        }
-    //    }
-    //}
 
 }

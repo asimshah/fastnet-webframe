@@ -4,5 +4,6 @@
     "connectionStringName": "LegacyData",
     "dataload": true
   },
-  "templateFolder": "DWHTemplates"
+  "templateFolder": "DWH",
+  "CSSFiles": ["~/Content/DWH/custom.css"]
 }

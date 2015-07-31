@@ -1,0 +1,12 @@
+﻿[
+  {
+    "outputFile": "Content/DWH/custom.css",
+    "inputFile": "Content/DWH/custom.less",
+    "minify": {
+      "enabled": true
+    },
+    "includeInProject": true,
+    "sourceMap": false,
+    "options": {}
+  }
+]

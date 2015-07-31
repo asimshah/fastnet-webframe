@@ -1,4 +1,5 @@
 ﻿using Fastnet.Common;
+using Fastnet.Web.Common;
 using Fastnet.EventSystem;
 using HtmlAgilityPack;
 using System;
@@ -191,10 +192,54 @@ namespace Fastnet.Webframe.CoreData
             throw new InvalidOperationException("This context is read-only.");
         }
     }
+    public class LoaderFactory : CustomFactory
+    {
+        public string LegacyConnectionString { get; set; }
+        public bool DataLoad { get; set; }
+        public LoaderFactory()
+        {
+            if (FactoryName != FactoryName.None)
+            {
+                LegacyConnectionString = GetLegacyConnectionString();
+                DataLoad = Settings.legacy?.dataload ?? false;
+            }
+            else
+            {
+                DataLoad = false;
+            }
+        }
+        private string GetLegacyConnectionString()
+        {
+            try
+            {
+                if (FactoryName == FactoryName.DonWhillansHut)
+                {
+                    string cs = Settings.legacy.connectionStringName;
+                    if (string.IsNullOrWhiteSpace(cs))
+                    {
+                        throw new ApplicationException("No legacy connection string defined");
+                    }
+                    else
+                    {
+                        return cs;
+                    }
+                }
+                else
+                {
+                    throw new ApplicationException("data load not supported for this factory");
+                }
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                throw;
+            }
+        }
+    }
     public class DataSeeder
     {
-        private bool dataload;
-        private string legacyConnectionString;
+        //private bool dataload;
+        //private string legacyConnectionString;
         private CoreDataContext ctx;
         public DataSeeder(CoreDataContext context)
         {
@@ -202,13 +247,15 @@ namespace Fastnet.Webframe.CoreData
         }
         public void Seed()
         {
-            SetCustomisation();
+            LoaderFactory lf = new LoaderFactory();
 
             bool isEmpty = IsDatabaseCompletelyEmpty();
             //if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
-            if (isEmpty && dataload)
+            if (isEmpty && lf.DataLoad)
             {
-                LoadLegacyData();
+                LegacyLoader ll = new LegacyLoader(ctx, lf);
+                ll.Load();
+                //LoadLegacyData();
                 //CreateDefaultMenu(true); // create the default menu but disable it
                 EnsureRequiredGroups();
                 EnsureAdministratorInAdministratorsGroup();
@@ -232,25 +279,26 @@ namespace Fastnet.Webframe.CoreData
             EnsureRootDirectoryRestrictions();
         }
 
-        private void SetCustomisation()
-        {
-            try
-            {
-                var customisationFile = HostingEnvironment.MapPath("~/customisation.json");
-                string text = System.IO.File.ReadAllText(customisationFile);
-                dynamic customisation = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(text);
-                dataload = customisation.legacy?.dataload ?? false;
-                if (dataload)
-                {
-                    legacyConnectionString = customisation.legacy.connectionStringName;
-                }
-            }
-            catch (Exception xe)
-            {
-                Log.Write(xe);
-                throw;
-            }
-        }
+        //private void SetCustomisation()
+        //{
+        //    try
+        //    {
+        //        //var customisationFile = HostingEnvironment.MapPath("~/customisation.json");
+        //        //string text = System.IO.File.ReadAllText(customisationFile);
+        //        //dynamic customisation = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(text);
+        //        dynamic customisation = Customisation.GetSettings();
+        //        dataload = customisation.legacy?.dataload ?? false;
+        //        if (dataload)
+        //        {
+        //            legacyConnectionString = customisation.legacy.connectionStringName;
+        //        }
+        //    }
+        //    catch (Exception xe)
+        //    {
+        //        Log.Write(xe);
+        //        throw;
+        //    }
+        //}
 
         private void CreateLeftSidePanelMenu(bool disable = false)
         {
@@ -628,65 +676,7 @@ namespace Fastnet.Webframe.CoreData
         }
         private void LoadLegacyData()
         {
-            //string legacyConnectionString = ApplicationSettings.Key<string>("LegacyDataConnection", null);
-            Debug.Assert(!String.IsNullOrWhiteSpace(legacyConnectionString));
-            //using (var scope = new TransactionScope())
-            //{
-            using (var tran = ctx.Database.BeginTransaction())
-            {
-                try
-                {
-                    using (LegacyLoader ll = new LegacyLoader(ctx, legacyConnectionString))
-                    {
-                        //ll.LoadClientApps();
-                        //Log.Write("legacyData: ClientApps loaded");
-                        //ll.LoadRoles();
-                        //Log.Write("legacyData: Roles loaded");
-                        //ll.LoadRegistrationKeys();
-                        //Log.Write("legacyData: RegistrationKeys loaded");
-                        ll.LoadGroups();
-                        Log.Write("legacyData: Groups loaded");
-                        ll.LoadMembers();
-                        Log.Write("legacyData: Members loaded");
-                        //ll.LoadAccessRules();
-                        //Log.Write("legacyData: AccessRules loaded");
-                        //ll.LoadBackgrounds();
-                        //Log.Write("legacyData: Backgrounds loaded");
-                        ll.LoadDirectories();
-                        Log.Write("legacyData: Directories loaded");
-                        ll.LoadDirectoryGroups();
-                        Log.Write("legacyData: DirectoryAccessRules loaded");
-                        //ll.LoadFonts();
-                        //Log.Write("legacyData: Fonts loaded");
-                        //ll.LoadStyles();
-                        //Log.Write("legacyData: Styles loaded");
-                        //ll.LoadPanels();
-                        //Log.Write("legacyData: Panels loaded");
-                        ll.LoadDocuments();
-                        Log.Write("legacyData: Documents loaded");
-                        ll.LoadPages();
-                        Log.Write("legacyData: Pages loaded");
-                        //ll.LoadPanelPages();
-                        //Log.Write("legacyData: PanelPages loaded");
-                        //ll.LoadPageAccessRules();
-                        //Log.Write("legacyData: PageAccessRules loaded");
-                        ll.LoadImages();
-                        Log.Write("legacyData: Images loaded");
-                        ll.LoadSiteSettings();
-                        Log.Write("legacyData: SiteSettings loaded");
-                        ll.LoadMenus();
-                        Log.Write("legacyData: Menus loaded");
-                    }
-                    tran.Commit();
-                }
-                catch (Exception xe)
-                {
-                    tran.Rollback();
-                    Log.Write(xe);
-                    throw;
-                }
-            }
-            //}
+
         }
         private bool IsDatabaseCompletelyEmpty()
         {
@@ -797,6 +787,4 @@ namespace Fastnet.Webframe.CoreData
             ctx.SaveChanges();
         }
     }
-
-
 }
