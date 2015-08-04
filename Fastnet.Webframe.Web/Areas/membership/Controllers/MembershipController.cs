@@ -19,6 +19,8 @@ using System.Web;
 using System.Web.Http;
 using Newtonsoft.Json.Linq;
 using Fastnet.Webframe.WebApi;
+using System.Transactions;
+using Fastnet.EventSystem;
 
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
@@ -59,7 +61,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 list[0] = await DataContext.Groups.SingleAsync(x => x.ParentGroup == null);
                 groups = list;
             }
-            
+
             var result = groups.Select(x => x.GetClientSideGroupDetails());
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
@@ -69,7 +71,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         {
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             var members = group.Members.Where(m => !m.IsAdministrator).OrderBy(x => x.LastName);
-            var resultMembers = members.Select(m => m.GetClientSideMemberDetails());
+            var resultMembers = members.Select(m => m.GetMinimumDetails());
             var result = new
             {
                 Group = group.GetClientSideGroupDetails(),
@@ -86,7 +88,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             var members = await DataContext.Members.Where(m => !m.IsAdministrator && !m.IsAnonymous).ToArrayAsync();
             //var groupMembers = group.Members.ToArrayAsync();
             var candidates = members.Except(group.Members.ToArray()).OrderBy(x => x.LastName);
-            var resultCandidates = candidates.Select(m => m.GetClientSideMemberDetails());
+            var resultCandidates = candidates.Select(m => m.GetMinimumDetails());
             var result = new
             {
                 Members = resultCandidates,
@@ -157,25 +159,25 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> AddGroup(dynamic data)
         {
             int weightIncrement = cd.Group.GetWeightIncrement();
-            Func< IEnumerable<string>, string> getUniqueName = (existingNames) =>
-            {
-                string fmt = "New Group";
-                int count = 1;
-                bool finished = false;
-                string result = fmt;
-                do
-                {
-                    if (!existingNames.Contains(result, StringComparer.InvariantCultureIgnoreCase))
-                    {
-                        finished = true;
-                    }
-                    else
-                    {
-                        result = string.Format("{0} ({1})", fmt, ++count);                        
-                    }
-                } while (!finished);
-                return result;
-            };
+            Func<IEnumerable<string>, string> getUniqueName = (existingNames) =>
+           {
+               string fmt = "New Group";
+               int count = 1;
+               bool finished = false;
+               string result = fmt;
+               do
+               {
+                   if (!existingNames.Contains(result, StringComparer.InvariantCultureIgnoreCase))
+                   {
+                       finished = true;
+                   }
+                   else
+                   {
+                       result = string.Format("{0} ({1})", fmt, ++count);
+                   }
+               } while (!finished);
+               return result;
+           };
             long groupId = data.groupId;
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             string name = getUniqueName(group.Children.Select(x => x.Name));
@@ -201,7 +203,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = (Member) await DataContext.Members.FindAsync(key);
+                Member m = (Member)await DataContext.Members.FindAsync(key);
                 group.Members.Add(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberAddition, m.EmailAddress);
             }
@@ -218,7 +220,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = (Member) await DataContext.Members.FindAsync(key);
+                Member m = (Member)await DataContext.Members.FindAsync(key);
                 group.Members.Remove(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberRemoval, m.EmailAddress);
             }
@@ -242,7 +244,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 EmailAddress = member.EmailAddress,
                 FirstName = member.FirstName,
                 LastName = member.LastName,
-                IsDisabled = member.Disabled,
+                Disabled = member.Disabled,
                 IsAdministrator = member.IsAdministrator,
                 CreationDate = member.CreationDate.ToString("ddMMMyyyy HH:mm:ss"),
                 LastLoginDate = member.LastLoginDate.HasValue ? member.LastLoginDate.Value.ToString("ddMMMyyyy HH:mm:ss") : null,
@@ -257,7 +259,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> GetMembers(string searchText, bool prefix = false)
         {
             var members = await FindMembers(searchText, prefix);
-            var result = members.Select(m => m.GetClientSideMemberDetails());
+            var result = members.Select(m => m.GetMinimumDetails());
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
@@ -265,19 +267,20 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> GetAllMembers()
         {
             var members = await DataContext.Members.Where(m => !m.IsAnonymous).ToArrayAsync();
-            var result = members.Select(m => new
-            {
-                Id = m.Id,
-                EmailAddress = m.EmailAddress,
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                CreationDate = m.CreationDate,
-                LastLoginDate = m.LastLoginDate,
-                Disabled = m.Disabled,
-                EmailConfirmed = m.EmailAddressConfirmed,
-                Groups = m.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
-                    .Select(g => new { Name = g.Shortenedpath })
-            });
+            //var result = members.Select(m => new
+            //{
+            //    Id = m.Id,
+            //    EmailAddress = m.EmailAddress,
+            //    FirstName = m.FirstName,
+            //    LastName = m.LastName,
+            //    CreationDate = m.CreationDate,
+            //    LastLoginDate = m.LastLoginDate,
+            //    Disabled = m.Disabled,
+            //    EmailConfirmed = m.EmailAddressConfirmed,
+            //    Groups = m.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
+            //        .Select(g => new { Name = g.Shortenedpath })
+            //});
+            var result = members.Select(m => m.GetMemberListDetails());
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpPost]
@@ -294,38 +297,54 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             Debug.Assert(firstName != null);
             Debug.Assert(lastName != null);
             Debug.Assert(password != null);
-            var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
-            var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
-            var result = await appUserManager.CreateAsync(user, password);
-            if (result.Succeeded)
+            MemberFactory mf = MemberFactory.GetInstance();
+            dynamic r = await mf.ValidateRegistration(data);
+            if(r.Success)
             {
-                bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                var member = MemberFactory.CreateNew(user.Id, emailAddress, firstName, lastName);
-                if(member is DWHMember)
+                using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    DWHMember dm = member as DWHMember;
-                    dm.BMCMembership = data.bmcMembership ?? "";
-                    string dob = data.dateOfBirth;
-                    if(dob != null)
+                    try
                     {
-                        DateTime dt = DateTime.Parse(dob);
-                        dm.DateOfBirth = dt;
+                        var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
+                        var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                        var result = await appUserManager.CreateAsync(user, password);
+                        if (result.Succeeded)
+                        {
+                            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
+                            var member = mf.CreateNew(user.Id, data);
+                            if (visiblePassword)
+                            {
+                                member.PlainPassword = password;
+                            }
+                            DataContext.Members.Add(member);
+                            cd.Group.AllMembers.Members.Add(member);
+                            member.ActivationCode = Guid.NewGuid().ToString();
+                            member.ActivationEmailSentDate = DateTime.UtcNow;
+                            member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
+                            await DataContext.SaveChangesAsync();
+                            MailHelper mh = new MailHelper();
+                            await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
+                            tran.Complete();
+                            return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
+                        }
+                        else
+                        {
+                            return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = result.Errors.First() });
+                        }
+                    }
+                    catch (Exception xe)
+                    {
+                        Log.Write(xe);
+                        return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = "Internal System Error!" });
+                        throw;
                     }
                 }
-                if (visiblePassword)
-                {
-                    member.PlainPassword = password;
-                }
-                DataContext.Members.Add(member);
-                cd.Group.AllMembers.Members.Add(member);
-                member.ActivationCode = Guid.NewGuid().ToString();
-                member.ActivationEmailSentDate = DateTime.UtcNow;
-                member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
-                await DataContext.SaveChangesAsync();
-                MailHelper mh = new MailHelper();                
-                await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);                
             }
-            return this.Request.CreateResponse(HttpStatusCode.OK);
+            else
+            {
+                return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = r.Success, Error = r.Error });
+                //return Json(r);
+            }
         }
         [HttpPost]
         [Route("delete/member")]
@@ -333,7 +352,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         {
             //MembershipOptions options = new MembershipOptions();
             string id = data.id;
-            Member m = (Member) await DataContext.Members.FindAsync(id);
+            Member m = (Member)await DataContext.Members.FindAsync(id);
             if (!m.IsAdministrator)
             {
                 var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
@@ -362,7 +381,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             string newFirstName = data.firstName;
             string newLastName = data.lastName;
             bool newDisabled = data.isDisabled;
-            Member m = (Member) await DataContext.Members.FindAsync(id);
+            MemberBase m = await DataContext.Members.FindAsync(id);
             string oldEmailAddress = m.EmailAddress.ToLower();
             newEmailAddress = newEmailAddress.ToLower();
             bool emailAddressChanged = oldEmailAddress != newEmailAddress;
@@ -390,7 +409,6 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                     user.UserName = newEmailAddress;
                 }
                 await appUserManager.UpdateAsync(user);
-
             }
             m.EmailAddress = newEmailAddress;
             m.FirstName = newFirstName;// data.firstName;
@@ -414,7 +432,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
                 await DataContext.SaveChangesAsync();
             }
-            var r = (object)m.GetClientSideMemberDetails();
+            var r = (object)m.GetMinimumDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
         [HttpPost]
@@ -436,9 +454,9 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
             }
             await DataContext.SaveChangesAsync();
-            MailHelper mh = new MailHelper();            
+            MailHelper mh = new MailHelper();
             await mh.SendAccountActivationAsync(m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
-            var r = (object)m.GetClientSideMemberDetails();
+            var r = (object)m.GetMinimumDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
         [HttpPost]
@@ -490,7 +508,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             bool currentIsAdministrator = this.GetCurrentMember().IsAdministrator;
             var temp = await DataContext.Members
                 .Where(x => (currentIsAdministrator || x.IsAdministrator == false) && !x.IsAnonymous)
-                .Select(m => new { Id = m.Id, m.FirstName, m.LastName } ).ToArrayAsync();
+                .Select(m => new { Id = m.Id, m.FirstName, m.LastName }).ToArrayAsync();
 
             var selectedMembers = temp.Where(x => match(x.FirstName, x.LastName));
             var keys = selectedMembers.Select(x => x.Id);

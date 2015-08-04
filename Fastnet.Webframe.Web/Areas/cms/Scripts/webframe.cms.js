@@ -181,9 +181,9 @@
             var documentTemplateUrl = "template/get/cms/documenttemplate";
             $.when(
                 $U.AjaxGet({ url: url }, true),
-                $U.AjaxGet({url: pageTemplateUrl}),
-                $U.AjaxGet({url: imageTemplateUrl}),
-                $U.AjaxGet({url: documentTemplateUrl}),
+                $U.AjaxGet({ url: pageTemplateUrl }),
+                $U.AjaxGet({ url: imageTemplateUrl }),
+                $U.AjaxGet({ url: documentTemplateUrl }),
                 $U.AjaxGet({ url: folderTemplateUrl })
                 ).then(function (q0, q1, q2, q3, q4) {
                     var r = q0[0];
@@ -282,6 +282,9 @@
                         clearAllContent();
                         openNavigationTable();
                         break;
+                    case "back-home":
+                        window.location("/");
+                        break;
                 }
             });
             $(".navigation-table button").on("click", function () {
@@ -328,7 +331,7 @@
             });
             if (typeof report === "undefined") {
                 openNavigationTable();
-            }  else  {
+            } else {
                 gotoReport(report);
                 //switch (report) {
                 //    default:

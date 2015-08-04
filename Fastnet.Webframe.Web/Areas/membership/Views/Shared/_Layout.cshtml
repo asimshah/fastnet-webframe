@@ -8,6 +8,7 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     @Styles.Render("~/Content/site/css")
+    @Styles.Render("~/Content/jqueryui/css")
     @Styles.Render("~/Content/membership/css")
 
 </head>
@@ -54,15 +55,19 @@
 
         </div>
     </div>
-
-
+    <script>
+        var baseUrl = '@Url.Content("~/")';
+    </script>
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/fastnet/utils")
+
     @RenderSection("scripts", required: false)
     @if (ApplicationSettings.Key("ClientSideLog", false) == true)
     {
         <script>
+           
             $(function () {
                 $.fastnet$utilities.EnableClientSideLog();
             });

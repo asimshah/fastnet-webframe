@@ -5,6 +5,15 @@
   "type": "object",
 
   "properties": {
+    "Scripts": {
+      "description": "An array of additional scripts to include in the custom bundle",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    },
     "CSSFiles": {
       "description": "An array of css files to include in the custom bundle",
       "type": "array",
@@ -37,6 +46,29 @@
         }
       },
       "type": "object"
+    },
+    "apps": {
+      "description": "",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "enum": [ "membership", "booking" ]
+          },
+          "Scripts": {
+            "description": "An array of additional scripts to include in the custom bundle",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+
+      }
     }
     //	"type": "array",
     //	"description": "An array of version numbers.",

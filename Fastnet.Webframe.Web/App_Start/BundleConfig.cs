@@ -6,23 +6,27 @@ using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web
 {
-    public class BundleConfig
+    public class BundleFactory : CustomFactory
     {
-        public class BundleFactory : CustomFactory
+        public string[] CSSFiles { get; set; }
+        public string[] Scripts { get; set; }
+        public BundleFactory()
         {
-            public string[] CSSFiles { get; set; }
-            public BundleFactory()
+            if (FactoryName != FactoryName.None)
             {
-                if (FactoryName != FactoryName.None)
-                {
-                    CSSFiles = Settings.CSSFiles == null ? new string[0] : ((JArray)Settings.CSSFiles).ToObject<string[]>();
-                }
-                else
-                {
-                    CSSFiles = new string[0];
-                }
+                CSSFiles = Settings.CSSFiles == null ? new string[0] : ((JArray)Settings.CSSFiles).ToObject<string[]>();
+                Scripts = Settings.Scripts == null ? new string[0] : ((JArray)Settings.Scripts).ToObject<string[]>();
+            }
+            else
+            {
+                CSSFiles = new string[0];
+                Scripts = new string[0];
             }
         }
+    }
+    public class BundleConfig
+    {
+
         // For more information on bundling, visit http://go.microsoft.com/fwlink/?LinkId=301862
         public static void RegisterBundles(BundleCollection bundles)
         {
@@ -46,12 +50,12 @@ namespace Fastnet.Webframe.Web
                       "~/Scripts/bootstrap.js",
                       "~/Scripts/respond.js"));
 
-            //bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
-            //    "~/Scripts/jquery-ui-{version}.js"));
+            bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
+                "~/Scripts/jquery-ui-{version}.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/datepicker").Include(
-                "~/Scripts/bootstrap-datetimepicker.js"
-                ));
+            //bundles.Add(new ScriptBundle("~/bundles/datepicker").Include(
+            //    "~/Scripts/bootstrap-datetimepicker.js"
+            //    ));
 
             bundles.Add(new ScriptBundle("~/bundles/fastnet")
                 .Include(
@@ -85,7 +89,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
                 .Include(
-                    "~/Scripts/jquery-ui-{version}.js",
+                   // "~/Scripts/jquery-ui-{version}.js",
                     "~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/dropzone/dropzone.js",
@@ -93,6 +97,8 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/fastnet/fastnet.treeview.js",
                     "~/Scripts/main/core.editor.js"
                 ));
+
+            AddCustomScripts(bundles);
 
             // css bundles below here
             EnsureUserCssFilesArePresent();
@@ -106,8 +112,11 @@ namespace Fastnet.Webframe.Web
                    "~/Content/fastnet/forms.css",
                    "~/Content/main/main.css"));
 
-            bundles.Add(new StyleBundle("~/Content/datepicker/css").Include(
-                "~/Content/bootstrap-datetimepicker.css"
+            bundles.Add(new StyleBundle("~/Content/jqueryui/css").Include(
+                //"~/Content/bootstrap-datetimepicker.css"
+                "~/Content/themes/base/all.css"
+                //"~/Content/themes/base/base.css",
+                //"~/Content/themes/base/theme.css"
                 ));
 
             bundles.Add(new StyleBundle("~/Content/site/css")
@@ -146,9 +155,7 @@ namespace Fastnet.Webframe.Web
                 ));
 
             bundles.Add(new StyleBundle("~/Content/editorcss").Include(
-                //"~/Content/themes/base/all.css",
-                //"~/Content/themes/base/base.css",
-                //"~/Content/themes/base/theme.css"
+
                 "~/Content/datatables/css/jquery.datatables.css"
                 ));
 
@@ -187,6 +194,16 @@ namespace Fastnet.Webframe.Web
                 customStyle.Include(cssFile);
             }
             bundles.Add(customStyle);
+        }
+        private static void AddCustomScripts(BundleCollection bundles)
+        {
+            var customScript = new ScriptBundle("~/bundles/custom");
+            BundleFactory bf = new BundleFactory();
+            foreach (var scriptFile in bf.Scripts)
+            {
+                customScript.Include(scriptFile);
+            }
+            bundles.Add(customScript);
         }
     }
 }

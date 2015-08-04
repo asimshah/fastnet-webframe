@@ -16,17 +16,18 @@
     </div>
     <div class="form-group-sm hide" data-property>
         <label for="password">Password</label>
-        <input type="text" class="form-control" id="password" placeholder="Password" data-item="password" disabled value="{{PlainPassword}}">
+        <input type="text" class="form-control" id="password" placeholder="Password" data-item="password" value="{{PlainPassword}}">
         <div class="message"></div>
     </div>
     <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
         <div class=" checkbox">
             <label>
-                <input type="checkbox" value="" data-item="is-disabled" {{#IsDisabled}} checked {{/IsDisabled}}>
+                <input type="checkbox" value="" data-item="is-disabled" {{#Disabled}} checked {{/Disabled}}>
                 Disabled
             </label>
         </div>
     </div>
+    <div class="error"></div>
     <div class="date-time-info">
         <span>Created:</span><span>{{CreationDate}}, </span>{{#LastLoginDate}}<span>Last logged in:</span><span>{{LastLoginDate}}</span>{{/LastLoginDate}}{{^LastLoginDate}}This member has not logged in.{{/LastLoginDate}}
     </div>

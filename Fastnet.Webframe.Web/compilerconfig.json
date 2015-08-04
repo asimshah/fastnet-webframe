@@ -8,5 +8,25 @@
     "includeInProject": true,
     "sourceMap": false,
     "options": {}
+  },
+  {
+    "outputFile": "Content/Main/main.css",
+    "inputFile": "Content/Main/main.less",
+    "minify": {
+      "enabled": true
+    },
+    "includeInProject": true,
+    "sourceMap": false,
+    "options": {}
+  },
+  {
+    "outputFile": "Areas/cms/Content/main.css",
+    "inputFile": "Areas/cms/Content/main.less",
+    "minify": {
+      "enabled": true
+    },
+    "includeInProject": true,
+    "sourceMap": false,
+    "options": {}
   }
 ]

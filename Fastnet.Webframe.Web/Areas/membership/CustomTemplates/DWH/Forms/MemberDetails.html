@@ -1,4 +1,4 @@
-﻿<div class="member-details" data-id="{{Id}}" data-active="{{EmailConfirmed}}">
+﻿<div class="member-details dwh" data-id="{{Id}}" data-active="{{EmailConfirmed}}">
     <div class="form-group-sm" data-property>
         <label for="email-address">Email Address</label>
         <input type="email" class="form-control" id="email-address" placeholder="Email Address" data-item="email-address" value="{{EmailAddress}}" data-focus>
@@ -6,7 +6,7 @@
     </div>
     <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
         <label for="first-name">First Name</label>
-        <input type="text" class="form-control" id="first-name" placeholder="First Name" data-item="first-name" value="{{FirstName}}" data-focus>
+        <input type="text" class="form-control" id="first-name" placeholder="First Name" data-item="first-name" value="{{FirstName}}" >
         <div class="message"></div>
     </div>
     <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
@@ -16,17 +16,34 @@
     </div>
     <div class="form-group-sm hide" data-property>
         <label for="password">Password</label>
-        <input type="text" class="form-control" id="password" placeholder="Password" data-item="password" disabled value="{{PlainPassword}}">
+        <input type="text" class="form-control" id="password" placeholder="Password" data-item="password" value="{{PlainPassword}}">
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
+        <label for="organisation">Club/Organisation</label>
+        <input type="text" class="form-control" id="organisation"  data-item="organisation" value="{{Organisation}}">
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
+        <label for="dob">Date of Birth</label>
+        <input type="date" class="form-control" id="dob" data-item="date-of-birth"
+               data-date-options='{"changeYear": "true", "yearRange": "-100: -15", "maxDate": "5475", "changeMonth":"true", "defaultDate": "-7300", "dateFormat": "dd/mm/yy"}'>
+        <div class="message"></div>
+    </div>
+    <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}} " data-property>
+        <label for="bmc-membership">BMC Membership</label>
+        <input type="text" class="form-control" id="bmc-membership" data-item="bmc-membership" value="{{BMCMembership}}">
         <div class="message"></div>
     </div>
     <div class="form-group-sm {{#IsAdministrator}}is-administrator{{/IsAdministrator}}" data-property>
         <div class=" checkbox">
             <label>
-                <input type="checkbox" value="" data-item="is-disabled" {{#IsDisabled}} checked {{/IsDisabled}}>
+                <input type="checkbox" value="" data-item="is-disabled" {{#Disabled}} checked {{/Disabled}}>
                 Disabled
             </label>
         </div>
     </div>
+    <div class="error"></div>
     <div class="date-time-info">
         <span>Created:</span><span>{{CreationDate}}, </span>{{#LastLoginDate}}<span>Last logged in:</span><span>{{LastLoginDate}}</span>{{/LastLoginDate}}{{^LastLoginDate}}This member has not logged in.{{/LastLoginDate}}
     </div>
@@ -37,9 +54,9 @@
     {{/EmailConfirmed}}
     <div class="form-group ">
         <div class="btn-group">
-            {{^IsAdministrator}}
+            <!--{{^IsAdministrator}}
             <button class="btn btn-sm  btn-danger" tabindex="-1" data-cmd="delete-member">Delete</button>
-            {{/IsAdministrator}}
+            {{/IsAdministrator}}-->
             <button class="btn btn-sm btn-primary" data-cmd="save-member-changes">Save Changes</button>
             <button class="btn btn-sm btn-default" data-cmd="close-form">Close</button>
         </div>

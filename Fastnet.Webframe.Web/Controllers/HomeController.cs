@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using System;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -66,7 +67,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("sessiontimedout")]
         public ActionResult SessionTimedout()
         {
-            
+
             return View();
         }
         // GET: Main/Home
@@ -240,41 +241,48 @@ namespace Fastnet.Webframe.Web.Controllers
             // pm.ClientDialog = new RegistrationDialogue();
             return View("Index", pm);
         }
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("account/register")]
-        public async Task<ActionResult> Register(RegistrationViewModel model)
-        {
-            var user = new ApplicationUser { UserName = model.emailAddress, Email = model.emailAddress };
-            var result = await UserManager.CreateAsync(user, model.password);
-            if (result.Succeeded)
-            {
-                bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                //Member member = new Member
-                //{
-                //    Id = user.Id,
-                //    EmailAddress = model.emailAddress,
-                //    FirstName = model.firstName,
-                //    LastName = model.lastName,
-                //    CreationDate = DateTime.UtcNow
-                //};
-                var member = MemberFactory.CreateNew(user.Id, model.emailAddress, model.firstName, model.lastName);
-                if (visiblePassword)
-                {
-                    member.PlainPassword = model.password;
-                }
-                DataContext.Members.Add(member);
-                Group.AllMembers.Members.Add(member);
-                member.ActivationCode = Guid.NewGuid().ToString();
-                member.ActivationEmailSentDate = DateTime.UtcNow;
-                member.RecordChanges(null, MemberAction.MemberActionTypes.New);
-                await DataContext.SaveChangesAsync();
-                MailHelper mh = new MailHelper();
-                await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);
-                return Json(new { Success = true });
-            }
-            return Json(new { Success = false, Error = result.Errors.First() });
-        }
+        //[AllowAnonymous]
+        //[HttpPost]
+        //[Route("account/register")]
+        //public async Task<ActionResult> Register(RegistrationViewModel model)
+        ////public async Task<ActionResult> Register(string text)
+        //{
+        //    dynamic data = null;
+        //    string emailAddress = data.emailAddress;
+        //    string password = data.password;
+        //    //string firstName = data.firstName;
+        //    //string lastName = data.lastName;
+        //    MemberFactory mf = MemberFactory.GetInstance();
+        //    dynamic r =  await mf.ValidateRegistration(data);
+        //    if (r.Success)
+        //    {
+        //        var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
+        //        var result = await UserManager.CreateAsync(user, password);
+        //        if (result.Succeeded)
+        //        {
+        //            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);
+        //            var member = mf.CreateNew(user.Id, data);
+        //            if (visiblePassword)
+        //            {
+        //                member.PlainPassword = password;
+        //            }
+        //            DataContext.Members.Add(member);
+        //            Group.AllMembers.Members.Add(member);
+        //            member.ActivationCode = Guid.NewGuid().ToString();
+        //            member.ActivationEmailSentDate = DateTime.UtcNow;
+        //            member.RecordChanges(null, MemberAction.MemberActionTypes.New);
+        //            await DataContext.SaveChangesAsync();
+        //            MailHelper mh = new MailHelper();
+        //            await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.ActivationCode);
+        //            return Json(new { Success = true });
+        //        }
+        //        return Json(new { Success = false, Error = result.Errors.First() });
+        //    }
+        //    else
+        //    {
+        //        return Json(r);
+        //    }
+        //}
         [AllowAnonymous]
         [Route("activate/{userId}/{code}")]
         public async Task<ActionResult> Activate(string userId, string code)
@@ -404,7 +412,12 @@ namespace Fastnet.Webframe.Web.Controllers
                         //    IsAdministrator = true,
                         //    CreationDate = DateTime.UtcNow
                         //};
-                        var member = MemberFactory.CreateNew(user.Id, model.Email, "", "Administrator");
+                        MemberFactory mf = new MemberFactory();
+                        dynamic data = new ExpandoObject();
+                        data.emailAddress = model.Email;
+                        data.firstName = "";
+                        data.lastName = "Administrator";
+                        var member = mf.CreateNew(user.Id, data);
                         member.EmailAddressConfirmed = true;
                         member.IsAdministrator = true;
                         if (visiblePassword)
@@ -412,7 +425,7 @@ namespace Fastnet.Webframe.Web.Controllers
                             member.PlainPassword = model.Password;
                         }
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                        
+
                         member.LastLoginDate = DateTime.UtcNow;
                         DataContext.Members.Add(member);
                         Group.AllMembers.Members.Add(member);

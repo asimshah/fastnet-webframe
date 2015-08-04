@@ -5,5 +5,12 @@
     "dataload": true
   },
   "templateFolder": "DWH",
-  "CSSFiles": ["~/Content/DWH/custom.css"]
+  "CSSFiles": [ "~/Content/DWH/custom.css" ],
+  "Scripts": [ "~/Scripts/dwh/dwh.js" ],
+  "apps": [
+    {
+      "Name": "membership",
+      "Scripts": ["~/Areas/membership/scripts/dwh/dwh.js"]      
+    }
+  ]
 }

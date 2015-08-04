@@ -14,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Fastnet.Webframe.Web</RootNamespace>
     <AssemblyName>Fastnet.Webframe.Web</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -24,7 +24,7 @@
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TypeScriptToolsVersion>1.0</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.5</TypeScriptToolsVersion>
     <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -65,16 +65,16 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5690.20601, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5690.20601\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5691.21800, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5691.21800\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5689.34098, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Fastnet.EventSystem.Logging.3.2.5689.34098\lib\net45\Fastnet.EventSystem.Logging.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Web.Common, Version=1.0.5690.20701, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Web.Common.1.0.5690.20701\lib\net45\Fastnet.Web.Common.dll</HintPath>
+    <Reference Include="Fastnet.Web.Common, Version=1.0.5691.24303, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Web.Common.1.0.5691.24303\lib\net45\Fastnet.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -157,13 +157,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
@@ -276,6 +277,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Areas\membership\Common\MembershipBundleFactory.cs" />
     <Compile Include="Areas\membership\Controllers\HomeController.cs" />
     <Compile Include="Areas\membership\Controllers\MembershipController.cs" />
     <Compile Include="Areas\membership\membershipAreaRegistration.cs" />
@@ -302,6 +304,7 @@
     <Compile Include="Controllers\SpecialController.cs" />
     <Compile Include="Controllers\StoreController.cs" />
     <Compile Include="Controllers\TemplateController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -331,6 +334,7 @@
     <Content Include="Areas\cms\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\cms\CustomTemplates\DWH\MemberList.html" />
     <Content Include="Areas\cms\Scripts\webframe.cms.js" />
     <Content Include="Areas\cms\Templates\ContentHistory.html" />
     <Content Include="Areas\cms\Templates\DocumentTemplate.html" />
@@ -691,6 +695,7 @@
       <DependentUpon>main.css</DependentUpon>
     </Content>
     <Content Include="Areas\membership\CustomTemplates\DWH\Forms\MemberDetails.html" />
+    <Content Include="Areas\membership\Scripts\dwh\dwh.js" />
     <Content Include="Areas\membership\Scripts\webframe.membership.js" />
     <Content Include="Areas\membership\Templates\Forms\GroupDetails.html" />
     <Content Include="Areas\membership\Templates\Forms\GroupManager.html" />
@@ -993,6 +998,7 @@
     <Content Include="Scripts\dropzone\dropzone.js" />
     <Content Include="Scripts\dropzone\dropzone.min.css" />
     <Content Include="Scripts\dropzone\dropzone.min.js" />
+    <Content Include="Scripts\dwh\dwh.js" />
     <Content Include="Scripts\fastnet\fastnet.account.js" />
     <Content Include="Scripts\fastnet\fastnet.contextmenu.js" />
     <Content Include="Scripts\fastnet\fastnet.forms.js" />
@@ -1540,7 +1546,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
-    <Folder Include="Areas\membership\Common\" />
     <Folder Include="Content\Main\CustomLess\" />
     <Folder Include="Scripts\main\Archive\" />
   </ItemGroup>
@@ -1553,6 +1558,11 @@
       <Project>{f780da43-e8f6-4dab-bc5f-e637414d1e17}</Project>
       <Name>Fastnet.Webframe.CoreData</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\membership\Scripts\membership.js" />
+    <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

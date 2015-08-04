@@ -109,6 +109,15 @@
             });
     }
     $.fastnet$account = {
+        customisation: null,
+        customise: function (ctx) {
+            if ($T.customisation != null) {
+                if ($.isFunction($T.customisation.customise)) {
+                    return $T.customisation.customise(ctx);
+                }
+            }
+            return {};
+        },
         onComplete: null,
         options: null,
         usingPopup: false,
@@ -351,6 +360,10 @@
                     var firstName = data["first-name"];//$F.GetFormData("first-name");
                     var lastName = data["last-name"];//$F.GetFormData("last-name");
                     var postData = { emailAddress: emailAddress, password: password, firstName: firstName, lastName: lastName };
+                    var customData = $T.customise({ process: "registration", action: "GetData", data: data });
+                    if ($.isPlainObject(customData)) {
+                        $.extend(postData, customData);
+                    }
                     //if ($T.options.Customer === "dwh") {
                     //    var dateOfBirth = $F.GetFormData("date-of-birth");
                     //    var bmcMembership = $F.GetFormData("bmc-membership");
@@ -359,7 +372,7 @@
                     //}
                     f.block();
                     $.when(
-                        $U.AjaxPost({ url: "account/register", data: postData })
+                        $U.AjaxPost({ url: "user/register", data: postData })
                         ).then(function (result) {
                             f.unBlock();
                             var success = result.Success;
@@ -375,7 +388,7 @@
                                                 break;
                                         }
                                     }
-                                }, { EmailAddress: emailAddress});
+                                }, { EmailAddress: emailAddress });
                                 cf.show();
                             } else {
                                 f.find(".error").html(result.Error);
@@ -391,8 +404,8 @@
                             rf.disableCommand("register");
                         }
                     },
-                    OnChange: function(f, dataItem) {
-                        if(f.isValid()) {
+                    OnChange: function (f, dataItem) {
+                        if (f.isValid()) {
                             f.enableCommand("register");
                         } else {
                             f.disableCommand("register");
@@ -421,6 +434,7 @@
                 validator.AddConfirmPassword("confirm-password", "Passwords do not match", "password");
                 validator.AddIsRequired("first-name", "A first name is required");
                 validator.AddIsRequired("last-name", "A last name is required");
+                $T.customise({ process: "registration", action: "AddValidations", validator: validator });
                 rf.disableCommand("register");
                 rf.show();
             },
@@ -448,7 +462,7 @@
                                                 break;
                                         }
                                     }
-                                }, { EmailAddress: emailAddress});
+                                }, { EmailAddress: emailAddress });
                                 cf.show();
                             } else {
                                 f.find(".error").html(result.Error);
@@ -519,7 +533,7 @@
                             _loadModel("userprofile", function () {
                                 var upf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/userprofile", {
                                     Title: "User Profile",
-                                    OnChange: function(f, dataItem) {
+                                    OnChange: function (f, dataItem) {
                                         if (f.isValid()) {
                                             f.enableCommand("save-changes");
                                         } else {

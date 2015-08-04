@@ -1,5 +1,6 @@
 ﻿(function ($) {
     $.webframe$membership = function membership() {
+        var customiser = null;
         var currentForm = null;
         var subformName = null;
         var validator = null;
@@ -7,19 +8,9 @@
         var memberItemTemplate =
             "    <div class='member' data-member-id='{{Id}}'>" +
             "        <span>{{Name}}</span>" +
-            "        <span class='fa fa-ban {{#IsDisabled}}disabled{{/IsDisabled}}' title='Member is disabled'></span>" +
+            "        <span class='fa fa-ban {{#Disabled}}disabled{{/Disabled}}' title='Member is disabled'></span>" +
             "        <span class='fa fa-clock-o {{#EmailConfirmed}}email-confirmed{{/EmailConfirmed}}' title='Waiting for email confirmation'></span>" +
             "    </div>";
-        var memberItemTemplateOld =
-            "<div >" +
-            "{{#data}}" +
-            "    <div class='member' data-member-id='{{Id}}'>" +
-            "        <span>{{Name}}</span>" +
-            "        <span class='fa fa-ban {{#IsDisabled}}disabled{{/IsDisabled}}' title='Member is disabled'></span>" +
-            "        <span class='fa fa-clock-o {{#EmailConfirmed}}email-confirmed{{/EmailConfirmed}}' title='Waiting for email confirmation'></span>" +
-            "    </div>" +
-            "{{/data}}" +
-            "</div>";
         var resetIndexTabs = function () {
             $(".member-manager .lookup-panel .member-index button[data-cmd='search-char']").removeClass("btn-warning").addClass("btn-primary");
         };
@@ -29,6 +20,11 @@
                 validator.ClearValidators();
             }
             subformName = null;
+        }
+        function customise(ctx) {
+            if ($.isFunction(customiser)) {
+                customiser(ctx);
+            }
         }
         function switchToMain() {
             $(".main-panel").addClass("active");
@@ -652,6 +648,9 @@
             $(".group-tree-panel").addClass("active");
             $(".group-content-panel").removeClass("active");
         }
+        membership.prototype.setCustomisation = function (func) {
+            customiser = func;
+        }
         membership.prototype.start = function (options) {
             function bindNavigation() {
                 $(".menu-overlay button").on("click", function () {
@@ -671,18 +670,18 @@
                 });
             }
             // load the banner panel content
-            var url = "membershipapi/banner";
-            $.when($U.AjaxGet({ url: url }).then(function (r) {
-                if (r.Success) {
-                    $(r.Styles).find("style").each(function (index, style) {
-                        var html = style.outerHTML;
-                        $("head").append($(html));
-                    });
-                    $(".BannerPanel").html(r.Html);
-                }
-            }));
+            //var url = "membershipapi/banner";
+            //$.when($U.AjaxGet({ url: url }).then(function (r) {
+            //    if (r.Success) {
+            //        $(r.Styles).find("style").each(function (index, style) {
+            //            var html = style.outerHTML;
+            //            $("head").append($(html));
+            //        });
+            //        $(".BannerPanel").html(r.Html);
+            //    }
+            //}));
             bindNavigation();
-            showMemberManager();
+            //showMemberManager();
         }
     }
     var $U = $.fastnet$utilities;

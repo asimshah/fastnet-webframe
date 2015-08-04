@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using Fastnet.Webframe.Web.Areas.membership.Common;
+using System.Web.Mvc;
 using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web.Areas.membership
@@ -35,11 +36,24 @@ namespace Fastnet.Webframe.Web.Areas.membership
 
             bundles.Add(new ScriptBundle("~/bundles/membership").Include(
                 "~/Scripts/mustache.js",
+                "~/Scripts/fastnet/fastnet.utilities.js",
                 "~/Scripts/fastnet/fastnet.validators.js",
                 "~/Scripts/fastnet/fastnet.forms.js",
                 "~/Scripts/fastnet/fastnet.treeview.js",
+                "~/Areas/membership/Scripts/membership.js",
                 "~/Areas/membership/Scripts/webframe.membership.js"
                 ));
+            AddCustomScripts(bundles);
+        }
+        private void AddCustomScripts(BundleCollection bundles)
+        {
+            var customScript = new ScriptBundle("~/bundles/membership/custom");
+            MembershipBundleFactory bf = new MembershipBundleFactory();
+            foreach (var scriptFile in bf.MembershipScripts)
+            {
+                customScript.Include(scriptFile);
+            }
+            bundles.Add(customScript);
         }
     }
 }

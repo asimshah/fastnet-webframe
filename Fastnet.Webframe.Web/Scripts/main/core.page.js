@@ -509,45 +509,45 @@
                 $(".bar-menu").removeAttr("data-current");
             }
         },
-        LoadEditor: function (afterLoad) {
-            // **NB** I do not use this lazy loading of the editor scripts
-            // as I found a problem with the electric mobile emulation of sadari - it
-            // was not able to debug. This is a problem thatis talked about on the net
-            // and the crossDomain setting on the script call was supposed to fix it and
-            // didn't. Not really bothered with it for now, am going back the older
-            // way where the editor code will always be laoded - caching should make it
-            // fast enough - let's see. 23Jun2015
-            if (!$.core$editor) {
-                var scripts = [
-                 "scripts/jquery-ui-1.11.4.min.js",
-                 "scripts/datatables/jquery.datatables.js",
-                 "scripts/tinymce/tinymce.js",
-                 "scripts/dropzone/dropzone.js",
-                 "scripts/fastnet/fastnet.contextmenu.js",
-                 "scripts/fastnet/fastnet.treeview.js",
-                 "scripts/main/core.editor.js"
-                ];
-                var dfds = [];
-                $.each(scripts, function (i, url) {
-                    dfds.push($T.AjaxGetScript({ url: url }));
-                });
-                $.when.apply($, dfds).then(function () {
-                    afterLoad();
-                });
-            }
+        //LoadEditor: function (afterLoad) {
+        //    // **NB** I do not use this lazy loading of the editor scripts
+        //    // as I found a problem with the electric mobile emulation of sadari - it
+        //    // was not able to debug. This is a problem thatis talked about on the net
+        //    // and the crossDomain setting on the script call was supposed to fix it and
+        //    // didn't. Not really bothered with it for now, am going back the older
+        //    // way where the editor code will always be laoded - caching should make it
+        //    // fast enough - let's see. 23Jun2015
+        //    if (!$.core$editor) {
+        //        var scripts = [
+        //         "scripts/jquery-ui-1.11.4.min.js",
+        //         "scripts/datatables/jquery.datatables.js",
+        //         "scripts/tinymce/tinymce.js",
+        //         "scripts/dropzone/dropzone.js",
+        //         "scripts/fastnet/fastnet.contextmenu.js",
+        //         "scripts/fastnet/fastnet.treeview.js",
+        //         "scripts/main/core.editor.js"
+        //        ];
+        //        var dfds = [];
+        //        $.each(scripts, function (i, url) {
+        //            dfds.push($T.AjaxGetScript({ url: url }));
+        //        });
+        //        $.when.apply($, dfds).then(function () {
+        //            afterLoad();
+        //        });
+        //    }
 
-        },
-        AjaxGetScript: function (args) {
-            // **NB** not used - see comment in LoadEditor
-            $(".ajax-error-message").empty();
-            return $.ajax({
-                url: "/" + args.url,// $T.rootUrl + args.url,
-                dataType: "script",
-                type: "GET",
-                cache: true,
-                crossDomain: true
-            });
-        },
+        //},
+        //AjaxGetScript: function (args) {
+        //    // **NB** not used - see comment in LoadEditor
+        //    $(".ajax-error-message").empty();
+        //    return $.ajax({
+        //        url: "/" + args.url,// $T.rootUrl + args.url,
+        //        dataType: "script",
+        //        type: "GET",
+        //        cache: true,
+        //        crossDomain: true
+        //    });
+        //},
         SetReponsiveFeatures: function () {
             function countMenus(panelSelector) {
                 var count = 0;

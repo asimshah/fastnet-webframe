@@ -26,25 +26,24 @@
             <input type="text" class="form-control" id="lastName" data-item="last-name">
             <div class="message"></div>
         </div>
-        <div class="form-group" data-property>
-            <label for="dob">Date of Birth</label>
-            <div class="input-group date" data-type="date">
-                <input type="text" class="form-control" id="dob" placeholder="Date of Birth" data-item="date-of-birth">
-                <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
-            </div>
-            <div class="help-block">We need this to validate your membership of the BMC</div>
-            <div class="message"></div>
-        </div>
-        <div class="form-group" data-property>
-            <label for="dob">BMC Membership</label>
-            <input type="date" class="form-control" id="bmc" placeholder="BMC Membership" data-item="bmc-membership">
-            <div class="message"></div>
-        </div>
         <div class="form-group-sm" data-property>
             <label for="organisation">Club/Organisation</label>
             <input type="text" class="form-control" id="organisation" data-item="organisation">
             <div class="message"></div>
         </div>
+        <div class="form-group" data-property>
+            <label for="dob">Date of Birth</label>
+            <input type="date" class="form-control" id="dob" data-item="date-of-birth"
+                   data-date-options='{"changeYear": "true", "yearRange": "-100: -15", "maxDate": "5475", "changeMonth":"true", "defaultDate": "-7300", "dateFormat": "dd/mm/yy"}'>
+            <div class="help-block">We need this to validate your membership of the BMC</div>
+            <div class="message"></div>
+        </div>
+        <div class="form-group" data-property>
+            <label for="dob">BMC Membership</label>
+            <input type="text" class="form-control" id="bmc" data-item="bmc-membership">
+            <div class="message"></div>
+        </div>
+
         <div class="error"></div>
     </div>
     <div class="form-footer">

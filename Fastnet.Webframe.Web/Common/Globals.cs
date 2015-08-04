@@ -24,7 +24,7 @@ namespace Fastnet.Webframe.Web.Common
         {
             using (CoreDataReadOnly DataContext = new CoreDataReadOnly())
             {
-                Member adminMember = DataContext.Members.OfType<Member>().Single(m => m.IsAdministrator);
+                MemberBase adminMember = DataContext.Members.Single(m => m.IsAdministrator);
                 return adminMember.EmailAddress;
             }
         }

@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.0.20
+    // Version 1.1.2
     var $T;
     var $U;
     var modelessTemplate =
@@ -96,7 +96,7 @@
     var formList = {};
     var formCount = 0;
     function frm(template, options, data) {
-        this.options = $.extend({            
+        this.options = $.extend({
             _container: ".forms-container",
             _template: template,
             _id: $U.Format("fn-{0}", formCount++),
@@ -174,19 +174,7 @@
                     var requiredCount = froot.find("[data-value-required='true']").length;
                     var originalValuesCount = froot.find("[data-original]").length;
                     var validationState = me.options._validationStateUpdated;
-                    //$U.Debug("checkform.1 {0}: {1} controls, {2} participating, match = {3}, {4} commands, {5} properties",
-                    //    me.options._id, allControls, totalControls, controlsMatched,
-                    //    commandControls, propertyControls);
-                    //$U.Debug("checkform.2 {0}: {1} validatable {2} {7} original values{8} :: {3} initial, {4} valid, {5} error, {6} required",
-                    //    me.options._id, validatable, allValidatable ? "(all)" : "(" + (propertyControls - validatable) + " missing)",
-                    //    initialCount, validCount, errorCount, requiredCount, originalValuesCount,
-                    //    validationState ? "" : " update required!"
-                    //    );
                     listPropertyDetails(me, froot);
-                    //if (!allValidatable) {
-                    //    listPropertyDetails(me.options._id, froot);
-                    //}
-                    //$U.Debug("done");
                 }
             } catch (xe) {
                 debugger;
@@ -239,7 +227,6 @@
             _bindDataChange.call(me);
             _bindFileButtons.call(me);
             if (me.options.IsModal) {
-                //$(id).modal({
                 me.options._froot.modal({
                     backdrop: 'static',
                     keyboard: false
@@ -258,6 +245,15 @@
                 var f_elements = $(container).find("[data-focus]");
                 if (f_elements.length > 0) {
                     f_elements[0].focus();
+                }
+                if (!Modernizr.inputtypes.date) {
+                    var zIndex = me.options.BaseZIndex + (formCount * 10);
+                    me.options._froot.find("input[type=date]").css("z-index", zIndex + 1);
+                    me.options._froot.find("input[type=date]").each(function (i, item) {
+                        var opts = $(item).attr("data-date-options");
+                        var options = JSON.parse(opts);
+                        $(item).datepicker(options);
+                    });
                 }
             }, 750);
         }
@@ -376,7 +372,6 @@
             //    $U.Debug("modal-content resize");
             //});
         }
-
         function _removeResizability() {
             var me = this;
             var f = me.options._froot;
@@ -513,49 +508,39 @@
             });
         }
         function _bindFocus(target) {
-            function getValue(element) {
-                var tag = element.tagName.toLowerCase();
-                //var inputType = $(element).attr("type");
-                var val;
-                var dataItem = $(element).attr("data-item");
-                //input, button, textarea, select
-                switch (tag) {
-                    case "input":
-                        var inputType = $(element).attr("type").toLowerCase();
-                        switch (inputType) {
-                            case "checkbox":
-                                val = $(element).prop('checked');
-                                break;
-                            default:
-                                val = $(element).val();
-                                break;
-                        }
-                        break;
-                    case "textarea":
-                        val = $(element).val();
-                        if ($(element).prop("placeholder") === val) {
-                            // workaround for IE textarea placeholder bug
-                            val = "";
-                        }
-                        break;
-                    case "select":
-                        $U.Debug("getValue: select not yet implemented");
-                        break;
-                    default:
-                        break;
-                }
-                //// so far only input tags
-                //if (inputType === "checkbox") {
-                //    val = $(element).is(":checked");
-                //} else {
-                //    val = $(element).val();
-                //    if (tag === "textarea" && $(element).prop("placeholder") === val) {
-                //        // workaround for IE textarea placeholder bug
-                //        val = "";
-                //    }
-                //}
-                return val;
-            }
+            //function getValue(element) {
+            //    var tag = element.tagName.toLowerCase();
+            //    //var inputType = $(element).attr("type");
+            //    var val;
+            //    var dataItem = $(element).attr("data-item");
+            //    //input, button, textarea, select
+            //    switch (tag) {
+            //        case "input":
+            //            var inputType = $(element).attr("type").toLowerCase();
+            //            switch (inputType) {
+            //                case "checkbox":
+            //                    val = $(element).prop('checked');
+            //                    break;
+            //                default:
+            //                    val = $(element).val();
+            //                    break;
+            //            }
+            //            break;
+            //        case "textarea":
+            //            val = $(element).val();
+            //            if ($(element).prop("placeholder") === val) {
+            //                // workaround for IE textarea placeholder bug
+            //                val = "";
+            //            }
+            //            break;
+            //        case "select":
+            //            $U.Debug("getValue: select not yet implemented");
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //    return val;
+            //}
             var me = this;
             var t = _getroot(me, target);
             var root = t.root;
@@ -575,7 +560,7 @@
                                 if (item.setIsRequired) {
                                     var propElement = $(element).closest("[data-property]");
                                     $(propElement).attr("data-value-required", "true");
-                                    var val = getValue(element);
+                                    var val = _getValue(element);
                                     if (val === "") {
                                         $(propElement).attr("data-validation-state", "error");
                                     }
@@ -587,89 +572,108 @@
                     me.options._validationStateUpdated = true;
                     _checkForm.call(me);
                 }
-                var propElement = $(this).closest("[data-property");
-                $(propElement).find(".message").html("");                
+                var propElement = $(this).closest("[data-property]");
+                $(propElement).find(".message").html("");
                 $(propElement).attr("data-validation-state", "visiting");
-                //var es = _updateErrorSummary.bind(me);
-                //es();
             });
-            //var selector = "textarea, input[type=text], input[type=password], input[type=email], input[type=checkbox]";
             root.find(me.options.allControlsSelector).on("blur", function (e) {
 
-                function afterItemValidation(me, result) {
-                    var totals = me.getValidationCounts();
-                    $.extend(result, totals);
-                    //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", result.totalErrors,
-                    //    result.totalValid, result.totalInitial,
-                    //    result.totalErrors + result.totalValid + result.totalInitial);
-                    //var es = _updateErrorSummary.bind(me);
-                    //es();
-                    if (me.options.AfterItemValidation !== null) {
-                        me.options.AfterItemValidation(me, result);
-                    }
-                }
                 e.preventDefault();
                 e.stopPropagation();
-                //if (me.options._validationStateUpdated === false) {
-                //    $("[data-property]").find("[data-item]").each(function (i, item) {
-                //        var element = item;
-                //        var dataItem = $(element).attr("data-item");
-                //        var validations = me.options._validators[dataItem];
-                //        if (typeof validations === "undefined") {
-                //            validations = null;
-                //        }
-                //        if (validations != null) {
-                //            $.each(validations, function (i, item) {
-                //                if (item.setIsRequired) {
-                //                    var propElement = $(element).closest("[data-property]");
-                //                    $(propElement).attr("data-value-required", "true");
-                //                    var val = getValue(element);
-                //                    if (val === "") {
-                //                        $(propElement).attr("data-validation-state", "error");
-                //                    }
-                //                    return false;
-                //                }
-                //            });
-                //        }
-                //    });
-                //    me.options._validationStateUpdated = true;
-                //    _checkForm.call(me);
+                _validateIfRequired(me, root, this);
+                //var val = _getValue(this);
+                //var dataItem = $(this).attr("data-item");
+                //var original = $(this).attr("data-original");
+                //var valueIsRequired = $(this).closest("[data-property]").attr("data-value-required") === "true";
+                //var needsValidation = val !== original || val === "" && valueIsRequired;
+                ////$U.Debug("leave focus for {0}", dataItem);
+                //if (needsValidation) {
+                //    var validations = me.options._validators[dataItem];
+                //    if (typeof validations === "undefined") {
+                //        validations = null;
+                //    }
+                //    if (validations !== null) {
+                //        $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
+                //            var dp = root.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
+                //            dp.attr("data-validation-state", r.success ? "valid" : "error");
+                //            afterItemValidation(me, r);
+                //            //r.totalErrors = root.find("[data-validation-state='error']").length;
+                //            //r.totalValid = root.find("[data-validation-state='valid']").length;
+                //            //r.totalInitial = root.find("[data-validation-state='initial']").length;
+                //            //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", r.totalErrors, r.totalValid, r.totalInitial, r.totalErrors + r.totalValid + r.totalInitial)
+                //            //if (me.options.AfterItemValidation !== null) {
+                //            //    me.options.AfterItemValidation(me, r);
+                //            //}
+                //        });
+                //    } else {
+                //        afterItemValidation(me, { success: true, dataItem: dataItem });
+                //    }
+                //    _updateErrorSummary.call(me);
                 //}
-
-                var val = getValue(this);
-                var dataItem = $(this).attr("data-item");
-
-                var original = $(this).attr("data-original");
-                var valueIsRequired = $(this).closest("[data-property]").attr("data-value-required") === "true";
-                var needsValidation = val !== original || val === "" && valueIsRequired;
-                //$U.Debug("leave focus for {0}", dataItem);
-                if (needsValidation) {
-                    var validations = me.options._validators[dataItem];
-                    if (typeof validations === "undefined") {
-                        validations = null;
-                    }
-                    if (validations !== null) {
-                        $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
-                            var dp = root.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
-                            dp.attr("data-validation-state", r.success ? "valid" : "error");
-                            afterItemValidation(me, r);
-                            //r.totalErrors = root.find("[data-validation-state='error']").length;
-                            //r.totalValid = root.find("[data-validation-state='valid']").length;
-                            //r.totalInitial = root.find("[data-validation-state='initial']").length;
-                            //$U.Debug("Errors: {0}, Valid: {1}, Initial: {2}, Total: {3}", r.totalErrors, r.totalValid, r.totalInitial, r.totalErrors + r.totalValid + r.totalInitial)
-                            //if (me.options.AfterItemValidation !== null) {
-                            //    me.options.AfterItemValidation(me, r);
-                            //}
-                        });
-                    } else {
-                        afterItemValidation(me, { success: true, dataItem: dataItem });
-                        //if (me.options.AfterItemValidation !== null) {
-                        //    me.options.AfterItemValidation(me, { success: true, dataItem: dataItem });
-                        //}
-                    }
-                    _updateErrorSummary.call(me);
-                }
             });
+        }
+        function _getValue(element) {
+            var tag = element.tagName.toLowerCase();
+            //var inputType = $(element).attr("type");
+            var val;
+            var dataItem = $(element).attr("data-item");
+            //input, button, textarea, select
+            switch (tag) {
+                case "input":
+                    var inputType = $(element).attr("type").toLowerCase();
+                    switch (inputType) {
+                        case "checkbox":
+                            val = $(element).prop('checked');
+                            break;
+                        default:
+                            val = $(element).val();
+                            break;
+                    }
+                    break;
+                case "textarea":
+                    val = $(element).val();
+                    if ($(element).prop("placeholder") === val) {
+                        // workaround for IE textarea placeholder bug
+                        val = "";
+                    }
+                    break;
+                case "select":
+                    $U.Debug("getValue: select not yet implemented");
+                    break;
+                default:
+                    break;
+            }
+            return val;
+        }
+        function _validateIfRequired(me, root, element) {
+            function afterItemValidation(me, result) {
+                var totals = me.getValidationCounts();
+                $.extend(result, totals);
+                if (me.options.AfterItemValidation !== null) {
+                    me.options.AfterItemValidation(me, result);
+                }
+            }
+            var val = _getValue(element);
+            var dataItem = $(element).attr("data-item");
+            var original = $(element).attr("data-original");
+            var valueIsRequired = $(element).closest("[data-property]").attr("data-value-required") === "true";
+            var needsValidation = val !== original || val === "" && valueIsRequired;
+            if (needsValidation) {
+                var validations = me.options._validators[dataItem];
+                if (typeof validations === "undefined") {
+                    validations = null;
+                }
+                if (validations !== null) {
+                    $.when(_validateItem(me.options._id, dataItem, validations)).then(function (r) {
+                        var dp = root.find("[data-item='" + r.dataItem + "']").closest("[data-property]");
+                        dp.attr("data-validation-state", r.success ? "valid" : "error");
+                        afterItemValidation(me, r);
+                    });
+                } else {
+                    afterItemValidation(me, { success: true, dataItem: dataItem });
+                }
+                _updateErrorSummary.call(me);
+            }
         }
         function _bindDataChange(target) {
             var me = this;
@@ -677,7 +681,6 @@
             var root = t.root;
             var cb$radio$selector = "input[type='checkbox'], input[type='radio']";
             var remainder$selector = "input:not([type='checkbox']):not([type='radio'])";
-            //var dcSelector = "input[type=text], input[type=password], input[type=email], textarea";
             root.find(cb$radio$selector).on('change', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -687,7 +690,7 @@
                     me.options.OnChange(me, item, checked);
                 }
             });
-            root.find(remainder$selector).on("input", function (e) {
+            root.find(remainder$selector).on("input change", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var tag = this.tagName.toLowerCase();
@@ -695,14 +698,16 @@
                     case "input":
                     case "textarea":
                         var item = $(this).attr("data-item");
-                        var val = $(this).val();
-                        var placeholder = $(this).attr("placeholder");
-
-                        $U.Debug("on input: {0} value is {1}", item, val);
+                        $(this).closest("[data-property]").find(".message").html("");
                         if (me.options.OnChange !== null) {
                             me.options.OnChange(me, item);
                         }
                         break;
+                }
+                if (tag === "input" && $(this).attr("type") === "date") {
+                    // input type=date does not cause blur after the date has been entered by the datepicker
+                    // so do the validation here - is this only IE?
+                    _validateIfRequired(me, root, this);
                 }
             });
         }
@@ -974,6 +979,15 @@
                 _bindCommands.call(me, content);
                 _bindFocus.call(me, content);
                 _bindDataChange.call(me, content);
+                if (!Modernizr.inputtypes.date) {
+                    var zIndex = me.options.BaseZIndex + (formCount * 10);
+                    content.find("input[type=date]").css("z-index", zIndex + 1);
+                    content.find("input[type=date]").each(function (i, item) {
+                        var opts = $(item).attr("data-date-options");
+                        var options = JSON.parse(opts);
+                        $(item).datepicker(options);
+                    });
+                }
                 _checkForm.call(me);
             }
             if (typeof templates.template != undefined && templates.template != null) {

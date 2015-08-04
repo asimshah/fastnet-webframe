@@ -14,12 +14,13 @@
             @Styles.Render("~/Content/editorcss");
             @Styles.Render("~/Content/dropzonecss");
         }*@
+    @Styles.Render("~/Content/jqueryui/css")
     @Styles.Render("~/Content/editorcss")
     @Styles.Render("~/Content/dropzonecss")
-    @if (Model.Features.HasFlag(Features.DateCapture))
+    @*@if (Model.Features.HasFlag(Features.DateCapture))
     {
         @Styles.Render("~/Content/datepicker/css");
-    }
+    }*@
     @*@Styles.Render("~/Content/site/css")*@
     @Styles.Render("~/Content/page/css")
 }
@@ -42,15 +43,12 @@
 @section scripts {
     @if (Model.Features.HasFlag(Features.DateCapture))
     {
-        @Scripts.Render("~/bundles/datepicker")
+       // @Scripts.Render("~/bundles/datepicker")
     }
     @Scripts.Render("~/bundles/main/page")
     @Scripts.Render("~/bundles/identity")
+    @Scripts.Render("~/bundles/jqueryui")
     @Scripts.Render("~/bundles/main/editor")
-    @*@if (Model.CanEditPages)
-        {
-            @Scripts.Render("~/bundles/main/editor");
-        }*@
     <script>
         $(function () {
             $.fastnet$utilities.AddOptions(@Html.Raw(@Model.Options.ToJson()));

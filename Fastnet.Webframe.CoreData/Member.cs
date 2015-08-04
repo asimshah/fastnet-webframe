@@ -9,8 +9,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Fastnet.Webframe.CoreData
@@ -204,7 +206,46 @@ namespace Fastnet.Webframe.CoreData
             TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, result.Url);
             return result;
         }
-        public abstract dynamic GetClientSideMemberDetails();
+        //public abstract dynamic GetMinimumDetails();
+        public virtual ExpandoObject GetMinimumDetails()
+        {
+            dynamic details = new ExpandoObject();
+            details.Id = this.Id;
+            details.EmailAddress = this.EmailAddress;
+            details.Name = this.Fullname;
+            details.Disabled = this.Disabled;
+            details.IsAdministrator = this.IsAdministrator;
+            details.EmailConfirmed = this.EmailAddressConfirmed;
+            return details;
+        }
+        public virtual ExpandoObject GetMemberListDetails()
+        {
+            Func<string> getStatus = () =>
+            {
+                string st = "";
+                if(Disabled)
+                {
+                    st = "Disabled";
+                } else if (!EmailAddressConfirmed)
+                {
+                    st = "Waiting Activation";
+                }
+                return st;
+            };
+            dynamic details = GetMinimumDetails();// new ExpandoObject();
+            //details.Id = this.Id;
+            //details.EmailAddress = this.EmailAddress;
+            //details.Disabled = this.Disabled;
+            //details.EmailConfirmed = this.EmailAddressConfirmed;
+            details.FirstName = this.FirstName;
+            details.LastName = this.LastName;
+            details.CreationDate = this.CreationDate;
+            details.LastLoginDate = this.LastLoginDate;
+            details.Status = getStatus();
+            details.Groups = this.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
+                .Select(g => new { Name = g.Shortenedpath });
+            return details;
+        }
         public void RecordChanges(string actionBy = null, MemberAction.MemberActionTypes actionType = MemberAction.MemberActionTypes.Modification)
         {
             CoreDataContext DataContext = Core.GetDataContext();
@@ -355,18 +396,19 @@ namespace Fastnet.Webframe.CoreData
         {
 
         }
-        public override dynamic GetClientSideMemberDetails()
-        {
-            return new
-            {
-                Id = this.Id,
-                Name = this.Fullname,
-                IsAdministrator = this.IsAdministrator,
-                IsDisabled = this.Disabled,
-                EmailConfirmed = this.EmailAddressConfirmed,
-                EmailAddress = this.EmailAddress,
-            };
-        }
+        //public override dynamic GetMinimumDetails()
+        //{
+        //    return new
+        //    {
+        //        Id = this.Id,
+        //        Name = this.Fullname,
+        //        IsAdministrator = this.IsAdministrator,
+        //        IsDisabled = this.Disabled,
+        //        EmailConfirmed = this.EmailAddressConfirmed,
+        //        EmailAddress = this.EmailAddress,
+        //    };
+        //}
+
     }
     public partial class DWHMember : MemberBase
     {
@@ -375,58 +417,178 @@ namespace Fastnet.Webframe.CoreData
         public DateTime? DateOfBirth { get; set; }
         [MaxLength(128)]
         public string Organisation { get; set; }
+        [MaxLength(128)]
+        public string PhoneNumber { get; set; }
         internal DWHMember()
         {
 
         }
-        public override dynamic GetClientSideMemberDetails()
+        //public override dynamic GetMinimumDetails()
+        //{
+        //    return new
+        //    {
+        //        Id = this.Id,
+        //        Name = this.Fullname,
+        //        IsAdministrator = this.IsAdministrator,
+        //        IsDisabled = this.Disabled,
+        //        EmailConfirmed = this.EmailAddressConfirmed,
+        //        EmailAddress = this.EmailAddress,
+        //        BMCMembership = this.BMCMembership,
+        //        DateOfBirth = this.DateOfBirth,
+        //        Organisation = this.Organisation
+        //    };
+        //}
+        public override ExpandoObject GetMemberListDetails()
         {
-            return new
-            {
-                Id = this.Id,
-                Name = this.Fullname,
-                IsAdministrator = this.IsAdministrator,
-                IsDisabled = this.Disabled,
-                EmailConfirmed = this.EmailAddressConfirmed,
-                EmailAddress = this.EmailAddress,
-                BMCMembership = this.BMCMembership,
-                DateOfBirth = this.DateOfBirth,
-                Organisation = this.Organisation
-            };
+            dynamic details =  base.GetMemberListDetails();
+            details.Organisation = this.Organisation;
+            details.BMCMembership = this.BMCMembership;
+            details.DateOfBirth = this.DateOfBirth?.ToString("ddMMMyyyy");
+            details.PhoneNumber = this.PhoneNumber;
+            return details;
         }
     }
     public class MemberFactory : CustomFactory
     {
-        public static MemberBase CreateNew(string id, string emailAddress, string firstName, string lastName)
+        private static MemberFactory instance;
+        public static MemberFactory GetInstance()
         {
-            MemberFactory mf = new MemberFactory();
-            return mf.Create(id, emailAddress, firstName, lastName);
-        }
-        private MemberBase Create(string id, string emailAddress, string firstName, string lastName)
-        {
-           
-            MemberBase member = null;
-
-            switch (this.FactoryName)
+            if (instance == null)
             {
-                case FactoryName.None:
-                    member = new Member();
-                    break;
-                case FactoryName.DonWhillansHut:
-                    var m = new DWHMember();
-                    m.BMCMembership = null;
-                    m.DateOfBirth = null;
-                    m.Organisation = null;
-                    member = m;
-                    break;
+                MemberFactory mf = null;
+                switch (FactoryName)
+                {
+                    case FactoryName.None:
+                        mf = new MemberFactory();
+                        break;
+                    case FactoryName.DonWhillansHut:
+                        mf = new DWHMemberFactory();
+                        break;
+                }
+                instance = mf;
             }
+            return instance;
+        }
+        protected virtual MemberBase CreateMemberInstance()
+        {
+            return new Member();
+        }
+        protected virtual void Fill(MemberBase member, string id, string emailAddress, string firstName, string lastName)
+        {
             member.Id = id;
             member.EmailAddress = emailAddress;
             member.FirstName = firstName;
             member.LastName = lastName;
             member.CreationDate = DateTime.UtcNow;
+        }
+        public virtual MemberBase CreateNew(string id, dynamic data)
+        {
+            MemberBase member = CreateMemberInstance();
+
+            string emailAddress = data.emailAddress;
+            //string password = data.password;
+            string firstName = data.firstName;
+            string lastName = data.lastName;
+            Fill(member, id, emailAddress, firstName, lastName);
             return member;
         }
-    }
+        public async virtual Task<dynamic> ValidateRegistration(dynamic data)
+        {
+            dynamic result = new ExpandoObject();
+            result.Success = true;
+            result.Error = "";
+            return await Task.FromResult(result);
+        }
+        //public static MemberBase CreateNew(string id, string emailAddress, string firstName, string lastName)
+        //{
+        //    MemberFactory mf = new MemberFactory();
+        //    return mf.Create(id, emailAddress, firstName, lastName);
+        //}
+        
+        //private MemberBase Create(string id, string emailAddress, string firstName, string lastName)
+        //{
+           
+        //    MemberBase member = null;
 
+        //    switch (this.FactoryName)
+        //    {
+        //        case FactoryName.None:
+        //            member = new Member();
+        //            break;
+        //        case FactoryName.DonWhillansHut:
+        //            var m = new DWHMember();
+        //            m.BMCMembership = null;
+        //            m.DateOfBirth = null;
+        //            m.Organisation = null;
+        //            member = m;
+        //            break;
+        //    }
+        //    member.Id = id;
+        //    member.EmailAddress = emailAddress;
+        //    member.FirstName = firstName;
+        //    member.LastName = lastName;
+        //    member.CreationDate = DateTime.UtcNow;
+        //    return member;
+        //}
+    }
+    public class DWHMemberFactory : MemberFactory
+    {
+        protected override MemberBase CreateMemberInstance()
+        {
+            return new DWHMember();
+        }
+        public override MemberBase CreateNew(string id, dynamic data)
+        {
+            DWHMember m = CreateMemberInstance() as DWHMember;
+            string emailAddress = data.emailAddress;
+            //string password = data.password;
+            string firstName = data.firstName;
+            string lastName = data.lastName;
+            Fill(m, id, emailAddress, firstName, lastName);
+            string bmc = data.bmcMembership ?? "";
+            m.BMCMembership = bmc.Trim();
+            string dob = data.dob ?? "";
+            m.DateOfBirth = DateTime.Parse(dob);
+            m.Organisation = data.organisation ?? "";
+            return m;
+        }
+        public async override Task<dynamic> ValidateRegistration(dynamic data)
+        {
+            dynamic result = new ExpandoObject();
+            string BMCMembership = data.bmcMembership;
+            if (!string.IsNullOrWhiteSpace(BMCMembership))
+            {
+                if (!BMCNumberInUse(BMCMembership.Trim()))
+                {
+                    if (ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
+                    {
+                        string DateOfBirth = data.dob;
+                        await Task.Delay(1000);
+                        result.Success = false;
+                        result.Error = "BMC Membership is invalid or not found. Please check both the BMC number and the date of birth";
+                    }
+                    else
+                    {
+                        result.Success = true;
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    result.Error = "This BMC membership is already in use";
+                }
+            }
+            else
+            {
+                result.Success = true;
+            }
+            return result;
+        }
+
+        private bool BMCNumberInUse(string bMCMembership)
+        {
+            var ctx = Core.GetDataContext();
+            return ctx.Members.OfType<DWHMember>().Any(x => string.Compare(bMCMembership, x.BMCMembership, true) == 0);
+        }
+    }
 }
