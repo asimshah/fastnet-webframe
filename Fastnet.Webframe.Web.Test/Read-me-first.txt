@@ -1,0 +1,13 @@
+﻿5Aug2015
+This project - Fastnet.Webframe.Web.Test - is a, so far failed, attempt to provide unit tests
+for Fastnet.Webframe.Web web api controllers.
+
+1. Using the CoreDataContext proved to ne problematic becuase of the injection of the this using Autofac. Eventually I devised a technique
+this modified the Core.GetDataContext() call by allowing an autofac container to be statically stored (having added a single-instance of CoreDataContext).
+The details can be examined by following the logic in IocSupport.cs. The result was that exceptions stopped to occuring while
+getting a CoreDataContext in the MembershipController. In itself this is not enough to know that it will work.
+2. The MembershipController always returns a HttpResponseMessage and I have not as yet found any way of properly receiving this.
+There may be a way but I am tired of it now.
+3. No attempt has yet been made to call test methods that will use the Identity system - this may cause further issues.
+
+I propose to revisit this area with the booking app ...

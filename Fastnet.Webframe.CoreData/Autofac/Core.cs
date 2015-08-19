@@ -20,9 +20,6 @@ namespace Fastnet.Webframe.CoreData
             get
             {
                 return GetDataContext();
-                //var dr = DependencyResolver.Current as Autofac.Integration.Mvc.AutofacDependencyResolver;
-                //CoreDataContext cdc = dr.RequestLifetimeScope.Resolve<CoreDataContext>();
-                //return cdc;
             }
         }
         public static CoreDataContext GetDataContext()
@@ -30,8 +27,24 @@ namespace Fastnet.Webframe.CoreData
             try
             {
                 var dr = DependencyResolver.Current as Autofac.Integration.Mvc.AutofacDependencyResolver;
-                CoreDataContext cdc = dr.RequestLifetimeScope.Resolve<CoreDataContext>();
-                return cdc;
+                if (dr == null)
+                {
+                    throw new ApplicationException("No IOC resolver available");
+                    //if (_container != null)
+                    //{
+                    //    CoreDataContext cdc = _container.Resolve<CoreDataContext>();
+                    //    return cdc;
+                    //}
+                    //else
+                    //{
+                        
+                    //}                        
+                }
+                else
+                {
+                    CoreDataContext cdc = dr.RequestLifetimeScope.Resolve<CoreDataContext>();
+                    return cdc;
+                }
             }
             catch (Exception xe)
             {
@@ -40,15 +53,20 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
+        //private static IContainer _container;
+        //public static void SetContainer(IContainer container)
+        //{
+        //    _container = container;
+        //}
         public static ApplicationDbContext GetApplicationDbContext()
         {
             ApplicationDbContext adc = HttpContext.Current.GetOwinContext().Get<ApplicationDbContext>();
-            if(adc == null)
+            if (adc == null)
             {
                 adc = new ApplicationDbContext();
             }
             return adc;
         }
     }
-    
+
 }

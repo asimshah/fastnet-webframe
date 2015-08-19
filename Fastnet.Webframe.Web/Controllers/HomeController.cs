@@ -359,11 +359,11 @@ namespace Fastnet.Webframe.Web.Controllers
                 string emailAddress = model.emailAddress;
                 string newPassword = model.password;
                 Member member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == model.emailAddress);
-                bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false); //SiteSetting.Get("VisiblePassword", false);
-                if (visiblePassword)
-                {
-                    member.PlainPassword = newPassword;
-                }
+                //bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false); //SiteSetting.Get("VisiblePassword", false);
+                //if (visiblePassword)
+                //{
+                //    member.PlainPassword = newPassword;
+                //}
                 member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordReset);
                 await DataContext.SaveChangesAsync();
                 using (ApplicationDbContext appDb = new ApplicationDbContext())
@@ -401,7 +401,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     //var result = UserManager.CreateAsync(user, model.password).Result;
                     if (result.Succeeded)
                     {
-                        bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
+                        //bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
                         //Member member = new Member
                         //{
                         //    Id = user.Id,
@@ -420,10 +420,10 @@ namespace Fastnet.Webframe.Web.Controllers
                         var member = mf.CreateNew(user.Id, data);
                         member.EmailAddressConfirmed = true;
                         member.IsAdministrator = true;
-                        if (visiblePassword)
-                        {
-                            member.PlainPassword = model.Password;
-                        }
+                        //if (visiblePassword)
+                        //{
+                        //    member.PlainPassword = model.Password;
+                        //}
                         await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
                         member.LastLoginDate = DateTime.UtcNow;

@@ -680,7 +680,7 @@
             //        $(".BannerPanel").html(r.Html);
             //    }
             //}));
-            bindNavigation();
+            //bindNavigation();
             //showMemberManager();
         }
     }

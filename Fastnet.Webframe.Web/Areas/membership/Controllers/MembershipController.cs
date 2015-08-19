@@ -21,6 +21,7 @@ using Newtonsoft.Json.Linq;
 using Fastnet.Webframe.WebApi;
 using System.Transactions;
 using Fastnet.EventSystem;
+using Microsoft.AspNet.Identity;
 
 namespace Fastnet.Webframe.Web.Areas.membership.Controllers
 {
@@ -29,6 +30,21 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
     public class MembershipController : BaseApiController // : ApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
+        //public MembershipController() : this(null)
+        //{
+
+        //}
+        //public MembershipController(CoreDataContext ctx)
+        //{
+        //    if (ctx == null)
+        //    {
+        //        DataContext = Core.GetDataContext();
+        //    }
+        //    else
+        //    {
+        //        DataContext = ctx;
+        //    }
+        //}
         [HttpGet]
         [Route("banner")]
         public HttpResponseMessage GetBannerHtml()
@@ -232,26 +248,35 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> GetMemberDetails(string memberId)
         {
             var member = await DataContext.Members.FindAsync(memberId);
-            string plainPassword = string.Empty;
-            var options = new MembershipOptions();
-            if (options.VisiblePassword)
-            {
-                plainPassword = member.PlainPassword;
-            }
-            var result = new
-            {
-                Id = member.Id,
-                EmailAddress = member.EmailAddress,
-                FirstName = member.FirstName,
-                LastName = member.LastName,
-                Disabled = member.Disabled,
-                IsAdministrator = member.IsAdministrator,
-                CreationDate = member.CreationDate.ToString("ddMMMyyyy HH:mm:ss"),
-                LastLoginDate = member.LastLoginDate.HasValue ? member.LastLoginDate.Value.ToString("ddMMMyyyy HH:mm:ss") : null,
-                EmailConfirmed = member.EmailAddressConfirmed,
-                PlainPassword = plainPassword
-            };
+            //string plainPassword = string.Empty;
+            //var options = new MembershipOptions();
+            //if (options.VisiblePassword)
+            //{
+            //    plainPassword = member.PlainPassword;
+            //}
+            var result = member.GetMemberListDetails();
+            //var result = new
+            //{
+            //    Id = member.Id,
+            //    EmailAddress = member.EmailAddress,
+            //    FirstName = member.FirstName,
+            //    LastName = member.LastName,
+            //    Disabled = member.Disabled,
+            //    IsAdministrator = member.IsAdministrator,
+            //    CreationDate = member.CreationDate.ToString("ddMMMyyyy HH:mm:ss"),
+            //    LastLoginDate = member.LastLoginDate.HasValue ? member.LastLoginDate.Value.ToString("ddMMMyyyy HH:mm:ss") : null,
+            //    EmailConfirmed = member.EmailAddressConfirmed,
+            //    PlainPassword = plainPassword
+            //};
 
+            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+        }
+        [HttpGet]
+        [Route("getbyemail/member/{email}/")]
+        public async Task<HttpResponseMessage> GetMemberDetailsByEmail(string email)
+        {
+            var member = await DataContext.Members.Where(z => z.EmailAddress == email).Include(xx => xx.Groups).FirstOrDefaultAsync();
+            var result = member.GetMemberListDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpGet]
@@ -264,24 +289,12 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         }
         [HttpGet]
         [Route("get/members/all")]
-        public async Task<HttpResponseMessage> GetAllMembers()
+        public async Task<dynamic> GetAllMembers()
         {
             var members = await DataContext.Members.Where(m => !m.IsAnonymous).ToArrayAsync();
-            //var result = members.Select(m => new
-            //{
-            //    Id = m.Id,
-            //    EmailAddress = m.EmailAddress,
-            //    FirstName = m.FirstName,
-            //    LastName = m.LastName,
-            //    CreationDate = m.CreationDate,
-            //    LastLoginDate = m.LastLoginDate,
-            //    Disabled = m.Disabled,
-            //    EmailConfirmed = m.EmailAddressConfirmed,
-            //    Groups = m.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
-            //        .Select(g => new { Name = g.Shortenedpath })
-            //});
             var result = members.Select(m => m.GetMemberListDetails());
-            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+            return result;
+            //return this.Request.CreateResponse(HttpStatusCode.OK, result);
         }
         [HttpPost]
         [Route("create/member")]
@@ -291,15 +304,17 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             string firstName = data.firstName;
             string lastName = data.lastName;
             string password = data.password;
-            bool isDisabled = data.isDisabled;
+            //bool isDisabled = data.isDisabled ?? false;
+            bool isDisabled = data.isDisabled?.Value ?? false;
 
             Debug.Assert(emailAddress != null);
             Debug.Assert(firstName != null);
             Debug.Assert(lastName != null);
             Debug.Assert(password != null);
+            //Debug.Print("Creating {0} .", emailAddress);
             MemberFactory mf = MemberFactory.GetInstance();
             dynamic r = await mf.ValidateRegistration(data);
-            if(r.Success)
+            if (r.Success)
             {
                 using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -307,15 +322,17 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                     {
                         var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
                         var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                        var result = await appUserManager.CreateAsync(user, password);
+                        IdentityResult result = await appUserManager.CreateAsync(user, password);
                         if (result.Succeeded)
                         {
-                            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
+                            //bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
+                            //Debug.Print("Creating {0} ..", emailAddress);
                             var member = mf.CreateNew(user.Id, data);
-                            if (visiblePassword)
-                            {
-                                member.PlainPassword = password;
-                            }
+                            //if (visiblePassword)
+                            //{
+                            //    member.PlainPassword = password;
+                            //}
+                            //Debug.Print("Creating {0} ...", emailAddress);
                             DataContext.Members.Add(member);
                             cd.Group.AllMembers.Members.Add(member);
                             member.ActivationCode = Guid.NewGuid().ToString();
@@ -325,6 +342,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             MailHelper mh = new MailHelper();
                             await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
                             tran.Complete();
+                            Log.Write("Member {0} created", member.EmailAddress);
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
                         }
                         else
@@ -352,95 +370,111 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         {
             //MembershipOptions options = new MembershipOptions();
             string id = data.id;
-            Member m = (Member)await DataContext.Members.FindAsync(id);
-            if (!m.IsAdministrator)
+            using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                var user = await appUserManager.FindByIdAsync(id);
-                await appUserManager.DeleteAsync(user);
-                var groups = m.Groups.ToArray();
-                foreach (Fastnet.Webframe.CoreData.Group g in groups)
+                try
                 {
-                    g.Members.Remove(m);
+                    MemberBase m = await DataContext.Members.Where(z => z.Id == id).Include(xx => xx.Groups).FirstOrDefaultAsync();                    
+                    if (!m.IsAdministrator && !m.IsAnonymous)
+                    {
+                        var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                        ApplicationUser user = await appUserManager.FindByIdAsync(id);
+                        if (user != null)
+                        {
+                            await appUserManager.DeleteAsync(user);
+                        }
+                        else
+                        {
+                            Log.Write(EventSeverities.Warning, "DeleteMember(): Member {0}, (id {1}) not found in Identity database", m.EmailAddress, m.Id);
+                        }
+                        var groups = m.Groups.ToArray();
+                        foreach (Fastnet.Webframe.CoreData.Group g in groups)
+                        {
+                            g.Members.Remove(m);
+                        }
+                        m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deletion);
+                        DataContext.Members.Remove(m);
+                        await DataContext.SaveChangesAsync();
+                        Debug.Print("Member {0} ({1}) deleted", m.EmailAddress, m.Id);
+                        tran.Complete();
+                    }
+                    return this.Request.CreateResponse(HttpStatusCode.OK);
                 }
-                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deletion);
-                DataContext.Members.Remove(m);
-                await DataContext.SaveChangesAsync();
-                Debug.Print("Member {0} ({1}) deleted", m.EmailAddress, m.Id);
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
+                    throw;
+                }
             }
-            return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         [HttpPost]
         [Route("update/member")]
         public async Task<HttpResponseMessage> UpdateMember(dynamic data)
         {
-            MembershipOptions options = new MembershipOptions();
-            string id = data.id;
-            string newEmailAddress = data.emailAddress;
-            string newPassword = data.password;
-            string newFirstName = data.firstName;
-            string newLastName = data.lastName;
-            bool newDisabled = data.isDisabled;
-            MemberBase m = await DataContext.Members.FindAsync(id);
-            string oldEmailAddress = m.EmailAddress.ToLower();
-            newEmailAddress = newEmailAddress.ToLower();
-            bool emailAddressChanged = oldEmailAddress != newEmailAddress;
-            bool passwordHasChanged = false;
-            if (options.EditablePassword)
+            try
             {
-                string oldPassword = m.PlainPassword;
-
-                passwordHasChanged = oldPassword != newPassword;
-                m.PlainPassword = newPassword;
-            }
-            if (emailAddressChanged || passwordHasChanged)
-            {
-                // need to update the identity system
-                var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
-                var user = await appUserManager.FindByIdAsync(id);
-                if (passwordHasChanged)
+                string id = data.id;
+                string newEmailAddress = data.emailAddress;
+                MemberBase m = await DataContext.Members.FindAsync(id);
+                string oldEmailAddress = m.EmailAddress.ToLower();
+                newEmailAddress = newEmailAddress.ToLower();
+                bool emailAddressChanged = oldEmailAddress != newEmailAddress;
+                dynamic r = await m.Update(data);
+                if (r.Success)
                 {
-                    user.PasswordHash = Member.HashPassword(newPassword);
-                    user.SecurityStamp = Guid.NewGuid().ToString();
+                    using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    {
+                        try
+                        {
+                            if (emailAddressChanged)// || passwordHasChanged)
+                            {
+                                // need to update the identity system
+                                var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                                var user = await appUserManager.FindByIdAsync(id);
+                                user.Email = newEmailAddress;
+                                user.UserName = newEmailAddress;
+                                await appUserManager.UpdateAsync(user);
+                                m.EmailAddressConfirmed = false;
+                                m.ActivationCode = Guid.NewGuid().ToString();
+                                m.ActivationEmailSentDate = DateTime.UtcNow;
+                            }
+                            m.RecordChanges(this.GetCurrentMember().Fullname);
+                            await DataContext.SaveChangesAsync();
+                            if (emailAddressChanged)
+                            {
+                                MailHelper mh = new MailHelper();
+                                var request = HttpContext.Current.Request;
+                                await mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
+                                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
+                                await DataContext.SaveChangesAsync();
+                            }
+                            tran.Complete();
+                            return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, MemberDetails = m.GetMemberListDetails() });
+                        }
+                        catch (Exception xe)
+                        {
+                            Log.Write(xe);
+                            return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = xe.Message });
+                        }
+                    }
                 }
-                if (emailAddressChanged)
+                else
                 {
-                    user.Email = newEmailAddress;
-                    user.UserName = newEmailAddress;
+                    return this.Request.CreateResponse(HttpStatusCode.OK, (object)r);
                 }
-                await appUserManager.UpdateAsync(user);
             }
-            m.EmailAddress = newEmailAddress;
-            m.FirstName = newFirstName;// data.firstName;
-            m.LastName = newLastName;// data.lastName;
-            m.Disabled = newDisabled;// data.isDisabled;
-            if (emailAddressChanged)
+            catch (Exception xe)
             {
-                // send activation email
-                m.EmailAddressConfirmed = false;
-                m.ActivationCode = Guid.NewGuid().ToString();
-                m.ActivationEmailSentDate = DateTime.UtcNow;
+                Log.Write(xe);
+                return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = xe.Message });
             }
-            m.RecordChanges(this.GetCurrentMember().Fullname);
-            await DataContext.SaveChangesAsync();
-            //recordMemberChanges(m, newEmailAddress, newFirstName, newLastName, newDisabled);
-            if (emailAddressChanged)
-            {
-                MailHelper mh = new MailHelper();
-                var request = HttpContext.Current.Request;
-                await mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
-                m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
-                await DataContext.SaveChangesAsync();
-            }
-            var r = (object)m.GetMinimumDetails();
-            return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
         [HttpPost]
         [Route("send/activationmail")]
         public async Task<HttpResponseMessage> SendActivationEmail(dynamic data)
         {
             string id = data.id;
-            Member m = (Member)await DataContext.Members.FindAsync(id);
+            MemberBase m = await DataContext.Members.FindAsync(id);
             bool currentlyActive = m.EmailAddressConfirmed;
             var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
             var user = await appUserManager.FindByIdAsync(id);
@@ -464,7 +498,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
         public async Task<HttpResponseMessage> SendPasswordResetRequest(dynamic data)
         {
             string id = data.id;
-            Member member = (Member)await DataContext.Members.FindAsync(id);
+            MemberBase member = await DataContext.Members.FindAsync(id);
             member.PasswordResetCode = Guid.NewGuid().ToString();
             member.PasswordResetEmailSentDate = DateTime.UtcNow;
             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.PasswordResetRequest);
@@ -472,6 +506,39 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             MailHelper mh = new MailHelper();
             await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
             return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [HttpGet]
+        [Route("validate/member/{memberId}")]
+        public async Task<HttpResponseMessage> ValidateMember(string memberId)
+        {
+            MemberBase m = await DataContext.Members.Where(z => z.Id == memberId)
+                .FirstOrDefaultAsync();
+            if(m != null)
+            {
+                var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+                ApplicationUser user = await appUserManager.FindByIdAsync(memberId);
+                if (user != null)
+                {
+                    if (user.Email == user.UserName
+                        && user.Email == m.EmailAddress)
+                    {
+                        return this.Request.CreateResponse(HttpStatusCode.OK, new { Valid = true });
+                    }
+                    else
+                    {
+                        return this.Request.CreateResponse(HttpStatusCode.OK, new { Valid = false, Error = "Member entries are inconsistent" });
+                    }
+                }
+                else
+                {
+                    return this.Request.CreateResponse(HttpStatusCode.OK, new { Valid = false, Error = "Member not found in Identity db" });
+                }
+            }
+            else
+            {
+                return this.Request.CreateResponse(HttpStatusCode.OK, new { Valid = false, Error = "Member not found in Core db" });
+            }
+            
         }
         private async Task<IEnumerable<MemberBase>> FindMembers(string searchText, bool prefix)
         {

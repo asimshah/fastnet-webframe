@@ -116,8 +116,12 @@ namespace Fastnet.Webframe.CoreData
         public CoreDataContext()
             : base("CoreData")
         {
-
+            //Debug.Print("CoreDataContext - new instance created");
         }
+        //public CoreDataContext(string cs) : base(cs)
+        //{
+
+        //}
         //public DbSet<AccessRule> AccessRules { get; set; }
         //public DbSet<Activity> Activities { get; set; }
         //public DbSet<Background> Backgrounds { get; set; }

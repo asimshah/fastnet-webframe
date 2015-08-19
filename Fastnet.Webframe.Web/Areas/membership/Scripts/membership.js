@@ -2,8 +2,10 @@
     // this uses a javascript singleton pattern
     var $U = $.fastnet$utilities;
     var _instance = null;
-    function _createInstance() {
-        var customisation = null;
+    var instanceCount = 0;
+    function _createInstance(index) {
+        var _instanceNumber = index;
+        var _customisation = null;
         var currentForm = null;
         var validator = null;
         var mode = { newMember: false };
@@ -14,12 +16,21 @@
             "        <span class='fa fa-ban {{#Disabled}}disabled{{/Disabled}}' title='Member is disabled'></span>" +
             "        <span class='fa fa-clock-o {{#EmailConfirmed}}email-confirmed{{/EmailConfirmed}}' title='Waiting for email confirmation'></span>" +
             "    </div>";
+        function _setCustomiser(customisation) {
+            _customisation = customisation;
+        }
+        function _getIndexNumber() {
+            return _instanceNumber;
+        }
         function _customise(ctx) {
-            if (customisation != null) {
-                if ($.isFunction(customisation.customise)) {
-                    return customisation.customise(ctx);
+            if (_customisation != null) {
+                if ($.isFunction(_customisation.customise)) {
+                    return _customisation.customise(ctx);
                 }
             }
+        }
+        function _sendPaswordReset() {
+            alert("Not Implemented!")
         }
         function _sendActivationMail() {
             function _sendActivationEmail(id) {
@@ -83,7 +94,7 @@
                     emailAddress: data["email-address"],
                     firstName: data["first-name"],
                     lastName: data["last-name"],
-                    password: data["password"], //encrypt it first?
+                    //password: data["password"], //encrypt it first?
                     isDisabled: data["is-disabled"]
                 };
                 var customData = _customise({ process: "memberdetails", action: "GetData", data: data });
@@ -95,12 +106,12 @@
                         // the entry for this member in the member index needs to be updated
                         $(".member-manager .lookup-panel .member-list")
                             .find(".member[data-member-id='" + id + "']")
-                            .replaceWith($(Mustache.to_html(memberItemTemplate, r)));
+                            .replaceWith($(Mustache.to_html(memberItemTemplate, r.MemberDetails)));
                         _bindMembers();
                         _loadMemberDetails(id);
                     }
                     else {
-                        currentForm.find(".error").html(result.Error);
+                        currentForm.find(".error").html(r.Error);
                     }
                 });
             }
@@ -302,7 +313,9 @@
                         case "send-activation-email":
                             _sendActivationMail();
                             break;
-
+                        case "send-password-reset":
+                            _sendPaswordReset();
+                            break;
                         default:
                             $U.Debug("showMemberManager: cmd {0} not implemented", cmd);
                             break;
@@ -635,14 +648,17 @@
         };
         return {
             start: _start,
-            customisation: customisation
+            setCustomisation: _setCustomiser,
+            getIndexNumber: _getIndexNumber
         };
     }
     function _getInstance() {
         if (!_instance) {
-            _instance = new _createInstance();
+            instanceCount++;
+            _instance = new _createInstance(instanceCount);
+            $U.Debug("creating new instance number {0} of Membership", instanceCount);
         }
-        $U.Debug("returning existing instance of Membership");
+        $U.Debug("returning existing instance {0} of Membership", _instance.getIndexNumber());
         return _instance;
     }
     return {

@@ -336,7 +336,7 @@ namespace Fastnet.Webframe.CoreData
         //}
         internal void LoadMembers()
         {
-            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
+            bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
             using (var tran = appDb.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
             {
                 try
@@ -383,10 +383,10 @@ namespace Fastnet.Webframe.CoreData
                             mu.UnlockUser();
                         }
                         string password = mu.GetPassword();
-                        if (visiblePassword)
-                        {
-                            m.PlainPassword = password;
-                        }
+                        //if (visiblePassword)
+                        //{
+                        //    m.PlainPassword = password;
+                        //}
                         user.PasswordHash = Member.HashPassword(password);
                         user.SecurityStamp = Guid.NewGuid().ToString();
                         appDb.Users.Add(user);

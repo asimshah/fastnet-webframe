@@ -13,15 +13,15 @@ namespace Fastnet.Webframe.Web.Areas.membership.Models
         public bool EditablePassword { get; set; }
         public MembershipOptions()
         {
-            if (ApplicationSettings.Key("VisiblePassword", false))
-            {
-                VisiblePassword = true;
-            }
-            if (ApplicationSettings.Key("Membership:EditablePassword", false))
-            {
-                VisiblePassword = true;
-                EditablePassword = true;
-            }
+            //if (ApplicationSettings.Key("VisiblePassword", false))
+            //{
+            //    VisiblePassword = true;
+            //}
+            //if (ApplicationSettings.Key("Membership:EditablePassword", false))
+            //{
+            //    VisiblePassword = true;
+            //    EditablePassword = true;
+            //}
         }
     }
     public class MembershipModel : ViewModelBase

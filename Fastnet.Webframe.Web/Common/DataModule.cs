@@ -11,9 +11,8 @@ namespace Fastnet.Webframe.Web.Common
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.Register(c => new CoreDataContext()).AsSelf().InstancePerRequest();
-
-            //builder.Register(c => new CoreDataContext()).AsSelf().InstancePerMatchingLifetimeScope("application");
+            //builder.Register(c => new CoreDataContext()).AsSelf().InstancePerRequest();
+            builder.Register(c => new CoreDataContext()).AsSelf().InstancePerLifetimeScope();
             base.Load(builder);
         }
     }

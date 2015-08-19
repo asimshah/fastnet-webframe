@@ -3,6 +3,7 @@ using Fastnet.EventSystem;
 using Fastnet.Web.Common;
 using Fastnet.Webframe;
 using Microsoft.AspNet.Identity;
+using Newtonsoft.Json.Linq;
 //using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
@@ -197,7 +198,7 @@ namespace Fastnet.Webframe.CoreData
                     Log.Write("Multiple landing pages found for {0}: {1}", this.Fullname, string.Join(", ", heaviest.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
                 }
                 TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, string.Format("{0} weight {1:#0.00}", heaviest.First().Page.Url, heaviest.First().Weight));
-                result =  heaviest.First().Page;
+                result = heaviest.First().Page;
             }
             else
             {
@@ -223,10 +224,11 @@ namespace Fastnet.Webframe.CoreData
             Func<string> getStatus = () =>
             {
                 string st = "";
-                if(Disabled)
+                if (Disabled)
                 {
                     st = "Disabled";
-                } else if (!EmailAddressConfirmed)
+                }
+                else if (!EmailAddressConfirmed)
                 {
                     st = "Waiting Activation";
                 }
@@ -245,6 +247,18 @@ namespace Fastnet.Webframe.CoreData
             details.Groups = this.Groups.OrderBy(x => x.Name).ToArray().Where(g => !g.Type.HasFlag(GroupTypes.SystemDefinedMembers))
                 .Select(g => new { Name = g.Shortenedpath });
             return details;
+        }
+        public virtual async Task<ExpandoObject> Update(dynamic data)
+        {
+            string newEmailAddress = data.emailAddress;
+            string newFirstName = data.firstName;
+            string newLastName = data.lastName;
+            bool newDisabled = data.isDisabled;
+            Update(newEmailAddress, newFirstName, newLastName, newDisabled);
+            dynamic result = new ExpandoObject();
+            result.Success = true;
+            result.Error = "";
+            return await Task.FromResult(result);
         }
         public void RecordChanges(string actionBy = null, MemberAction.MemberActionTypes actionType = MemberAction.MemberActionTypes.Modification)
         {
@@ -314,6 +328,13 @@ namespace Fastnet.Webframe.CoreData
                 }
             }
         }
+        protected void Update(string newEmailAddress, string newFirstName, string newLastName, bool newDisabled)
+        {
+            EmailAddress = newEmailAddress;
+            FirstName = newFirstName;
+            LastName = newLastName;
+            Disabled = newDisabled;
+        }
         private IEnumerable<Group> GetAllGroups()
         {
             // this returns a flat list of all groups this member is in 
@@ -349,7 +370,7 @@ namespace Fastnet.Webframe.CoreData
                     TraceAccess("Access: for {0}, directory {1}, edit allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.EditAllowed).Select(x => x.Group.Fullpath).ToArray()));
                     ar = AccessResult.EditAllowed;
                 }
-                else if  (dgs.Any(x => x.ViewAllowed))
+                else if (dgs.Any(x => x.ViewAllowed))
                 {
                     //var xx = dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray();
                     TraceAccess("Access: for {0}, directory {1}, view allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray()));
@@ -396,19 +417,6 @@ namespace Fastnet.Webframe.CoreData
         {
 
         }
-        //public override dynamic GetMinimumDetails()
-        //{
-        //    return new
-        //    {
-        //        Id = this.Id,
-        //        Name = this.Fullname,
-        //        IsAdministrator = this.IsAdministrator,
-        //        IsDisabled = this.Disabled,
-        //        EmailConfirmed = this.EmailAddressConfirmed,
-        //        EmailAddress = this.EmailAddress,
-        //    };
-        //}
-
     }
     public partial class DWHMember : MemberBase
     {
@@ -423,29 +431,50 @@ namespace Fastnet.Webframe.CoreData
         {
 
         }
-        //public override dynamic GetMinimumDetails()
-        //{
-        //    return new
-        //    {
-        //        Id = this.Id,
-        //        Name = this.Fullname,
-        //        IsAdministrator = this.IsAdministrator,
-        //        IsDisabled = this.Disabled,
-        //        EmailConfirmed = this.EmailAddressConfirmed,
-        //        EmailAddress = this.EmailAddress,
-        //        BMCMembership = this.BMCMembership,
-        //        DateOfBirth = this.DateOfBirth,
-        //        Organisation = this.Organisation
-        //    };
-        //}
+
         public override ExpandoObject GetMemberListDetails()
         {
-            dynamic details =  base.GetMemberListDetails();
+            dynamic details = base.GetMemberListDetails();
             details.Organisation = this.Organisation;
             details.BMCMembership = this.BMCMembership;
             details.DateOfBirth = this.DateOfBirth?.ToString("ddMMMyyyy");
             details.PhoneNumber = this.PhoneNumber;
             return details;
+        }
+        public override async Task<ExpandoObject> Update(dynamic data)
+        {
+            string newEmailAddress = data.emailAddress;
+            string newFirstName = data.firstName;
+            string newLastName = data.lastName;
+            bool newDisabled = data.isDisabled;
+
+            DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
+            string newBmcMembership = mf.ExtractBmcMembership(data);
+            DateTime? newDob = mf.ExtractDob(data);
+            bool needsRevalidation = false;
+            if (newBmcMembership != this.BMCMembership || newDob != this.DateOfBirth)
+            {
+                needsRevalidation = true;
+            }
+            dynamic r = new ExpandoObject();
+            r.Success = true;
+            if (needsRevalidation)
+            {
+                r = await mf.ValidateRegistration(newBmcMembership, newDob);
+            }
+            if (r.Success)
+            {
+                Update(newEmailAddress, newFirstName, newLastName, newDisabled);
+                string newOrganisation = data.organisation?.Value ?? "";
+                BMCMembership = newBmcMembership;
+                DateOfBirth = newDob;
+                Organisation = newOrganisation;
+                //dynamic result = new ExpandoObject();
+                //result.Success = true;
+                //return result;
+            }
+            return r;
+
         }
     }
     public class MemberFactory : CustomFactory
@@ -492,7 +521,8 @@ namespace Fastnet.Webframe.CoreData
             Fill(member, id, emailAddress, firstName, lastName);
             return member;
         }
-        public async virtual Task<dynamic> ValidateRegistration(dynamic data)
+
+        public async virtual Task<ExpandoObject> ValidateRegistration(dynamic data)
         {
             dynamic result = new ExpandoObject();
             result.Success = true;
@@ -504,10 +534,10 @@ namespace Fastnet.Webframe.CoreData
         //    MemberFactory mf = new MemberFactory();
         //    return mf.Create(id, emailAddress, firstName, lastName);
         //}
-        
+
         //private MemberBase Create(string id, string emailAddress, string firstName, string lastName)
         //{
-           
+
         //    MemberBase member = null;
 
         //    switch (this.FactoryName)
@@ -545,24 +575,59 @@ namespace Fastnet.Webframe.CoreData
             string firstName = data.firstName;
             string lastName = data.lastName;
             Fill(m, id, emailAddress, firstName, lastName);
-            string bmc = data.bmcMembership ?? "";
-            m.BMCMembership = bmc.Trim();
-            string dob = data.dob ?? "";
-            m.DateOfBirth = DateTime.Parse(dob);
-            m.Organisation = data.organisation ?? "";
+            //string bmc = data.bmcMembership?.Value ?? "";
+            m.BMCMembership = ExtractBmcMembership(data);// bmc.Trim();
+            m.DateOfBirth = ExtractDob(data);// data.dob?.Value;
+                                             //string dob = data.dob.Value ?? "";
+                                             //if(!string.IsNullOrWhiteSpace(dob))
+                                             //{
+                                             //    m.DateOfBirth = DateTime.Parse(dob);
+                                             //}
+
+            m.Organisation = data.organisation?.Value ?? "";
             return m;
         }
-        public async override Task<dynamic> ValidateRegistration(dynamic data)
+        public string ExtractBmcMembership(dynamic data)
         {
-            dynamic result = new ExpandoObject();
-            string BMCMembership = data.bmcMembership;
-            if (!string.IsNullOrWhiteSpace(BMCMembership))
+            string bmcMembership = data.bmcMembership?.Value ?? "";
+            return bmcMembership.Trim();
+        }
+        public DateTime? ExtractDob(dynamic data)
+        {
+            object r = data.dob?.Value ?? null;
+            if (r is string)
             {
-                if (!BMCNumberInUse(BMCMembership.Trim()))
+                DateTime dt;
+                if (DateTime.TryParse((string)r, out dt))
+                {
+                    return dt;
+                }
+            }
+            if (r.GetType() == typeof(DateTime))
+            {
+                return (DateTime)r;
+            }
+            return null;
+
+        }
+        public async override Task<ExpandoObject> ValidateRegistration(dynamic data)
+        {
+            string bmc = ExtractBmcMembership(data);
+            DateTime? dob = ExtractDob(data);
+            return await ValidateRegistration(bmc, dob);
+        }
+        internal async Task<ExpandoObject> ValidateRegistration(string bmcMembership, DateTime? dob)
+        {
+
+            dynamic result = new ExpandoObject();
+            //string BMCMembership = data.bmcMembership;
+            if (!string.IsNullOrWhiteSpace(bmcMembership))
+            {
+                if (!BMCNumberInUse(bmcMembership))
                 {
                     if (ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
                     {
-                        string DateOfBirth = data.dob;
+                        //string DateOfBirth = data.dob;
                         await Task.Delay(1000);
                         result.Success = false;
                         result.Error = "BMC Membership is invalid or not found. Please check both the BMC number and the date of birth";
@@ -584,7 +649,6 @@ namespace Fastnet.Webframe.CoreData
             }
             return result;
         }
-
         private bool BMCNumberInUse(string bMCMembership)
         {
             var ctx = Core.GetDataContext();

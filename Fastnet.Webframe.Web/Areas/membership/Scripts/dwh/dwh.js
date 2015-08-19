@@ -26,8 +26,12 @@
     $(function () {
         $U.Debug("in membership dwh.js");
         var mm = Membership.get();
-        mm.customisation = {
+        $U.Debug("Customising membership instance {0}", mm.getIndexNumber());
+        mm.setCustomisation({
             customise: customise
-        };
+        });
+        //mm.customisation = {
+        //    customise: customise
+        //};
     });
 })(jQuery);

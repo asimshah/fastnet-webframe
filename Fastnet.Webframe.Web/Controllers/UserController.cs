@@ -50,12 +50,12 @@ namespace Fastnet.Webframe.Web.Controllers
                         var result = await UserManager.CreateAsync(user, password);
                         if (result.Succeeded)
                         {
-                            bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);
+                            //bool visiblePassword = ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);
                             var member = mf.CreateNew(user.Id, data);
-                            if (visiblePassword)
-                            {
-                                member.PlainPassword = password;
-                            }
+                            //if (visiblePassword)
+                            //{
+                            //    member.PlainPassword = password;
+                            //}
                             DataContext.Members.Add(member);
                             Group.AllMembers.Members.Add(member);
                             member.ActivationCode = Guid.NewGuid().ToString();
