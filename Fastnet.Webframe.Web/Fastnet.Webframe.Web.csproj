@@ -241,6 +241,7 @@
     <Compile Include="Areas\cms\Controllers\HomeController.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Areas\cms\Controllers\PlainController.cs" />
     <Compile Include="Areas\Designer\Common\Templates.cs" />
     <Compile Include="Areas\Designer\Controllers\HomeController.cs" />
     <Compile Include="Areas\Designer\Controllers\MenuApiController.cs" />
@@ -346,6 +347,7 @@
     <Content Include="Areas\cms\Templates\MailTester.html" />
     <Content Include="Areas\cms\Templates\MemberList.html" />
     <Content Include="Areas\cms\Templates\MembershipHistory.html" />
+    <Content Include="Areas\cms\Templates\MembershipHistorySS.html" />
     <Content Include="Areas\cms\Templates\PageTemplate.html" />
     <Content Include="Areas\cms\Templates\SessionHistory.html" />
     <Content Include="Areas\cms\Views\Home\Index.cshtml">

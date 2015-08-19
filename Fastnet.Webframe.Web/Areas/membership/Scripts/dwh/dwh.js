@@ -7,10 +7,10 @@
             //    ctx.validator.AddIsRequired("bmc-membership", "A BMC membership number is required");
             //    break;
             case "GetData":
-                var dob = ctx.data["date-of-birth"];
+                //var dob = ctx.data["date-of-birth"];
                 var bmcMembership = ctx.data["bmc-membership"];
                 var organisation = ctx.data["organisation"];
-                return {dob: dob, bmcMembership: bmcMembership, organisation: organisation};
+                return {bmcMembership: bmcMembership, organisation: organisation};
                 break;
         }
         return {};

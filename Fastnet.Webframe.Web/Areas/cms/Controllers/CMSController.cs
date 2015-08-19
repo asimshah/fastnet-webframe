@@ -6,17 +6,19 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 
 
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RoutePrefix("cmsapi")]
-    [PermissionFilter(SystemGroups.Administrators)]
+    //[PermissionFilter(SystemGroups.Administrators)]
     public class CMSController : BaseApiController
     {
 
@@ -145,6 +147,71 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         {
             var data = await DataContext.Actions.OfType<MemberAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
             return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("~/cms/get/ss/membershiphistory")]
+        public async Task<dynamic> GetMembershipHistoryPaged()
+        {
+            var query = HttpUtility.ParseQueryString(this.Request.RequestUri.Query);
+            int draw = Convert.ToInt32(query["draw"]);
+            int start = Convert.ToInt32(query["start"]);
+            int length = Convert.ToInt32(query["length"]);
+            var all = await DataContext.Actions.OfType<MemberAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            var total = all.Count();
+            dynamic data = new ExpandoObject();
+            data.draw = draw;// = 57;
+            data.recordsTotal = total;
+            data.recordsFiltered = total;
+            var selected = all.Skip(start).Take(length);
+            List<string[]> l = new List<string[]>();
+            foreach(MemberAction ma in selected)
+            {
+                string ro = ma.RecordedOn.UtcDateTime.ToString("ddMMMyyyy HH:mm:ss");
+                string an = ma.ActionName;
+                string ea = ma.EmailAddress;
+                string fn = ma.FullName;
+                string ab = ma.ActionBy;
+                string pc = null;
+                string ov = null;
+                string nv = null;
+                if(ma.IsModification)
+                {
+                    pc = ma.PropertyChanged;
+                    ov = ma.OldValue;
+                    nv = ma.NewValue;
+                }
+                var x = new string[]
+                {
+                    ro,
+                    an,
+                    ea,
+                    fn,
+                    ab,
+                    pc,
+                    ov,
+                    nv
+                };
+                l.Add(x);
+            }
+            //for(int i = 0; i < 10;++i)
+            //{
+            //    var x = new string[]
+            //    {
+            //        "Airi",
+            //        "Satou",
+            //        "Accountant",
+            //        "Tokyo",
+            //        "28th Nov 08",
+            //        "$162,700",
+            //        "xxx",
+            //        "yyyy"
+            //    };
+            //    l.Add(x);
+            //}
+            data.data = l.ToArray();
+            return data;
+            //var data = await DataContext.Actions.OfType<MemberAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            //return this.Request.CreateResponse(HttpStatusCode.OK, data);
         }
         [HttpGet]
         [Route("get/grouphistory")]

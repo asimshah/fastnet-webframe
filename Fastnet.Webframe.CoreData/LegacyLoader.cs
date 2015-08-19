@@ -364,7 +364,7 @@ namespace Fastnet.Webframe.CoreData
                             CreationDate = item.CreationDate,
                             LastLoginDate = item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
                             Disabled = !item.Active,
-                            DateOfBirth = null,// DateTime.MinValue,
+                            //DateOfBirth = null,// DateTime.MinValue,
                             BMCMembership = null, //"(missing)"
                         };
                         if (item.Name == "Administrator")

@@ -422,7 +422,7 @@ namespace Fastnet.Webframe.CoreData
     {
         [MaxLength(128)]
         public string BMCMembership { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        //public DateTime? DateOfBirth { get; set; }
         [MaxLength(128)]
         public string Organisation { get; set; }
         [MaxLength(128)]
@@ -437,7 +437,7 @@ namespace Fastnet.Webframe.CoreData
             dynamic details = base.GetMemberListDetails();
             details.Organisation = this.Organisation;
             details.BMCMembership = this.BMCMembership;
-            details.DateOfBirth = this.DateOfBirth?.ToString("ddMMMyyyy");
+            //details.DateOfBirth = this.DateOfBirth?.ToString("ddMMMyyyy");
             details.PhoneNumber = this.PhoneNumber;
             return details;
         }
@@ -450,9 +450,9 @@ namespace Fastnet.Webframe.CoreData
 
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
             string newBmcMembership = mf.ExtractBmcMembership(data);
-            DateTime? newDob = mf.ExtractDob(data);
+            //DateTime? newDob = mf.ExtractDob(data);
             bool needsRevalidation = false;
-            if (newBmcMembership != this.BMCMembership || newDob != this.DateOfBirth)
+            if (newBmcMembership != this.BMCMembership) // || newDob != this.DateOfBirth)
             {
                 needsRevalidation = true;
             }
@@ -460,14 +460,14 @@ namespace Fastnet.Webframe.CoreData
             r.Success = true;
             if (needsRevalidation)
             {
-                r = await mf.ValidateRegistration(newBmcMembership, newDob);
+                r = await mf.ValidateRegistration(newBmcMembership);//, newDob);
             }
             if (r.Success)
             {
                 Update(newEmailAddress, newFirstName, newLastName, newDisabled);
                 string newOrganisation = data.organisation?.Value ?? "";
                 BMCMembership = newBmcMembership;
-                DateOfBirth = newDob;
+                //DateOfBirth = newDob;
                 Organisation = newOrganisation;
                 //dynamic result = new ExpandoObject();
                 //result.Success = true;
@@ -577,7 +577,7 @@ namespace Fastnet.Webframe.CoreData
             Fill(m, id, emailAddress, firstName, lastName);
             //string bmc = data.bmcMembership?.Value ?? "";
             m.BMCMembership = ExtractBmcMembership(data);// bmc.Trim();
-            m.DateOfBirth = ExtractDob(data);// data.dob?.Value;
+           // m.DateOfBirth = ExtractDob(data);// data.dob?.Value;
                                              //string dob = data.dob.Value ?? "";
                                              //if(!string.IsNullOrWhiteSpace(dob))
                                              //{
@@ -592,31 +592,31 @@ namespace Fastnet.Webframe.CoreData
             string bmcMembership = data.bmcMembership?.Value ?? "";
             return bmcMembership.Trim();
         }
-        public DateTime? ExtractDob(dynamic data)
-        {
-            object r = data.dob?.Value ?? null;
-            if (r is string)
-            {
-                DateTime dt;
-                if (DateTime.TryParse((string)r, out dt))
-                {
-                    return dt;
-                }
-            }
-            if (r.GetType() == typeof(DateTime))
-            {
-                return (DateTime)r;
-            }
-            return null;
+        //public DateTime? ExtractDob(dynamic data)
+        //{
+        //    object r = data.dob?.Value ?? null;
+        //    if (r is string)
+        //    {
+        //        DateTime dt;
+        //        if (DateTime.TryParse((string)r, out dt))
+        //        {
+        //            return dt;
+        //        }
+        //    }
+        //    if (r.GetType() == typeof(DateTime))
+        //    {
+        //        return (DateTime)r;
+        //    }
+        //    return null;
 
-        }
+        //}
         public async override Task<ExpandoObject> ValidateRegistration(dynamic data)
         {
             string bmc = ExtractBmcMembership(data);
-            DateTime? dob = ExtractDob(data);
-            return await ValidateRegistration(bmc, dob);
+            //DateTime? dob = ExtractDob(data);
+            return await ValidateRegistration(bmc);//, dob);
         }
-        internal async Task<ExpandoObject> ValidateRegistration(string bmcMembership, DateTime? dob)
+        internal async Task<ExpandoObject> ValidateRegistration(string bmcMembership)//, DateTime? dob)
         {
 
             dynamic result = new ExpandoObject();
@@ -630,7 +630,7 @@ namespace Fastnet.Webframe.CoreData
                         //string DateOfBirth = data.dob;
                         await Task.Delay(1000);
                         result.Success = false;
-                        result.Error = "BMC Membership is invalid or not found. Please check both the BMC number and the date of birth";
+                        result.Error = "BMC Membership is invalid or not found";
                     }
                     else
                     {

@@ -135,17 +135,41 @@
                     showHistory(template, data, "report-group-history");
                 });
         }
-        function showMembershipHistory() {
+        //function showMembershipHistory() {
+        //    //var templateurl = "cms/template/type/membershiphistory";
+        //    var templateurl = "template/get/cms/membershiphistory";
+        //    var dataurl = "cmsapi/get/membershiphistory";
+        //    $.when(
+        //        $U.AjaxGet({ url: templateurl }),
+        //        $U.AjaxGet({ url: dataurl })
+        //        ).then(function (q1, q2) {
+        //            var template = q1[0].Template;
+        //            var data = q2[0];
+        //            showHistory(template, data, "report-membership-history");
+        //        });
+        //}
+        function showMembershipHistorySS() {
             //var templateurl = "cms/template/type/membershiphistory";
-            var templateurl = "template/get/cms/membershiphistory";
-            var dataurl = "cmsapi/get/membershiphistory";
+            var templateurl = "template/get/cms/membershiphistorySS";
+            //var dataurl = "cmsapi/get/membershiphistory";
             $.when(
-                $U.AjaxGet({ url: templateurl }),
-                $U.AjaxGet({ url: dataurl })
-                ).then(function (q1, q2) {
-                    var template = q1[0].Template;
-                    var data = q2[0];
-                    showHistory(template, data, "report-membership-history");
+                $U.AjaxGet({ url: templateurl })
+                ).then(function (r) {
+                    var template = r.Template;
+                    $(".report-container").append(template);
+                    $(".report-container table").dataTable({
+                        "processing": true,
+                        "serverSide": true,
+                        "ordering": false,
+                        "searching": false,
+                        "ajax": "get/ss/membershiphistory",
+                        "createdRow": function (row, data, index) {
+                            var x = data[0];
+                            var y = moment(moment.utc(data[0]).toDate()).format("DDMMMYYYY HH:mm:ss");
+                            row.cells(0).innerText = y;
+                            $U.Debug("{0} changed to {1}", x, y)
+                        }
+                    });
                 });
         }
         function showSessionHistory() {
@@ -173,6 +197,13 @@
                 order: [[0, 'desc']]
             });
         }
+        //function showHistoryWithSSPaging() {
+        //    $(".report-container").addClass(reportClass).append(html);
+        //    $(".report-container table").dataTable({
+        //        pagingType: "simple",
+        //        order: [[0, 'desc']]
+        //    });
+        //}
         function showSiteContent() {
             url = "cmsapi/get/folders";
             var folderTemplateUrl = "template/get/cms/foldertemplate";
@@ -243,7 +274,7 @@
                         break;
                     case "membership-history":
                         closeNavigationTable();
-                        showMembershipHistory();
+                        showMembershipHistorySS();
                         break;
                     case "group-history":
                         closeNavigationTable();
