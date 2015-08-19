@@ -241,7 +241,6 @@
     <Compile Include="Areas\cms\Controllers\HomeController.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Areas\cms\Controllers\PlainController.cs" />
     <Compile Include="Areas\Designer\Common\Templates.cs" />
     <Compile Include="Areas\Designer\Controllers\HomeController.cs" />
     <Compile Include="Areas\Designer\Controllers\MenuApiController.cs" />

@@ -16,11 +16,11 @@ namespace Fastnet.Webframe.Web.Areas.cms
         public override void RegisterArea(AreaRegistrationContext context) 
         {
             RegisterBundles();
-            context.MapRoute(
-                "cms_default",
-                "cmsget/{controller}/{action}/{id}",
-                new { action = "GetMembershipHistoryPaged", id = UrlParameter.Optional }
-            );
+            //context.MapRoute(
+            //    "cms_default",
+            //    "cmsget/{controller}/{action}/{id}",
+            //    new { action = "GetMembershipHistoryPaged", id = UrlParameter.Optional }
+            //);
 
         }
         private void RegisterBundles()

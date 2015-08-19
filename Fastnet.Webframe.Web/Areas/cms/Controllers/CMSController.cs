@@ -18,7 +18,7 @@ using System.Web.Http;
 namespace Fastnet.Webframe.Web.Areas.cms.Controllers
 {
     [RoutePrefix("cmsapi")]
-    //[PermissionFilter(SystemGroups.Administrators)]
+    [PermissionFilter(SystemGroups.Administrators)]
     public class CMSController : BaseApiController
     {
 

@@ -69,6 +69,10 @@
         }
 
       }
+    },
+    "parameters": {
+      "description": "Miscellaneous Parameters - these vary by customisation",
+      "type": "object"
     }
     //	"type": "array",
     //	"description": "An array of version numbers.",

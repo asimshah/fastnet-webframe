@@ -171,6 +171,8 @@
     <Compile Include="Directory.cs" />
     <Compile Include="DirectoryGroup.cs" />
     <Compile Include="Document.cs" />
+    <Compile Include="Customisation\DWH\DWHMemberFactory.cs" />
+    <Compile Include="Customisation\DWH\DWHMember.cs" />
     <Compile Include="FileChunk.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="Actions.cs" />
@@ -183,6 +185,7 @@
     <Compile Include="MarkupDocumentLink.cs" />
     <Compile Include="MarkupPageLink.cs" />
     <Compile Include="Member.cs" />
+    <Compile Include="MemberFactory.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="MenuMaster.cs" />
     <Compile Include="Page.cs" />
