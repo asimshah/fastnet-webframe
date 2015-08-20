@@ -51,8 +51,8 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5691.21800, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5691.21800\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5710.23435, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5710.23435\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5689.34098, Culture=neutral, processorArchitecture=MSIL">
@@ -165,9 +165,11 @@
     <Compile Include="Activity.cs" />
     <Compile Include="Autofac\Core.cs" />
     <Compile Include="Autofac\DataModule.cs" />
+    <Compile Include="Customisation\DWH\BMCApiClient.cs" />
     <Compile Include="CoreDataContext.cs" />
     <Compile Include="CoreDbInitializer.cs" />
     <Compile Include="CSS\CSSRule.cs" />
+    <Compile Include="DataSeeder.cs" />
     <Compile Include="Directory.cs" />
     <Compile Include="DirectoryGroup.cs" />
     <Compile Include="Document.cs" />
@@ -180,7 +182,8 @@
     <Compile Include="Hierarchy.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
-    <Compile Include="LegacyLoader.cs" />
+    <Compile Include="Customisation\DWH\DWHLegacyLoader.cs" />
+    <Compile Include="LoaderFactory.cs" />
     <Compile Include="Logs.cs" />
     <Compile Include="MarkupDocumentLink.cs" />
     <Compile Include="MarkupPageLink.cs" />

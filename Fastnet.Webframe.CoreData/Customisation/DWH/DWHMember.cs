@@ -50,7 +50,7 @@ namespace Fastnet.Webframe.CoreData
             r.Success = true;
             if (needsRevalidation)
             {
-                r = await mf.ValidateRegistration(newBmcMembership);//, newDob);
+                r = await mf.ValidateRegistration(data);//, newDob);
             }
             if (r.Success)
             {

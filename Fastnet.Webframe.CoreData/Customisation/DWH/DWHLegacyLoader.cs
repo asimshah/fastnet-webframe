@@ -16,13 +16,13 @@ using LDB = Fastnet.Webframe.Web.DataModel;
 namespace Fastnet.Webframe.CoreData
 {
 
-    public class LegacyLoader : IDisposable
+    public class DWHLegacyLoader : IDisposable
     {
         private CoreDataContext coreDb;
         private ApplicationDbContext appDb;
         private LDB.WebframeDataEntities legacyDb;
         //private string configConnectionString;
-        public LegacyLoader(CoreDataContext context, LoaderFactory lf)
+        public DWHLegacyLoader(CoreDataContext context, LoaderFactory lf)
         {
             //LoaderFactory lf = new LoaderFactory();
             string configConnectionString = lf.LegacyConnectionString;

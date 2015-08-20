@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
-
     public class DWHMemberFactory : MemberFactory
     {
         protected override MemberBase CreateMemberInstance()
@@ -60,11 +59,12 @@ namespace Fastnet.Webframe.CoreData
         //}
         public async override Task<ExpandoObject> ValidateRegistration(dynamic data)
         {
+            string lastName = ((string)data.lastName).Trim();
             string bmc = ExtractBmcMembership(data);
             //DateTime? dob = ExtractDob(data);
-            return await ValidateRegistration(bmc);//, dob);
+            return await ValidateRegistration(bmc, lastName);//, dob);
         }
-        internal async Task<ExpandoObject> ValidateRegistration(string bmcMembership)//, DateTime? dob)
+        internal async Task<ExpandoObject> ValidateRegistration(string bmcMembership, string lastName)//, DateTime? dob)
         {
 
             dynamic result = new ExpandoObject();
@@ -75,10 +75,11 @@ namespace Fastnet.Webframe.CoreData
                 {
                     if (ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
                     {
-                        //string DateOfBirth = data.dob;
-                        await Task.Delay(1000);
-                        result.Success = false;
-                        result.Error = "BMC Membership is invalid or not found";
+                        dynamic r = await ValidateBMCNumber(bmcMembership, lastName);
+                        return r;
+                        //await Task.Delay(1000);
+                        //result.Success = false;
+                        //result.Error = "BMC Membership is invalid or not found";
                     }
                     else
                     {
@@ -96,6 +97,12 @@ namespace Fastnet.Webframe.CoreData
                 result.Success = true;
             }
             return result;
+        }
+        private async Task<ExpandoObject> ValidateBMCNumber(string bmcMembership, string lastName)
+        {
+            var bmcClient = BMCApiFactory.GetClient();
+            string url = string.Format("MemberUpdate/QueryLight?lastName={0}&membershipNumber={1}", lastName, bmcMembership);
+            return await bmcClient.Validate(bmcMembership, lastName);
         }
         private bool BMCNumberInUse(string bMCMembership)
         {
