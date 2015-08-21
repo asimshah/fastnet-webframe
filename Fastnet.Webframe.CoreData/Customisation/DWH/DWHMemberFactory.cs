@@ -10,6 +10,11 @@ namespace Fastnet.Webframe.CoreData
 {
     public class DWHMemberFactory : MemberFactory
     {
+        private bool enableBMCApi;
+        public DWHMemberFactory()
+        {
+            enableBMCApi = Settings.bmc.api.enable;
+        }
         protected override MemberBase CreateMemberInstance()
         {
             return new DWHMember();
@@ -73,7 +78,7 @@ namespace Fastnet.Webframe.CoreData
             {
                 if (!BMCNumberInUse(bmcMembership))
                 {
-                    if (ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
+                    if (enableBMCApi) // ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
                     {
                         dynamic r = await ValidateBMCNumber(bmcMembership, lastName);
                         return r;

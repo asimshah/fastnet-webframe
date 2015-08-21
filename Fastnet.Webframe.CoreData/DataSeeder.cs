@@ -20,59 +20,38 @@ namespace Fastnet.Webframe.CoreData
             ctx = context;
         }
         public void Seed()
-        {
-            LoaderFactory lf = new LoaderFactory();
-
+        {           
             bool isEmpty = IsDatabaseCompletelyEmpty();
             //if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
-            if (isEmpty && lf.DataLoad)
+            if (isEmpty)
             {
-                DWHLegacyLoader ll = new DWHLegacyLoader(ctx, lf);
-                ll.Load();
-                //LoadLegacyData();
-                //CreateDefaultMenu(true); // create the default menu but disable it
-                EnsureRequiredGroups();
-                EnsureAdministratorInAdministratorsGroup();
-                SetSiteVersion("4.0.0.0");
-                //WriteCustomStylesheets();
-            }
-            else
-            {
-                //EnsureClientApplications();
-                EnsureRequiredGroups();
-                //EnsureRequiredPanels();
-                EnsureInitialPages();
-                CreateDefaultMenu();
-                CreateLeftSidePanelMenu();
-                SetSiteVersion("4.0.0.0");
-                //// this will need addtion in cases of a v4 upgrade
-                //WriteMainStylesheets();
-                ////ClearCustomStylesheets();
+                LoaderFactory lf = LoaderFactory.Get(ctx);// new LoaderFactory();
+                if (lf != null)
+                {
+                    using (lf)
+                    {
+                        lf.Load();
+                    }
+                    EnsureRequiredGroups();
+                    EnsureAdministratorInAdministratorsGroup();
+                    SetSiteVersion("4.0.0.0");
+                    //WriteCustomStylesheets();
+                }
+                else
+                {
+                    //EnsureClientApplications();
+                    EnsureRequiredGroups();
+                    //EnsureRequiredPanels();
+                    EnsureInitialPages();
+                    CreateDefaultMenu();
+                    CreateLeftSidePanelMenu();
+                    SetSiteVersion("4.0.0.0");
+                }
             }
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
         }
 
-        //private void SetCustomisation()
-        //{
-        //    try
-        //    {
-        //        //var customisationFile = HostingEnvironment.MapPath("~/customisation.json");
-        //        //string text = System.IO.File.ReadAllText(customisationFile);
-        //        //dynamic customisation = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(text);
-        //        dynamic customisation = Customisation.GetSettings();
-        //        dataload = customisation.legacy?.dataload ?? false;
-        //        if (dataload)
-        //        {
-        //            legacyConnectionString = customisation.legacy.connectionStringName;
-        //        }
-        //    }
-        //    catch (Exception xe)
-        //    {
-        //        Log.Write(xe);
-        //        throw;
-        //    }
-        //}
 
         private void CreateLeftSidePanelMenu(bool disable = false)
         {
@@ -189,7 +168,8 @@ namespace Fastnet.Webframe.CoreData
                     LastName = "Anonymous",
                     CreationDate = DateTime.UtcNow,
                     PlainPassword = "",
-                    IsAnonymous = true
+                    IsAnonymous = true,
+                    CreationMethod = MemberCreationMethod.SystemGenerated
                 };
                 ctx.Members.Add(anonymous);
                 anonymousGroup.Members.Add(anonymous);

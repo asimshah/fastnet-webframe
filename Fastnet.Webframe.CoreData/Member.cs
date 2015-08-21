@@ -18,6 +18,13 @@ using System.Web;
 
 namespace Fastnet.Webframe.CoreData
 {
+    public enum MemberCreationMethod
+    {
+        SelfRegistration,
+        MembershipApplication,
+        DataLoad,
+        SystemGenerated
+    }
     public enum AccessResult
     {
         Rejected,
@@ -55,6 +62,7 @@ namespace Fastnet.Webframe.CoreData
         public string PlainPassword { get; set; }
         public bool IsAdministrator { get; set; }
         public bool IsAnonymous { get; set; }
+        public MemberCreationMethod CreationMethod { get; set; }
         //
 
         private ICollection<Group> groups;

@@ -1,14 +1,16 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
-
+using Fastnet.Webframe.CoreData.DWH;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Security;
 using LDB = Fastnet.Webframe.Web.DataModel;
@@ -16,23 +18,27 @@ using LDB = Fastnet.Webframe.Web.DataModel;
 namespace Fastnet.Webframe.CoreData
 {
 
-    public class DWHLegacyLoader : IDisposable
+    public class DWHLegacyLoader : LoaderFactory //: IDisposable
     {
-        private CoreDataContext coreDb;
+        
         private ApplicationDbContext appDb;
         private LDB.WebframeDataEntities legacyDb;
+        private DWHLegacyBookingDbContext legacyBookingData;
         //private string configConnectionString;
-        public DWHLegacyLoader(CoreDataContext context, LoaderFactory lf)
+        public DWHLegacyLoader(CoreDataContext context) : base(context)
         {
+
             //LoaderFactory lf = new LoaderFactory();
-            string configConnectionString = lf.LegacyConnectionString;
-            coreDb = context;
+            string configConnectionString = LegacyConnectionString;
+            //coreDb = context;
             appDb = new ApplicationDbContext();
             //this.configConnectionString = configConnectionString;
             string connectionString = GetEntityConnectionString(configConnectionString);
             legacyDb = new LDB.WebframeDataEntities(connectionString);
+            string bookingConnectionString = GetLegacyBookingConnectionString();
+            legacyBookingData = new DWHLegacyBookingDbContext(bookingConnectionString);
         }
-        public void Load()
+        public override void Load()
         {
             using (var tran = coreDb.Database.BeginTransaction())
             {
@@ -57,6 +63,8 @@ namespace Fastnet.Webframe.CoreData
                     LoadMenus();
                     Log.Write("legacyData: Menus loaded");
                     tran.Commit();
+                    CreateMembersFromVisitors();
+                    //LoadBookings();
                 }
                 catch (Exception xe)
                 {
@@ -66,9 +74,10 @@ namespace Fastnet.Webframe.CoreData
                 }
             }
         }
-        public void Dispose()
+        public override void Dispose()
         {
             legacyDb.Dispose();
+            legacyBookingData.Dispose();
         }
         //internal void LoadAccessRules()
         //{
@@ -372,6 +381,10 @@ namespace Fastnet.Webframe.CoreData
                             m.FirstName = "";
                             m.LastName = "Administrator";
                             m.IsAdministrator = true;
+                            m.CreationMethod = MemberCreationMethod.SystemGenerated;
+                        } else
+                        {
+                            m.CreationMethod = MemberCreationMethod.DataLoad;
                         }
                         coreDb.Members.Add(m);
                         //Debug.Print("{0} ...", m.Name);
@@ -470,7 +483,7 @@ namespace Fastnet.Webframe.CoreData
                                 image.CreatedOn = p.CreatedOn;
                                 image.Data = ti.ImageData;
                                 image.Directory = p.Directory;
-                                image.Height = ti.Height;                                
+                                image.Height = ti.Height;
                                 image.ImageType = (ImageType)ti.ImageTypeCode;
                                 image.Width = ti.Width;
                                 image.TimeStamp = BitConverter.GetBytes(-1);
@@ -517,7 +530,7 @@ namespace Fastnet.Webframe.CoreData
                     Text = item.Text,
                     Page = p,
                     Index = item.Sequence,
-                    Url = item.Url,                    
+                    Url = item.Url,
                 };
                 coreDb.Menus.Add(menu);
                 foreach (var child in item.SubMenus)
@@ -537,7 +550,7 @@ namespace Fastnet.Webframe.CoreData
             // we don't use the old style single root menu anymore
             foreach (var item in rootMenu.SubMenus)
             {
-                mm.Menus.Add( addMenu(item, null));
+                mm.Menus.Add(addMenu(item, null));
             }
             coreDb.MenuMasters.Add(mm);
             coreDb.SaveChanges();
@@ -625,6 +638,62 @@ namespace Fastnet.Webframe.CoreData
         //{
         //    return coreDb.Backgrounds.First(b => b.Colour == colour && b.BackgroundImageUrl == imageUrl && b.BackgroundPosition == position && b.BackgroundRepeat == repeat);
         //}
+        internal void LoadBookings()
+        {
+            var bookings = legacyBookingData.Bookings;
+            List<Booking> memberBookings = new List<Booking>();
+            List<Booking> strangerBookings = new List<Booking>();
+            foreach (var b in bookings)
+            {
+                Visitor v = b.Visitor;
+                string email = v.Email;
+                MemberBase member = coreDb.Members.SingleOrDefault(m => string.Compare(m.EmailAddress, email, true) == 0);
+                if (member == null)
+                {
+                    strangerBookings.Add(b);
+                }
+                else
+                {
+                    memberBookings.Add(b);
+                }
+            }
+            Debugger.Break();
+        }
+        internal void CreateMembersFromVisitors()
+        {
+            
+            Func<string, string> parseBMCNumber = (bn) =>
+            {
+                bn = bn.Trim();
+                if (bn.Length == 7)
+                {
+                    bn = bn.ToUpper();
+                    string pattern = @"^[A-Z][0-9]+$";
+                    bool result = Regex.IsMatch(bn, pattern);
+                    return result ? bn : null;
+                }
+                return bn;
+            };
+            Func<string, string> capitalise = (name) =>
+            {
+                name = name.ToLower();
+                name = name.Substring(0, 1).ToUpper() + name.Substring(1);
+                return name;
+            };
+            var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today);
+            var visitors = forwardBookings.Select(b => b.Visitor);
+            foreach (var v in visitors)
+            {
+                Debug.Print("legacy booking visitor: {0}, club/membership: {1}", v.Email, v.AssociationReference);
+                string email = v.Email.ToLower();
+                string firstName = capitalise(v.FirstName);
+                string lastName = capitalise(v.LastName);
+                string bmcNumber = parseBMCNumber(v.AssociationReference);
+                string phoneNumber = v.MobilePhone.Trim();
+                Debug.Print("{0}, {1}, {2}, {3}, {4}", email, firstName, lastName, bmcNumber, phoneNumber);
+            }
+            Debugger.Break();
+        }
         private string GetEntityConnectionString(string cs)
         {
             string sqlConnectionString = ConfigurationManager.ConnectionStrings[cs].ConnectionString;
@@ -638,6 +707,26 @@ namespace Fastnet.Webframe.CoreData
             ecb.ProviderConnectionString = sqlConnectionString;
             ecb.Metadata = @"res://*/WebframeDataModel.csdl|res://*/WebframeDataModel.ssdl|res://*/WebframeDataModel.msl";
             return ecb.ToString();
+        }
+        private string GetLegacyBookingConnectionString()
+        {
+            try
+            {
+                string cs = Settings.legacy.bookingConnectionStringName;
+                if (string.IsNullOrWhiteSpace(cs))
+                {
+                    throw new ApplicationException("No legacy booking connection string defined");
+                }
+                else
+                {
+                    return cs;
+                }
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+                throw;
+            }
         }
     }
 }

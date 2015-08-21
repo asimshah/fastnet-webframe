@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
+
     public partial class DWHMember : MemberBase
     {
         [MaxLength(128)]
@@ -21,7 +22,6 @@ namespace Fastnet.Webframe.CoreData
         {
 
         }
-
         public override ExpandoObject GetMemberListDetails()
         {
             dynamic details = base.GetMemberListDetails();

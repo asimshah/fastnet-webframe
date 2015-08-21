@@ -20,15 +20,15 @@ namespace Fastnet.Webframe.CoreData
         public BMCApiFactory()
         {
             Debug.Assert(FactoryName == FactoryName.DonWhillansHut);
-            string BMCApiUser = Settings.parameters.BMCApiUser;
-            string BMCApiKey = Settings.parameters.BMCApiKey;
-            string BMCUrl = Settings.parameters.BMCUrl;
         }
         public static BMCApiClient GetClient()
         {
-            string BMCApiUser = Settings.parameters.BMCApiUser;
-            string BMCApiKey = Settings.parameters.BMCApiKey;
-            string BMCUrl = Settings.parameters.BMCUrl;
+            //string BMCApiUser = Settings.parameters.BMCApiUser;
+            //string BMCApiKey = Settings.parameters.BMCApiKey;
+            //string BMCUrl = Settings.parameters.BMCUrl;
+            string BMCApiUser = Settings.bmc.api.apiuser;
+            string BMCApiKey = Settings.bmc.api.apikey;
+            string BMCUrl = Settings.bmc.api.apiurl;
             return new BMCApiClient(BMCUrl, BMCApiUser, BMCApiKey);
         }
     }

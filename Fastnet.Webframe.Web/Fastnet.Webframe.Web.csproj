@@ -282,6 +282,7 @@
     <Compile Include="Areas\membership\Controllers\MembershipController.cs" />
     <Compile Include="Areas\membership\membershipAreaRegistration.cs" />
     <Compile Include="Areas\membership\Models\MembershipModel.cs" />
+    <Compile Include="Areas\Role.cs" />
     <Compile Include="Common\ActionLogging.cs" />
     <Compile Include="Common\AutofacConfig.cs" />
     <Compile Include="Common\CustomFactory.cs" />

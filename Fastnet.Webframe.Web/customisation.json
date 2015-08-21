@@ -2,7 +2,8 @@
   "factory": "DonWhillansHut",
   "legacy": {
     "connectionStringName": "LegacyData",
-    "dataload": true
+    "dataload": true,
+    "bookingConnectionStringName": "LegacyBooking"
   },
   "templateFolder": "DWH",
   "CSSFiles": [ "~/Content/DWH/custom.css" ],
@@ -13,9 +14,17 @@
       "Scripts": [ "~/Areas/membership/scripts/dwh/dwh.js" ]
     }
   ],
+  "bmc": {
+    "api": {
+      "enable": true,
+      "apikey": "Tk1MXeExO7ijIW4Pos1BA6RT2lbAsiAKUIMdC4r%2F5oA6UYsLoTedhhHP5klP2ZrF2eqgna9SNgLZAZoliXHlrw%3D%3D",
+      "apiurl": "https://webtier-staging.thebmc.co.uk",
+      "apiuser": "DWMH"
+    }
+  },
   "parameters": {
     "BMCApiUser": "DWMH",
     "BMCApiKey": "Tk1MXeExO7ijIW4Pos1BA6RT2lbAsiAKUIMdC4r%2F5oA6UYsLoTedhhHP5klP2ZrF2eqgna9SNgLZAZoliXHlrw%3D%3D",
-    "BMCUrl":  "https://webtier-staging.thebmc.co.uk"
+    "BMCUrl": "https://webtier-staging.thebmc.co.uk"
   }
 }

@@ -169,6 +169,8 @@
     <Compile Include="CoreDataContext.cs" />
     <Compile Include="CoreDbInitializer.cs" />
     <Compile Include="CSS\CSSRule.cs" />
+    <Compile Include="Customisation\DWH\DWHBookingClasses.cs" />
+    <Compile Include="Customisation\DWH\DWHLegacyBookingDbContext.cs" />
     <Compile Include="DataSeeder.cs" />
     <Compile Include="Directory.cs" />
     <Compile Include="DirectoryGroup.cs" />

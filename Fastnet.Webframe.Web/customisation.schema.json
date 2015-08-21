@@ -1,9 +1,7 @@
 ﻿{
   "$schema": "http://json-schema.org/draft-04/schema",
   "title": "JSON Schema for customisation JSON file format",
-
   "type": "object",
-
   "properties": {
     "Scripts": {
       "description": "An array of additional scripts to include in the custom bundle",
@@ -43,6 +41,10 @@
         "connectionStringName": {
           "type": "string",
           "description": "one of the available connectionsStrings in web.config"
+        },
+        "bookingConnectionStringName": {
+          "type": "string",
+          "description": "one of the available connectionStrings in web.config"
         }
       },
       "type": "object"
@@ -70,16 +72,37 @@
 
       }
     },
-    "parameters": {
-      "description": "Miscellaneous Parameters - these vary by customisation",
-      "type": "object"
+    "bmc": {
+      "type": "object",
+      "description": "BMC settings - only used by DWH factories",
+      "properties": {
+        "api": {
+          "type": "object",
+          "description": "Bmc membership api settings",
+          "properties": {
+            "enable": {
+              "default": "true",
+              "type": "boolean"
+            },
+            "apiuser": {
+              "type": "string",
+              "description": "normally DWMH",
+              "default": "DWMH"
+            },
+            "apikey": {
+              "type": "string",
+              "description": "access key"
+            },
+            "apiurl": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "parameters": {
+        "description": "Miscellaneous Parameters - these vary by customisation",
+        "type": "object"
+      }
     }
-    //	"type": "array",
-    //	"description": "An array of version numbers.",
-    //	"minItems": 1,
-    //	"items": {
-    //		"type": "number"
-    //	}
-    //}
   }
 }

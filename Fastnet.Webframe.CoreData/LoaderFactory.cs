@@ -8,23 +8,42 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
-    public class LoaderFactory : CustomFactory
+    public abstract class LoaderFactory : CustomFactory, IDisposable
     {
-        public string LegacyConnectionString { get; set; }
-        public bool DataLoad { get; set; }
-        public LoaderFactory()
+        protected CoreDataContext coreDb;
+        protected string LegacyConnectionString { get; set; }
+        //public string LegacyBookingConnectionString { get; set; }
+        //public bool DataLoad { get; set; }
+        protected LoaderFactory(CoreDataContext context)
         {
-            if (FactoryName != FactoryName.None)
-            {
-                LegacyConnectionString = GetLegacyConnectionString();
-                DataLoad = Settings.legacy?.dataload ?? false;
-            }
-            else
-            {
-                DataLoad = false;
-            }
+            coreDb = context;
+            //if (FactoryName != FactoryName.None)
+            //{
+            //    LegacyConnectionString = GetLegacyConnectionString();
+                
+            //    DataLoad = Settings.legacy?.dataload ?? false;
+            //}
+            //else
+            //{
+            //    DataLoad = false;
+            //}
         }
-        private string GetLegacyConnectionString()
+        public static LoaderFactory Get(CoreDataContext context)
+        {
+            bool? dataloadRequired = Settings.legacy?.dataload;
+            if(dataloadRequired == true)
+            {
+                switch(FactoryName)
+                {
+                    case FactoryName.DonWhillansHut:
+                        return new DWHLegacyLoader(context);
+                    default:
+                        throw new ApplicationException(string.Format("Factory {0}: dataload specified but no load factory exists", FactoryName.ToString()));
+                }
+            }
+            return null;
+        }
+        protected string GetLegacyConnectionString()
         {
             try
             {
@@ -51,5 +70,7 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
+        public abstract void Dispose();
+        public abstract void Load();
     }
 }
