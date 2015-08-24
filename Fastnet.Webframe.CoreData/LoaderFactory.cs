@@ -11,22 +11,9 @@ namespace Fastnet.Webframe.CoreData
     public abstract class LoaderFactory : CustomFactory, IDisposable
     {
         protected CoreDataContext coreDb;
-        protected string LegacyConnectionString { get; set; }
-        //public string LegacyBookingConnectionString { get; set; }
-        //public bool DataLoad { get; set; }
         protected LoaderFactory(CoreDataContext context)
         {
             coreDb = context;
-            //if (FactoryName != FactoryName.None)
-            //{
-            //    LegacyConnectionString = GetLegacyConnectionString();
-                
-            //    DataLoad = Settings.legacy?.dataload ?? false;
-            //}
-            //else
-            //{
-            //    DataLoad = false;
-            //}
         }
         public static LoaderFactory Get(CoreDataContext context)
         {
@@ -47,21 +34,14 @@ namespace Fastnet.Webframe.CoreData
         {
             try
             {
-                if (FactoryName == FactoryName.DonWhillansHut)
+                string cs = Settings.legacy.connectionStringName;
+                if (string.IsNullOrWhiteSpace(cs))
                 {
-                    string cs = Settings.legacy.connectionStringName;
-                    if (string.IsNullOrWhiteSpace(cs))
-                    {
-                        throw new ApplicationException("No legacy connection string defined");
-                    }
-                    else
-                    {
-                        return cs;
-                    }
+                    throw new ApplicationException("No legacy connection string defined");
                 }
                 else
                 {
-                    throw new ApplicationException("data load not supported for this factory");
+                    return cs;
                 }
             }
             catch (Exception xe)

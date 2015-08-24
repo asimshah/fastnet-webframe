@@ -11,9 +11,23 @@ namespace Fastnet.Webframe.CoreData
     public class DWHMemberFactory : MemberFactory
     {
         private bool enableBMCApi;
+
+        public bool EnableBMCApi
+        {
+            get
+            {
+                return enableBMCApi;
+            }
+
+            set
+            {
+                enableBMCApi = value;
+            }
+        }
+
         public DWHMemberFactory()
         {
-            enableBMCApi = Settings.bmc.api.enable;
+            EnableBMCApi = Settings.bmc.api.enable;
         }
         protected override MemberBase CreateMemberInstance()
         {
@@ -78,13 +92,10 @@ namespace Fastnet.Webframe.CoreData
             {
                 if (!BMCNumberInUse(bmcMembership))
                 {
-                    if (enableBMCApi) // ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
+                    if (EnableBMCApi) // ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
                     {
                         dynamic r = await ValidateBMCNumber(bmcMembership, lastName);
                         return r;
-                        //await Task.Delay(1000);
-                        //result.Success = false;
-                        //result.Error = "BMC Membership is invalid or not found";
                     }
                     else
                     {
@@ -103,7 +114,7 @@ namespace Fastnet.Webframe.CoreData
             }
             return result;
         }
-        private async Task<ExpandoObject> ValidateBMCNumber(string bmcMembership, string lastName)
+        internal async Task<ExpandoObject> ValidateBMCNumber(string bmcMembership, string lastName)
         {
             var bmcClient = BMCApiFactory.GetClient();
             string url = string.Format("MemberUpdate/QueryLight?lastName={0}&membershipNumber={1}", lastName, bmcMembership);

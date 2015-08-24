@@ -13,7 +13,7 @@ namespace Fastnet.Webframe.CoreData
     {
         [MaxLength(128)]
         public string BMCMembership { get; set; }
-        //public DateTime? DateOfBirth { get; set; }
+        public DateTime? BMCMembershipExpiresOn { get; set; }
         [MaxLength(128)]
         public string Organisation { get; set; }
         [MaxLength(128)]

@@ -15,6 +15,14 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
+    public enum BMCMembershipStatus
+    {
+        Current,
+        Expired,
+        NotFound,
+        Missing,
+        Unknown
+    }
     class BMCApiFactory : CustomFactory
     {
         public BMCApiFactory()
@@ -63,14 +71,19 @@ namespace Fastnet.Webframe.CoreData
                             case "not found":
                                 result.Success = false;
                                 result.Error = "No record found at the BMC";
+                                result.Status = BMCMembershipStatus.NotFound;
                                 break;
                             case "current":
                                 result.Success = true;
+                                result.Expiry = r2.Data.Expiry.Value;
                                 result.Error = null;
+                                result.Status = BMCMembershipStatus.Current;
                                 break;
                             case "expired":
                                 result.Success = false;
+                                result.Expiry = r2.Data.Expiry.Value;
                                 result.Error = "BMC membership has expired";
+                                result.Status = BMCMembershipStatus.Expired;
                                 break;
                         }
                     }

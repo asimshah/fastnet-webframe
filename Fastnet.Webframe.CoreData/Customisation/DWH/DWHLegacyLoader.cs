@@ -1,7 +1,9 @@
 ﻿using Fastnet.Common;
 using Fastnet.EventSystem;
+using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData.DWH;
 using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,24 +14,23 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Security;
 using LDB = Fastnet.Webframe.Web.DataModel;
 
 namespace Fastnet.Webframe.CoreData
 {
-
     public class DWHLegacyLoader : LoaderFactory //: IDisposable
     {
-        
         private ApplicationDbContext appDb;
         private LDB.WebframeDataEntities legacyDb;
         private DWHLegacyBookingDbContext legacyBookingData;
-        //private string configConnectionString;
+        private string defaultMemberPassword;
         public DWHLegacyLoader(CoreDataContext context) : base(context)
         {
-
+            defaultMemberPassword = Settings.legacy.defaultMemberPassword;
             //LoaderFactory lf = new LoaderFactory();
-            string configConnectionString = LegacyConnectionString;
+            string configConnectionString = GetLegacyConnectionString();
             //coreDb = context;
             appDb = new ApplicationDbContext();
             //this.configConnectionString = configConnectionString;
@@ -40,7 +41,9 @@ namespace Fastnet.Webframe.CoreData
         }
         public override void Load()
         {
-            using (var tran = coreDb.Database.BeginTransaction())
+            // using (var tran = coreDb.Database.BeginTransaction())
+            //using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            //{
             {
                 try
                 {
@@ -62,50 +65,26 @@ namespace Fastnet.Webframe.CoreData
                     Log.Write("legacyData: SiteSettings loaded");
                     LoadMenus();
                     Log.Write("legacyData: Menus loaded");
-                    tran.Commit();
+
                     CreateMembersFromVisitors();
                     //LoadBookings();
+                    //tran.Complete();
+                    LoadBookingData();
                 }
                 catch (Exception xe)
                 {
-                    tran.Rollback();
+                    //tran.Rollback();
                     Log.Write(xe);
                     throw;
                 }
             }
+            //}
         }
         public override void Dispose()
         {
             legacyDb.Dispose();
             legacyBookingData.Dispose();
         }
-        //internal void LoadAccessRules()
-        //{
-        //    foreach (var item in legacyDb.AccessRules)
-        //    {
-        //        AccessRule ar = new AccessRule { Permission = (Permission)item.PermissionCode, Allow = item.Allow };
-        //        coreDb.AccessRules.Add(ar);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
-        //internal void LoadBackgrounds()
-        //{
-        //    foreach (var item in legacyDb.Backgrounds)
-        //    {
-        //        Background bg = new Background { Colour = item.Colour, BackgroundImageUrl = item.BackgroundImageUrl, BackgroundPosition = item.BackgroundPosition, BackgroundRepeat = item.BackgroundRepeat };
-        //        coreDb.Backgrounds.Add(bg);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
-        //internal void LoadClientApps()
-        //{
-        //    foreach (var item in legacyDb.ClientApps)
-        //    {
-        //        ClientApp ca = new ClientApp { Name = item.Name, IsInstalled = item.IsInstalled, Url = item.Url };
-        //        coreDb.ClientApps.Add(ca);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
         internal void LoadDirectories()
         {
             Action<LDB.Directory, Directory> addDirectory = null;
@@ -142,18 +121,6 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        //internal void LoadPageAccessRules()
-        //{
-        //    foreach (var item in legacyDb.PageAccessRules)
-        //    {
-        //        Page p = coreDb.Pages.Find(item.Page.PageId);
-        //        Group g = coreDb.Groups.ToArray().First(x => x.Fullpath == item.Group.Fullpath);
-        //        AccessRule ar = coreDb.AccessRules.First(x => ((int)x.Permission) == ((int)item.AccessRule.Permission) && x.Allow == item.AccessRule.Allow);
-        //        PageAccessRule par = new PageAccessRule { Page = p, Group = g, AccessRule = ar };
-        //        coreDb.PageAccessRules.Add(par);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
         internal void LoadPages()
         {
             foreach (var item in legacyDb.Pages)
@@ -231,15 +198,6 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        //internal void LoadFonts()
-        //{
-        //    foreach (var item in legacyDb.Fonts)
-        //    {
-        //        Font f = new Font { Name = item.Name, PointSize = item.PointSize, Style = item.Style, Weight = item.Weight };
-        //        coreDb.Fonts.Add(f);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
         internal void LoadRoles()
         {
             //foreach (var item in wde.Roles)
@@ -269,160 +227,54 @@ namespace Fastnet.Webframe.CoreData
             }
             coreDb.SaveChanges();
         }
-        //internal void LoadPanels()
-        //{
-        //    Action<LDB.Panel, Panel> addPanel = null;
-        //    addPanel = (item, parent) =>
-        //    {
-        //        Style style = FindStyle(item.Style);
-        //        Panel panel = new Panel
-        //        {
-        //            Name = item.Name,
-        //            ParentPanel = parent,
-        //            Visible = item.Visible,
-        //            LastModified = item.LastModified,
-        //            PixelHeight = item.PixelHeight,
-        //            PixelWidth = item.PixelWidth,
-        //            Style = style,
-        //        };
-        //        coreDb.Panels.Add(panel);
-        //        foreach (var child in item.ChildPanels)
-        //        {
-        //            addPanel(child, panel);
-        //        }
-        //    };
-        //    foreach (var item in legacyDb.Panels.Where(g => g.ParentPanel == null))
-        //    {
-        //        addPanel(item, null);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
-        //internal void LoadPanelPages()
-        //{
-        //    foreach (var item in legacyDb.PanelPages)
-        //    {
-        //        Panel panel = coreDb.Panels.Single(x => x.Name == item.Panel.Name);
-        //        Page cp = coreDb.Pages.Find(item.CentrePage.PageId);
-        //        Page p = coreDb.Pages.Find(item.Page.PageId);
-        //        switch (item.Panel.Name)
-        //        {
-        //            case "BannerPanel":
-        //                p.Type = PageType.Banner;
-        //                break;
-        //            case "LeftPanel":
-        //                p.Type = PageType.Left;
-        //                break;
-        //            case "RightPanel":
-        //                p.Type = PageType.Right;
-        //                break;
-        //        }
-        //        //PanelPage r = new PanelPage { Panel = panel, Page = p, CentrePage = cp };
-        //        //coreDb.PanelPages.Add(r);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
-        //internal void LoadStyles()
-        //{
-        //    foreach (var item in legacyDb.Styles)
-        //    {
-        //        Background b = FindBackground(item.Background);
-        //        Font font = FindFont(item.Font);
-        //        Style style = new Style
-        //        {
-        //            Font = font,
-        //            Background = b,
-        //            Border = item.Border,
-        //            Margin = item.Margin,
-        //            Padding = item.Padding,
-        //            Colour = item.Colour,
-        //            TextAlignment = item.TextAlignment,
-        //            VerticalAlignment = item.VerticalAlignment,
-        //            OriginalStyleId = item.StyleId
-        //        };
-        //        coreDb.Styles.Add(style);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
         internal void LoadMembers()
         {
-            bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-            using (var tran = appDb.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
+            try
             {
-                try
+                foreach (var item in legacyDb.Members.OrderBy(x => x.UserId))
                 {
-                    foreach (var item in legacyDb.Members.OrderBy(x => x.UserId))
+                    if (item.Name == "Administrator$")
                     {
-                        if (item.Name == "Administrator$")
+                        continue;
+                    }
+                    MembershipProvider mp = Membership.Providers["LegacySqlMembershipProvider"];
+                    MembershipUser mu = mp.GetUser(item.Name, false);
+                    if (mu.IsLockedOut)
+                    {
+                        mu.UnlockUser();
+                    }
+                    string password = mu.GetPassword();
+                    string email = item.Email.ToLower();
+                    string firstName = item.FirstName;
+                    string lastName = item.LastName;
+                    if (item.Name == "Administrator")
+                    {
+                        firstName = "";
+                        lastName = "Administrator";
+                    }
+                    DateTime creationDate = item.CreationDate;
+                    DateTime? lastLoginDate = item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate;
+                    bool disabled = !item.Active;
+                    //CreateMember(item);
+                    DWHMember m = CreateMember(email, password, firstName, lastName, creationDate, lastLoginDate, disabled);
+                    foreach (var gm in item.GroupMembers)
+                    {
+                        LDB.Group group = gm.Group;
+                        var ng = coreDb.Groups.FirstOrDefault(x => x.Name == group.Name);
+                        if (ng != null)
                         {
-                            continue;
-                        }
-                        var user = new ApplicationUser
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            Email = item.Email,
-                            UserName = item.Email,
-                        };
-                        DWHMember m = new DWHMember
-                        {
-                            Id = user.Id,
-                            //UserName = item.Email,
-                            EmailAddress = item.Email,
-                            EmailAddressConfirmed = true,
-                            FirstName = item.FirstName,
-                            LastName = item.LastName,
-                            CreationDate = item.CreationDate,
-                            LastLoginDate = item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
-                            Disabled = !item.Active,
-                            //DateOfBirth = null,// DateTime.MinValue,
-                            BMCMembership = null, //"(missing)"
-                        };
-                        if (item.Name == "Administrator")
-                        {
-                            m.FirstName = "";
-                            m.LastName = "Administrator";
-                            m.IsAdministrator = true;
-                            m.CreationMethod = MemberCreationMethod.SystemGenerated;
-                        } else
-                        {
-                            m.CreationMethod = MemberCreationMethod.DataLoad;
-                        }
-                        coreDb.Members.Add(m);
-                        //Debug.Print("{0} ...", m.Name);
-
-                        MembershipProvider mp = Membership.Providers["LegacySqlMembershipProvider"];
-                        MembershipUser mu = mp.GetUser(item.Name, false);
-                        if (mu.IsLockedOut)
-                        {
-                            mu.UnlockUser();
-                        }
-                        string password = mu.GetPassword();
-                        //if (visiblePassword)
-                        //{
-                        //    m.PlainPassword = password;
-                        //}
-                        user.PasswordHash = Member.HashPassword(password);
-                        user.SecurityStamp = Guid.NewGuid().ToString();
-                        appDb.Users.Add(user);
-                        foreach (var gm in item.GroupMembers)
-                        {
-                            LDB.Group group = gm.Group;
-                            var ng = coreDb.Groups.FirstOrDefault(x => x.Name == group.Name);
-                            if (ng != null)
-                            {
-                                m.Groups.Add(ng);
-                            }
+                            m.Groups.Add(ng);
                         }
                     }
-                    appDb.SaveChanges();
-                    tran.Commit();
                 }
-                catch (Exception xe)
-                {
-                    tran.Rollback();
-                    Log.Write(xe);
-                }
+                appDb.SaveChanges();
+                //tran.Complete();
             }
-            //ctx.SaveChanges();
+            catch (Exception xe)
+            {
+                //tran.Rollback();
+                Log.Write(xe);
+            }
         }
         internal void LoadSiteSettings()
         {
@@ -555,113 +407,17 @@ namespace Fastnet.Webframe.CoreData
             coreDb.MenuMasters.Add(mm);
             coreDb.SaveChanges();
         }
-        //internal void LoadMenusOld()
-        //{
-        //    Action<LDB.Menu, Menu> addMenu = null;
-        //    addMenu = (item, parent) =>
-        //    {
-        //        Page p = item.Page == null ? null : coreDb.Pages.Find(item.Page.PageId);
-        //        Style normalStyle = FindStyle(item.NormalStyle);
-        //        Style hoverStyle = FindStyle(item.HoverStyle);
-        //        Style selectedStyle = FindStyle(item.SelectedStyle);
-        //        Menu menu = new Menu
-        //        {
-        //            ParentMenu = parent,
-        //            Sequence = item.Sequence,
-        //            Text = item.Text,
-        //            AccessibilityCode = item.AccessibilityCode,
-        //            Page = p,
-        //            Url = item.Url,
-        //            Visible = item.Visible,
-        //            LastModified = item.LastModified,
-        //            PixelHeight = item.PixelHeight,
-        //            PixelWidth = item.PixelWidth,
-        //            SubMenuPixelHeight = item.SubMenuPixelHeight,
-        //            SubMenuPixelWidth = item.SubMenuPixelWidth,
-        //            InheritParentStyles = item.InheritParentStyles,
-        //            NormalStyle = normalStyle,
-        //            HoverStyle = hoverStyle,
-        //            SelectedStyle = selectedStyle,
-        //            UseStandardArrows = item.UseStandardArrows,
-        //            NormalArrowColour = item.NormalArrowColour,
-        //            HighlitArrowColour = item.HighlitArrowColour
-        //        };
-        //        coreDb.Menus.Add(menu);
-        //        foreach (var child in item.SubMenus)
-        //        {
-        //            addMenu(child, menu);
-        //        }
-        //    };
-        //    foreach (var item in legacyDb.Menus.Where(g => g.ParentMenu == null))
-        //    {
-        //        addMenu(item, null);
-        //    }
-        //    coreDb.SaveChanges();
-        //}
-
-        //private Style FindStyle(LDB.Style ls)
-        //{
-        //    return ls == null ? null : coreDb.Styles.Single(s => s.OriginalStyleId == ls.StyleId);
-        //    //Font f = FindFont(ls.Font);
-        //    //Background b = FindBackground(ls.Background);
-        //    //Func<Style, bool> isMatch = (s) =>
-        //    //    {
-        //    //        bool result = (f == null && s.Font == null || (s.Font != null && f != null && s.Font.FontId == f.FontId))
-        //    //            && (b == null && s.Background == null ||(s.Background != null && b != null) && s.Background.BackgroundId == b.BackgroundId)
-        //    //            && s.Border == ls.Border && s.Margin == ls.Margin && s.Padding == ls.Padding && s.Colour == ls.Colour
-        //    //            && s.TextAlignment == ls.TextAlignment && s.VerticalAlignment == ls.VerticalAlignment;
-        //    //        return result;
-        //    //    };
-        //    //return ctx.Styles.AsEnumerable().First(x => isMatch(x));
-        //}
-        //private Font FindFont(LDB.Font font)
-        //{
-        //    if (font == null)
-        //    {
-        //        return null;
-        //    }
-        //    return FindFont(font.Name, font.PointSize, font.Style, font.Weight);
-        //}
-        //private Font FindFont(string name, double? pointsize, string style, string weight)
-        //{
-        //    return coreDb.Fonts.First(f => f.Name == name && f.PointSize == pointsize && f.Style == style && f.Weight == weight);
-        //}
-        //private Background FindBackground(LDB.Background background)
-        //{
-        //    if (background == null)
-        //    {
-        //        return null;
-        //    }
-        //    return FindBackground(background.Colour, background.BackgroundImageUrl, background.BackgroundPosition, background.BackgroundRepeat);
-        //}
-        //private Background FindBackground(string colour, string imageUrl, string position, string repeat)
-        //{
-        //    return coreDb.Backgrounds.First(b => b.Colour == colour && b.BackgroundImageUrl == imageUrl && b.BackgroundPosition == position && b.BackgroundRepeat == repeat);
-        //}
-        internal void LoadBookings()
+        internal async void CreateMembersFromVisitors()
         {
-            var bookings = legacyBookingData.Bookings;
-            List<Booking> memberBookings = new List<Booking>();
-            List<Booking> strangerBookings = new List<Booking>();
-            foreach (var b in bookings)
+            Dictionary<string, List<dynamic>> candidates = new Dictionary<string, List<dynamic>>();
+            Action<string, dynamic> addCandidate = (email, details) =>
             {
-                Visitor v = b.Visitor;
-                string email = v.Email;
-                MemberBase member = coreDb.Members.SingleOrDefault(m => string.Compare(m.EmailAddress, email, true) == 0);
-                if (member == null)
+                if (!candidates.ContainsKey(email))
                 {
-                    strangerBookings.Add(b);
+                    candidates.Add(email, new List<dynamic>());
                 }
-                else
-                {
-                    memberBookings.Add(b);
-                }
-            }
-            Debugger.Break();
-        }
-        internal void CreateMembersFromVisitors()
-        {
-            
+                candidates[email].Add(details);
+            };
             Func<string, string> parseBMCNumber = (bn) =>
             {
                 bn = bn.Trim();
@@ -672,27 +428,126 @@ namespace Fastnet.Webframe.CoreData
                     bool result = Regex.IsMatch(bn, pattern);
                     return result ? bn : null;
                 }
-                return bn;
+                return null;
             };
             Func<string, string> capitalise = (name) =>
             {
-                name = name.ToLower();
+                name = name.Trim().ToLower();
                 name = name.Substring(0, 1).ToUpper() + name.Substring(1);
                 return name;
             };
             var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today);
             var visitors = forwardBookings.Select(b => b.Visitor);
+
             foreach (var v in visitors)
             {
-                Debug.Print("legacy booking visitor: {0}, club/membership: {1}", v.Email, v.AssociationReference);
+                //Debug.Print("legacy booking visitor: {0}, club/membership: {1}", v.Email, v.AssociationReference);
                 string email = v.Email.ToLower();
                 string firstName = capitalise(v.FirstName);
                 string lastName = capitalise(v.LastName);
                 string bmcNumber = parseBMCNumber(v.AssociationReference);
+                string club = bmcNumber == null && v.AssociationReference != null ? v.AssociationReference : null;
                 string phoneNumber = v.MobilePhone.Trim();
-                Debug.Print("{0}, {1}, {2}, {3}, {4}", email, firstName, lastName, bmcNumber, phoneNumber);
+
+                addCandidate(email, new { firstName = firstName, lastName = lastName, bmcNumber = bmcNumber, phoneNumber = phoneNumber, club = club });
+                //Debug.Print("{5}: {0}, {1}, {2}, {3}, {4}", email, firstName, lastName, bmcNumber, phoneNumber, count);
             }
-            Debugger.Break();
+            await CreateMembersFromCandidates(candidates);
+            coreDb.SaveChanges();
+        }
+        private async Task CreateMembersFromCandidates(Dictionary<string, List<dynamic>> candidates)
+        {
+            DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
+            foreach (KeyValuePair<string, List<dynamic>> kvp in candidates)
+            {
+                //++count;
+                //Debug.Print("{0}: {1}", count, kvp.Key);
+                BMCMembershipStatus status = BMCMembershipStatus.Unknown;
+                var bestDetail = kvp.Value.FirstOrDefault(z => z.bmcNumber != null);
+                if (bestDetail == null)
+                {
+                    bestDetail = kvp.Value.First();
+                }
+                string bmcNumber = bestDetail.bmcNumber ?? null;
+                DateTime? expiry = null;
+                //good++;
+                if (bmcNumber != null && mf.EnableBMCApi)
+                {
+                    dynamic result = await mf.ValidateBMCNumber((string)bestDetail.bmcNumber, (string)bestDetail.lastName);
+                    status = result.Status;
+                    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                    {
+                        expiry = result.Expiry;
+                    }
+                }
+                else if (bmcNumber == null)
+                {
+                    status = BMCMembershipStatus.Missing;
+                }
+                //Debug.Print("{2}: validate: {0}, {1}, ***** {3}", (string)x.lastName, (string)x.bmcNumber, good, status.ToString());
+                //Debugger.Break();
+                string email = kvp.Key;
+                bool newlyCreated = false;
+                DWHMember member = coreDb.Members.OfType<DWHMember>().SingleOrDefault(m => m.EmailAddress == email);
+                if (member == null)
+                {
+                    member = CreateMember(email, defaultMemberPassword, (string)bestDetail.firstName, (string)bestDetail.lastName, DateTime.Today, null, false);
+                    Group.AllMembers.Members.Add(member);
+                    member.PlainPassword = defaultMemberPassword;
+                    newlyCreated = true;
+                    //Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "No BMC Membership number", status.ToString());
+                }
+                member.BMCMembership = bmcNumber;
+                member.BMCMembershipExpiresOn = expiry;
+                member.Organisation = bestDetail.club;
+                member.PhoneNumber = bestDetail.phoneNumber;
+                if (newlyCreated)
+                {
+                    Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "**No BMC Membership number**", status.ToString());
+                }
+            }
+        }
+        private DWHMember CreateMember(string email, string password, string firstName, string lastName,
+            DateTime creationDate, DateTime? lastLoginDate, bool disabled)
+        {
+            var user = new ApplicationUser
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = email,// item.Email.ToLower(),
+                UserName = email, //item.Email.ToLower(),
+                PasswordHash = Member.HashPassword(password),
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+            appDb.Users.Add(user);
+            appDb.SaveChanges();
+            DWHMember m = new DWHMember
+            {
+                Id = user.Id,
+                EmailAddress = email,//item.Email.ToLower(),
+                EmailAddressConfirmed = true,
+                FirstName = firstName,// item.FirstName,
+                LastName = lastName,//item.LastName,
+                CreationDate = creationDate,// item.CreationDate,
+                LastLoginDate = lastLoginDate,// item.LastLoginDate < item.CreationDate ? item.CreationDate : item.LastLoginDate,
+                Disabled = disabled,// !item.Active,
+                BMCMembership = null, //"(missing)"
+                CreationMethod = MemberCreationMethod.DataLoad,
+                PlainPassword = password
+            };
+            if (lastName == "Administrator")
+            {
+                m.FirstName = "";
+                m.LastName = "Administrator";
+                m.IsAdministrator = true;
+                m.CreationMethod = MemberCreationMethod.SystemGenerated;
+            }
+            else
+            {
+                m.CreationMethod = MemberCreationMethod.DataLoad;
+            }
+            coreDb.Members.Add(m);
+
+            return m;
         }
         private string GetEntityConnectionString(string cs)
         {
@@ -726,6 +581,253 @@ namespace Fastnet.Webframe.CoreData
             {
                 Log.Write(xe);
                 throw;
+            }
+        }
+
+        private void LoadBookingData()
+        {
+            using (BookingDataContext bctx = new BookingDataContext())
+            {
+                CreateAccomodation(bctx);
+                CreatePriceStructure(bctx);
+                //LoadBlockedDays(bctx);
+                LoadBookings(bctx);
+            }
+        }
+        private List<Period> LoadBlockedDays(BookingDataContext bctx)
+        {
+            var blockeddays = legacyBookingData.DayBook.Where(db => db.Day >= DateTime.Today && db.IsUnavailable).Select(d => d.Day).OrderBy(x => x).ToList();
+            var result = blockeddays.GroupWhile((p, n) => n == p.AddDays(1));
+            List<Period> blockedPeriods = new List<Period>();
+            foreach (var set in result)
+            {
+                DateTime start = set.First();
+                DateTime end = set.Last();
+                Period p = new Period
+                {
+                    PeriodType = PeriodType.Fixed,
+                    StartDate = start,
+                    EndDate = end
+                };
+                blockedPeriods.Add(p);
+            }
+            return blockedPeriods;
+        }
+        private void LoadBookings(BookingDataContext bctx)
+        {
+            var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today);
+            foreach (var lBooking in forwardBookings)
+            {
+                DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
+                Debug.Assert(member != null);
+                BookingData.Booking b = new BookingData.Booking
+                {
+                    CreatedOn = lBooking.BookingDate,
+                    EntryInformation = lBooking.EntryInformation,
+                    From = lBooking.From,
+                    IsPaid = lBooking.IsPaid,
+                    MemberId = member.Id,
+                    Notes = lBooking.Notes,
+                    Reference = lBooking.Reference,
+                    To = lBooking.To,
+                    TotalCost = lBooking.TotalCost,
+                    Under18sInParty = lBooking.Under18sInParty
+                };
+                foreach (var ri in lBooking.ReleasedItems)
+                {
+                    switch (ri.BookableItem.Name)
+                    {
+                        case "Don Whillans Hut":
+                            Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                            b.AccomodationCollection.Add(ac);
+                            break;
+                        default:
+                            Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
+                            b.AccomodationCollection.Add(bed);
+                            break;
+                    }
+                }
+                bctx.Bookings.Add(b);
+            }
+            bctx.SaveChanges();
+        }
+        private void CreatePriceStructure(BookingDataContext bctx)
+        {
+            PriceStructure ps = new PriceStructure
+            {
+                Name = "Default"
+            };
+            Period pp = new Period
+            {
+                PeriodType = PeriodType.Fixed,
+                StartDate = DateTime.Parse("1/1/2014"),
+                EndDate = null // i.e. forever
+            };
+            Price bedPrice = new Price
+            {
+                Period = pp,
+                Amount = 10.0M,
+                Class = AccomodationClass.Standard,
+                Type = AccomodationType.Bed,
+                MinimumUnits = 1
+            };
+            Price hutPrice = new Price
+            {
+                Period = pp,
+                Amount = 120.0M,
+                Class = AccomodationClass.Standard,
+                Type = AccomodationType.Hut,
+                MinimumUnits = 1
+            };
+            ps.Periods.Add(pp);
+            bctx.Prices.Add(bedPrice);
+            bctx.Prices.Add(hutPrice);
+            bctx.PriceStructures.Add(ps);
+            bctx.SaveChanges();
+        }
+        private void CreateAccomodation(BookingDataContext bctx)
+        {
+            Action<List<dynamic>, Accomodation> load = null;
+            load = (l, acc) =>
+            {
+                foreach (dynamic item in l)
+                {
+                    string at = item.accomodationtype;
+                    AccomodationType type = (AccomodationType)Enum.Parse(typeof(AccomodationType), at, true);
+                    string ac = item.accomodationclass;
+                    AccomodationClass c = (AccomodationClass)Enum.Parse(typeof(AccomodationClass), ac, true);
+                    string name = item.name;
+                    bool bookable = item.bookable;
+                    bool? sisb = item.subItemsSeparatelyBookable;
+                    List<dynamic> subitems = ((JArray)item.subitems)?.ToObject<List<dynamic>>();
+                    Debug.Print("item: {0}", name);
+                    Accomodation a = new Accomodation
+                    {
+                        Class = c,// AccomodationClass.Standard,
+                        Type = type,
+                        Name = name,
+                        Bookable = bookable,
+                        SubAccomodationSeparatelyBookable = sisb?? false
+                    };
+                    if (acc != null)
+                    {
+                        acc.SubAccomodation.Add(a);
+                    }
+                    if (subitems != null)
+                    {
+                        load(subitems, a);
+                    }
+                    bctx.AccomodationSet.Add(a);
+                    //Debugger.Break();
+                }
+            };
+            List<dynamic> bookingAccomodation = ((JArray)Settings.bookingApp.accomodation).ToObject<List<dynamic>>();
+            load(bookingAccomodation, null);
+            bctx.SaveChanges();
+            //Accomodation room1 = new Accomodation
+            //{
+            //    Class = AccomodationClass.Standard,
+            //    Type = AccomodationType.Room,
+            //    Name = "Room 1",
+            //    Bookable = false,
+            //    SubAccomodationSeparatelyBookable = true
+            //};
+            //for (int i = 0; i < 4; ++i)
+            //{
+            //    Accomodation bed = new Accomodation
+            //    {
+            //        Class = AccomodationClass.Standard,
+            //        Type = AccomodationType.Bed,
+            //        Name = string.Format("Bed {0}", i + 1),
+            //        Bookable = true,
+            //    };
+            //    room1.SubAccomodation.Add(bed);
+            //}
+            //Accomodation room2 = new Accomodation
+            //{
+            //    Class = AccomodationClass.Standard,
+            //    Type = AccomodationType.Room,
+            //    Name = "Room 2",
+            //    Bookable = false,
+            //    SubAccomodationSeparatelyBookable = true
+            //};
+            //for (int i = 0; i < 8; ++i)
+            //{
+            //    Accomodation bed = new Accomodation
+            //    {
+            //        Class = AccomodationClass.Standard,
+            //        Type = AccomodationType.Bed,
+            //        Name = string.Format("Bed {0}", i + 1 + 4),
+            //        Bookable = true,
+            //    };
+            //    room2.SubAccomodation.Add(bed);
+            //}
+            //Accomodation hut = new Accomodation
+            //{
+            //    Class = AccomodationClass.Standard,
+            //    Type = AccomodationType.Hut,
+            //    Name = "Don Whillans Hut",
+            //    SubAccomodationSeparatelyBookable = true,
+            //    Bookable = true
+            //};
+            // availabilities
+            var blockedPeriods = LoadBlockedDays(bctx);
+
+            foreach (Accomodation acc in bctx.AccomodationSet.Where(x => x.ParentAccomodation == null))
+            {
+                Period pp = new Period
+                {
+                    PeriodType = PeriodType.Rolling,
+                    Interval = new LongSpan { Years = 1 }
+                    //StartDate = DateTime.Parse("1/1/2014"),
+                    // = null // i.e. forever
+                };
+
+                Availability a1 = new Availability
+                {
+                    Accomodation = acc,
+                    Period = pp
+                };
+                //hut.SubAccomodation.Add(room1);
+                //hut.SubAccomodation.Add(room2);
+                //bctx.AccomodationSet.Add(hut);
+                foreach (var p in blockedPeriods)
+                {
+                    Availability a = new Availability
+                    {
+                        Accomodation = acc,
+                        Period = p,
+                        Blocked = true
+                    };
+                    bctx.Availablities.Add(a);
+                }
+                bctx.Availablities.Add(a1);
+            };
+
+            bctx.SaveChanges();
+        }
+    }
+    static class _extensions
+    {
+        public static IEnumerable<IEnumerable<T>> GroupWhile<T>(this IEnumerable<T> source, Func<T, T, bool> predicate)
+        {
+            using (var iterator = source.GetEnumerator())
+            {
+                if (!iterator.MoveNext())
+                    yield break;
+
+                List<T> currentGroup = new List<T>() { iterator.Current };
+                while (iterator.MoveNext())
+                {
+                    if (predicate(currentGroup.Last(), iterator.Current))
+                        currentGroup.Add(iterator.Current);
+                    else
+                    {
+                        yield return currentGroup;
+                        currentGroup = new List<T>() { iterator.Current };
+                    }
+                }
+                yield return currentGroup;
             }
         }
     }

@@ -88,4 +88,10 @@ namespace Fastnet.Webframe.CoreData.DWH
         [NotMapped]
         public string Name { get { return FirstName + " " + LastName; } }
     }
+    public class DayBookEntry
+    {
+        public long DayBookEntryId { get; set; }
+        public DateTime Day { get; set; }
+        public bool IsUnavailable { get; set; }
+    }
 }

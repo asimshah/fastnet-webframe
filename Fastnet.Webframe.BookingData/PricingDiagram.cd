@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Fastnet.Webframe.BookingData.Accomodation">
+    <Position X="7.5" Y="3" Width="2.75" />
+    <Members>
+      <Property Name="AccomodationId" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAggAAAAJAIAAASAAAAAAAAAIRAAAEAAQAA=</HashCode>
+      <FileName>Accomodation.cs</FileName>
+      <NewMemberFileName>PriceStructure.cs</NewMemberFileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Type" />
+      <Property Name="Class" />
+      <Property Name="ParentAccomodation" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="SubAccomodation" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Fastnet.Webframe.BookingData.PriceStructure">
+    <Position X="0.75" Y="0.5" Width="1.5" />
+    <Members>
+      <Property Name="PriceStructureId" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAEAAAAAAAAAQAAAAAAAAAAAAAAAAAAAQ=</HashCode>
+      <FileName>PriceStructure.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Periods" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Fastnet.Webframe.BookingData.Price">
+    <Position X="1.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAACCAAAAAAAAAAQAAAAAAAAI=</HashCode>
+      <FileName>PriceStructure.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Type" />
+      <Property Name="Class" />
+      <Property Name="Period" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fastnet.Webframe.BookingData.AccomodationExtra">
+    <Position X="10.75" Y="2.25" Width="1.75" />
+    <Members>
+      <Property Name="AccomodationExtraId" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAABAAAAAIAAIAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Accomodation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Extra" />
+      <Property Name="Accomodation" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Fastnet.Webframe.BookingData.Period">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAABAAAAAAAIAIAAAAAgAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Period.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Fastnet.Webframe.BookingData.Availability">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <AssociationLine Name="Accomodation" Type="Fastnet.Webframe.BookingData.Accomodation" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.875" Y="2.247" />
+        <Point X="6.875" Y="3.336" />
+        <Point X="7.294" Y="3.336" />
+        <Point X="7.294" Y="3.312" />
+        <Point X="7.5" Y="3.312" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAABAAAIAAAAAAAAAAAAAAAAgAAI=</HashCode>
+      <FileName>Accomodation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Period" />
+      <Property Name="Accomodation" />
+    </ShowAsAssociation>
+  </Class>
+  <Enum Name="Fastnet.Webframe.BookingData.AccomodationClass">
+    <Position X="4.5" Y="3.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABAAAAAAAAAAAAAIQAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Fastnet.Webframe.BookingData.AccomodationType">
+    <Position X="4.25" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>CQAAAAAAAAAAAAACABAAEAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Fastnet.Webframe.BookingData.OptionalExtras">
+    <Position X="10.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAEAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

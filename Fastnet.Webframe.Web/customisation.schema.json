@@ -1,8 +1,42 @@
 ﻿{
   "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "accomodation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minItems": 1,
+        "properties": {
+          "accomodationtype": {
+            "type": "string",
+            "enum": [ "bed", "room", "suite", "flat", "villa", "hut" ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "accomodationclass": {
+            "type": "string",
+            "enum": [ "standard", "superior", "executive", "deluxe" ]
+          },
+          "bookable": {
+            "type": "boolean"
+          },
+          "subItemsSeparatelyBookable": {
+            "type": "boolean",
+            "default": false
+          },
+          "subitems": {
+            "$ref": "#/definitions/accomodation"
+          }
+        }
+      }
+    }
+  },
   "title": "JSON Schema for customisation JSON file format",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
+
     "Scripts": {
       "description": "An array of additional scripts to include in the custom bundle",
       "type": "array",
@@ -45,9 +79,31 @@
         "bookingConnectionStringName": {
           "type": "string",
           "description": "one of the available connectionStrings in web.config"
+        },
+        "defaultMemberPassword": {
+          "type": "string",
+          "minLength": 8
         }
-      },
-      "type": "object"
+      }
+    },
+    "bookingApp": {
+      "type": "object",
+      "description": "Settings for the booking app",
+      "additionalProperties": false,
+      "properties": {
+        "lodgmentName": { "type": "string" },
+        "rollDayManually": {
+          "type": "boolean",
+          "default": false
+        },
+        "enable": {
+          "type": "boolean",
+          "default": false
+        },
+        "accomodation": {
+          "$ref": "#/definitions/accomodation"
+        }
+      }
     },
     "apps": {
       "description": "",
@@ -69,7 +125,6 @@
             }
           }
         }
-
       }
     },
     "bmc": {
@@ -98,10 +153,6 @@
             }
           }
         }
-      },
-      "parameters": {
-        "description": "Miscellaneous Parameters - these vary by customisation",
-        "type": "object"
       }
     }
   }

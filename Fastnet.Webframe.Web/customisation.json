@@ -3,7 +3,8 @@
   "legacy": {
     "connectionStringName": "LegacyData",
     "dataload": true,
-    "bookingConnectionStringName": "LegacyBooking"
+    "bookingConnectionStringName": "LegacyBooking",
+    "defaultMemberPassword": "abcdefgh"
   },
   "templateFolder": "DWH",
   "CSSFiles": [ "~/Content/DWH/custom.css" ],
@@ -16,15 +17,116 @@
   ],
   "bmc": {
     "api": {
-      "enable": true,
+      "enable": false,
       "apikey": "Tk1MXeExO7ijIW4Pos1BA6RT2lbAsiAKUIMdC4r%2F5oA6UYsLoTedhhHP5klP2ZrF2eqgna9SNgLZAZoliXHlrw%3D%3D",
       "apiurl": "https://webtier-staging.thebmc.co.uk",
       "apiuser": "DWMH"
     }
   },
-  "parameters": {
-    "BMCApiUser": "DWMH",
-    "BMCApiKey": "Tk1MXeExO7ijIW4Pos1BA6RT2lbAsiAKUIMdC4r%2F5oA6UYsLoTedhhHP5klP2ZrF2eqgna9SNgLZAZoliXHlrw%3D%3D",
-    "BMCUrl": "https://webtier-staging.thebmc.co.uk"
+  "bookingApp": {
+    "lodgmentName": "Don Whillans Hut",
+    "rollDayManually": true,
+    "enable": true,
+    "accomodation": [
+      {
+        "accomodationtype": "hut",
+        "name": "Whole Hut",
+        "accomodationclass": "standard",
+        "bookable": true,
+        "subItemsSeparatelyBookable": true,
+        "subitems": [
+          {
+            "accomodationclass": "standard",
+            "accomodationtype": "room",
+            "name": "Room 1",
+            "bookable": true,
+            "subItemsSeparatelyBookable": true,
+            "subitems": [
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 1",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 2",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 3",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 4",
+                "bookable": true
+              }
+            ]
+          },
+          {
+            "accomodationclass": "standard",
+            "accomodationtype": "room",
+            "name": "Room 2",
+            "bookable": true,
+            "subItemsSeparatelyBookable": true,
+            "subitems": [
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 5",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 6",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 7",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 8",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 9",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 10",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 11",
+                "bookable": true
+              },
+              {
+                "accomodationtype": "bed",
+                "accomodationclass": "standard",
+                "name": "Bed 12",
+                "bookable": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
