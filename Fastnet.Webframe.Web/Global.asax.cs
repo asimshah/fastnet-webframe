@@ -73,6 +73,7 @@ namespace Fastnet.Webframe.Web
                 core.Actions.Add(aa);
                 core.SaveChanges();
             }
+            BookingData.BookingGlobals.Startup();
         }
 
         //private void ScanForTemplates()

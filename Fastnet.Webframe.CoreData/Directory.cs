@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fastnet.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -68,11 +69,11 @@ namespace Fastnet.Webframe.CoreData
         {
             get { return getPath(); }
         }
-        internal override Directory GetParent()
+        public override Directory GetParent()
         {
             return this.ParentDirectory;
         }
-        internal override IEnumerable<Directory> GetChildren()
+        public override IEnumerable<Directory> GetChildren()
         {
             return this.SubDirectories;
         }

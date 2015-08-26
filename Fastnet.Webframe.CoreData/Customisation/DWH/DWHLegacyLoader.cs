@@ -590,7 +590,6 @@ namespace Fastnet.Webframe.CoreData
             {
                 CreateAccomodation(bctx);
                 CreatePriceStructure(bctx);
-                //LoadBlockedDays(bctx);
                 LoadBookings(bctx);
             }
         }
@@ -615,41 +614,51 @@ namespace Fastnet.Webframe.CoreData
         }
         private void LoadBookings(BookingDataContext bctx)
         {
-            var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today);
-            foreach (var lBooking in forwardBookings)
+            try
             {
-                DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
-                Debug.Assert(member != null);
-                BookingData.Booking b = new BookingData.Booking
+                var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today && ((int)b.Status) != 2);
+                foreach (var lBooking in forwardBookings)
                 {
-                    CreatedOn = lBooking.BookingDate,
-                    EntryInformation = lBooking.EntryInformation,
-                    From = lBooking.From,
-                    IsPaid = lBooking.IsPaid,
-                    MemberId = member.Id,
-                    Notes = lBooking.Notes,
-                    Reference = lBooking.Reference,
-                    To = lBooking.To,
-                    TotalCost = lBooking.TotalCost,
-                    Under18sInParty = lBooking.Under18sInParty
-                };
-                foreach (var ri in lBooking.ReleasedItems)
-                {
-                    switch (ri.BookableItem.Name)
+                    DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
+                    Debug.Assert(member != null);
+                    Debug.Print("Loading {0}", lBooking.Reference);
+                    BookingData.Booking b = new BookingData.Booking
                     {
-                        case "Don Whillans Hut":
-                            Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
-                            b.AccomodationCollection.Add(ac);
-                            break;
-                        default:
-                            Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
-                            b.AccomodationCollection.Add(bed);
-                            break;
+                        CreatedOn = lBooking.BookingDate,
+                        EntryInformation = lBooking.EntryInformation,
+                        From = lBooking.From,
+                        IsPaid = lBooking.IsPaid,
+                        MemberId = member.Id,
+                        Notes = lBooking.Notes,
+                        Reference = lBooking.Reference,
+                        To = lBooking.To,
+                        TotalCost = lBooking.TotalCost,
+                        Under18sInParty = lBooking.Under18sInParty
+                    };
+                    b.To = lBooking.ReleasedItems.Max(d => d.Date);
+                    foreach (var ri in lBooking.ReleasedItems)
+                    {
+                        switch (ri.BookableItem.Name)
+                        {
+                            case "Don Whillans Hut":
+                                Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                                b.AccomodationCollection.Add(ac);
+                                break;
+                            default:
+                                Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
+                                b.AccomodationCollection.Add(bed);
+                                break;
+                        }
                     }
+                    bctx.Bookings.Add(b);
                 }
-                bctx.Bookings.Add(b);
+                bctx.SaveChanges();
             }
-            bctx.SaveChanges();
+            catch (Exception xe)
+            {
+                Debugger.Break();
+                throw;
+            }
         }
         private void CreatePriceStructure(BookingDataContext bctx)
         {

@@ -36,11 +36,11 @@ namespace Fastnet.Webframe.CoreData
             get { return members ?? (members = new HashSet<MemberBase>()); }
             set { members = value; }
         }
-        internal override Group GetParent()
+        public override Group GetParent()
         {
             return this.ParentGroup;
         }
-        internal override IEnumerable<Group> GetChildren()
+        public override IEnumerable<Group> GetChildren()
         {
             return Children;
         }

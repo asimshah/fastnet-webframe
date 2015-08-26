@@ -65,8 +65,8 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5710.23435, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5710.23435\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5715.25326, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5715.25326\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5689.34098, Culture=neutral, processorArchitecture=MSIL">
@@ -1556,6 +1556,10 @@
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Fastnet.Webframe.BookingData\Fastnet.Webframe.BookingData.csproj">
+      <Project>{354f79dd-7aa1-43d5-a482-da1b1f9c96cc}</Project>
+      <Name>Fastnet.Webframe.BookingData</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Fastnet.Webframe.CoreData\Fastnet.Webframe.CoreData.csproj">
       <Project>{f780da43-e8f6-4dab-bc5f-e637414d1e17}</Project>
       <Name>Fastnet.Webframe.CoreData</Name>

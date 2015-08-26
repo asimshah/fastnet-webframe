@@ -39,7 +39,7 @@
             "accomodationclass": "standard",
             "accomodationtype": "room",
             "name": "Room 1",
-            "bookable": true,
+            "bookable": false,
             "subItemsSeparatelyBookable": true,
             "subitems": [
               {
@@ -65,17 +65,8 @@
                 "accomodationclass": "standard",
                 "name": "Bed 4",
                 "bookable": true
-              }
-            ]
-          },
-          {
-            "accomodationclass": "standard",
-            "accomodationtype": "room",
-            "name": "Room 2",
-            "bookable": true,
-            "subItemsSeparatelyBookable": true,
-            "subitems": [
-              {
+              },
+                            {
                 "accomodationtype": "bed",
                 "accomodationclass": "standard",
                 "name": "Bed 5",
@@ -99,6 +90,15 @@
                 "name": "Bed 8",
                 "bookable": true
               },
+            ]
+          },
+          {
+            "accomodationclass": "standard",
+            "accomodationtype": "room",
+            "name": "Room 2",
+            "bookable": true,
+            "subItemsSeparatelyBookable": true,
+            "subitems": [
               {
                 "accomodationtype": "bed",
                 "accomodationclass": "standard",

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fastnet.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,12 +18,12 @@ namespace Fastnet.Webframe.CoreData
         public virtual Menu ParentMenu { get; set; }
         public virtual ICollection<Menu> Submenus { get; set; }
 
-        internal override Menu GetParent()
+        public override Menu GetParent()
         {
             return ParentMenu;
         }
 
-        internal override IEnumerable<Menu> GetChildren()
+        public override IEnumerable<Menu> GetChildren()
         {
             return this.Submenus;
         }

@@ -36,4 +36,17 @@ namespace Fastnet.Webframe.BookingData
             set { accomodationSet = value; }
         }
     }
+    //public class BookingTo
+    //{
+    //    public long BookingId { get; set; }
+    //    public string Reference { get; set; }
+    //    public string MemberId { get; set; }
+    //    public DateTime From { get; set; }
+    //    public DateTime To { get; set; }
+    //    public DateTime CreatedOn { get; set; }
+    //    public Decimal TotalCost { get; set; }
+    //    public bool IsPaid { get; set; }
+    //    public string Notes { get; set; }
+    //    public string EntryInformation { get; set; }
+    //}
 }

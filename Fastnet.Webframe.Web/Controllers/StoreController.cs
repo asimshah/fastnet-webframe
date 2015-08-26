@@ -245,7 +245,8 @@ namespace Fastnet.Webframe.Web.Controllers
             List<CD.Group> list = new List<CD.Group>();
             foreach (var group in groups)
             {
-                list.AddRange(group.GetAllChildren());
+                //list.AddRange(group.GetAllChildren());
+                list.AddRange(group.Descendants);
             }
             var result = new List<dynamic>();
             foreach (var group in list.Where(g => g.GroupId != CD.Group.Anonymous.GroupId))
