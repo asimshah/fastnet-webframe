@@ -198,7 +198,6 @@
     <Compile Include="PageAccessRule.cs" />
     <Compile Include="PageMarkup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Role.cs" />
     <Compile Include="SiteSetting.cs" />
     <Compile Include="UploadFile.cs" />
     <Compile Include="UserClaim.cs" />

@@ -234,6 +234,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Areas\booking\bookingAreaRegistration.cs" />
+    <Compile Include="Areas\booking\Controllers\BookingController.cs" />
+    <Compile Include="Areas\booking\Controllers\HomeController.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -282,7 +285,6 @@
     <Compile Include="Areas\membership\Controllers\MembershipController.cs" />
     <Compile Include="Areas\membership\membershipAreaRegistration.cs" />
     <Compile Include="Areas\membership\Models\MembershipModel.cs" />
-    <Compile Include="Areas\Role.cs" />
     <Compile Include="Common\ActionLogging.cs" />
     <Compile Include="Common\AutofacConfig.cs" />
     <Compile Include="Common\CustomFactory.cs" />
@@ -321,6 +323,12 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Areas\booking\Content\main.css">
+      <DependentUpon>main.less</DependentUpon>
+    </Content>
+    <Content Include="Areas\booking\Content\main.min.css">
+      <DependentUpon>main.css</DependentUpon>
+    </Content>
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
     <Content Include="Areas\cms\Content\images\centrepage.png" />
@@ -969,6 +977,7 @@
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\bootstrap-select.js" />
     <Content Include="Scripts\bootstrap-select.min.js" />
+    <Content Include="Scripts\collections\collections.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.min.js" />
     <Content Include="Scripts\datatables\datatables.bootstrap.js" />
@@ -1122,6 +1131,12 @@
     <Content Include="customisation.json" />
     <Content Include="customisation.schema.json" />
     <Content Include="Content\DWH\custom.less" />
+    <Content Include="Areas\booking\Views\web.config" />
+    <Content Include="Areas\booking\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\booking\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\booking\Views\Home\Index.cshtml" />
+    <Content Include="Areas\booking\Content\main.less" />
+    <Content Include="Areas\booking\Content\constants.less" />
     <None Include="compilerconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
@@ -1546,6 +1561,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\booking\Models\" />
     <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Content\Main\CustomLess\" />
@@ -1567,8 +1583,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\typings\collections.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\moment\moment-node.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\moment\moment.d.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

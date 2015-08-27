@@ -9,7 +9,32 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
-
+    public static class _mapper
+    {
+        private static AccomodationTO mapItem(Accomodation source)
+        {
+            var item = new AccomodationTO
+            {
+                AccomodationId = source.AccomodationId,
+                Type = source.Type,
+                Class = source.Class,
+                Name = source.Name,
+                SubAccomodationSeparatelyBookable = source.SubAccomodationSeparatelyBookable,
+                Bookable = source.Bookable,
+                SubAccomodation = map(source.SubAccomodation)
+            };
+            return item;
+        }
+        public static List<AccomodationTO> map(IEnumerable<Accomodation> source)
+        {
+            var list = new List<AccomodationTO>();
+            foreach(var item in source)
+            {
+                list.Add(mapItem(item));
+            }
+            return list;
+        }
+    }
     public partial class BookingDataContext
     {
         /// <summary>
@@ -21,6 +46,7 @@ namespace Fastnet.Webframe.BookingData
         {
             var rootItems = AccomodationSet.Where(x => x.ParentAccomodation == null);
             var allAccomodation = Mapper.Map<IEnumerable<Accomodation>, List<AccomodationTO>>(rootItems);
+            //var allAccomodation = _mapper.map(rootItems);
             Func<List<AccomodationTO>, Task> removeBlocked = null;
             removeBlocked = async (list) =>
             {
@@ -42,9 +68,14 @@ namespace Fastnet.Webframe.BookingData
         }
         public async Task<DayInformation> GetDayInformation(DateTime day)
         {
+            Stopwatch sw = new Stopwatch();
+            var scanTimes = new List<Tuple<long, int>>();
             Func<IEnumerable<AccomodationTO>, Task<bool>> scanBookingStatus = null;
             scanBookingStatus = async (list) =>
             {
+                Stopwatch scanW = new Stopwatch();
+                scanW.Start();
+                //long startScan = sw.ElapsedMilliseconds;
                 foreach (var item in list)
                 {
                     Accomodation fullItem = await AccomodationSet.FindAsync(item.AccomodationId);
@@ -67,7 +98,9 @@ namespace Fastnet.Webframe.BookingData
                     }
                     if (!item.IsBooked)
                     {
+                        scanW.Stop();
                         var occ = await scanBookingStatus(item.SubAccomodation);
+                        scanW.Start();
                         if(occ)
                         {
                             item.IsAvailableToBook = false;
@@ -86,15 +119,20 @@ namespace Fastnet.Webframe.BookingData
                 {
                     occupied = list.Any(x => x.Bookable == true && x.IsAvailableToBook == false)
                     || list.Any(x => x.Bookable == false && x.SubAccomodation.Any(z => z.IsAvailableToBook == false) == true);
+                    scanW.Stop();
+                    scanTimes.Add(Tuple.Create<long, int>(scanW.ElapsedMilliseconds, list.Count()));
                 }
-                //bool occupied = list.Count() > 0 && list.Any(x => x.Bookable == true && x.IsAvailableToBook == false);
                 return occupied;
             };
+            //
+            sw.Start();
             DayInformation di = new DayInformation();
+            di.Day = day;
             var availableAccomodation = await GetAvailableAccomodation(day);
+            long afterGetAvailableAccomodation = sw.ElapsedMilliseconds;
             if (availableAccomodation.Count() == 0)
             {
-                di.Status = DayStatus.IsBlocked;
+                di.Status = DayStatus.IsClosed;
             }
             else
             {
@@ -113,8 +151,22 @@ namespace Fastnet.Webframe.BookingData
                     }
                 }
                 di.Status = availableToBook == 0 ? DayStatus.IsFull : items == availableToBook ? DayStatus.IsFree : DayStatus.IsPartBooked;
+                // todo: the next line to check for Saturday needs to go into DWH customisation
+                if(di.Status == DayStatus.IsFree && day.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    di.Status = DayStatus.IsNotBookable;
+                }
             }
             di.Accomodation = availableAccomodation;
+            sw.Stop();
+            long total = sw.ElapsedMilliseconds;
+            long totalScanTime = scanTimes.Sum(x => x.Item1);
+            Debug.Print("GetDayInformation({3}-{4}): total {0} ms:  afterGetAvailableAccomodation {1} ms, total scan {2} ms",
+                total, afterGetAvailableAccomodation, totalScanTime, day.ToString("ddMMMyyyy"), di.Status.ToString());
+            //foreach(var st in scanTimes)
+            //{
+            //    Debug.Print("\t scan time {0} ms for {1} items", st.Item1, st.Item2);
+            //}
             return di;
         }
     }

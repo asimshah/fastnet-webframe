@@ -76,6 +76,7 @@
     <Compile Include="BookingGlobals.cs" />
     <Compile Include="DayInformation.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Parameter.cs" />
     <Compile Include="Period.cs" />
     <Compile Include="PriceStructure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

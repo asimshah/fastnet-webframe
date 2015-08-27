@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Fastnet.Webframe.BookingData
                     break;
                 case PeriodType.Rolling:
                     DateTime today = BookingGlobals.GetToday();
-                    DateTime endDate = today.AddYears(Interval.Years).AddMonths(Interval.Months).AddDays(Interval.Days);
+                    DateTime endDate = GetRollingEndDate(today);// today.AddYears(Interval.Years).AddMonths(Interval.Months).AddDays(Interval.Days);
                     result = day >= today && day <= endDate;
                     break;
                 case PeriodType.DaysInWeek:
@@ -45,6 +46,18 @@ namespace Fastnet.Webframe.BookingData
                     break;
             }
             return result;
+        }
+        public DateTime GetRollingEndDate()
+        {
+            Debug.Assert(PeriodType == PeriodType.Rolling);
+            DateTime today = BookingGlobals.GetToday();
+            return GetRollingEndDate(today);
+        }
+        public DateTime GetRollingEndDate(DateTime relativeTo)
+        {
+            Debug.Assert(PeriodType == PeriodType.Rolling);
+            DateTime endDate = relativeTo.AddYears(Interval.Years).AddMonths(Interval.Months).AddDays(Interval.Days).AddDays(-1);
+            return endDate;
         }
     }
 }

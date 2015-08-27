@@ -1,0 +1,139 @@
+﻿@import (reference) "../../../Content/bootstrap.less";
+@import (reference) "constants.less";
+
+@-ms-viewport {
+    width: device-width;
+}
+
+.SitePanel {
+    width: auto;
+}
+
+.BannerPanel {
+    /*background-color: white;*/
+    display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+    //display: -moz-box; /* OLD - Firefox 19- (buggy but mostly works) */
+    display: -ms-flexbox; /* TWEENER - IE 10 */
+    //display: -webkit-flex; /* NEW - Chrome */
+    display: flexbox; /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+.login-status {
+    z-index: 33333;
+    /*&.enable {
+        display: block;
+    }
+
+    &:not(.enable) {
+        display: none;
+    }*/
+    position: relative;
+
+    .login-name {
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    div {
+        position: absolute;
+        right: 0;
+        top: 60px;
+        margin-right: 4px;
+        background: transparent;
+        color: white;
+    }
+    /*.login-name:before {
+        content: "Welcome: ";
+    }*/
+}
+
+.BannerContent {
+    position: relative;
+
+    .app-title {
+        z-index: 4499;
+        position: absolute;
+        top: 10px;
+        left: 64px; // reposition for phone
+        color: #ffffff;
+        font-size: 2em; // make this smaller for phone
+        @media only screen and (max-width: 768px) {
+            left: 44px;
+            top: 8px;
+            font-size: 1.25em;
+        }
+
+        @media only screen and (max-width: 480px) {
+            left: 24px;
+            top: 6px;
+            font-size: 1.0em;
+        }
+
+        @media only screen and (max-width: 320px) {
+            left: 4px;
+            top: 4px;
+            font-size: 0.75em;
+        }
+    }
+}
+
+.AppPanel {
+    width: 100%;
+}
+
+#bookingCalendar {
+    .ui-widget {
+        font-size: 0.9em;
+    }
+
+    .ui-state-disabled {
+        opacity: inherit;
+    }
+
+    .ui-datepicker {
+        table {
+            font-size: 0.8em;
+        }
+
+        th {
+            font-weight: normal;
+        }
+    }
+
+    .out-of-service a, .out-of-service span,
+    .blocked a, .blocked span,
+    .part-booked a, .part-booked span,
+    .not-bookable a, .not-bookable span,
+    .fully-booked a, .fully-booked span,
+    //.free-blocked a, .free-blocked span,
+    .free a, .free span {
+        color: white;
+    }
+
+    .out-of-service, .out-of-service a, .out-of-service span {
+        background: @status-outofservice-colour;
+    }
+
+    .blocked, .blocked a, .blocked span {
+        background: @status-blocked-colour;
+    }
+
+    .part-booked, .part-booked a, .part-booked span {
+        background: @status-part-booked-colour;
+    }
+
+    .fully-booked, .fully-booked a, .fully-booked span {
+        background: @status-fully-booked-colour;
+    }
+
+    .free, .free a, .free span {
+        background: @status-free-colour;
+    }
+    .not-bookable, .not-bookable a, .not-bookable span {
+        background: @status-not-bookable-colour;
+    }
+}

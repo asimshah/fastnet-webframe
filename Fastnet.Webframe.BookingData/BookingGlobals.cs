@@ -34,6 +34,7 @@ namespace Fastnet.Webframe.BookingData
         public static void Startup()
         {
             Mapper.CreateMap<Accomodation, AccomodationTO>()
+                //.ForSourceMember(n => n.ParentAccomodation, opt => opt.Ignore())
                 .ForMember(n => n.IsBookable, opt => opt.Ignore())
                 .ForMember(n => n.IsBooked, opt => opt.Ignore())
                 .ForMember(n => n.IsAvailableToBook, opt => opt.Ignore())

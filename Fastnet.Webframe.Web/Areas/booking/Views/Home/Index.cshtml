@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Booking";
+    //To do: customise app name
+    ViewBag.AppName = "Don Whillan's Hut Booking System";
+}
+<div>
+    <div id="bookingCalendar"></div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/booking")
+    <script>
+        var bookingApp = null;
+        (function ($) {
+            @*var _u = fastnet.utilities.getInstance();
+            _u.setBaseUrl('@Url.Content("~/")');*@
+            bookingApp = new fastnet.bookingApp();
+            bookingApp.start();
+        })(jQuery);
+    </script>
+}

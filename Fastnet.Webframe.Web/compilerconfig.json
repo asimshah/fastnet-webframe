@@ -1,32 +1,18 @@
 ﻿[
   {
     "outputFile": "Content/DWH/custom.css",
-    "inputFile": "Content/DWH/custom.less",
-    "minify": {
-      "enabled": true
-    },
-    "includeInProject": true,
-    "sourceMap": false,
-    "options": {}
+    "inputFile": "Content/DWH/custom.less"
   },
   {
     "outputFile": "Content/Main/main.css",
-    "inputFile": "Content/Main/main.less",
-    "minify": {
-      "enabled": true
-    },
-    "includeInProject": true,
-    "sourceMap": false,
-    "options": {}
+    "inputFile": "Content/Main/main.less"
   },
   {
     "outputFile": "Areas/cms/Content/main.css",
-    "inputFile": "Areas/cms/Content/main.less",
-    "minify": {
-      "enabled": true
-    },
-    "includeInProject": true,
-    "sourceMap": false,
-    "options": {}
+    "inputFile": "Areas/cms/Content/main.less"
+  },
+  {
+    "outputFile": "Areas/booking/Content/main.css",
+    "inputFile": "Areas/booking/Content/main.less"
   }
 ]

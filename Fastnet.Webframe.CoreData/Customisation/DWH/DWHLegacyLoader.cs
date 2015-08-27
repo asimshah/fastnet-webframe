@@ -588,11 +588,29 @@ namespace Fastnet.Webframe.CoreData
         {
             using (BookingDataContext bctx = new BookingDataContext())
             {
+                SetParameters(bctx);
                 CreateAccomodation(bctx);
                 CreatePriceStructure(bctx);
                 LoadBookings(bctx);
             }
         }
+
+        private void SetParameters(BookingDataContext bctx)
+        {
+            Period pp = new Period
+            {
+                PeriodType = PeriodType.Rolling,
+                Interval = new LongSpan { Years = 1 }
+            };
+            Parameter p = new Parameter
+            {
+                ForwardBookingPeriod = pp
+            };
+            bctx.Periods.Add(pp);
+            bctx.Parameters.Add(p);
+            bctx.SaveChanges();
+        }
+
         private List<Period> LoadBlockedDays(BookingDataContext bctx)
         {
             var blockeddays = legacyBookingData.DayBook.Where(db => db.Day >= DateTime.Today && db.IsUnavailable).Select(d => d.Day).OrderBy(x => x).ToList();
@@ -733,52 +751,7 @@ namespace Fastnet.Webframe.CoreData
             List<dynamic> bookingAccomodation = ((JArray)Settings.bookingApp.accomodation).ToObject<List<dynamic>>();
             load(bookingAccomodation, null);
             bctx.SaveChanges();
-            //Accomodation room1 = new Accomodation
-            //{
-            //    Class = AccomodationClass.Standard,
-            //    Type = AccomodationType.Room,
-            //    Name = "Room 1",
-            //    Bookable = false,
-            //    SubAccomodationSeparatelyBookable = true
-            //};
-            //for (int i = 0; i < 4; ++i)
-            //{
-            //    Accomodation bed = new Accomodation
-            //    {
-            //        Class = AccomodationClass.Standard,
-            //        Type = AccomodationType.Bed,
-            //        Name = string.Format("Bed {0}", i + 1),
-            //        Bookable = true,
-            //    };
-            //    room1.SubAccomodation.Add(bed);
-            //}
-            //Accomodation room2 = new Accomodation
-            //{
-            //    Class = AccomodationClass.Standard,
-            //    Type = AccomodationType.Room,
-            //    Name = "Room 2",
-            //    Bookable = false,
-            //    SubAccomodationSeparatelyBookable = true
-            //};
-            //for (int i = 0; i < 8; ++i)
-            //{
-            //    Accomodation bed = new Accomodation
-            //    {
-            //        Class = AccomodationClass.Standard,
-            //        Type = AccomodationType.Bed,
-            //        Name = string.Format("Bed {0}", i + 1 + 4),
-            //        Bookable = true,
-            //    };
-            //    room2.SubAccomodation.Add(bed);
-            //}
-            //Accomodation hut = new Accomodation
-            //{
-            //    Class = AccomodationClass.Standard,
-            //    Type = AccomodationType.Hut,
-            //    Name = "Don Whillans Hut",
-            //    SubAccomodationSeparatelyBookable = true,
-            //    Bookable = true
-            //};
+
             // availabilities
             var blockedPeriods = LoadBlockedDays(bctx);
 
@@ -788,8 +761,6 @@ namespace Fastnet.Webframe.CoreData
                 {
                     PeriodType = PeriodType.Rolling,
                     Interval = new LongSpan { Years = 1 }
-                    //StartDate = DateTime.Parse("1/1/2014"),
-                    // = null // i.e. forever
                 };
 
                 Availability a1 = new Availability
@@ -797,9 +768,6 @@ namespace Fastnet.Webframe.CoreData
                     Accomodation = acc,
                     Period = pp
                 };
-                //hut.SubAccomodation.Add(room1);
-                //hut.SubAccomodation.Add(room2);
-                //bctx.AccomodationSet.Add(hut);
                 foreach (var p in blockedPeriods)
                 {
                     Availability a = new Availability

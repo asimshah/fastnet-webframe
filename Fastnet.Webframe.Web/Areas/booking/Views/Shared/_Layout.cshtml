@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/booking/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/site/css")
+    @Styles.Render("~/Content/jqueryui/css")
+    @Styles.Render("~/Content/booking/app/css")
+</head>
+<body>
+    <div class="SitePanel container"> 
+        <div class="login-status">
+            <div class="login-name"></div>
+        </div>
+        <div class="BannerContent">
+            <div class="BannerPanel"></div>
+            <div class="app-title">@ViewBag.AppName</div>
+        </div>
+        <div class="AppPanel">
+            @RenderBody()
+        </div>
+        <div class="forms-container">
+
+        </div>
+    </div>
+    <script>
+        var baseUrl = '@Url.Content("~/")';
+    </script>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/fastnet/vnext")
+    @RenderSection("scripts", required: false)
+    <script>
+        (function ($) {
+            fastnet.util.ajax.init('@Url.Content("~/")');
+        })(jQuery);
+    </script>
+</body>
+</html>
