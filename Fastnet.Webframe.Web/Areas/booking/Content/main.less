@@ -1,5 +1,6 @@
 ﻿@import (reference) "../../../Content/bootstrap.less";
 @import (reference) "constants.less";
+@import (reference) "fastnet/forms.less";
 
 @-ms-viewport {
     width: device-width;
@@ -17,7 +18,10 @@
     //display: -webkit-flex; /* NEW - Chrome */
     display: flexbox; /* NEW, Spec - Opera 12.1, Firefox 20+ */
 }
-
+.login-invitation {
+    margin: 4px;
+    font-size: 0.9em;
+}
 .login-status {
     z-index: 33333;
     /*&.enable {
@@ -32,9 +36,13 @@
     .login-name {
         text-decoration: none;
         cursor: pointer;
-
+        font-size: 0.9em;
+        margin-right: 8px;
         &:hover {
             text-decoration: underline;
+        }
+        a {
+            color: white;            
         }
     }
 
@@ -85,6 +93,14 @@
     width: 100%;
 }
 
+.booking-forms {
+    .chrome(@dark-purple, @yellow, @red);
+    .form-buttons(@purple, @white);
+
+    .help-button {
+        .button-style(@teal, @white);
+    }
+}
 #bookingCalendar {
     .ui-widget {
         font-size: 0.9em;

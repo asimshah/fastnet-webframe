@@ -28,7 +28,7 @@ namespace Fastnet.Webframe.BookingData
         public static List<AccomodationTO> map(IEnumerable<Accomodation> source)
         {
             var list = new List<AccomodationTO>();
-            foreach(var item in source)
+            foreach (var item in source)
             {
                 list.Add(mapItem(item));
             }
@@ -68,14 +68,10 @@ namespace Fastnet.Webframe.BookingData
         }
         public async Task<DayInformation> GetDayInformation(DateTime day)
         {
-            Stopwatch sw = new Stopwatch();
-            var scanTimes = new List<Tuple<long, int>>();
             Func<IEnumerable<AccomodationTO>, Task<bool>> scanBookingStatus = null;
+            #region scanBookingStatus
             scanBookingStatus = async (list) =>
             {
-                Stopwatch scanW = new Stopwatch();
-                scanW.Start();
-                //long startScan = sw.ElapsedMilliseconds;
                 foreach (var item in list)
                 {
                     Accomodation fullItem = await AccomodationSet.FindAsync(item.AccomodationId);
@@ -98,38 +94,33 @@ namespace Fastnet.Webframe.BookingData
                     }
                     if (!item.IsBooked)
                     {
-                        scanW.Stop();
                         var occ = await scanBookingStatus(item.SubAccomodation);
-                        scanW.Start();
-                        if(occ)
+                        if (occ)
                         {
                             item.IsAvailableToBook = false;
                         }
                     }
                     else
                     {
-                        foreach(var child in item.Descendants)
+                        foreach (var child in item.Descendants)
                         {
                             child.IsAvailableToBook = false;
                         }
                     }
                 }
                 bool occupied = false;
-                if(list.Count() > 0)
+                if (list.Count() > 0)
                 {
                     occupied = list.Any(x => x.Bookable == true && x.IsAvailableToBook == false)
                     || list.Any(x => x.Bookable == false && x.SubAccomodation.Any(z => z.IsAvailableToBook == false) == true);
-                    scanW.Stop();
-                    scanTimes.Add(Tuple.Create<long, int>(scanW.ElapsedMilliseconds, list.Count()));
                 }
                 return occupied;
             };
-            //
-            sw.Start();
-            DayInformation di = new DayInformation();
+
+            #endregion            //
+            DayInformation di = Factory.GetDayInformationInstance();// new DayInformation();
             di.Day = day;
             var availableAccomodation = await GetAvailableAccomodation(day);
-            long afterGetAvailableAccomodation = sw.ElapsedMilliseconds;
             if (availableAccomodation.Count() == 0)
             {
                 di.Status = DayStatus.IsClosed;
@@ -139,9 +130,9 @@ namespace Fastnet.Webframe.BookingData
                 await scanBookingStatus(availableAccomodation);
                 int availableToBook = 0;
                 int items = 0;
-                foreach(var item in availableAccomodation)
+                foreach (var item in availableAccomodation)
                 {
-                    foreach(var si in item.SelfAndDescendants)
+                    foreach (var si in item.SelfAndDescendants)
                     {
                         if (si.IsBookable)
                         {
@@ -151,23 +142,39 @@ namespace Fastnet.Webframe.BookingData
                     }
                 }
                 di.Status = availableToBook == 0 ? DayStatus.IsFull : items == availableToBook ? DayStatus.IsFree : DayStatus.IsPartBooked;
-                // todo: the next line to check for Saturday needs to go into DWH customisation
-                if(di.Status == DayStatus.IsFree && day.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    di.Status = DayStatus.IsNotBookable;
-                }
+
             }
             di.Accomodation = availableAccomodation;
-            sw.Stop();
-            long total = sw.ElapsedMilliseconds;
-            long totalScanTime = scanTimes.Sum(x => x.Item1);
-            Debug.Print("GetDayInformation({3}-{4}): total {0} ms:  afterGetAvailableAccomodation {1} ms, total scan {2} ms",
-                total, afterGetAvailableAccomodation, totalScanTime, day.ToString("ddMMMyyyy"), di.Status.ToString());
-            //foreach(var st in scanTimes)
-            //{
-            //    Debug.Print("\t scan time {0} ms for {1} items", st.Item1, st.Item2);
-            //}
+            di.PostProcess(this, day);
             return di;
+        }
+        public CalendarSetupTO GetCalendarSetupInfo()
+        {
+            Parameter p = Parameters.Single();
+            Period fp = p.ForwardBookingPeriod;
+            DateTime start = BookingGlobals.GetToday();
+            DateTime end;
+            switch (fp.PeriodType)
+            {
+                case PeriodType.Fixed:
+                    if (!fp.EndDate.HasValue)
+                    {
+                        var xe = new ApplicationException("Fixed Forward booking period must have an end date");
+                        //Log.Write(xe);
+                        throw xe;
+                    }
+                    start = new[] { fp.StartDate.Value, start }.Max();
+                    end = fp.EndDate.Value;
+                    break;
+                case PeriodType.Rolling:
+                    end = fp.GetRollingEndDate(start);
+                    break;
+                default:
+                    var xe2 = new ApplicationException("No valid Forward booking period available");
+                    //Log.Write(xe2);
+                    throw xe2;
+            }
+            return new CalendarSetupTO { startAt = start, until = end };
         }
     }
 }

@@ -69,6 +69,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accomodation.cs" />
+    <Compile Include="Customisation\DWH\DWHDayInformation.cs" />
+    <Compile Include="Factory.cs" />
+    <Compile Include="TransferObjects\CalendarSetupTO.cs" />
+    <Compile Include="TransferObjects\AccomodationTO.cs" />
     <Compile Include="Availability.cs" />
     <Compile Include="Booking.cs" />
     <Compile Include="BookingDataContext.cs" />

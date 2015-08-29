@@ -13,6 +13,7 @@ using Fastnet.Common;
 using Fastnet.Webframe.Web.Common;
 using System.Transactions;
 using Fastnet.EventSystem;
+using Microsoft.Owin.Security;
 
 namespace Fastnet.Webframe.Web.Controllers
 {
@@ -21,6 +22,18 @@ namespace Fastnet.Webframe.Web.Controllers
     {
         private CoreDataContext DataContext = Core.GetDataContext();
         private ApplicationUserManager _userManager;
+        private ApplicationSignInManager _signInManager;
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? HttpContext.Current.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
+        }
         public ApplicationUserManager UserManager
         {
             get
@@ -30,6 +43,13 @@ namespace Fastnet.Webframe.Web.Controllers
             private set
             {
                 _userManager = value;
+            }
+        }
+        private IAuthenticationManager AuthenticationManager
+        {
+            get
+            {
+                return HttpContext.Current.GetOwinContext().Authentication;
             }
         }
         [HttpPost]
@@ -82,6 +102,82 @@ namespace Fastnet.Webframe.Web.Controllers
                 //return Json(r);
             }
             //return this.Request.CreateResponse(HttpStatusCode.OK);
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("login")]
+        public async Task<dynamic> Login(dynamic data)
+        {
+            Func<SignInStatus, string> statusToString = (sis) =>
+            {
+                string text = "system error";
+                switch (sis)
+                {
+                    case SignInStatus.Failure:
+                        text = "Invalid credentials";
+                        break;
+                    case SignInStatus.LockedOut:
+                        text = "This account is locked out";
+                        break;
+                    case SignInStatus.RequiresVerification:
+                        text = "This account is not verified";
+                        break;
+                    default:
+                    case SignInStatus.Success:
+                        // we should never reach here!
+                        break;
+                }
+                return text;
+            };
+            string emailAddress = data.emailAddress;
+            string password = data.password;
+            var user = await UserManager.FindByEmailAsync(emailAddress);
+            if (user == null)
+            {
+                return Json(new { Success = false, Error = "Invalid Credentials" });
+            }
+            else
+            {
+                var CurrentMember = this.GetCurrentMember();
+                var member = DataContext.Members.Single(m => m.Id == user.Id);
+                //if (member.IsAdministrator || await UserManager.IsEmailConfirmedAsync(user.Id))
+                if (member.IsAdministrator || (member.EmailAddressConfirmed && !member.Disabled))
+                {
+                    if (CurrentMember != null && emailAddress != CurrentMember.EmailAddress)
+                    {
+                        Logoff();
+                    }
+                    SignInStatus result = await SignInManager.PasswordSignInAsync(emailAddress, password, false, false);
+                    switch (result)
+                    {
+                        case SignInStatus.Success:
+                            member.LastLoginDate = DateTime.UtcNow;
+                            HttpContext.Current.Session["current-member"] = member.Id;
+                            return Json(new { Success = true });
+                        default:
+                            return Json(new { Success = false, Error = statusToString(result) });
+                    }
+                }
+                else
+                {
+                    string error = "System error!";
+                    if (!member.EmailAddressConfirmed)
+                    {
+                        error = "This account has not been activated";
+                    }
+                    else if (member.Disabled)
+                    {
+                        error = "This account is barred";
+                    }
+                    return new { Success = false, Error = error };
+                }
+            }
+        }
+        private void Logoff()
+        {
+            AuthenticationManager.SignOut();
+            //this.InEditMode = false;
+            HttpContext.Current.Session["current-member"] = Member.Anonymous.Id;
         }
     }
 }

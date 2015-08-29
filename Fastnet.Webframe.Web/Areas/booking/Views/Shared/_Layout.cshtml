@@ -12,15 +12,19 @@
 </head>
 <body>
     <div class="SitePanel container"> 
-        <div class="login-status">
-            <div class="login-name"></div>
+        <div class="row">
+            <div class="login-status">
+                <div class="login-name"></div>
+            </div>
+            <div class="BannerContent">
+                <div class="BannerPanel"></div>
+                <div class="app-title">@ViewBag.AppName</div>
+            </div>
         </div>
-        <div class="BannerContent">
-            <div class="BannerPanel"></div>
-            <div class="app-title">@ViewBag.AppName</div>
-        </div>
-        <div class="AppPanel">
-            @RenderBody()
+        <div class="row AppPanel">
+            <div class="col-xs-12">
+                @RenderBody()
+            </div>
         </div>
         <div class="forms-container">
 
@@ -30,9 +34,9 @@
         var baseUrl = '@Url.Content("~/")';
     </script>
     @Scripts.Render("~/bundles/jquery")
+    <!-- BEWARE: make sure bootstrap is loaded before jqueryui! Otherwise dialog close button icons will disappear -->
+    @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/jqueryui")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/fastnet/vnext")
     @RenderSection("scripts", required: false)
     <script>

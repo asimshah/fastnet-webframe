@@ -78,9 +78,18 @@
                 $T.GotoInternalLink(r.url);
             });
             $(window).bind('popstate', function (event) {
-                //Debug.writeln(location.href);
+                var obj = event.originalEvent.state;
+                if (obj === null) {
+                    location.href = "home";
+                } else {
+                    var url = obj.href;
+                    if (url.startsWith("page/")) {
+                        //var id = parseInt(url.substring(6));
+                        $T.SetPage(url.substring(5));
+                    }
+                }
                 if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
-                    location.href = location.href;
+                    //location.href = location.href;
                 }
             });
         },
@@ -153,6 +162,14 @@
                         md.data = r;
                         //$U.Debug("Panel {0}, master {1}, added menu {2}", panelSelector, mm.Id, menu.getId());
                         $($T.panelData).trigger("menucreated", { selector: panelSelector, menuId: menu.getId() });
+                        $(panelSelector + " .fastnet-menu a").on("click", function (e) {
+                            var url = $(e.currentTarget).attr("href");
+                            //$U.Debug("menu link to {0}", url);
+                            if ($T.IsLinkInternal(url)) {
+                                e.preventDefault();
+                                $T.GotoInternalLink(url);
+                            }
+                        });
                     }
 
                 });
@@ -187,26 +204,41 @@
                 });
             });
         },
+        StandardiseUrl: function (url) {
+            var thisSite = $("head base").attr("href");
+            url = url.toLowerCase();
+            if (url.startsWith(thisSite)) {
+                url = url.substring(thisSite.length, url.length - thisSite.length)
+            }
+            if (!(url.startsWith("http") || url.startsWith("file") || url.startsWith("mailto"))) {
+                if (url.startsWith("/")) {
+                    url = url.substring(1);
+                }
+            }
+            return url;
+        },
         GotoInternalLink: function (url) {
+            url = $T.StandardiseUrl(url); //NB: this removes any leading "/"
             switch (url) {
-                case "/home":
+                //case "/home":
                 case "login":
+                //case "/login":
                     $T.ShowDialog("login");
                     break;
-                case "/register":
-                case "/recoverpassword":
-                case "/studio":
-                case "/membership":
+                case "register":
+                case "recoverpassword":
+                //case "/studio":
+                //case "/membership":
                     $.fastnet$account.AccountOperation(url);
                     break;
-                case "/userprofile":
+                case "userprofile":
                     $T.ShowDialog("userprofile");
                     break;
                 default:
                     if (url.startsWith("page/")) {
                         //var id = parseInt(url.substring(6));
                         $T.SetPage(url.substring(5));
-                        window.history.pushState({ href: url }, null, url);
+                        window.history.pushState({ href: url }, "", url);
                     }
                     break;
             }
@@ -218,7 +250,7 @@
             //    "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
             //    "studio", "membership"];
             var builtIn = [
-               "login", "logon", "login", "logoff", "register", "recoverpassword"];
+               "login", "logon",  "logoff", "register", "recoverpassword"];
             function isBuiltIn(url) {
                 var r = false;
                 $.each(builtIn, function (i, item) {
@@ -247,19 +279,7 @@
                 });
             });
         },
-        StandardiseUrl: function (url) {
-            var thisSite = $("head base").attr("href");
-            url = url.toLowerCase();
-            if (url.startsWith(thisSite)) {
-                url = url.substring(thisSite.length, url.length - thisSite.length)
-            }
-            if (!(url.startsWith("http") || url.startsWith("file") || url.startsWith("mailto"))) {
-                if (url.startsWith("/")) {
-                    url = url.substring(1);
-                }
-            }
-            return url;
-        },
+
         LoadStartPage: function (startPage) {
             $T.SetReponsiveFeatures();
             var pageId = startPage;

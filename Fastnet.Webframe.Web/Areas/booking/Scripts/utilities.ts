@@ -67,5 +67,10 @@ module fastnet {
                 //}
             }
         }
+        export class helper {
+            public static isNullOrUndefined(obj: any): boolean {
+                return obj === null || obj === undefined;
+            }
+        }
     }
 }

@@ -323,12 +323,19 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Areas\booking\Content\fastnet\forms.css">
+      <DependentUpon>forms.less</DependentUpon>
+    </Content>
+    <Content Include="Areas\booking\Content\fastnet\forms.min.css">
+      <DependentUpon>forms.css</DependentUpon>
+    </Content>
     <Content Include="Areas\booking\Content\main.css">
       <DependentUpon>main.less</DependentUpon>
     </Content>
     <Content Include="Areas\booking\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\booking\HtmlPage1.html" />
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
     <Content Include="Areas\cms\Content\images\centrepage.png" />
@@ -1137,6 +1144,7 @@
     <Content Include="Areas\booking\Views\Home\Index.cshtml" />
     <Content Include="Areas\booking\Content\main.less" />
     <Content Include="Areas\booking\Content\constants.less" />
+    <Content Include="Areas\booking\Content\fastnet\forms.less" />
     <None Include="compilerconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
@@ -1584,6 +1592,7 @@
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
     <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\typings\collections.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />

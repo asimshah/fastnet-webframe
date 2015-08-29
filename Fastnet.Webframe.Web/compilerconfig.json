@@ -14,5 +14,9 @@
   {
     "outputFile": "Areas/booking/Content/main.css",
     "inputFile": "Areas/booking/Content/main.less"
+  },
+  {
+    "outputFile": "Areas/booking/Content/fastnet/forms.css",
+    "inputFile": "Areas/booking/Content/fastnet/forms.less"
   }
 ]

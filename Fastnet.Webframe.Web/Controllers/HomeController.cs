@@ -167,6 +167,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [AllowAnonymous]
         [HttpPost]
         [Route("account/login")]
+        /// no longer used - login is now in UserController - 28Aug2015
         public async Task<ActionResult> Login(LoginViewModel model)
         {
             Func<SignInStatus, string> statusToString = (sis) =>

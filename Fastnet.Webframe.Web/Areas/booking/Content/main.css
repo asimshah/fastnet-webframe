@@ -86,6 +86,10 @@
   display: flexbox;
   /* NEW, Spec - Opera 12.1, Firefox 20+ */
 }
+.login-invitation {
+  margin: 4px;
+  font-size: 0.9em;
+}
 .login-status {
   z-index: 33333;
   /*&.enable {
@@ -103,9 +107,14 @@
 .login-status .login-name {
   text-decoration: none;
   cursor: pointer;
+  font-size: 0.9em;
+  margin-right: 8px;
 }
 .login-status .login-name:hover {
   text-decoration: underline;
+}
+.login-status .login-name a {
+  color: white;
 }
 .login-status div {
   position: absolute;
@@ -149,6 +158,68 @@
 }
 .AppPanel {
   width: 100%;
+}
+.booking-forms .ui-chrome-titlebar,
+.booking-forms .ui-form-titlebar {
+  background-image: none;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  background-color: #603cba;
+}
+.booking-forms .ui-chrome-title,
+.booking-forms .ui-form-title {
+  color: #ffc40d;
+}
+.booking-forms .ui-chrome-systemclose {
+  color: #ee1111;
+}
+.booking-forms .ui-chrome-systemclose:hover,
+.booking-forms .ui-chrome-systemclose:focus,
+.booking-forms .ui-chrome-systemclose:active {
+  background-color: transparent !important;
+  color: #ffe38d !important;
+}
+.booking-forms .ui-form-buttonpane {
+  border-top: 1px solid #bf9bbb;
+}
+.booking-forms .ui-form-button {
+  background-image: none !important;
+  background-color: #7e3878 !important;
+  color: #ffffff !important;
+  border: 1px solid #371935 !important;
+}
+.booking-forms .ui-form-button:hover {
+  background-color: #c174bb !important;
+  color: #ffffff !important;
+}
+.booking-forms .ui-form-button[disabled],
+.booking-forms .ui-form-button[disabled]:hover,
+.booking-forms .ui-form-button[disabled]:focus,
+.booking-forms .ui-form-button[disabled]:active {
+  background-color: #9b9b9b !important;
+  cursor: not-allowed !important;
+  color: #ffffff !important;
+}
+.booking-forms .help-button {
+  background-image: none !important;
+  background-color: #00aba9 !important;
+  color: #ffffff !important;
+  border: 1px solid #004544 !important;
+}
+.booking-forms .help-button:hover {
+  background-color: #2bfffd !important;
+  color: #ffffff !important;
+}
+.booking-forms .help-button[disabled],
+.booking-forms .help-button[disabled]:hover,
+.booking-forms .help-button[disabled]:focus,
+.booking-forms .help-button[disabled]:active {
+  background-color: #959595 !important;
+  cursor: not-allowed !important;
+  color: #ffffff !important;
 }
 #bookingCalendar .ui-widget {
   font-size: 0.9em;

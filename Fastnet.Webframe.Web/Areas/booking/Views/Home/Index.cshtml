@@ -1,11 +1,15 @@
-﻿@{
+﻿@using Fastnet.Webframe.BookingData
+@{
     ViewBag.Title = "Booking";
-    //To do: customise app name
-    ViewBag.AppName = "Don Whillan's Hut Booking System";
+    ViewBag.AppName = BookingGlobals.GetLodgementName() +  " Booking System";
 }
-<div>
+<div class="row">
     <div id="bookingCalendar"></div>
 </div>
+<div class="row">
+    <div class="booking-interaction"></div>
+</div>
+
 @section scripts {
     @Scripts.Render("~/bundles/booking")
     <script>

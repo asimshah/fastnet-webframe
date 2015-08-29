@@ -50,31 +50,40 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             using (var ctx = new BookingDataContext())
             {
-                Parameter p = ctx.Parameters.Single();
-                Period fp = p.ForwardBookingPeriod;
-                DateTime start = BookingGlobals.GetToday();
-                DateTime end;
-                switch(fp.PeriodType)
+                try
                 {
-                    case PeriodType.Fixed:
-                        if(!fp.EndDate.HasValue)
-                        {
-                            var xe = new ApplicationException("Fixed Forward booking period must have an end date");
-                            Log.Write(xe);
-                            throw xe;
-                        }
-                        start = new[] { fp.StartDate.Value, start }.Max();
-                        end = fp.EndDate.Value;
-                        break;
-                    case PeriodType.Rolling:
-                        end = fp.GetRollingEndDate(start);
-                        break;
-                    default:
-                        var xe2 = new ApplicationException("No valid Forward booking period available");
-                        Log.Write(xe2);
-                        throw xe2;
+                    return ctx.GetCalendarSetupInfo();
                 }
-                return new { startAt = start, until = end };
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
+                    throw;
+                }
+                //Parameter p = ctx.Parameters.Single();
+                //Period fp = p.ForwardBookingPeriod;
+                //DateTime start = BookingGlobals.GetToday();
+                //DateTime end;
+                //switch(fp.PeriodType)
+                //{
+                //    case PeriodType.Fixed:
+                //        if(!fp.EndDate.HasValue)
+                //        {
+                //            var xe = new ApplicationException("Fixed Forward booking period must have an end date");
+                //            Log.Write(xe);
+                //            throw xe;
+                //        }
+                //        start = new[] { fp.StartDate.Value, start }.Max();
+                //        end = fp.EndDate.Value;
+                //        break;
+                //    case PeriodType.Rolling:
+                //        end = fp.GetRollingEndDate(start);
+                //        break;
+                //    default:
+                //        var xe2 = new ApplicationException("No valid Forward booking period available");
+                //        Log.Write(xe2);
+                //        throw xe2;
+                //}
+                //return new { startAt = start, until = end };
             }
         }
         [HttpGet]
@@ -108,8 +117,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             using (var ctx = new BookingDataContext())
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
                 List<DayInformation> dayList = new List<DayInformation>();
                 for (DateTime day = start; day <= end; day = day.AddDays(1))
                 {
@@ -120,15 +129,16 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         case DayStatus.IsFull:
                         case DayStatus.IsPartBooked:
                         case DayStatus.IsNotBookable:
+                        case DayStatus.IsFree:
                             di.StatusDisplay = di.ToString();
                             di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload                          
                             dayList.Add(di);
                             break;
                     }
                 }
-                sw.Stop();
-                Debug.Print("GetDayStatus(), from {0} to {1}, {2} ms for {3} items",
-                    start.ToString("ddMMMyyyy"), end.ToString("ddMMMyyyy"), sw.ElapsedMilliseconds, dayList.Count());
+                //sw.Stop();
+                //Debug.Print("GetDayStatus(), from {0} to {1}, {2} ms for {3} items",
+                //    start.ToString("ddMMMyyyy"), end.ToString("ddMMMyyyy"), sw.ElapsedMilliseconds, dayList.Count());
                 return dayList;
             }
         }

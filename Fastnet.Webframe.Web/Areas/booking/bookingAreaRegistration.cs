@@ -32,14 +32,16 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 ));
             bundles.Add(new StyleBundle("~/Content/booking/app/css")
                 .Include(
-                "~/Areas/booking/Content/main.css"
+                 "~/Areas/booking/Content/fastnet/forms.css",
+                 "~/Areas/booking/Content/main.css"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/fastnet/vnext").Include(
                 //"~/Scripts/mustache.js",
                 "~/Scripts/moment.js",
                 "~/Scripts/collections/collections.js",
-                "~/Areas/booking/Scripts/utilities.js"
+                "~/Areas/booking/Scripts/utilities.js",
+                "~/Areas/booking/Scripts/fastnet/forms.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/booking").Include(

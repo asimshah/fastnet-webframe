@@ -275,7 +275,8 @@
                     var password = data.password;
                     var postData = { emailAddress: emailAddress, password: password };
                     $.when(
-                        $U.AjaxPost({ url: "account/login", data: postData })
+                        //$U.AjaxPost({ url: "account/login", data: postData })
+                        $U.AjaxPost({ url: "user/login", data: postData })
                         ).then(function (result) {
                             var success = result.Success;
                             if (success) {
