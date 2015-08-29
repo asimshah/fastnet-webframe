@@ -2,6 +2,20 @@
 
 
 module fastnet {
+    export module web {
+        //import ajax = fastnet.util.ajax;
+        export class tools {
+            public static  getTemplate(templateUrl: string): JQueryPromise<string> {
+                var url = "template/get/" + templateUrl;
+                var deferred = $.Deferred<string>();
+                $.when(fastnet.util.ajax.Get({ url: url })).then((r) => {
+                    var template = r.Template;
+                    deferred.resolve(template);
+                });
+                return deferred.promise();
+            }
+        }
+    }
     export module util {
         export class ajax {
             private static rootUrl: string = "/";
@@ -11,10 +25,6 @@ module fastnet {
                 $(document).ajaxError(this.ajaxError);
             }
             public static Get(args: JQueryAjaxSettings, cache: boolean = true) : JQueryXHR {
-                //var cache = true;
-                //if (typeof noCache !== "undefined") {
-                //    cache = !noCache;
-                //}
                 return $.ajax({
                     url: this.rootUrl + args.url,
                     contentType: "application/json",

@@ -167,11 +167,11 @@
   border-top: none !important;
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
-  background-color: #603cba;
+  background-color: #2d89ef;
 }
 .booking-forms .ui-chrome-title,
 .booking-forms .ui-form-title {
-  color: #ffc40d;
+  color: #ffffff;
 }
 .booking-forms .ui-chrome-systemclose {
   color: #ee1111;
@@ -180,26 +180,29 @@
 .booking-forms .ui-chrome-systemclose:focus,
 .booking-forms .ui-chrome-systemclose:active {
   background-color: transparent !important;
-  color: #ffe38d !important;
+  color: #ffffff !important;
 }
 .booking-forms .ui-form-buttonpane {
-  border-top: 1px solid #bf9bbb;
+  border-top: 2px solid #2d89ef;
 }
 .booking-forms .ui-form-button {
-  background-image: none !important;
-  background-color: #7e3878 !important;
+  background-image: none  !important;
+  background-color: #2d89ef !important;
   color: #ffffff !important;
-  border: 1px solid #371935 !important;
+  border: 1px solid #0d57a9 !important;
+  min-width: 80px !important;
+  font-size: 0.8em !important;
+  outline: none !important;
 }
 .booking-forms .ui-form-button:hover {
-  background-color: #c174bb !important;
+  background-color: #a3ccf8 !important;
   color: #ffffff !important;
 }
 .booking-forms .ui-form-button[disabled],
 .booking-forms .ui-form-button[disabled]:hover,
 .booking-forms .ui-form-button[disabled]:focus,
 .booking-forms .ui-form-button[disabled]:active {
-  background-color: #9b9b9b !important;
+  background-color: #cecece !important;
   cursor: not-allowed !important;
   color: #ffffff !important;
 }

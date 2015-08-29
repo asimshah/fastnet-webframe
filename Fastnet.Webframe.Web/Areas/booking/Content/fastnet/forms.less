@@ -9,13 +9,13 @@
 @teal: #00aba9;
 @light-blue: #eff4ff;
 @blue: #2d89ef;
-@dark-blue:#2b5797;
+@dark-blue: #2b5797;
 @yellow: #ffc40d;
 @orange: #e3a21a;
 @dark-orange: #da532c;
 @red: #ee1111;
-@dark-red:#b91d47;
-@white:#ffffff;
+@dark-red: #b91d47;
+@white: #ffffff;
 @grey: lighten(@black, 50%);
 @light-grey: lighten(@black, 80%);
 @dark-grey: lighten(@black, 10%);
@@ -61,18 +61,23 @@
         background-color: transparent !important;
         color: lighten(@fgc, 25%) !important;
     }
+
+    .ui-form-buttonpane {
+        border-top: 2px solid @bgc;
+    }
 }
 
 .form-buttons(@bgc; @fgc;) {
-    .ui-form-buttonpane {
-        border-top: 1px solid average(@bgc, @fgc);
-    }
+
 
     .ui-form-button {
-        background-image: none !important;
-        background-color: @bgc !important;
-        color: @fgc !important;
-        border: 1px solid darken(@bgc, 20%) !important;
+        background-image: none ;
+        background-color: @bgc ;
+        color: @fgc ;
+        border: 1px solid darken(@bgc, 20%);
+        min-width: 80px;
+        font-size: 0.8em;
+        outline: none;
     }
 
     .ui-form-button:hover {

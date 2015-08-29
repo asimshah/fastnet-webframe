@@ -1,6 +1,8 @@
 ﻿/// <reference path="../../../scripts/typings/jquery/jquery.d.ts" />
 /// <reference path="../../../scripts/typings/jqueryui/jqueryui.d.ts" />
 /// <reference path="../../../scripts/typings/moment/moment.d.ts" />
+/// <reference path="../../../scripts/typings/knockout/knockout.d.ts" />
+
 /// <reference path="typings/collections.d.ts" />
 
 module fastnet {
@@ -8,6 +10,7 @@ module fastnet {
     import ajax = fastnet.util.ajax;
     import debug = fastnet.util.debug;
     import str = fastnet.util.str;
+    import wt = fastnet.web.tools;
     enum DayStatus {
         IsClosed,
         IsFree,
@@ -40,10 +43,26 @@ module fastnet {
         (mt: monthTuple): monthTuple;
     }
     export class bookingApp {
+
+        private testFormContent =
+        `<div class="login-form">
+            <h6>Enter your email address and password</h6>
+            <div class="form-group-sm" data-property>
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" id="email" data-item="email" data-focus >
+                <div class="message"></div>
+            </div>
+            <div class="form-group-sm" data-property>
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password"  data-item="password">
+                <div class="message"></div>
+            </div>
+            <div class="error"></div>
+        </div>`
         private formStyleClasses = ["booking-forms"];
         private dayDictionary: collections.Dictionary<string, DayInformation>;
         private dayDictionaryMonthsLoaded: collections.Dictionary<string, boolean>;
-        private help: number;
+        //private help: number;
         private currentMember: member;
         private calendarPeriod: period;
         public start(): void {
@@ -51,7 +70,14 @@ module fastnet {
             this.dayDictionaryMonthsLoaded = new collections.Dictionary<string, boolean>();
             this.currentMember = { anonymous: true, fullname: null };
             this.calendarPeriod = { start: null, end: null };
-            this.loadInitialisationData(() => {
+            //this.loadInitialisationData(() => {
+            //    this.setMember();
+            //    var initialNumberOfMonths = this.addBookingCalendar();
+            //    this.loadDayDictionaryInSteps(this.calendarPeriod.start, initialNumberOfMonths, () => {
+            //        //debugger;
+            //    });
+            //});
+            this.loadInitialisationData().then(() => {
                 this.setMember();
                 var initialNumberOfMonths = this.addBookingCalendar();
                 this.loadDayDictionaryInSteps(this.calendarPeriod.start, initialNumberOfMonths, () => {
@@ -59,10 +85,11 @@ module fastnet {
                 });
             });
         }
-        private loadInitialisationData(afterLoad: callback): void {
+        private loadInitialisationData(): JQueryPromise<void> {
             // we need to load:
             // 1. the current member,
             // 2. the forward bookable period (for the booking calendar)
+            var deferred = $.Deferred<void>();
             var calendarInfoUrl = "bookingapi/calendar/setup/info";
             var memberInfoUrl = "bookingapi/member";
             $.when(
@@ -71,9 +98,25 @@ module fastnet {
                     this.currentMember = r1[0];
                     this.calendarPeriod.start = moment(r2[0].startAt).toDate();
                     this.calendarPeriod.end = moment(r2[0].until).toDate();
-                    afterLoad();
+                    deferred.resolve();
                 });
+            return deferred.promise();
         }
+        //private loadInitialisationData(afterLoad: callback): void {
+        //    // we need to load:
+        //    // 1. the current member,
+        //    // 2. the forward bookable period (for the booking calendar)
+        //    var calendarInfoUrl = "bookingapi/calendar/setup/info";
+        //    var memberInfoUrl = "bookingapi/member";
+        //    $.when(
+        //        ajax.Get({ url: memberInfoUrl }, false),
+        //        ajax.Get({ url: calendarInfoUrl }, false)).then((r1, r2) => {
+        //            this.currentMember = r1[0];
+        //            this.calendarPeriod.start = moment(r2[0].startAt).toDate();
+        //            this.calendarPeriod.end = moment(r2[0].until).toDate();
+        //            afterLoad();
+        //        });
+        //}
         private loadDayDictionaryInSteps(startAt: Date, numberOfMonthsToLoad: number, afterLoad: callback) {
             var lastMonth = false;
             var sd = moment(startAt);
@@ -135,8 +178,6 @@ module fastnet {
             if (w <= (factor * 2)) {
                 n = Math.round((w + (factor / 2)) / factor) + 1;
             }
-            //n = 1;
-            //debug.print("fw: {0}, w: {1}, n: {2}", fw, w, n);
             var cn = $('#bookingCalendar').datepicker("option", "numberOfMonths");
             if (n != cn) {
                 $('#bookingCalendar').datepicker("option", "numberOfMonths", n);
@@ -151,7 +192,6 @@ module fastnet {
             if (this.dayDictionary.isEmpty()) {
                 return [false, "blocked", "not ready"];
             } else {
-                //debug.print("calendarBeforeShowDate(): {0}", day.format("DDMMMYYYY"));
                 if (this.dayDictionary.containsKey(day.format("DDMMMYYYY"))) {
                     var di = this.dayDictionary.getValue(day.format("DDMMMYYYY"));
                     var r: any[];
@@ -181,10 +221,8 @@ module fastnet {
             }
         }
         private calendarOnChangeMonth(year, month) {
-            //debug.print("calendarOnChangeMonth(): year {0}, month {1}", year, month);
             var sd = new Date(year, month, 1);
             this.loadDayDictionaryInSteps(sd, 3, () => {
-                //debugger;
             });
         }
         private addBookingCalendar(): number {
@@ -208,12 +246,21 @@ module fastnet {
             debug.print("onLoginRequested");
             var loginForm = new fastnet.form({
                 modal: true,
-                title: "Login test",
+                title: "Login",
                 styleClasses: this.formStyleClasses,
-                okButton: null
+                okButtonText: "Login"
             });
-            loginForm.open((f, cmd) => {
-                debugger;
+            var loginFormTemplateUrl = "booking/login";
+            wt.getTemplate(loginFormTemplateUrl).then((t) => {
+                loginForm.setContentHtml(t);
+                loginForm.open((f, cmd) => {
+                    switch (cmd) {
+                        case "cancel-command":
+                            f.close();
+                            break;
+                    }
+                });
+                loginForm.disableCommand("ok-command");
             });
         }
         private onRegisterRequested(): void {
@@ -242,9 +289,9 @@ module fastnet {
                 });
             } else {
                 $(".booking-interaction").off().empty();
-                //debug.print("user is {0}", this.currentMember.fullname);
                 $(".login-name").off().text(this.currentMember.fullname);
             }
         }
+
     }
 }

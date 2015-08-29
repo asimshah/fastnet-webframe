@@ -29,6 +29,10 @@ module fastnet {
         styleClasses?: string[];
         hideSystemCloseButton?: boolean;
         okButton?: formButton;
+        okButtonText?: string;
+        cancelButton?: formButton;
+        cancelButtonText?: string;
+
     }
     interface modalPosition {
         openingHeight: number;
@@ -37,7 +41,7 @@ module fastnet {
     }
     export class form {
         private static formCount: number = 0;
-        private static formTemplate = `
+        private static modelessFormTemplate = `
             <div id='{0}' class='ui-form {2}' >
                 <div class='ui-form-titlebar' >
                     <span class='ui-form-title' >{1}</span>
@@ -51,22 +55,48 @@ module fastnet {
         private formId: string;
         private modalPosition: modalPosition;
         private commandCallback: CommandCallback;
-        constructor(opts: form$options) {
-            //this.commandCallback = onCommand;
+        private buttons: formButton[];
+        private contentHtml: string = null;
+        constructor(opts: form$options, contentHtml?: string) {
+            this.buttons = [];
             this.options = {
                 modal: false,
                 title: "title required",
                 container: null,
                 styleClass: "dialog-style",
                 hideSystemCloseButton: false,
-                okButton: { text: "OK", command: "ok-command", position: buttonPosition.right }
+                okButton: { text: "OK", command: "ok-command", position: buttonPosition.right },
+                cancelButton: { text: "Cancel", command: "cancel-command", position: buttonPosition.right }
                 //onCommand: (f, c) => { this.onCommand(f, c) }
             }
+            this.contentHtml = contentHtml;
             $.extend(true, this.options, opts);
             if (!this.validateOptions()) {
                 debug.print("form options are invalid");
             }
             this.formId = "ff-" + form.formCount++;
+            if (this.options.okButton !== null && !h$.isNullOrUndefined(this.options.okButtonText)) {
+                this.options.okButton.text = this.options.okButtonText;
+            }
+            if (this.options.cancelButton !== null && !h$.isNullOrUndefined(this.options.cancelButtonText)) {
+                this.options.cancelButton.text = this.options.cancelButtonText;
+            }
+            if (this.options.cancelButton != null) {
+                this.buttons.push(this.options.cancelButton);
+            }
+            if (this.options.okButton != null) {
+                this.buttons.push(this.options.okButton);
+            }
+
+        }
+        public setContentHtml(html: string): void {
+            this.contentHtml = html;
+        }
+        public close() {
+            if (this.options.modal) {
+                $(`#${this.formId}`).off().dialog("close");
+            } else {
+            }
         }
         public open(onCommand: CommandCallback): void {
             this.commandCallback = onCommand;
@@ -77,9 +107,44 @@ module fastnet {
                 this.openModeless();
             }
         }
+        public disableCommand(cmd: string): void {
+            var f = this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);
+            let buttons = `button[data-cmd='${cmd}'], input[type=button][data-cmd='${cmd}']`;
+            $(f).find(buttons).prop("disabled", true);
+        }
+        public enableCommand(cmd: string): void {
+            var f = this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);
+            let buttons = `button[data-cmd='${cmd}'], input[type=button][data-cmd='${cmd}']`;
+            $(f).find(buttons).prop("disabled", false);
+        }
         private openModal(): void {
-            var root = $("<div></div>").attr("id", this.formId).append($("<div>some form body</div>"));
+            var buttons = [];
+            $.each(this.buttons, (i, item) => {
+                var b = {
+                    text: item.text,
+                    "data-cmd": item.command,
+                    click: (e) => {
+                        var cmd = $(e.target).attr("data-cmd");
+                        e.stopPropagation();
+                        e.preventDefault();
+                        this.onCommand(cmd);
+                    },
+                    "class": ""
+                };
+                if (!h$.isNullOrUndefined(item.classList) && item.classList.length > 0) {
+                    b["class"] = item.classList.join(" ");
+                }
+                if (item.position === buttonPosition.right) {
+                    b["class"] += " pull-right";
+                }
+                if (item.position === buttonPosition.left) {
+                    b["class"] += " pull-left";
+                }
+                buttons.push(b);
+            });
+            var root = $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
             var dg = $(root).dialog({
+                buttons: buttons,
                 autoOpen: false,
                 modal: true,
                 title: this.options.title,
@@ -155,10 +220,11 @@ module fastnet {
             ui_dialog.find(".ui-dialog-title").addClass("ui-chrome-title");
             ui_dialog.find(".ui-dialog-titlebar-close")
                 .addClass("ui-chrome-systemclose")
-                .attr("tabindex", "-1");;
+                .attr("tabindex", "-1");
+            ui_dialog.find(".ui-dialog-buttonpane").addClass("ui-form-buttonpane");
             ui_dialog.find(".ui-dialog-buttonset .ui-button").addClass("ui-form-button");
         }
-        private onWindowResize(e) : void {
+        private onWindowResize(e): void {
             if (e.target === window) {
                 let elem = $(`#${this.formId}`);
                 let ui_dialog = elem.closest(".ui-dialog");
