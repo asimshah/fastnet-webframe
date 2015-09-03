@@ -112,7 +112,13 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             return await GetDayStatusForDateRange(start, end);
         }
-
+        [HttpGet]
+        [Route("test/{emailAddress}")]
+        public async Task<dynamic> Test(string emailAddress)
+        {
+            await Task.Delay(3000);
+            return  new { Success = false, Error = "Always false during testing (delay 3 secs)" };
+        }
         private static async Task<dynamic> GetDayStatusForDateRange(DateTime start, DateTime end)
         {
             using (var ctx = new BookingDataContext())

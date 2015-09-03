@@ -1,13 +1,17 @@
 ﻿@using Fastnet.Webframe.BookingData
 @{
     ViewBag.Title = "Booking";
-    ViewBag.AppName = BookingGlobals.GetLodgementName() +  " Booking System";
+    ViewBag.AppName = BookingGlobals.GetLodgementName() + " Booking System";
 }
 <div class="row">
-    <div id="bookingCalendar"></div>
+    <div class="col-xs-12">
+        <div id="bookingCalendar"></div>
+    </div>
 </div>
 <div class="row">
-    <div class="booking-interaction"></div>
+    <div class="col-xs-12">
+        <div class="booking-interaction"></div>
+    </div>
 </div>
 
 @section scripts {
@@ -19,6 +23,7 @@
             _u.setBaseUrl('@Url.Content("~/")');*@
             bookingApp = new fastnet.bookingApp();
             bookingApp.start();
+
         })(jQuery);
     </script>
 }

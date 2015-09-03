@@ -13,21 +13,20 @@
 <body>
     <div class="SitePanel container"> 
         <div class="row">
-            <div class="login-status">
-                <div class="login-name"></div>
-            </div>
-            <div class="BannerContent">
-                <div class="BannerPanel"></div>
-                <div class="app-title">@ViewBag.AppName</div>
+            <div class="col-xs-12">
+                <div class="login-status">
+                    <div class="login-name"></div>
+                </div>
+                <div class="BannerContent">
+                    <div class="BannerPanel"></div>
+                    <div class="app-title">@ViewBag.AppName</div>
+                </div>
             </div>
         </div>
         <div class="row AppPanel">
             <div class="col-xs-12">
                 @RenderBody()
             </div>
-        </div>
-        <div class="forms-container">
-
         </div>
     </div>
     <script>

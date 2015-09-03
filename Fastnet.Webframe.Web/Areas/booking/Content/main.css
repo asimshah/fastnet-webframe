@@ -74,6 +74,15 @@
 @-ms-viewport {
   width: device-width;
 }
+@-moz-viewport {
+  width: device-width;
+}
+@-webkit-viewport {
+  width: device-width;
+}
+@viewport {
+  width: device-width;
+}
 .SitePanel {
   width: auto;
 }
@@ -155,9 +164,6 @@
     top: 4px;
     font-size: 0.75em;
   }
-}
-.AppPanel {
-  width: 100%;
 }
 .booking-forms .ui-chrome-titlebar,
 .booking-forms .ui-form-titlebar {
@@ -279,4 +285,29 @@
 #bookingCalendar .not-bookable a,
 #bookingCalendar .not-bookable span {
   background: #805050;
+}
+.test-form label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
+}
+.test-form .order-list {
+  margin-left: 7px;
+}
+.test-form .order-list button[data-cmd='remove-order'] {
+  margin-top: 2.25em;
+  font-style: italic;
+  font-size: 0.75em;
+}
+.test-form .order-list .col-xs-3 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.test-form .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.test-form .validation-error {
+  border: 1px solid red;
 }

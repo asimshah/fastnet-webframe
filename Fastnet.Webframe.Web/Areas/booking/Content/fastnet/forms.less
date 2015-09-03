@@ -68,12 +68,10 @@
 }
 
 .form-buttons(@bgc; @fgc;) {
-
-
     .ui-form-button {
-        background-image: none ;
-        background-color: @bgc ;
-        color: @fgc ;
+        background-image: none;
+        background-color: @bgc;
+        color: @fgc;
         border: 1px solid darken(@bgc, 20%);
         min-width: 80px;
         font-size: 0.8em;
@@ -119,9 +117,10 @@
     }
 }
 
-.form-style {
+.modeless-form {
     margin-top: 24px;
     margin-bottom: 12px;
+    position: static;
 
     .ui-form-titlebar {
         .ui-form-title {
@@ -147,9 +146,22 @@
             }
         }
     }
+
+    .modeless-block {
+        //text-align:center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity:0.6;
+        background-color: #3399ff;
+        cursor: none;
+        .indicator {
+            color: white;
+        }
+    }
 }
 
-.dialog-style, .form-style {
+.modal-form, .modeless-form {
     .chrome(@grey, @white);
     .form-buttons(@blue, @white);
 }

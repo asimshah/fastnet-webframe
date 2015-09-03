@@ -2,15 +2,22 @@
 
 
 module fastnet {
+    interface templateRequest {
+        ctx: any;
+        templateUrl: string;
+    }
+    interface templateResult extends templateRequest {
+        template: string;
+    }
     export module web {
         //import ajax = fastnet.util.ajax;
         export class tools {
-            public static  getTemplate(templateUrl: string): JQueryPromise<string> {
-                var url = "template/get/" + templateUrl;
-                var deferred = $.Deferred<string>();
+            public static getTemplate(request: templateRequest): JQueryPromise<templateResult> {
+                var url = "template/get/" + request.templateUrl;
+                var deferred = $.Deferred<templateResult>();
                 $.when(fastnet.util.ajax.Get({ url: url })).then((r) => {
                     var template = r.Template;
-                    deferred.resolve(template);
+                    deferred.resolve({ ctx: request.ctx, templateUrl: request.templateUrl, template: template});
                 });
                 return deferred.promise();
             }

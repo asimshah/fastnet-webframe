@@ -20,32 +20,44 @@
   min-width: 15%;
   float: right;
 }
-.form-style {
+.modeless-form {
   margin-top: 24px;
   margin-bottom: 12px;
+  position: static;
 }
-.form-style .ui-form-titlebar .ui-form-title {
+.modeless-form .ui-form-titlebar .ui-form-title {
   font-size: 1.1em;
   font-weight: 700;
   line-height: 2.0em;
   font-family: Verdana, Arial, sans-serif;
   padding: 8px;
 }
-.form-style .ui-form-buttonpane {
+.modeless-form .ui-form-buttonpane {
   font-family: Verdana, Arial, sans-serif !important;
   margin-top: 12px;
   margin-bottom: 12px;
   padding-top: 8px;
 }
-.form-style .ui-form-buttonpane .ui-form-buttonset .btn {
+.modeless-form .ui-form-buttonpane .ui-form-buttonset .btn {
   margin-left: 2px;
   margin-right: 2px;
   min-width: 100px;
 }
-.dialog-style .ui-chrome-titlebar,
-.form-style .ui-chrome-titlebar,
-.dialog-style .ui-form-titlebar,
-.form-style .ui-form-titlebar {
+.modeless-form .modeless-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  background-color: #3399ff;
+  cursor: none;
+}
+.modeless-form .modeless-block .indicator {
+  color: white;
+}
+.modal-form .ui-chrome-titlebar,
+.modeless-form .ui-chrome-titlebar,
+.modal-form .ui-form-titlebar,
+.modeless-form .ui-form-titlebar {
   background-image: none;
   border-left: none !important;
   border-right: none !important;
@@ -54,32 +66,32 @@
   border-bottom-right-radius: 0 !important;
   background-color: #9d9d9d;
 }
-.dialog-style .ui-chrome-title,
-.form-style .ui-chrome-title,
-.dialog-style .ui-form-title,
-.form-style .ui-form-title {
+.modal-form .ui-chrome-title,
+.modeless-form .ui-chrome-title,
+.modal-form .ui-form-title,
+.modeless-form .ui-form-title {
   color: #ffffff;
 }
-.dialog-style .ui-chrome-systemclose,
-.form-style .ui-chrome-systemclose {
+.modal-form .ui-chrome-systemclose,
+.modeless-form .ui-chrome-systemclose {
   color: #ee1111;
 }
-.dialog-style .ui-chrome-systemclose:hover,
-.form-style .ui-chrome-systemclose:hover,
-.dialog-style .ui-chrome-systemclose:focus,
-.form-style .ui-chrome-systemclose:focus,
-.dialog-style .ui-chrome-systemclose:active,
-.form-style .ui-chrome-systemclose:active {
+.modal-form .ui-chrome-systemclose:hover,
+.modeless-form .ui-chrome-systemclose:hover,
+.modal-form .ui-chrome-systemclose:focus,
+.modeless-form .ui-chrome-systemclose:focus,
+.modal-form .ui-chrome-systemclose:active,
+.modeless-form .ui-chrome-systemclose:active {
   background-color: transparent !important;
   color: #ffffff !important;
 }
-.dialog-style .ui-form-buttonpane,
-.form-style .ui-form-buttonpane {
+.modal-form .ui-form-buttonpane,
+.modeless-form .ui-form-buttonpane {
   border-top: 2px solid #9d9d9d;
 }
-.dialog-style .ui-form-button,
-.form-style .ui-form-button {
-  background-image: none ;
+.modal-form .ui-form-button,
+.modeless-form .ui-form-button {
+  background-image: none;
   background-color: #2d89ef;
   color: #ffffff;
   border: 1px solid #0d57a9;
@@ -87,19 +99,19 @@
   font-size: 0.8em;
   outline: none;
 }
-.dialog-style .ui-form-button:hover,
-.form-style .ui-form-button:hover {
+.modal-form .ui-form-button:hover,
+.modeless-form .ui-form-button:hover {
   background-color: #a3ccf8 !important;
   color: #ffffff !important;
 }
-.dialog-style .ui-form-button[disabled],
-.form-style .ui-form-button[disabled],
-.dialog-style .ui-form-button[disabled]:hover,
-.form-style .ui-form-button[disabled]:hover,
-.dialog-style .ui-form-button[disabled]:focus,
-.form-style .ui-form-button[disabled]:focus,
-.dialog-style .ui-form-button[disabled]:active,
-.form-style .ui-form-button[disabled]:active {
+.modal-form .ui-form-button[disabled],
+.modeless-form .ui-form-button[disabled],
+.modal-form .ui-form-button[disabled]:hover,
+.modeless-form .ui-form-button[disabled]:hover,
+.modal-form .ui-form-button[disabled]:focus,
+.modeless-form .ui-form-button[disabled]:focus,
+.modal-form .ui-form-button[disabled]:active,
+.modeless-form .ui-form-button[disabled]:active {
   background-color: #cecece !important;
   cursor: not-allowed !important;
   color: #ffffff !important;

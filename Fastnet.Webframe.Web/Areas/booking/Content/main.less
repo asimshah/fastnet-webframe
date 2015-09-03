@@ -6,6 +6,19 @@
     width: device-width;
 }
 
+@-moz-viewport {
+    width: device-width;
+}
+
+@-webkit-viewport {
+    width: device-width;
+}
+
+@viewport {
+    width: device-width;
+}
+
+
 .SitePanel {
     width: auto;
 }
@@ -18,10 +31,12 @@
     //display: -webkit-flex; /* NEW - Chrome */
     display: flexbox; /* NEW, Spec - Opera 12.1, Firefox 20+ */
 }
+
 .login-invitation {
     margin: 4px;
     font-size: 0.9em;
 }
+
 .login-status {
     z-index: 33333;
     /*&.enable {
@@ -38,11 +53,13 @@
         cursor: pointer;
         font-size: 0.9em;
         margin-right: 8px;
+
         &:hover {
             text-decoration: underline;
         }
+
         a {
-            color: white;            
+            color: white;
         }
     }
 
@@ -90,7 +107,7 @@
 }
 
 .AppPanel {
-    width: 100%;
+   
 }
 
 .booking-forms {
@@ -101,6 +118,7 @@
         .button-style(@teal, @white);
     }
 }
+
 #bookingCalendar {
     .ui-widget {
         font-size: 0.9em;
@@ -149,7 +167,41 @@
     .free, .free a, .free span {
         background: @status-free-colour;
     }
+
     .not-bookable, .not-bookable a, .not-bookable span {
         background: @status-not-bookable-colour;
+    }
+}
+//
+//
+.test-form {
+    label {
+        font-size: x-small;
+        color: @blue;
+        font-weight: normal;
+    }
+
+    .order-list {
+        margin-left: 7px;
+        @local-gutter: 8px;
+        button[data-cmd='remove-order'] {
+            margin-top: 2.25em;
+            font-style: italic;
+            font-size: 0.75em;
+        }
+        .col-xs-3 {
+            padding-left: @local-gutter;
+            padding-right: @local-gutter;
+        }
+    }
+
+    .validationMessage {
+        font-size: x-small;
+        color: @dark-red;
+        font-style: italic;
+    }
+
+    .validation-error {
+        border: 1px solid red;
     }
 }

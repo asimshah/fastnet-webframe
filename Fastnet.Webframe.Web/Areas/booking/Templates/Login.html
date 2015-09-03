@@ -2,12 +2,12 @@
     <h6>Enter your Email address and password</h6>
     <div class="form-group-sm" data-property>
         <label for="email">Email address</label>
-        <input type="email" class="form-control" id="email" data-item="email" data-focus>
-        <div class="message"></div>
+        <input type="email" class="form-control" id="email" data-validate="email" data-bind="textInput: email, event: { input: enableOK }">
+        <div class="message" ></div>
     </div>
     <div class="form-group-sm" data-property>
         <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" data-item="password">
+        <input type="password" class="form-control" id="password" data-bind="value: password">
         <div class="message"></div>
     </div>
     <div class="error"></div>

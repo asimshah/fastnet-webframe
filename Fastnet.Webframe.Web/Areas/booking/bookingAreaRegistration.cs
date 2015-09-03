@@ -39,7 +39,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
             bundles.Add(new ScriptBundle("~/bundles/fastnet/vnext").Include(
                 //"~/Scripts/mustache.js",
                 "~/Scripts/moment.js",
-                "~/Scripts/knockout-{version}.js",
+                "~/Scripts/jquery.blockUI.js",
+                "~/Scripts/knockout-3.3.0.js",
+                "~/Scripts/knockout.mapping-latest.js",
+                "~/Scripts/knockout.validation.js",
                 "~/Scripts/collections/collections.js",
                 "~/Areas/booking/Scripts/utilities.js",
                 "~/Areas/booking/Scripts/fastnet/forms.js"
@@ -52,7 +55,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 //"~/Scripts/fastnet/fastnet.validators.js",
                 //"~/Scripts/fastnet/fastnet.forms.js",
                 //"~/Scripts/fastnet/fastnet.treeview.js"
-                "~/Areas/booking/Scripts/booking.js"
+                "~/Areas/booking/Scripts/bookingViewModels.js",
+                "~/Areas/booking/Scripts/booking.js",
+                 "~/Areas/booking/Scripts/tests.js"
                 //,"~/Areas/membership/Scripts/webframe.membership.js"
                 ));
         }

@@ -337,6 +337,7 @@
     </Content>
     <Content Include="Areas\booking\HtmlPage1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
+    <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
     <Content Include="Areas\cms\Content\images\centrepage.png" />
@@ -1217,6 +1218,10 @@
     <Content Include="Scripts\jspanel\jquery.jspanel.min.js" />
     <Content Include="Scripts\knockout-3.3.0.debug.js" />
     <Content Include="Scripts\knockout-3.3.0.js" />
+    <Content Include="Scripts\knockout.mapping-latest.debug.js" />
+    <Content Include="Scripts\knockout.mapping-latest.js" />
+    <Content Include="Scripts\knockout.validation.js" />
+    <Content Include="Scripts\knockout.validation.min.js" />
     <Content Include="Scripts\less\less.js" />
     <Content Include="Scripts\less\less.min.js" />
     <Content Include="Scripts\main\core.admin.setup.js" />
@@ -1569,10 +1574,12 @@
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.eot" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\readme.md" />
     <Content Include="Scripts\tinymce\langs\readme.md" />
+    <Content Include="Scripts\knockout.validation.min.js.map" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\booking\Models\" />
+    <Folder Include="Areas\booking\Scripts\typings\" />
     <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Content\Main\CustomLess\" />
@@ -1595,11 +1602,16 @@
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
     <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\typings\collections.d.ts" />
+    <TypeScriptCompile Include="Scripts\collections\collections.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\knockout.mapping\knockout.mapping.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\knockout.validation\knockout.validation.modified.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment.d.ts" />

@@ -2,8 +2,7 @@
 /// <reference path="../../../scripts/typings/jqueryui/jqueryui.d.ts" />
 /// <reference path="../../../scripts/typings/moment/moment.d.ts" />
 /// <reference path="../../../scripts/typings/knockout/knockout.d.ts" />
-
-/// <reference path="typings/collections.d.ts" />
+/// <reference path="../../../scripts/collections/collections.d.ts" />
 
 module fastnet {
     //var __u = fastnet.utilities.getInstance();// new utilities();
@@ -11,6 +10,8 @@ module fastnet {
     import debug = fastnet.util.debug;
     import str = fastnet.util.str;
     import wt = fastnet.web.tools;
+    import forms = fastnet.forms;
+    //import validator = forms.validator;
     enum DayStatus {
         IsClosed,
         IsFree,
@@ -42,27 +43,14 @@ module fastnet {
     interface getMonthTupleCallback {
         (mt: monthTuple): monthTuple;
     }
+    class configuration {
+        public static getFormStyleClasses(): string[]{
+            return ["booking-forms"];
+        }
+    }
     export class bookingApp {
-
-        private testFormContent =
-        `<div class="login-form">
-            <h6>Enter your email address and password</h6>
-            <div class="form-group-sm" data-property>
-                <label for="email">Email address</label>
-                <input type="email" class="form-control" id="email" data-item="email" data-focus >
-                <div class="message"></div>
-            </div>
-            <div class="form-group-sm" data-property>
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password"  data-item="password">
-                <div class="message"></div>
-            </div>
-            <div class="error"></div>
-        </div>`
-        private formStyleClasses = ["booking-forms"];
         private dayDictionary: collections.Dictionary<string, DayInformation>;
         private dayDictionaryMonthsLoaded: collections.Dictionary<string, boolean>;
-        //private help: number;
         private currentMember: member;
         private calendarPeriod: period;
         public start(): void {
@@ -102,21 +90,6 @@ module fastnet {
                 });
             return deferred.promise();
         }
-        //private loadInitialisationData(afterLoad: callback): void {
-        //    // we need to load:
-        //    // 1. the current member,
-        //    // 2. the forward bookable period (for the booking calendar)
-        //    var calendarInfoUrl = "bookingapi/calendar/setup/info";
-        //    var memberInfoUrl = "bookingapi/member";
-        //    $.when(
-        //        ajax.Get({ url: memberInfoUrl }, false),
-        //        ajax.Get({ url: calendarInfoUrl }, false)).then((r1, r2) => {
-        //            this.currentMember = r1[0];
-        //            this.calendarPeriod.start = moment(r2[0].startAt).toDate();
-        //            this.calendarPeriod.end = moment(r2[0].until).toDate();
-        //            afterLoad();
-        //        });
-        //}
         private loadDayDictionaryInSteps(startAt: Date, numberOfMonthsToLoad: number, afterLoad: callback) {
             var lastMonth = false;
             var sd = moment(startAt);
@@ -242,56 +215,89 @@ module fastnet {
             };
             return this.setCalendarMonthCount();
         }
-        private onLoginRequested(): void {
-            debug.print("onLoginRequested");
-            var loginForm = new fastnet.form({
-                modal: true,
-                title: "Login",
-                styleClasses: this.formStyleClasses,
-                okButtonText: "Login"
-            });
-            var loginFormTemplateUrl = "booking/login";
-            wt.getTemplate(loginFormTemplateUrl).then((t) => {
-                loginForm.setContentHtml(t);
-                loginForm.open((f, cmd) => {
-                    switch (cmd) {
-                        case "cancel-command":
-                            f.close();
-                            break;
-                    }
-                });
-                loginForm.disableCommand("ok-command");
-            });
-        }
-        private onRegisterRequested(): void {
-            debug.print("onRegisterRequested");
-        }
         private setMember(): void {
             if (this.currentMember.anonymous) {
-                var loginInvitation: string =
-                    `<div class='login-invitation'>
-                    <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.
-                    If you are not a member, please <a href='#' data-cmd='register-cmd'>register</a>.</div>
-                </div>`;
-                debug.print("user is anonymous");
-                $(".login-name").empty();
-                $(".booking-interaction").append($(loginInvitation));
-                $(".login-invitation a").on("click", (e) => {
-                    var cmd: string = $(e.target).attr("data-cmd");
-                    switch (cmd) {
-                        case "login-cmd":
-                            this.onLoginRequested();
-                            break;
-                        case "register-cmd":
-                            this.onRegisterRequested();
-                            break;
-                    }
-                });
+                var lm = new LoginManager();
+                lm.start();
             } else {
                 $(".booking-interaction").off().empty();
                 $(".login-name").off().text(this.currentMember.fullname);
             }
         }
-
+    }
+    class loginModel extends forms.viewModel {
+        public email: string;
+        public password: string;
+        public validateProperty(property: string, original: loginModel): forms.validationResult {
+            var result: forms.validationResult;
+            switch (property) {
+                case "email":
+                    debug.print("validation required for email, value {0}", this.email);
+                    //result = this.validateEmail();
+                    break;
+                default:
+                    //result = super.validateProperty(property, original);
+                    break;
+            }
+            return result;
+        }
+        //private validateEmail(): forms.validationResult {
+        //    return validator.validateEmailAddress(this.email);
+        //}
+    }
+    class LoginManager {
+        public model: loginModel;
+        private loginInvitation: string =
+        `<div class='login-invitation'>
+            <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.
+            If you are not a member, please <a href='/register' >register</a>.</div>
+            <div><button class='btn btn-primary' data-cmd='test-form' >Test Forms</button></div>
+         </div>`;
+        public start(): void {
+            $(".login-name").empty();
+            $(".booking-interaction").append($(this.loginInvitation));
+            $(".login-invitation a[data-cmd]").on("click", (e) => {
+                var cmd: string = $(e.target).attr("data-cmd");
+                switch (cmd) {
+                    case "login-cmd":
+                        this.onLoginRequested();
+                        break;
+                }
+            });
+            var t = new fastnet.tests();
+            t.start();
+        }
+        
+        private login(data: forms.models): void {
+            debugger;
+        }
+        private onLoginRequested(): void {
+            debug.print("onLoginRequested")
+            var loginForm = new forms.form(this, {                
+                modal: true,
+                title: "Login",
+                styleClasses: configuration.getFormStyleClasses(),
+                okButtonText: "Login"
+            }, null);
+            var loginFormTemplateUrl = "booking/login";
+            wt.getTemplate({ ctx: this, templateUrl: loginFormTemplateUrl }).then((r) => {
+                var template = r.template;
+                var lm: LoginManager = r.ctx;
+                lm.model = new loginModel();
+                lm.model.fromJSObject({ email: "asim", password: "password" });
+                loginForm.setContentHtml(template);
+                loginForm.open((ctx: LoginManager, f: forms.form, cmd: string, data: forms.models) => {
+                    switch (cmd) {
+                        case "cancel-command":
+                            f.close();
+                            break;
+                        case "ok-command":
+                            ctx.login(data);
+                            break;
+                    }
+                });
+                //loginForm.disableCommand("ok-command");
+            });
+        }
     }
 }
