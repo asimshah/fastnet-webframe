@@ -1,0 +1,22 @@
+﻿<div class="booking-form">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group-sm">
+                <label for="startDatePicker">Arrival Date</label>
+                <input id="startDatePicker" type="date" class="form-control" data-bind="value: startDate" />
+                <span class="validationMessage" data-bind="validationMessage: startDate"></span>
+            </div>
+            <div class="form-group-sm">
+                <label for="endDatePicker">Departure Date</label>
+                <input id="endDatePicker" type="date" class="form-control"  data-bind="moment: endDate" />
+                <span class="validationMessage" data-bind="validationMessage: endDate"></span>
+            </div>
+            <div class="form-group-sm">
+                <label for="peopleCount">Number of people</label>
+                <input id="peopleCount" type="number" class="form-control"  data-bind="value: numberOfPeople" />
+                <span class="validationMessage" data-bind="validationMessage: numberOfPeople"></span>
+            </div>
+            <div class="help-block">Some help text</div>
+        </div>
+    </div>
+</div>

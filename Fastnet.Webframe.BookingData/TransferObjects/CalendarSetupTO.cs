@@ -8,7 +8,7 @@ namespace Fastnet.Webframe.BookingData
 {
     public class CalendarSetupTO
     {
-        public DateTime startAt { get; set; }
-        public DateTime until { get; set; }
+        public DateTime StartAt { get; set; }
+        public DateTime Until { get; set; }
     }
 }

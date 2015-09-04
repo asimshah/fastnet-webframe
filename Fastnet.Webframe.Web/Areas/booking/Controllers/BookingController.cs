@@ -32,17 +32,46 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("member")]
-        public dynamic GetMember()
+        public MemberInfo GetMember()
         {
             MemberBase m = this.GetCurrentMember();
             if(m.IsAnonymous)
             {
-                return new { anonymous = true };
+                return new MemberInfo { Anonymous = true };
             }
             else
             {
-                return new { anonymous = false, memberId = m.Id, fullname = m.Fullname };
+                var mi = Factory.GetMemberInfo();
+                mi.Anonymous = false;
+                mi.MemberId = m.Id;
+                mi.Fullname = m.Fullname;
+                mi.UpdatePermissions();
+                return mi;
             }
+        }
+        [HttpGet]
+        [Route("parameters")]
+        public async Task<Parameters> GetParameters()
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var allAccomodation = await ctx.GetTotalAccomodation();
+                int bedCount = 0;
+                foreach(var accomodation in allAccomodation)
+                {
+                    foreach(var item in accomodation.SelfAndDescendants)
+                    {
+                        if(item.Type == AccomodationType.Bed)
+                        {
+                            bedCount++;
+                        }
+                    }
+                }
+                Parameters pars = new Parameters();
+                pars.MaximumOccupants = bedCount;
+                return pars;
+            }
+
         }
         [HttpGet]
         [Route("calendar/setup/info")]
@@ -59,31 +88,6 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     Log.Write(xe);
                     throw;
                 }
-                //Parameter p = ctx.Parameters.Single();
-                //Period fp = p.ForwardBookingPeriod;
-                //DateTime start = BookingGlobals.GetToday();
-                //DateTime end;
-                //switch(fp.PeriodType)
-                //{
-                //    case PeriodType.Fixed:
-                //        if(!fp.EndDate.HasValue)
-                //        {
-                //            var xe = new ApplicationException("Fixed Forward booking period must have an end date");
-                //            Log.Write(xe);
-                //            throw xe;
-                //        }
-                //        start = new[] { fp.StartDate.Value, start }.Max();
-                //        end = fp.EndDate.Value;
-                //        break;
-                //    case PeriodType.Rolling:
-                //        end = fp.GetRollingEndDate(start);
-                //        break;
-                //    default:
-                //        var xe2 = new ApplicationException("No valid Forward booking period available");
-                //        Log.Write(xe2);
-                //        throw xe2;
-                //}
-                //return new { startAt = start, until = end };
             }
         }
         [HttpGet]
@@ -106,11 +110,53 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             DateTime end = start.AddMonths(1).AddDays(-1);
             return await GetDayStatusForDateRange(start, end);
         }
+        //[HttpGet]
+        //[Route("calendar/status/from/{start}/to/{end}")]
+        //public async Task<dynamic> GetDayStatus(DateTime start, DateTime end)
+        //{
+        //    return await GetDayStatusForDateRange(start, end);
+        //}
         [HttpGet]
-        [Route("calendar/status/from/{start}/to/{end}")]
-        public async Task<dynamic> GetDayStatus(DateTime start, DateTime end)
+        [Route("checkavailability/{start}/{to}/{peoplecount}")]
+        public async Task<AvailabilityInfo> GetRequestedBookings(DateTime start, DateTime to, int peopleCount)
         {
-            return await GetDayStatusForDateRange(start, end);
+            AvailabilityInfo ai = new AvailabilityInfo();
+            DateTime end = to.AddDays(-1);
+            var dayList = await GetDayStatusForDateRange(start, end, false);
+            bool unavailable = dayList.Any(d => d.Status == DayStatus.IsClosed || d.Status == DayStatus.IsFull);
+            if (unavailable)
+            {
+                // at least one day is not possible
+                ai.Success = false;
+                ai.Explanation = "The hut is full (or closed) during this period";
+            }
+            else
+            {
+                if(dayList.First().Status == DayStatus.IsNotBookable)
+                {
+                    // first day  cannot be a not bookable - this is DWH customisation?
+                    ai.Success = false;
+                    ai.Explanation = "Bookings cannot start on a Saturday";
+                }
+                else
+                {
+                    var freeBeds = dayList.Where(x => x.Status == DayStatus.IsFree || x.Status == DayStatus.IsPartBooked)
+                        .Select(d => new { Date = d.Day, Beds = d.Accomodation.SelectMany(z => z.SelfAndDescendants).Count(z => z.Type == AccomodationType.Bed && z.IsAvailableToBook) });
+                    //var freeBeds = dayList.Where(x => x.Status == DayStatus.IsFree || x.Status == DayStatus.IsPartBooked).Select(d => new { Date = d.Day, Beds = d.Accomodation.Count(a => a.Type == AccomodationType.Bed && a.IsAvailableToBook) });
+                    var insufficientAvailability = freeBeds.Any(x => x.Beds < peopleCount);
+                    if(insufficientAvailability)
+                    {
+                        // there is at least one day when there are not enough free beds
+                        ai.Success = false;
+                        ai.Explanation = "There is an insufficient number of free beds during this period";
+                    }
+                    else
+                    {
+                        ai.Success = true;
+                    }
+                }
+            }
+            return ai;
         }
         [HttpGet]
         [Route("test/{emailAddress}")]
@@ -119,12 +165,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             await Task.Delay(3000);
             return  new { Success = false, Error = "Always false during testing (delay 3 secs)" };
         }
-        private static async Task<dynamic> GetDayStatusForDateRange(DateTime start, DateTime end)
+        private async Task<List<DayInformation>> GetDayStatusForDateRange(DateTime start, DateTime end, bool reducePayload = true)
         {
             using (var ctx = new BookingDataContext())
             {
-                //Stopwatch sw = new Stopwatch();
-                //sw.Start();
                 List<DayInformation> dayList = new List<DayInformation>();
                 for (DateTime day = start; day <= end; day = day.AddDays(1))
                 {
@@ -137,14 +181,14 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         case DayStatus.IsNotBookable:
                         case DayStatus.IsFree:
                             di.StatusDisplay = di.ToString();
-                            di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload                          
+                            if (reducePayload)
+                            {
+                                di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload    
+                            }                      
                             dayList.Add(di);
                             break;
                     }
                 }
-                //sw.Stop();
-                //Debug.Print("GetDayStatus(), from {0} to {1}, {2} ms for {3} items",
-                //    start.ToString("ddMMMyyyy"), end.ToString("ddMMMyyyy"), sw.ElapsedMilliseconds, dayList.Count());
                 return dayList;
             }
         }

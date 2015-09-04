@@ -99,6 +99,9 @@
   margin: 4px;
   font-size: 0.9em;
 }
+.login-invitation a {
+  color: orangered;
+}
 .login-status {
   z-index: 33333;
   /*&.enable {
@@ -115,15 +118,15 @@
 }
 .login-status .login-name {
   text-decoration: none;
-  cursor: pointer;
   font-size: 0.9em;
   margin-right: 8px;
-}
-.login-status .login-name:hover {
-  text-decoration: underline;
-}
-.login-status .login-name a {
-  color: white;
+  /*&:hover {
+            text-decoration: underline;
+        }
+
+        a {
+            color: white;
+        }*/
 }
 .login-status div {
   position: absolute;
@@ -165,6 +168,9 @@
     font-size: 0.75em;
   }
 }
+.message-box-body {
+  font-size: smaller;
+}
 .booking-forms .ui-chrome-titlebar,
 .booking-forms .ui-form-titlebar {
   background-image: none;
@@ -192,7 +198,7 @@
   border-top: 2px solid #2d89ef;
 }
 .booking-forms .ui-form-button {
-  background-image: none  !important;
+  background-image: none !important;
   background-color: #2d89ef !important;
   color: #ffffff !important;
   border: 1px solid #0d57a9 !important;
@@ -229,6 +235,31 @@
   background-color: #959595 !important;
   cursor: not-allowed !important;
   color: #ffffff !important;
+}
+.booking-forms label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
+}
+.booking-forms .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.booking-forms .validation-error {
+  border: 1px solid red;
+}
+.booking-forms .help-block {
+  font-size: small;
+  color: #2d89ef;
+}
+.booking-disallowed {
+  font-weight: bold;
+}
+.booking-disallowed .explanation {
+  font-size: x-small;
+  font-weight: lighter;
+  color: red;
 }
 #bookingCalendar .ui-widget {
   font-size: 0.9em;
@@ -285,6 +316,74 @@
 #bookingCalendar .not-bookable a,
 #bookingCalendar .not-bookable span {
   background: #805050;
+}
+.booking-month.ui-widget {
+  font-size: 0.9em;
+}
+.booking-month.ui-widget .ui-state-disabled {
+  opacity: inherit;
+}
+.booking-month.ui-widget.ui-datepicker table {
+  font-size: 0.8em;
+}
+.booking-month.ui-widget.ui-datepicker th {
+  font-weight: normal;
+}
+.booking-month .out-of-service a,
+.booking-month .out-of-service span,
+.booking-month .blocked a,
+.booking-month .blocked span,
+.booking-month .part-booked a,
+.booking-month .part-booked span,
+.booking-month .not-bookable a,
+.booking-month .not-bookable span,
+.booking-month .fully-booked a,
+.booking-month .fully-booked span,
+.booking-month .free a,
+.booking-month .free span {
+  color: white;
+}
+.booking-month .out-of-service,
+.booking-month .out-of-service a,
+.booking-month .out-of-service span {
+  background: black;
+}
+.booking-month .blocked,
+.booking-month .blocked a,
+.booking-month .blocked span {
+  background: #808080;
+}
+.booking-month .part-booked,
+.booking-month .part-booked a,
+.booking-month .part-booked span {
+  background: orange;
+}
+.booking-month .fully-booked,
+.booking-month .fully-booked a,
+.booking-month .fully-booked span {
+  background: red;
+}
+.booking-month .free,
+.booking-month .free a,
+.booking-month .free span {
+  background: #00c800;
+}
+.booking-month .not-bookable,
+.booking-month .not-bookable a,
+.booking-month .not-bookable span {
+  background: #805050;
+}
+.booking-month.end-month .not-bookable.allow a {
+  background: #ccadad;
+}
+.booking-month.end-month .fully-booked.allow a {
+  background: #ffa8a8;
+}
+.booking-month.end-month .blocked.allow a {
+  background: #d4d4d4;
+}
+.booking-month.end-month .out-of-service.allow a {
+  background: #545454;
 }
 .test-form label {
   font-size: x-small;

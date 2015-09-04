@@ -1,14 +1,14 @@
 ﻿<div class="login-form">
     <h6>Enter your Email address and password</h6>
-    <div class="form-group-sm" data-property>
+    <div class="form-group-sm" >
         <label for="email">Email address</label>
-        <input type="email" class="form-control" id="email" data-validate="email" data-bind="textInput: email, event: { input: enableOK }">
-        <div class="message" ></div>
+        <input type="email" class="form-control" id="email" data-bind="value: email">
+        <span class="validationMessage" data-bind="validationMessage: email"></span>
     </div>
-    <div class="form-group-sm" data-property>
+    <div class="form-group-sm" >
         <label for="password">Password</label>
         <input type="password" class="form-control" id="password" data-bind="value: password">
-        <div class="message"></div>
+        <span class="validationMessage" data-bind="validationMessage: password"></span>
     </div>
-    <div class="error"></div>
+    <span class="validationMessage login-failure"></span>
 </div>

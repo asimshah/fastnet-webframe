@@ -39,12 +39,6 @@ module fastnet {
             error?: string;
         }
         export class validations {
-            //public static emailInUse: knockoutAsyncValidator = function(val, params, callback): void {
-            //    var url = str.format("bookingapi/test/{0}/", val);
-            //    ajax.Get({ url: url }).then((r) => {
-            //        callback({ isValid: r.Success, message: r.Error });
-            //    });
-            //}
             public static passwordComplexity: knockoutValidator = function (val, params): boolean {
                 var pattern = /(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
                 return ko.validation.rules.pattern.validator(val, pattern);
@@ -56,20 +50,20 @@ module fastnet {
                 return rules;
             }
         }
-        export class validator {
-            public static validateEmailAddress(emailAddress: string): validationResult {
-                // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
-                //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-                var regex = /([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/;
-                //var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
-                var r = regex.test(emailAddress);
-                if (!r) {
-                    return { success: false, error: str.format("{0} is not a valid email address", emailAddress) };
-                } else {
-                    return { success: true }
-                }
-            }
-        }
+        //export class validator {
+        //    public static validateEmailAddress(emailAddress: string): validationResult {
+        //        // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
+        //        //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+        //        var regex = /([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/;
+        //        //var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
+        //        var r = regex.test(emailAddress);
+        //        if (!r) {
+        //            return { success: false, error: str.format("{0} is not a valid email address", emailAddress) };
+        //        } else {
+        //            return { success: true }
+        //        }
+        //    }
+        //}
         /**
          * data returned to a CommandCallback.
          * models.current is the data current in the form
@@ -114,6 +108,11 @@ module fastnet {
              * optional: array of class names to attach to the root of the form
              */
             styleClasses?: string[];
+            /**
+             * optional: beforeShow callback for jquery ui datepicker
+             */
+            datePickerBeforeShow?: any;
+            datepickerOptions?: JQueryUI.DatepickerOptions;
             /**
              * modal only: if true, hides the close button in the caption bar
              */
@@ -213,6 +212,8 @@ module fastnet {
                 };
                 form.config = <configuration>$.extend(defaultConfig, (config || {}));
                 if (!form.systemInitialised) {
+                    //form.addDateStringBinding();
+                    form.addMomentBinding();
                     ko.validation.init({
                         errorsAsTitle: false,
                         insertMessages: false,
@@ -225,45 +226,50 @@ module fastnet {
                     if (form.config.additionalValidations) {
                         this.addValidations(form.config.additionalValidations);
                     }
-                    //$.each(rules, (i, rule) => {
-                    //    if (rule.async) {
-                    //        ko.validation.rules[rule.name] = {
-                    //            message: rule.message, async: true, validator: (val, params, callback) => {
-                    //                form.incrementAsyncValidatorCount();
-                    //                rule.validator(val, params, (r) => {
-                    //                    callback(r);
-                    //                    form.decrementAsyncValidatorCount();
-                    //                });
-                    //            }
-                    //        };
-                    //    } else {
-                    //        ko.validation.rules[rule.name] = {
-                    //            message: rule.message,
-                    //            validator: rule.validator
-                    //        };
-                    //    }
-                    //});
-                    //var emailInUseRule: KnockoutValidationAsyncRuleDefinition = {
-                    //    async: true,
-                    //    validator: validations.emailInUse,
-                    //    //validator: function (val, params, callback) {
-                    //    //    form.incrementAsyncValidatorCount();
-                    //    //    var url = str.format("bookingapi/test/{0}/", val);
-                    //    //    //debug.print("emailInUse ajax call ...");
-                    //    //    ajax.Get({ url: url }).then((r) => {
-                    //    //        //debug.print("... returned");
-                    //    //        callback({ isValid: r.Success, message: r.Error });
-                    //    //        form.decrementAsyncValidatorCount();
-                    //    //    });
-                    //    //},
-                    //    message: "This email address is in use"
-                    //};
-                    //ko.validation.rules["emailInUse"] = emailInUseRule;
+
                     ko.validation.registerExtenders();
                     debug.print("ko.validation initialised");
                     form.systemInitialised = true;
                 }
             }
+            private static addMomentBinding() {
+                
+                ko.bindingHandlers["moment"] = {
+                    update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+                        var val = valueAccessor();
+
+                        var formatted = '**INVALID**'; // throw instead?
+                        var date = moment(ko.utils.unwrapObservable(val));
+
+                        //var format = allBindingsAccessor().format || 'MM/DD/YYYY';
+                        var format = allBindingsAccessor().format || 'DDMMMYYYY';
+
+                        if (date && date.isValid()) {
+                            formatted = date.format(format);
+                        }
+
+                        element.innerText = formatted;
+                    }
+                };
+            }
+            //private static addDateStringBinding() {
+            //    ko.bindingHandlers["dateString"] = {
+            //        update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+            //            var value = valueAccessor(),
+            //                allBindings = allBindingsAccessor();
+            //            var valueUnwrapped = ko.utils.unwrapObservable(value);
+            //            var pattern = allBindings.datePattern || 'DDMMMYYYY';
+            //            if (valueUnwrapped == undefined || valueUnwrapped == null) {
+            //                $(element).text("");
+            //            }
+            //            else {
+            //                var date = moment(valueUnwrapped);//, "YYYY-MM-DDTHH:mm:ss"); //new Date(Date.fromISO(valueUnwrapped));
+            //               // $(element).text(moment(date).format(pattern));
+            //                $(element).text(moment(valueUnwrapped).format(pattern));
+            //            }
+            //        }
+            //    }
+            //}
             private static incrementAsyncValidatorCount(): void {
                 form.asyncValCounter++;
                 var cf = form.formStack.peek();
@@ -364,6 +370,9 @@ module fastnet {
                     return true;
                 }
             }
+            public find(selector: string): JQuery {
+                return $(this.rootElement).find(selector);
+            }
             private getBlockRoot(): JQuery {
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent();//.parent();
             }
@@ -444,6 +453,14 @@ module fastnet {
                     this.mappedModel = ko.validatedObservable(this.vm);
                     ko.applyBindings(this.mappedModel, this.rootElement);
                 }
+                var focusableElements = "input:not([type='checkbox']):not([type='button'])";
+                $(this.rootElement).find(focusableElements).each((i, c) => {
+                    var v = $(c).val().trim();
+                    if (v === null || v === "") {
+                        $(c).focus();
+                        return false;
+                    }
+                });
             }
             private openModal(): void {
                 var buttons = this.prepareButtons();
@@ -595,7 +612,11 @@ module fastnet {
                 }
             }
             private attachDatePickers(): void {
-                $(this.rootElement).find("input[type=date]").datepicker();
+                //var options: JQueryUI.DatepickerOptions = {};
+                //if (!h$.isNullOrUndefined(this.options.datePickerBeforeShow)) {
+                //    options.beforeShow = this.options.datePickerBeforeShow;
+                //}
+                $(this.rootElement).find("input[type=date]").datepicker((this.options.datepickerOptions || null));
             }
             private updateElementAttributes(): void {
                 $(this.rootElement).find("input[data-bind]").each((index, element) => {
@@ -606,7 +627,7 @@ module fastnet {
                         bindings[i] = b.trim();
                         var tuple = b.split(":");
                         var key = tuple[0].trim();
-                        if (key === "value" || key === "textInput" || key === "checked") {
+                        if (key === "value" || key === "textInput" || key === "checked" || key === "moment" || key === "dateString") {
                             propertyName = tuple[1].trim();
                         }
                     });
@@ -618,6 +639,23 @@ module fastnet {
                         $(element).attr("data-property", propertyName);
                     }
                 });
+            }
+        }
+        export class messageBox {
+            public static show(msg: string) : JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var messageHtml = `<div class='message-box-body'>${msg}</div>`;
+                var mf = new form(null, {
+                    modal: true,
+                    title: "System Message",
+                    cancelButton: null
+                }, null);
+                mf.setContentHtml(messageHtml);
+                mf.open((ctx: any, f: form, cmd: string, data: any) => {
+                    f.close();
+                    deferred.resolve();
+                });
+                return deferred.promise();
             }
         }
     }

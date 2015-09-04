@@ -38,14 +38,24 @@ namespace Fastnet.Webframe.BookingData
     public partial class BookingDataContext
     {
         /// <summary>
+        /// Returns dtos for all the accomodation
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<AccomodationTO>> GetTotalAccomodation()
+        {
+            var rootItems = await AccomodationSet.Where(x => x.ParentAccomodation == null).ToArrayAsync();
+            return Mapper.Map<IEnumerable<Accomodation>, List<AccomodationTO>>(rootItems);
+        }
+        /// <summary>
         /// Returns dtos for all accomodation that has not been blocked on the given day. This accomodation may or may not be booked.
         /// </summary>
         /// <param name="day"></param>
         /// <returns></returns>
         public async Task<IEnumerable<AccomodationTO>> GetAvailableAccomodation(DateTime day)
         {
-            var rootItems = AccomodationSet.Where(x => x.ParentAccomodation == null);
-            var allAccomodation = Mapper.Map<IEnumerable<Accomodation>, List<AccomodationTO>>(rootItems);
+            //var rootItems = AccomodationSet.Where(x => x.ParentAccomodation == null);
+            //var allAccomodation = Mapper.Map<IEnumerable<Accomodation>, List<AccomodationTO>>(rootItems);
+            var allAccomodation = await GetTotalAccomodation();
             //var allAccomodation = _mapper.map(rootItems);
             Func<List<AccomodationTO>, Task> removeBlocked = null;
             removeBlocked = async (list) =>
@@ -174,7 +184,7 @@ namespace Fastnet.Webframe.BookingData
                     //Log.Write(xe2);
                     throw xe2;
             }
-            return new CalendarSetupTO { startAt = start, until = end };
+            return new CalendarSetupTO { StartAt = start, Until = end };
         }
     }
 }

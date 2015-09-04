@@ -1,5 +1,7 @@
 ﻿module bookingVM {
     import forms = fastnet.forms;
+    import str = fastnet.util.str;
+    import h$ = fastnet.util.helper;
     export module test {
         interface ITestModel {
             email: string;
@@ -69,6 +71,77 @@
             public removeOrder = (order: observableOrder): void => {
                 this.orders.remove(order);
             }
+        }
+    }
+    export module login {
+        export class formData {
+            current: credentials;
+            original: credentials;
+        }
+        export class credentials extends forms.viewModel {
+            public email: string;
+            public password: string;
+        }
+        export class observableCredentials extends forms.viewModel {
+            public email: KnockoutObservable<string>;
+            public password: KnockoutObservable<string>;
+            constructor(m: credentials) {
+                super();
+                this.email = ko.observable<string>(m.email).extend({
+                    required: { message: "An email address is required" }
+                });
+                this.password = ko.observable<string>().extend({
+                    required: { message: "A password is required" }
+                });
+            }
+        }
+    }
+    export class requestFormData {
+        current: request;
+        original: request;
+    }
+    export class request extends forms.viewModel {
+        public startDate: Date;
+        public endDate: Date;
+        public numberOfPeople: number;
+    }
+    interface requestOptions {
+        maximumNumberOfPeople: number;
+    }
+    export class observableRequest extends forms.viewModel {
+        public startDate: KnockoutObservable<Date>;
+        public endDate: KnockoutObservable<Date>;
+        public numberOfPeople: KnockoutObservable<number>;
+        constructor(req: request, opts: requestOptions) {
+            super();            
+            this.startDate = ko.observable<Date>(req.startDate).extend({
+                required: { message: "A start date is required" },
+            });
+            this.endDate = ko.observable<Date>(req.endDate).extend({
+                required: { message: "An end date is required" },
+                bookingEndDate: { startDate: this.startDate, fred: "asim" }
+            });
+            this.startDate.subscribe((cd) => {
+                var sd = moment(cd);
+                var ed = this.endDate();
+                if (h$.isNullOrUndefined(ed)) {
+                    this.endDate(sd.add(1, 'd').toDate());
+                } else {
+                    var med = moment(ed);
+                    var duration = med.diff(sd);
+                    if (duration < 1) {
+                        this.endDate(sd.add(1, 'd').toDate());
+                    }
+                }
+            }, this);
+            this.numberOfPeople = ko.observable<number>(req.numberOfPeople).extend({
+                required: { message: "Please provide the number of people in the party" },
+                min: { params: 1, message: "The number of people must be at least 1" },
+                max: {
+                    params: opts.maximumNumberOfPeople,
+                    message: str.format("The maximum number of people that can be acommodated is {0}", opts.maximumNumberOfPeople)
+                }
+            });
         }
     }
 }

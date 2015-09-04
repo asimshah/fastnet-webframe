@@ -235,8 +235,14 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\booking\bookingAreaRegistration.cs" />
+    <Compile Include="Areas\booking\Common\Factory.cs" />
+    <Compile Include="Areas\booking\Common\Globals.cs" />
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\Parameters.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -335,7 +341,7 @@
     <Content Include="Areas\booking\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
-    <Content Include="Areas\booking\HtmlPage1.html" />
+    <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
@@ -1606,6 +1612,16 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs.d.ts">
+      <DependentUpon>AvailabilityInfo.cs</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\bookingdata.typings.ts" />
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\MemberInfo.cs.d.ts">
+      <DependentUpon>MemberInfo.cs</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\Parameters.cs.d.ts">
+      <DependentUpon>Parameters.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\collections\collections.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />

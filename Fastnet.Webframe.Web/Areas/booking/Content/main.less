@@ -35,6 +35,10 @@
 .login-invitation {
     margin: 4px;
     font-size: 0.9em;
+
+    a {
+        color: orangered;
+    }
 }
 
 .login-status {
@@ -50,17 +54,16 @@
 
     .login-name {
         text-decoration: none;
-        cursor: pointer;
+        //cursor: pointer;
         font-size: 0.9em;
         margin-right: 8px;
-
-        &:hover {
+        /*&:hover {
             text-decoration: underline;
         }
 
         a {
             color: white;
-        }
+        }*/
     }
 
     div {
@@ -107,9 +110,11 @@
 }
 
 .AppPanel {
-   
 }
-
+.message-box-body {
+    //color: burlywood;
+    font-size: smaller;
+}
 .booking-forms {
     .chrome(@blue, @white, @red);
     .form-buttons(@blue, @white) !important;
@@ -117,8 +122,35 @@
     .help-button {
         .button-style(@teal, @white);
     }
-}
 
+    label {
+        font-size: x-small;
+        color: @blue;
+        font-weight: normal;
+    }
+
+    .validationMessage {
+        font-size: x-small;
+        color: @dark-red;
+        font-style: italic;
+    }
+
+    .validation-error {
+        border: 1px solid red;
+    }
+    .help-block {
+         font-size: small;
+         color: @blue;
+    }
+}
+.booking-disallowed {
+    font-weight: bold;
+    .explanation {
+        font-size: x-small;
+        font-weight: lighter;
+        color: red;
+    }
+}
 #bookingCalendar {
     .ui-widget {
         font-size: 0.9em;
@@ -172,6 +204,72 @@
         background: @status-not-bookable-colour;
     }
 }
+
+.booking-month {
+    &.ui-widget {
+        font-size: 0.9em;
+
+        .ui-state-disabled {
+            opacity: inherit;
+        }
+
+        &.ui-datepicker {
+            table {
+                font-size: 0.8em;
+            }
+
+            th {
+                font-weight: normal;
+            }
+        }
+    }
+
+    .out-of-service a, .out-of-service span,
+    .blocked a, .blocked span,
+    .part-booked a, .part-booked span,
+    .not-bookable a, .not-bookable span,
+    .fully-booked a, .fully-booked span,
+    .free a, .free span {
+        color: white;
+    }
+
+    .out-of-service, .out-of-service a, .out-of-service span {
+        background: @status-outofservice-colour;
+    }
+
+    .blocked, .blocked a, .blocked span {
+        background: @status-blocked-colour;
+    }
+
+    .part-booked, .part-booked a, .part-booked span {
+        background: @status-part-booked-colour;
+    }
+
+    .fully-booked, .fully-booked a, .fully-booked span {
+        background: @status-fully-booked-colour;
+    }
+    .free, .free a, .free span {
+        background: @status-free-colour;
+    }
+
+    .not-bookable, .not-bookable a, .not-bookable span {
+        background: @status-not-bookable-colour;
+    }
+}
+.booking-month.end-month {
+    .not-bookable.allow a {
+        background: lighten(@status-not-bookable-colour, 33%);
+    }
+    .fully-booked.allow a {
+        background: lighten( @status-fully-booked-colour, 33%);
+    }
+    .blocked.allow a {
+        background: lighten(@status-blocked-colour, 33%);
+    }
+    .out-of-service.allow a {
+        background: lighten( @status-outofservice-colour, 33%);
+    }
+}
 //
 //
 .test-form {
@@ -184,11 +282,13 @@
     .order-list {
         margin-left: 7px;
         @local-gutter: 8px;
+
         button[data-cmd='remove-order'] {
             margin-top: 2.25em;
             font-style: italic;
             font-size: 0.75em;
         }
+
         .col-xs-3 {
             padding-left: @local-gutter;
             padding-right: @local-gutter;

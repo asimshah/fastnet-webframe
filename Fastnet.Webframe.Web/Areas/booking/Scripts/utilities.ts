@@ -17,7 +17,7 @@ module fastnet {
                 var deferred = $.Deferred<templateResult>();
                 $.when(fastnet.util.ajax.Get({ url: url })).then((r) => {
                     var template = r.Template;
-                    deferred.resolve({ ctx: request.ctx, templateUrl: request.templateUrl, template: template});
+                    deferred.resolve({ ctx: request.ctx, templateUrl: request.templateUrl, template: template });
                 });
                 return deferred.promise();
             }
@@ -31,7 +31,7 @@ module fastnet {
                 util.debug.print("rootUrl is {0}", this.rootUrl);
                 $(document).ajaxError(this.ajaxError);
             }
-            public static Get(args: JQueryAjaxSettings, cache: boolean = true) : JQueryXHR {
+            public static Get(args: JQueryAjaxSettings, cache: boolean = true): JQueryXHR {
                 return $.ajax({
                     url: this.rootUrl + args.url,
                     contentType: "application/json",
@@ -39,7 +39,7 @@ module fastnet {
                     cache: cache,
                 });
             }
-            public static Post(args) {
+            public static Post(args: { url: string, data: any }) {
                 return $.ajax({
                     url: this.rootUrl + args.url,
                     contentType: "application/json; charset=UTF-8",
@@ -73,18 +73,45 @@ module fastnet {
             }
         }
         export class debug {
+            public static routeMessagesToVisualStudio = false;
             public static print(str: string, ...args: any[]) {
                 var message = util.str.format.apply(this, arguments);
-                console.log(message);
-                //if (window.hasOwnProperty('Debug')) {
-                //    var x = window['Debug'];
-                //    x.writeln(message);
-                //} else {
-                //    console.log(message);
-                //}
+                if (debug.routeMessagesToVisualStudio) {
+                    if (window.hasOwnProperty('Debug')) {
+                        var x = window['Debug'];
+                        x.writeln(message);
+                    } else {
+                        console.log(message);
+                    }
+                }
+                else {
+                    console.log(message);
+                }
             }
         }
         export class helper {
+            private static nameSpace = "fastnet-";
+            public static setLocalData(key: string, value: string): void {
+                if (!helper.isNullOrUndefined(localStorage)) {
+                    localStorage.setItem(helper.nameSpace + key, value);
+                }
+            }
+            public static getLocalData(key: string): string {
+                if (!helper.isNullOrUndefined(localStorage)) {
+                    return localStorage.getItem(helper.nameSpace + key);
+                }
+                return null;
+            }
+            public static clearLocalData(key: string): void {
+                if (!helper.isNullOrUndefined(localStorage)) {
+                    return localStorage.removeItem(helper.nameSpace + key);
+                }
+            }
+            public static clearLocalStorage(): void {
+                if (!helper.isNullOrUndefined(localStorage)) {
+                    return localStorage.clear();
+                }
+            }
             public static isNullOrUndefined(obj: any): boolean {
                 return obj === null || obj === undefined;
             }

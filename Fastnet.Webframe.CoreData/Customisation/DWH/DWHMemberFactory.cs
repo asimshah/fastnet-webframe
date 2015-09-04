@@ -114,7 +114,7 @@ namespace Fastnet.Webframe.CoreData
             }
             return result;
         }
-        internal async Task<ExpandoObject> ValidateBMCNumber(string bmcMembership, string lastName)
+        public async Task<ExpandoObject> ValidateBMCNumber(string bmcMembership, string lastName)
         {
             var bmcClient = BMCApiFactory.GetClient();
             string url = string.Format("MemberUpdate/QueryLight?lastName={0}&membershipNumber={1}", lastName, bmcMembership);
