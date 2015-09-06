@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using Fastnet.Webframe.Web.Areas.booking.Common;
+using System.Web.Mvc;
 using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web.Areas.booking
@@ -49,17 +50,27 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/booking").Include(
-                //"~/Scripts/mustache.js",
-                //"~/Scripts/moment.js",
-                //"~/Areas/booking/Scripts/utilities.js",
-                //"~/Scripts/fastnet/fastnet.validators.js",
-                //"~/Scripts/fastnet/fastnet.forms.js",
-                //"~/Scripts/fastnet/fastnet.treeview.js"
+                "~/Areas/booking/Scripts/factory.js",
                 "~/Areas/booking/Scripts/bookingViewModels.js",
-                "~/Areas/booking/Scripts/booking.js",
-                 "~/Areas/booking/Scripts/tests.js"
-                //,"~/Areas/membership/Scripts/webframe.membership.js"
+                "~/Areas/booking/Scripts/booking.js"//,
+                 //"~/Areas/booking/Scripts/tests.js"
                 ));
+            bundles.Add(new ScriptBundle("~/bundles/booking/admin").Include(
+                 "~/Areas/booking/Scripts/factory.js",
+                 "~/Areas/booking/Scripts/adminViewModels.js",
+                "~/Areas/booking/Scripts/bookingAdmin.js"
+                ));
+            AddCustomScripts(bundles);
+        }
+        private void AddCustomScripts(BundleCollection bundles)
+        {
+            var customScript = new ScriptBundle("~/bundles/booking/custom");
+            BookingBundleFactory bf = new BookingBundleFactory();
+            foreach (var scriptFile in bf.AppScripts)
+            {
+                customScript.Include(scriptFile);
+            }
+            bundles.Add(customScript);
         }
     }
 }

@@ -2,13 +2,16 @@
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.WebApi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
@@ -51,7 +54,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("parameters")]
-        public async Task<Parameters> GetParameters()
+        public async Task<BookingParameters> GetParameters()
         {
             using (var ctx = new BookingDataContext())
             {
@@ -67,7 +70,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         }
                     }
                 }
-                Parameters pars = new Parameters();
+                BookingParameters pars = new BookingParameters();
+                pars.FactoryName = Factory.FactoryName.ToString();
                 pars.MaximumOccupants = bedCount;
                 return pars;
             }
@@ -153,11 +157,79 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     else
                     {
                         ai.Success = true;
+                        CreateChoices(peopleCount, dayList);
                     }
                 }
             }
             return ai;
         }
+        [HttpGet]
+        [Route("get/occupancy")]
+        public async Task<dynamic> GetOccupancyPaged()
+        {
+            Func<IEnumerable<AccomodationTO>, dynamic> getDetails = null;
+            getDetails = (accomodation) =>
+            {
+                List<ExpandoObject> details = new List<ExpandoObject>();
+                foreach (var item in accomodation)
+                {
+                    dynamic d = new ExpandoObject();
+                    d.bookable = item.Bookable; // false if this accomodation is configured not to be bookable, see comment in entity declaration for Accomodation
+                    d.@class = item.Class;
+                    d.isAvailableToBook = item.IsAvailableToBook;
+                    //d.isBookable = item.IsBookable;
+                    d.isBooked = item.IsBooked; // true == this item is itself booked
+                    d.isBlocked = item.IsBlocked; // true if blocked bya blocking period
+                    d.bookingReference = item.BookingReference;
+                    d.name = item.Name;
+                    d.type = item.Type;
+                    d.canBookSubAccomodation = item.SubAccomodationSeparatelyBookable;
+                    d.details = getDetails(item.SubAccomodation);
+                    details.Add(d);
+                }
+                return details;
+            };
+            //var query = HttpUtility.ParseQueryString(this.Request.RequestUri.Query);
+            //int draw = Convert.ToInt32(query["draw"]);
+            //int start = Convert.ToInt32(query["start"]);
+            //int length = Convert.ToInt32(query["length"]);
+            DateTime today = BookingGlobals.GetToday();
+            DateTime until = today.AddMonths(6);
+            var list = await GetDayStatusForDateRange(today, until, false);
+            List<ExpandoObject> result = new List<ExpandoObject>();
+            foreach(var day in list)
+            {
+                dynamic d = new ExpandoObject();
+                d.day = day.Day.ToString("ddMMMyyyy");
+                d.status = day.Status.ToString();
+                d.accomodationCount = day.Accomodation.Count();
+                d.accomodationDetails = getDetails(day.Accomodation);
+                result.Add(d);
+            }
+            return result;
+            //return list;
+        }
+
+        //private dynamic getAccomodationDetails(IEnumerable<AccomodationTO> accomodation)
+        //{
+        //    List<ExpandoObject> details = new List<ExpandoObject>();
+        //    foreach (var item in accomodation)
+        //    {
+        //        dynamic d = new ExpandoObject();
+        //        d.bookable = item.Bookable;
+        //        d.@class = item.Class;
+        //        d.isAvailableToBook = item.IsAvailableToBook;
+        //        d.isBookable = item.IsBookable;
+        //        d.isBooked = item.IsBooked;
+        //        d.name = item.Name;
+        //        d.type = item.Type;
+        //        d.canBookSubAccomodation = item.SubAccomodationSeparatelyBookable;
+        //        d.details = getAccomodationDetails(item.SubAccomodation);
+        //        details.Add(d);
+        //    }
+        //    return details;
+        //}
+
         [HttpGet]
         [Route("test/{emailAddress}")]
         public async Task<dynamic> Test(string emailAddress)
@@ -192,5 +264,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 return dayList;
             }
         }
+        private void CreateChoices(int peopleCount, List<DayInformation> dayList)
+        {
+            var firstDayAccomodation = dayList.First().Accomodation;
+        }
+
     }
 }

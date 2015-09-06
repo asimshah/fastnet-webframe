@@ -30,7 +30,7 @@ namespace Fastnet.Webframe.CoreData
                 {
                     using (lf)
                     {
-                        lf.Load();
+                        lf.Load().Wait();
                     }
                     EnsureRequiredGroups();
                     EnsureAdministratorInAdministratorsGroup();

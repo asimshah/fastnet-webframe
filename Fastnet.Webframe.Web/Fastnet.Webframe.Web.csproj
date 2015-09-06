@@ -235,14 +235,19 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\booking\bookingAreaRegistration.cs" />
+    <Compile Include="Areas\booking\Common\BookingBundleFactory.cs" />
     <Compile Include="Areas\booking\Common\Factory.cs" />
     <Compile Include="Areas\booking\Common\Globals.cs" />
+    <Compile Include="Areas\booking\Controllers\AdminController.cs" />
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
+    <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\AdminParameters.cs" />
     <Compile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
-    <Compile Include="Areas\booking\TransferObjects\Parameters.cs" />
+    <Compile Include="Areas\booking\TransferObjects\BookingParameters.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -341,6 +346,10 @@
     <Content Include="Areas\booking\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
+    <Content Include="Areas\booking\Templates\adminIndex.html" />
+    <Content Include="Areas\booking\Templates\configurationIndex.html" />
+    <Content Include="Areas\booking\Templates\Parameters.html" />
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
@@ -1153,6 +1162,7 @@
     <Content Include="Areas\booking\Content\main.less" />
     <Content Include="Areas\booking\Content\constants.less" />
     <Content Include="Areas\booking\Content\fastnet\forms.less" />
+    <Content Include="Areas\booking\Views\Management\Index.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
@@ -1607,20 +1617,31 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
+    <TypeScriptCompile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs.d.ts">
+      <DependentUpon>DWHAdminParameters.cs</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\Scripts\adminViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhbooking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\factory.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\testViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\AdminParameters.cs.d.ts">
+      <DependentUpon>AdminParameters.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs.d.ts">
       <DependentUpon>AvailabilityInfo.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\bookingdata.typings.ts" />
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\BookingParameters.cs.d.ts">
+      <DependentUpon>BookingParameters.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\MemberInfo.cs.d.ts">
       <DependentUpon>MemberInfo.cs</DependentUpon>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="Areas\booking\TransferObjects\Parameters.cs.d.ts">
-      <DependentUpon>Parameters.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\collections\collections.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />

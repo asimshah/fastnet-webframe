@@ -13,9 +13,9 @@ module fastnet {
     import wt = fastnet.web.tools;
     import forms = fastnet.forms;
     //import test = bookingVM.test.
-    import testVM = bookingVM.test.testModel;
-    import oTestVM = bookingVM.test.observableTestModel;
-    import formData = bookingVM.test.testModelFormData;
+    import testVM = fastnet.test.testModel;
+    import oTestVM = fastnet.test.observableTestModel;
+    import formData = fastnet.test.testModels;
     class testValidations {
         public static emailInUse: forms.knockoutAsyncValidator = function (val, params, callback): void {
             var url = str.format("bookingapi/test/{0}/", val);
@@ -105,7 +105,7 @@ module fastnet {
         private startTestForm(): void {
             debug.print("tests started");
             this.model = new testVM();
-            this.model.fromJSObject({
+            this.model.setFromJSON({
                 email: null, password: null, valueDate: new Date(),
                 orders: [
                     { id: "o1", quantity: 2, price: 23.0 },

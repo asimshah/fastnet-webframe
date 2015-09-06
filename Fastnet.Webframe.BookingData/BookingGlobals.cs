@@ -35,10 +35,11 @@ namespace Fastnet.Webframe.BookingData
         {
             Mapper.CreateMap<Accomodation, AccomodationTO>()
                 //.ForSourceMember(n => n.ParentAccomodation, opt => opt.Ignore())
-                .ForMember(n => n.IsBookable, opt => opt.Ignore())
+                //.ForMember(n => n.IsBookable, opt => opt.Ignore())
                 .ForMember(n => n.IsBooked, opt => opt.Ignore())
                 .ForMember(n => n.IsAvailableToBook, opt => opt.Ignore())
-                .ForMember(n => n.BookingReference, opt => opt.Ignore());
+                .ForMember(n => n.BookingReference, opt => opt.Ignore())
+                .ForMember(n => n.IsBlocked, opt => opt.Ignore());
             Mapper.AssertConfigurationIsValid();
             //Debugger.Break();
         }

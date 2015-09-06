@@ -1,0 +1,21 @@
+﻿@using Fastnet.Webframe.BookingData
+@{
+    ViewBag.Title = "Booking Admin";
+    ViewBag.AppName = BookingGlobals.GetLodgementName() + " Booking System";
+}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="admin-interaction"></div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/booking/admin")
+    @Scripts.Render("~/bundles/booking/custom")
+    <script>
+        (function ($) {
+            var adminApp = new fastnet.booking.adminApp();
+            adminApp.start();
+        })(jQuery);
+    </script>
+}

@@ -65,7 +65,10 @@ namespace Fastnet.Webframe.BookingData
                     Accomodation fullItem = await AccomodationSet.FindAsync(item.AccomodationId);
                     if (fullItem.IsBlocked(day))
                     {
-                        list.Remove(item);
+                        //IsBlocked() returns true if a blocking period exists for this day
+                        // for this accomodation item
+                        item.IsBlocked = true;
+                        //list.Remove(item);
                     }
                     else
                     {
@@ -76,7 +79,7 @@ namespace Fastnet.Webframe.BookingData
             await removeBlocked(allAccomodation);
             return allAccomodation;
         }
-        public async Task<DayInformation> GetDayInformation(DateTime day)
+        public async Task<DayInformation> GetDayInformation(DateTime day, bool includeBlocked = false)
         {
             Func<IEnumerable<AccomodationTO>, Task<bool>> scanBookingStatus = null;
             #region scanBookingStatus
@@ -91,7 +94,7 @@ namespace Fastnet.Webframe.BookingData
                     }
                     else
                     {
-                        item.IsBookable = true;
+                        //item.IsBookable = true;
                         item.IsAvailableToBook = true;
                         var bookingCount = fullItem.Bookings.Where(b => day >= b.From && day <= b.To).Count();
                         Debug.Assert(bookingCount < 2, string.Format("{0} is booked multiple times for {1}", fullItem.Name, day.ToString("ddMMMyyyy")));
@@ -131,8 +134,13 @@ namespace Fastnet.Webframe.BookingData
             DayInformation di = Factory.GetDayInformationInstance();// new DayInformation();
             di.Day = day;
             var availableAccomodation = await GetAvailableAccomodation(day);
-            if (availableAccomodation.Count() == 0)
+            if (availableAccomodation.Count(x => x.IsBlocked == false) == 0)
             {
+                //availableAccomodation includes everything except those
+                //accomodations items that have been blocked as a result
+                //of a blocking period that applies to this day
+                //if the count == 0, then there is nothing available at all
+                //due to the blocking period
                 di.Status = DayStatus.IsClosed;
             }
             else
@@ -144,7 +152,11 @@ namespace Fastnet.Webframe.BookingData
                 {
                     foreach (var si in item.SelfAndDescendants)
                     {
-                        if (si.IsBookable)
+                        //if (si.IsBookable)
+                        //{
+                        //    items++;
+                        //}
+                        if (si.Bookable)
                         {
                             items++;
                         }
@@ -160,7 +172,7 @@ namespace Fastnet.Webframe.BookingData
         }
         public CalendarSetupTO GetCalendarSetupInfo()
         {
-            Parameter p = Parameters.Single();
+            ParameterBase p = Parameters.Single();
             Period fp = p.ForwardBookingPeriod;
             DateTime start = BookingGlobals.GetToday();
             DateTime end;

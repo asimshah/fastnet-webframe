@@ -51,6 +51,6 @@ namespace Fastnet.Webframe.CoreData
             }
         }
         public abstract void Dispose();
-        public abstract void Load();
+        public abstract Task Load();
     }
 }

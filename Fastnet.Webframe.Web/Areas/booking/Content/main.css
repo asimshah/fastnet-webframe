@@ -241,6 +241,11 @@
   color: #2d89ef;
   font-weight: normal;
 }
+.booking-forms .message-block {
+  font-size: small;
+  color: #1e7145;
+  font-style: italic;
+}
 .booking-forms .validationMessage {
   font-size: x-small;
   color: #b91d47;
@@ -384,6 +389,27 @@
 }
 .booking-month.end-month .out-of-service.allow a {
   background: #545454;
+}
+.index-page .sub-section .heading {
+  margin: 12px;
+  font-size: larger;
+  font-weight: bold;
+}
+.index-page .sub-section .row {
+  font-size: 12px;
+  line-height: 18px;
+  /*div:first-child {
+                padding-right: 0;
+            }*/
+}
+.index-page .sub-section .btn-link {
+  font-family: Verdana;
+  font-size: 12px;
+  padding-top: 0;
+}
+.parameters-form button.side-button {
+  margin-top: 2.35em;
+  font-size: 0.75em;
 }
 .test-form label {
   font-size: x-small;

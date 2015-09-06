@@ -22,9 +22,6 @@ module fastnet {
         export interface knockoutAsyncValidator {
             (value: any, params: any, callback: KnockoutValidationAsyncCallback): void;
         }
-        //export interface validatorList {
-        //    (): any[];
-        //}
         export const enum buttonPosition {
             right,
             left
@@ -50,28 +47,23 @@ module fastnet {
                 return rules;
             }
         }
-        //export class validator {
-        //    public static validateEmailAddress(emailAddress: string): validationResult {
-        //        // ([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})
-        //        //var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
-        //        var regex = /([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/;
-        //        //var emailReg = new RegExp(/([\w-\.]+)@((?:[\w]+\.)+)([a-zA-Z]{2,4})/);
-        //        var r = regex.test(emailAddress);
-        //        if (!r) {
-        //            return { success: false, error: str.format("{0} is not a valid email address", emailAddress) };
-        //        } else {
-        //            return { success: true }
-        //        }
-        //    }
-        //}
         /**
          * data returned to a CommandCallback.
          * models.current is the data current in the form
          * models.original is the data as it was originally
          */
+        export class model {
+            public setFromJSON(data: any) {
+                $.extend(this, data);
+            }
+            public getObservable<T extends viewModel>(): T {
+                return null;
+            }
+        }
         export class models {
-            current: viewModel;
-            original: viewModel;
+            current: model;
+            original: model;
+            //observable: viewModel;
         }
         /**
          * Function passed to fastnet.forms.form.open().
@@ -137,12 +129,17 @@ module fastnet {
              * array of additional buttons in the button pane
              */
             additionalButtons?: formButton[];
+            /**
+             *
+             */
+            messageClass?: string;
         }
         /**
          * base class for a data class to be used with a form
          * current version uses knockout
          */
         export class viewModel {
+            public message: KnockoutObservable<string> = ko.observable("");
             public okEnabled: KnockoutObservable<boolean> = ko.observable(true);
             public cancelEnabled: KnockoutObservable<boolean> = ko.observable(true);
             /**
@@ -181,8 +178,8 @@ module fastnet {
             private contentHtml: string = null;
             private ctx: any;
             private unwrappedOriginal: any;
-            private vm: any = null;
-            private mappedModel: any;
+            private model: model = null;
+            private observableModel: any;
             private knockoutIsBound: boolean = false;
             private rootElement: HTMLElement;
             private validationResults: collections.Dictionary<string, collections.Bag<validationResult>>;
@@ -212,7 +209,6 @@ module fastnet {
                 };
                 form.config = <configuration>$.extend(defaultConfig, (config || {}));
                 if (!form.systemInitialised) {
-                    //form.addDateStringBinding();
                     form.addMomentBinding();
                     ko.validation.init({
                         errorsAsTitle: false,
@@ -232,44 +228,21 @@ module fastnet {
                     form.systemInitialised = true;
                 }
             }
-            private static addMomentBinding() {
-                
+            private static addMomentBinding() {                
                 ko.bindingHandlers["moment"] = {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
                         var val = valueAccessor();
-
-                        var formatted = '**INVALID**'; // throw instead?
+                        var formatted = ""; // throw instead?
                         var date = moment(ko.utils.unwrapObservable(val));
-
                         //var format = allBindingsAccessor().format || 'MM/DD/YYYY';
                         var format = allBindingsAccessor().format || 'DDMMMYYYY';
-
                         if (date && date.isValid()) {
                             formatted = date.format(format);
                         }
-
                         element.innerText = formatted;
                     }
                 };
             }
-            //private static addDateStringBinding() {
-            //    ko.bindingHandlers["dateString"] = {
-            //        update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
-            //            var value = valueAccessor(),
-            //                allBindings = allBindingsAccessor();
-            //            var valueUnwrapped = ko.utils.unwrapObservable(value);
-            //            var pattern = allBindings.datePattern || 'DDMMMYYYY';
-            //            if (valueUnwrapped == undefined || valueUnwrapped == null) {
-            //                $(element).text("");
-            //            }
-            //            else {
-            //                var date = moment(valueUnwrapped);//, "YYYY-MM-DDTHH:mm:ss"); //new Date(Date.fromISO(valueUnwrapped));
-            //               // $(element).text(moment(date).format(pattern));
-            //                $(element).text(moment(valueUnwrapped).format(pattern));
-            //            }
-            //        }
-            //    }
-            //}
             private static incrementAsyncValidatorCount(): void {
                 form.asyncValCounter++;
                 var cf = form.formStack.peek();
@@ -284,14 +257,14 @@ module fastnet {
                    cf.unBlock();
                 }
             }
-            constructor(ctx: any, opts: formOptions, vm: any, contentHtml?: string) {
+            constructor(ctx: any, opts: formOptions, model: any, contentHtml?: string) {
                 // ctx will be passed through to the CommandCallback
                 if (!form.systemInitialised) {
                     throw new Error("forms system not initialised: call  to form.initialise() missing?");
                 }
                 this.ctx = ctx;
-                this.vm = vm;
-                this.unwrappedOriginal = ko.toJS(this.vm);
+                this.model = model;
+                this.unwrappedOriginal = ko.toJS(this.model);
                 this.buttons = [];
                 this.options = {                    
                     modal: false,
@@ -299,7 +272,8 @@ module fastnet {
                     modelessContainer: null,
                     hideSystemCloseButton: false,
                     okButton: { text: "OK", command: "ok-command", position: buttonPosition.right, dataBinding: "enable: okEnabled" },
-                    cancelButton: { text: "Close", command: "cancel-command", position: buttonPosition.right, dataBinding: "enable: cancelEnabled" }
+                    cancelButton: { text: "Close", command: "cancel-command", position: buttonPosition.right, dataBinding: "enable: cancelEnabled" },
+                    messageClass: "message-block"
                 }
                 if (this.options.modal === true) {
                     this.options.cancelButton.text = "Cancel";
@@ -360,10 +334,10 @@ module fastnet {
                 $(f).find(buttons).prop("disabled", false);
             }
             public isValid(): boolean {
-                if (this.vm !== null) {
-                    var result: boolean = this.mappedModel.isValid() && form.asyncValCounter === 0;
+                if (this.model !== null) {
+                    var result: boolean = this.observableModel.isValid() && form.asyncValCounter === 0;
                     if (!result) {
-                        this.mappedModel.errors.showAllMessages();
+                        this.observableModel.errors.showAllMessages();
                     }
                     return result;
                 } else {
@@ -372,6 +346,12 @@ module fastnet {
             }
             public find(selector: string): JQuery {
                 return $(this.rootElement).find(selector);
+            }
+            public setMessage(text: string): void {
+                if (!h$.isNullOrUndefined(this.observableModel)) {
+                    this.observableModel().message(text);
+                }
+                //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             }
             private getBlockRoot(): JQuery {
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent();//.parent();
@@ -418,6 +398,7 @@ module fastnet {
                         text: item.text,
                         "data-cmd": item.command,
                         click: (e) => {
+                            this.setMessage('');
                             var cmd = $(e.target).attr("data-cmd");
                             e.stopPropagation();
                             e.preventDefault();
@@ -446,12 +427,13 @@ module fastnet {
             }
             private finalise(): void {
                 this.rootElement = this.getRoot().get(0);
+                this.bindEmbeddedButtons();
                 this.attachDatePickers();
-                if (this.vm !== null) {
+                if (this.model !== null) {
                     this.knockoutIsBound = true;
                     this.updateElementAttributes();
-                    this.mappedModel = ko.validatedObservable(this.vm);
-                    ko.applyBindings(this.mappedModel, this.rootElement);
+                    this.observableModel = ko.validatedObservable(this.model);
+                    ko.applyBindings(this.observableModel, this.rootElement);
                 }
                 var focusableElements = "input:not([type='checkbox']):not([type='button'])";
                 $(this.rootElement).find(focusableElements).each((i, c) => {
@@ -603,20 +585,32 @@ module fastnet {
                     alert(msg);
                 } else {
                     var data: models = null;
-                    if (this.vm !== null) {
+                    if (this.model !== null) {
                         data = new models();
-                        data.current = ko.toJS(this.mappedModel);
+                        data.current = ko.toJS(this.observableModel);
                         data.original = this.unwrappedOriginal;
+                        //data.observable = this.observableModel;
                     }
                     this.commandCallback(this.ctx, this, cmd, data);
                 }
             }
             private attachDatePickers(): void {
-                //var options: JQueryUI.DatepickerOptions = {};
-                //if (!h$.isNullOrUndefined(this.options.datePickerBeforeShow)) {
-                //    options.beforeShow = this.options.datePickerBeforeShow;
-                //}
                 $(this.rootElement).find("input[type=date]").datepicker((this.options.datepickerOptions || null));
+            }
+            private bindEmbeddedButtons(): void {
+                var contentSelector = null;
+                if (this.options.modal) {
+                    contentSelector = ".ui-dialog-content";
+                } else {
+                    contentSelector = ".ui-form-content";
+                }
+                $(contentSelector).find("button[data-cmd]").on("click", (e) => {
+                    this.setMessage('');
+                    var cmd = $(e.target).attr("data-cmd");
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this.onCommand(cmd);
+                });
             }
             private updateElementAttributes(): void {
                 $(this.rootElement).find("input[data-bind]").each((index, element) => {

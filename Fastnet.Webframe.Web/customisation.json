@@ -13,6 +13,10 @@
     {
       "Name": "membership",
       "Scripts": [ "~/Areas/membership/scripts/dwh/dwh.js" ]
+    },
+    {
+      "Name": "booking",
+      "Scripts": ["~/Areas/booking/scripts/dwh/dwhbooking.js"]
     }
   ],
   "bmc": {

@@ -111,10 +111,12 @@
 
 .AppPanel {
 }
+
 .message-box-body {
     //color: burlywood;
     font-size: smaller;
 }
+
 .booking-forms {
     .chrome(@blue, @white, @red);
     .form-buttons(@blue, @white) !important;
@@ -128,7 +130,11 @@
         color: @blue;
         font-weight: normal;
     }
-
+    .message-block {
+        font-size: small;
+        color: @dark-green;
+        font-style: italic;
+    }
     .validationMessage {
         font-size: x-small;
         color: @dark-red;
@@ -138,19 +144,23 @@
     .validation-error {
         border: 1px solid red;
     }
+
     .help-block {
-         font-size: small;
-         color: @blue;
+        font-size: small;
+        color: @blue;
     }
 }
+
 .booking-disallowed {
     font-weight: bold;
+
     .explanation {
         font-size: x-small;
         font-weight: lighter;
         color: red;
     }
 }
+
 #bookingCalendar {
     .ui-widget {
         font-size: 0.9em;
@@ -248,6 +258,7 @@
     .fully-booked, .fully-booked a, .fully-booked span {
         background: @status-fully-booked-colour;
     }
+
     .free, .free a, .free span {
         background: @status-free-colour;
     }
@@ -256,18 +267,56 @@
         background: @status-not-bookable-colour;
     }
 }
+
 .booking-month.end-month {
     .not-bookable.allow a {
         background: lighten(@status-not-bookable-colour, 33%);
     }
+
     .fully-booked.allow a {
         background: lighten( @status-fully-booked-colour, 33%);
     }
+
     .blocked.allow a {
         background: lighten(@status-blocked-colour, 33%);
     }
+
     .out-of-service.allow a {
         background: lighten( @status-outofservice-colour, 33%);
+    }
+}
+
+.index-page {
+    .sub-section {
+        .heading {
+            margin: 12px;
+            font-size: larger;
+            font-weight: bold;
+            //font-family: Cambria;
+        }
+
+        .row {
+            //border-top: 1px solid black;
+            font-size: 12px;
+            line-height: 18px;
+            /*div:first-child {
+                padding-right: 0;
+            }*/
+        }
+
+        .btn-link {
+            font-family: Verdana;
+            font-size: 12px;
+            padding-top: 0;
+        }
+    }
+}
+
+.parameters-form {
+    button.side-button {
+        margin-top: 2.35em;
+        //font-style: italic;
+        font-size: 0.75em;
     }
 }
 //

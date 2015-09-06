@@ -39,7 +39,7 @@ namespace Fastnet.Webframe.CoreData
             string bookingConnectionString = GetLegacyBookingConnectionString();
             legacyBookingData = new DWHLegacyBookingDbContext(bookingConnectionString);
         }
-        public override void Load()
+        public override async Task Load()
         {
             // using (var tran = coreDb.Database.BeginTransaction())
             //using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -66,7 +66,7 @@ namespace Fastnet.Webframe.CoreData
                     LoadMenus();
                     Log.Write("legacyData: Menus loaded");
 
-                    CreateMembersFromVisitors();
+                    await CreateMembersFromVisitors();
                     //LoadBookings();
                     //tran.Complete();
                     LoadBookingData();
@@ -407,7 +407,7 @@ namespace Fastnet.Webframe.CoreData
             coreDb.MenuMasters.Add(mm);
             coreDb.SaveChanges();
         }
-        internal async void CreateMembersFromVisitors()
+        internal async Task CreateMembersFromVisitors()
         {
             Dictionary<string, List<dynamic>> candidates = new Dictionary<string, List<dynamic>>();
             Action<string, dynamic> addCandidate = (email, details) =>
@@ -457,6 +457,7 @@ namespace Fastnet.Webframe.CoreData
         }
         private async Task CreateMembersFromCandidates(Dictionary<string, List<dynamic>> candidates)
         {
+            Group allMembers = coreDb.Groups.ToArray().Single(x => x.Name == SystemGroups.AllMembers.ToString() && x.Type.HasFlag(GroupTypes.System));
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
             foreach (KeyValuePair<string, List<dynamic>> kvp in candidates)
             {
@@ -492,7 +493,7 @@ namespace Fastnet.Webframe.CoreData
                 if (member == null)
                 {
                     member = CreateMember(email, defaultMemberPassword, (string)bestDetail.firstName, (string)bestDetail.lastName, DateTime.Today, null, false);
-                    Group.AllMembers.Members.Add(member);
+                    allMembers.Members.Add(member);
                     member.PlainPassword = defaultMemberPassword;
                     newlyCreated = true;
                     //Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "No BMC Membership number", status.ToString());
@@ -602,10 +603,13 @@ namespace Fastnet.Webframe.CoreData
                 PeriodType = PeriodType.Rolling,
                 Interval = new LongSpan { Years = 1 }
             };
-            Parameter p = new Parameter
-            {
-                ForwardBookingPeriod = pp
-            };
+            DWHParameter p = Factory.CreateNewParameter() as DWHParameter;
+            p.ForwardBookingPeriod = pp;
+            
+            //Parameter p = new Parameter
+            //{
+            //    ForwardBookingPeriod = pp
+            //};
             bctx.Periods.Add(pp);
             bctx.Parameters.Add(p);
             bctx.SaveChanges();

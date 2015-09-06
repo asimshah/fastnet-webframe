@@ -8,15 +8,15 @@
             </div>
             <div class="form-group-sm">
                 <label for="endDatePicker">Departure Date</label>
-                <input id="endDatePicker" type="date" class="form-control"  data-bind="moment: endDate" />
+                <input id="endDatePicker" type="date" class="form-control"  data-bind="value: endDate, moment: endDate" />
                 <span class="validationMessage" data-bind="validationMessage: endDate"></span>
             </div>
             <div class="form-group-sm">
                 <label for="peopleCount">Number of people</label>
-                <input id="peopleCount" type="number" class="form-control"  data-bind="value: numberOfPeople" />
+                <input id="peopleCount" type="number" class="form-control"  data-bind="textInput: numberOfPeople" />
                 <span class="validationMessage" data-bind="validationMessage: numberOfPeople"></span>
             </div>
-            <div class="help-block">Some help text</div>
+            <div class="help-block" data-bind="text: helpText()"></div>
         </div>
     </div>
 </div>

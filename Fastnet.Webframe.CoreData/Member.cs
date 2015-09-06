@@ -388,7 +388,7 @@ namespace Fastnet.Webframe.CoreData
             TraceAccess("Access: for {0}, directory {1}, access result: {2}", this.Fullname, dir.DisplayName, ar.ToString());
             return ar;
         }
-        private bool IsMemberOf(Group group)
+        public bool IsMemberOf(Group group)
         {
             return group.SelfAndDescendants.Any(x => x.Members.Contains(this));
             //return group.Members.Contains(this);

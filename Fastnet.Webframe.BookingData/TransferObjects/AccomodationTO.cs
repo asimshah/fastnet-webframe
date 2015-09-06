@@ -17,14 +17,15 @@ namespace Fastnet.Webframe.BookingData
         public bool Bookable { get; set; } // if false, then SubAccomodationSeparatelyBookable should be true, else it is means this accomodation has been taken out of service
         public AccomodationTO ParentAccomodation { get; set; }
         public List<AccomodationTO> SubAccomodation { get; set; }
-        public bool IsBookable { get; set; }
+        //public bool IsBookable { get; set; }
         public bool IsBooked { get; set; }
         public bool IsAvailableToBook { get; set; }
+        public bool IsBlocked { get; set; } // i.e by an applicable blocking period
         public string BookingReference { get; set; }
 
         public override AccomodationTO GetParent()
         {
-            return ParentAccomodation;
+            return  ParentAccomodation;
         }
         public override IEnumerable<AccomodationTO> GetChildren()
         {
@@ -33,14 +34,14 @@ namespace Fastnet.Webframe.BookingData
         public override string ToString()
         {
             return string.Format("{0} {1}, Bookable = {2}, Booked = {3}, Available = {4}", Name,
-                ParentToString(), IsBookable, IsBooked, IsAvailableToBook);//,GetSubAccomodationStatus());
+                ParentToString(), Bookable, IsBooked, IsAvailableToBook);//,GetSubAccomodationStatus());
             //return base.ToString();
         }
         private string ParentToString()
         {
             //return "unk";
             string fmt = ParentAccomodation == null ? "" : "(in {0})";
-            return string.Format(fmt, ParentAccomodation?.Name);
+            return  string.Format(fmt, ParentAccomodation?.Name);
         }
     }
 }

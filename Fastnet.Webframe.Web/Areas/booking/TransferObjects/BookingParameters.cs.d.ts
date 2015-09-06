@@ -1,5 +1,6 @@
 ﻿declare module server {
-	interface Parameters {
+	interface BookingParameters {
+		FactoryName: string;
 		MaximumOccupants: number;
 	}
 }

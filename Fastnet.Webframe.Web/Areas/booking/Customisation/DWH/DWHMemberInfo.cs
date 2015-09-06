@@ -1,4 +1,5 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.CoreData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,38 +13,53 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public override async Task UpdatePermissions()
         {
             await base.UpdatePermissions();
-            using (CoreDataReadOnly core = new CoreDataReadOnly())
+            using (var bctx = new BookingDataContext())
             {
-                Func<string, string> formatExplanation = (text) =>
+                var para = bctx.Parameters.OfType<DWHParameter>().Single();
+                using (CoreDataReadOnly core = new CoreDataReadOnly())
                 {
-                    string fmt = "<span>Booking is restricted to BMC Members. " + text + " Please contact the <a href='mailto://{0}'>Booking Secretary</a> to update our records.</span>";
-                    return string.Format(fmt, Globals.GetBookingSecretaryEmailAddress());
-                };
-                DWHMember member = core.Members.OfType<DWHMember>().Single(x => x.Id == MemberId);
-                if (member.BMCMembership == null)
-                {
-                    BookingDisallowed = true;
-                    Explanation = formatExplanation("We have no record of your BMC Membership number.");
-                }
-                else
-                {
-                    // validate BMC Membership here
-                    DWHMemberFactory mf = new DWHMemberFactory();
-                    dynamic result =  await mf.ValidateBMCNumber(member.BMCMembership, member.LastName);
-                    BMCMembershipStatus status = result.Status;
-                    switch(status)
+                    Func<string, string> formatExplanation = (text) =>
                     {
-                        case BMCMembershipStatus.Current:
-                            BookingDisallowed = false;
-                            break;
-                        case BMCMembershipStatus.Expired:
+                        string fmt = "<span>Booking is restricted to BMC Members. " + text + " Please contact the <a href='mailto://{0}'>Booking Secretary</a> to update our records.</span>";
+                        return string.Format(fmt, Globals.GetBookingSecretaryEmailAddress());
+                    };
+                    Group noCheckGroup = null;
+                    if (para.NoBMCCheckGroup != null)
+                    {
+                        noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NoBMCCheckGroup);
+                    }
+                    DWHMember member = core.Members.OfType<DWHMember>().Single(x => x.Id == MemberId);
+                    if(noCheckGroup != null && member.IsMemberOf(noCheckGroup)) {
+                        BookingDisallowed = false;
+                    }
+                    else
+                    {
+                        if (member.BMCMembership == null)
+                        {
                             BookingDisallowed = true;
-                            Explanation = formatExplanation("Your BMC membership has expired.");
-                            break;
-                        case BMCMembershipStatus.NotFound:
-                            BookingDisallowed = true;
-                            Explanation = formatExplanation("Your BMC membership has failed validation.");
-                            break;
+                            Explanation = formatExplanation("We have no record of your BMC Membership number.");
+                        }
+                        else
+                        {
+                            // validate BMC Membership here
+                            DWHMemberFactory mf = new DWHMemberFactory();
+                            dynamic result = await mf.ValidateBMCNumber(member.BMCMembership, member.LastName);
+                            BMCMembershipStatus status = result.Status;
+                            switch (status)
+                            {
+                                case BMCMembershipStatus.Current:
+                                    BookingDisallowed = false;
+                                    break;
+                                case BMCMembershipStatus.Expired:
+                                    BookingDisallowed = true;
+                                    Explanation = formatExplanation("Your BMC membership has expired.");
+                                    break;
+                                case BMCMembershipStatus.NotFound:
+                                    BookingDisallowed = true;
+                                    Explanation = formatExplanation("Your BMC membership has failed validation.");
+                                    break;
+                            }
+                        } 
                     }
                 }
             }

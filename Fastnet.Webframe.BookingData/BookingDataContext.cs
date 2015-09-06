@@ -22,7 +22,7 @@ namespace Fastnet.Webframe.BookingData
         public DbSet<Period> Periods { get; set; }
         public DbSet<Price> Prices { get; set; }
         public DbSet<Booking> Bookings { get; set; }
-        public DbSet<Parameter> Parameters { get; set; }
+        public DbSet<ParameterBase> Parameters { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("book");
