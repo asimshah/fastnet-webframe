@@ -96,11 +96,13 @@ namespace Fastnet.Webframe.BookingData
                     {
                         //item.IsBookable = true;
                         item.IsAvailableToBook = true;
-                        var bookingCount = fullItem.Bookings.Where(b => day >= b.From && day <= b.To).Count();
+                        var bookings = fullItem.Bookings.Where(b => day >= b.From && day <= b.To);
+                        var bookingCount = bookings.Count();// fullItem.Bookings.Where(b => day >= b.From && day <= b.To).Count();
                         Debug.Assert(bookingCount < 2, string.Format("{0} is booked multiple times for {1}", fullItem.Name, day.ToString("ddMMMyyyy")));
-                        bool isBooked = fullItem.Bookings.Where(b => day >= b.From && day <= b.To).Count() > 0;
+                        bool isBooked = bookingCount > 0;
                         if (isBooked)
                         {
+                            item.BookingReference = bookings.First().Reference;
                             item.IsAvailableToBook = false;
                             item.IsBooked = true;
                         }
@@ -197,6 +199,30 @@ namespace Fastnet.Webframe.BookingData
                     throw xe2;
             }
             return new CalendarSetupTO { StartAt = start, Until = end };
+        }
+        public async Task<List<DayInformation>> GetDayStatusForDateRange(DateTime start, DateTime end, bool reducePayload = true)
+        {
+            List<DayInformation> dayList = new List<DayInformation>();
+            for (DateTime day = start; day <= end; day = day.AddDays(1))
+            {
+                DayInformation di = await GetDayInformation(day);
+                switch (di.Status)
+                {
+                    case DayStatus.IsClosed:
+                    case DayStatus.IsFull:
+                    case DayStatus.IsPartBooked:
+                    case DayStatus.IsNotBookable:
+                    case DayStatus.IsFree:
+                        di.StatusDisplay = di.ToString();
+                        if (reducePayload)
+                        {
+                            di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload    
+                        }
+                        dayList.Add(di);
+                        break;
+                }
+            }
+            return dayList;
         }
     }
 }

@@ -349,6 +349,7 @@
     <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
     <Content Include="Areas\booking\Templates\adminIndex.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
+    <Content Include="Areas\booking\Templates\OccupancyReport.html" />
     <Content Include="Areas\booking\Templates\Parameters.html" />
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />

@@ -117,6 +117,11 @@
     font-size: smaller;
 }
 
+.booking-reports {
+    .chrome(@dark-grey, @white, @red);
+    .form-buttons(@dark-grey, @white) !important;
+}
+
 .booking-forms {
     .chrome(@blue, @white, @red);
     .form-buttons(@blue, @white) !important;
@@ -130,11 +135,13 @@
         color: @blue;
         font-weight: normal;
     }
+
     .message-block {
         font-size: small;
         color: @dark-green;
         font-style: italic;
     }
+
     .validationMessage {
         font-size: x-small;
         color: @dark-red;
@@ -317,6 +324,36 @@
         margin-top: 2.35em;
         //font-style: italic;
         font-size: 0.75em;
+    }
+}
+
+// report stuff
+.admin-reports {
+    .ui-widget {
+        font-size: 0.9em;
+
+        .ui-state-disabled {
+            opacity: inherit;
+        }
+
+        &.ui-datepicker {
+            table {
+                font-size: 0.8em;
+            }
+
+            th {
+                font-weight: normal;
+            }
+        }
+    }
+
+    &.occupancy-report {
+        .ui-datepicker-calendar {
+            display: none;
+        }
+        .ui-widget-content {
+            border: none;
+        }
     }
 }
 //

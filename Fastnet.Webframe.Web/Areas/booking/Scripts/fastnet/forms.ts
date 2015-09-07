@@ -313,7 +313,8 @@ module fastnet {
                     $(`#${this.formId}`).off().closest(".ui-form").remove();
                 }
             }
-            public open(onCommand: CommandCallback): void {
+            public open(onCommand: CommandCallback): JQueryPromise<form> {
+                var deferred = $.Deferred<form>();
                 form.formStack.push(this);
                 this.commandCallback = onCommand;
                 if (this.options.modal) {
@@ -322,6 +323,8 @@ module fastnet {
                 else {
                     this.openModeless();
                 }
+                deferred.resolve(this);
+                return deferred.promise(this);
             }
             public disableCommand(cmd: string): void {
                 var f = this.getRoot();// this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);

@@ -171,6 +171,53 @@
 .message-box-body {
   font-size: smaller;
 }
+.booking-reports .ui-chrome-titlebar,
+.booking-reports .ui-form-titlebar {
+  background-image: none;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  background-color: #373737;
+}
+.booking-reports .ui-chrome-title,
+.booking-reports .ui-form-title {
+  color: #ffffff;
+}
+.booking-reports .ui-chrome-systemclose {
+  color: #ee1111;
+}
+.booking-reports .ui-chrome-systemclose:hover,
+.booking-reports .ui-chrome-systemclose:focus,
+.booking-reports .ui-chrome-systemclose:active {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+.booking-reports .ui-form-buttonpane {
+  border-top: 2px solid #373737;
+}
+.booking-reports .ui-form-button {
+  background-image: none !important;
+  background-color: #373737 !important;
+  color: #ffffff !important;
+  border: 1px solid #040404 !important;
+  min-width: 80px !important;
+  font-size: 0.8em !important;
+  outline: none !important;
+}
+.booking-reports .ui-form-button:hover {
+  background-color: #767676 !important;
+  color: #ffffff !important;
+}
+.booking-reports .ui-form-button[disabled],
+.booking-reports .ui-form-button[disabled]:hover,
+.booking-reports .ui-form-button[disabled]:focus,
+.booking-reports .ui-form-button[disabled]:active {
+  background-color: #767676 !important;
+  cursor: not-allowed !important;
+  color: #ffffff !important;
+}
 .booking-forms .ui-chrome-titlebar,
 .booking-forms .ui-form-titlebar {
   background-image: none;
@@ -410,6 +457,24 @@
 .parameters-form button.side-button {
   margin-top: 2.35em;
   font-size: 0.75em;
+}
+.admin-reports .ui-widget {
+  font-size: 0.9em;
+}
+.admin-reports .ui-widget .ui-state-disabled {
+  opacity: inherit;
+}
+.admin-reports .ui-widget.ui-datepicker table {
+  font-size: 0.8em;
+}
+.admin-reports .ui-widget.ui-datepicker th {
+  font-weight: normal;
+}
+.admin-reports.occupancy-report .ui-datepicker-calendar {
+  display: none;
+}
+.admin-reports.occupancy-report .ui-widget-content {
+  border: none;
 }
 .test-form label {
   font-size: x-small;

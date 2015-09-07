@@ -48,6 +48,7 @@
                 var adminIndexFormTemplateUrl = "booking/adminIndex";
                 wt.getTemplate({ ctx: this, templateUrl: adminIndexFormTemplateUrl }).then((r) => {
                     aiForm.setContentHtml(r.template);
+
                     aiForm.open((ctx: adminIndex, f: forms.form, cmd: string, data: any) => {
                         switch (cmd) {
                             case "cancel-command":
@@ -59,6 +60,11 @@
                                 var ci = new configIndex();
                                 ci.start();
                                 break;
+                            case "view-occupancy":
+                                f.close();
+                                var r = new occupancyReport();
+                                r.start();
+                                break;
                             default:
                                 forms.messageBox.show("This feature not yet implemented").then(() => { });
                                 break;
@@ -66,6 +72,7 @@
                     });
                 });
             }
+
         }
         class configIndex { 
             public start(): void {
@@ -158,6 +165,57 @@
                 var url = "bookingadmin/save/parameters";
                 ajax.Post({ url: url, data: models.current }).then((r) => {
                     f.setMessage("Changes saved");
+                });
+            }
+        }
+        class occupancyReport {
+            public start(): void {
+                var oform = new forms.form(this, {
+                    modal: false,
+                    title: "Occupancy Report",
+                    styleClasses: ["booking-reports"], //configuration.getFormStyleClasses(),
+                    cancelButtonText: "Administration page",
+                    okButton: null,
+                    additionalButtons: [
+                        { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
+                    ]
+                }, null);
+                var reportTemplate = "booking/occupancyreport";
+                wt.getTemplate({ ctx: this, templateUrl: reportTemplate }).then((r) => {
+                    oform.setContentHtml(r.template);
+                    //this.addMonthPickers(r.template);
+                    oform.open((ctx: configIndex, f: forms.form, cmd: string, data: any) => {
+                        switch (cmd) {
+                            case "cancel-command":
+                                f.close();
+                                var index = new adminIndex();
+                                index.start();
+                                break;
+                            case "back-to-site":
+                                f.close();
+                                location.href = "/home";
+                                break;
+                            case "edit-parameters":
+                                f.close();
+                                var pf = new parametersApp();
+                                pf.start();
+                                break;
+                            default:
+                                forms.messageBox.show("This feature not yet implemented").then(() => { });
+                                break;
+                        }
+                    }).then((f) => {
+                        this.addMonthPickers(f);
+                    });
+                });
+            }
+            public addMonthPickers(f: forms.form): void {
+                f.find("#startMonthPicker, #endMonthPicker").datepicker({
+                    changeMonth: true,
+                    changeYear: true,
+                    onChangeMonthYear: function (a, b, c) {
+                        debugger;
+                    }
                 });
             }
         }

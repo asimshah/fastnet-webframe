@@ -18,7 +18,8 @@ namespace Fastnet.Webframe.BookingData
         }
         public static DateTime GetToday()
         {
-            return DateTime.Today;// for now
+            // FOR TESTING
+            return new DateTime(2015, 9, 6);// DateTime.Today;// for now
         }
         public static string GetLodgementName()
         {
