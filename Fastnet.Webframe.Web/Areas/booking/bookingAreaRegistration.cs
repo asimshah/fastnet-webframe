@@ -38,7 +38,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/fastnet/vnext").Include(
-                //"~/Scripts/mustache.js",
+                "~/Scripts/mustache.js",
                 "~/Scripts/moment.js",
                 "~/Scripts/jquery.blockUI.js",
                 "~/Scripts/knockout-3.3.0.js",

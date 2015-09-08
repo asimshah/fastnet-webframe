@@ -13,18 +13,18 @@ module fastnet {
         import wt = fastnet.web.tools;
         import forms = fastnet.forms;
         import h$ = fastnet.util.helper;
-        enum DayStatus {
-            IsClosed,
-            IsFree,
-            IsFull,
-            IsPartBooked,
-            IsNotBookable
-        }
-        interface DayInformation {
-            Day: Date;
-            Status: DayStatus,
-            StatusDisplay: string
-        }
+        //enum DayStatus {
+        //    IsClosed,
+        //    IsFree,
+        //    IsFull,
+        //    IsPartBooked,
+        //    IsNotBookable
+        //}
+        //interface DayInformation {
+        //    Day: Date;
+        //    Status: DayStatus,
+        //    StatusDisplay: string
+        //}
         interface monthTuple {
             year: number;
             month: number;
@@ -34,7 +34,7 @@ module fastnet {
         //    MemberId?: string;
         //    Fullname?: string;
         //}
-        interface period {
+        export interface period {
             start: Date;
             end: Date;
         }
@@ -84,7 +84,7 @@ module fastnet {
             }
         }
         export class bookingApp {
-            private dayDictionary: collections.Dictionary<string, DayInformation>;
+            private dayDictionary: collections.Dictionary<string, server.dayInformation>;
             private dayDictionaryMonthsLoaded: collections.Dictionary<string, boolean>;
             private currentMember: server.MemberInfo;
             public calendarPeriod: period;
@@ -95,7 +95,7 @@ module fastnet {
                     additionalValidations: bookingAppValidations.GetValidators()
                 };
                 forms.form.initialise(config);
-                this.dayDictionary = new collections.Dictionary<string, DayInformation>();
+                this.dayDictionary = new collections.Dictionary<string, server.dayInformation>();
                 this.dayDictionaryMonthsLoaded = new collections.Dictionary<string, boolean>();
                 this.currentMember = { Anonymous: true, Fullname: null, MemberId: null, BookingDisallowed: true, Explanation: "Not logged in" };
                 this.calendarPeriod = { start: null, end: null };
@@ -165,10 +165,10 @@ module fastnet {
                 var monthKey = str.format("{0}-{1}", month.year, month.month);
                 var alreadyDone = app.dayDictionaryMonthsLoaded.containsKey(monthKey) && app.dayDictionaryMonthsLoaded.getValue(monthKey);
                 if (!alreadyDone) {
-                    $.when(ajax.Get({ url: dayStatusForMonthUrl }, false)).then((r) => {
-                        var ds: DayInformation[] = r;
-                        ds.forEach((value, index, array) => {
-                            app.dayDictionary.setValue(moment(value.Day).format("DDMMMYYYY"), value);
+                    $.when(ajax.Get({ url: dayStatusForMonthUrl }, false)).then((r: server.dayInformation[]) => {
+                        //var ds: DayInformation[] = r;
+                        r.forEach((value, index, array) => {
+                            app.dayDictionary.setValue(moment(value.day).format("DDMMMYYYY"), value);
                         });
                         app.dayDictionaryMonthsLoaded.setValue(monthKey, true);
                         //debug.print("loaded: year {0}, month: {1}", month.year, month.month);
@@ -208,21 +208,21 @@ module fastnet {
                     if (this.dayDictionary.containsKey(day.format("DDMMMYYYY"))) {
                         var di = this.dayDictionary.getValue(day.format("DDMMMYYYY"));
                         var r: any[];
-                        switch (di.Status) {
-                            case DayStatus.IsClosed:
-                                r = [false, "out-of-service", di.StatusDisplay];
+                        switch (di.status) {
+                            case server.DayStatus.IsClosed:
+                                r = [false, "out-of-service", di.calendarPopup];
                                 break;
-                            case DayStatus.IsFull:
-                                r = [false, "fully-booked", di.StatusDisplay];
+                            case server.DayStatus.IsFull:
+                                r = [false, "fully-booked", di.calendarPopup];
                                 break;
-                            case DayStatus.IsNotBookable:
-                                r = [false, "not-bookable", di.StatusDisplay];
+                            case server.DayStatus.IsNotBookable:
+                                r = [false, "not-bookable", di.calendarPopup];
                                 break;
-                            case DayStatus.IsPartBooked:
-                                r = [true, "part-booked", di.StatusDisplay];
+                            case server.DayStatus.IsPartBooked:
+                                r = [true, "part-booked", di.calendarPopup];
                                 break;
-                            case DayStatus.IsFree:
-                                r = [true, "free", di.StatusDisplay];
+                            case server.DayStatus.IsFree:
+                                r = [true, "free", di.calendarPopup];
                                 break;
                         }
                         return r;

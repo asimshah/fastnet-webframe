@@ -1,0 +1,61 @@
+﻿{{#data}}
+<div class="row">
+    <div class="day-row">
+        <div class="col-xs-1">
+            <span class="fa fa-circle  {{statusName}}-day status-icon"></span>
+        </div>
+        <div class="col-xs-4">
+            <span class="day-date">{{formattedDay}}</span>
+        </div>
+        <div class="col-xs-7">
+            <div class="status-description">{{statusDescription}}</div>
+        </div>
+    </div>
+</div>
+
+<div class="day-details {{statusName}}">
+    {{#reportDetails}}
+    {{#accomodationDetails}}
+    {{#isBooked}}
+    <div class="row">
+        <div class="accomodation-row">
+            <div class="col-xs-2 ">{{name}}</div>
+            <div class="col-xs-2">{{bookingReference}}</div>
+            <div class="col-xs-2">{{memberName}}</div>
+            <div class="col-xs-4">{{memberEmailAddress}}</div>
+            <div class="col-xs-2">{{mobilePhoneNumber}}</div>
+        </div>
+    </div>
+    {{/isBooked}}
+    {{#subAccomodation}}
+    {{#isBooked}}
+    <div class="row">
+        <div class="accomodation-row">
+            <div class="col-xs-2 ">{{name}}</div>
+            <div class="col-xs-2">{{bookingReference}}</div>
+            <div class="col-xs-2">{{memberName}}</div>
+            <div class="col-xs-4">{{memberEmailAddress}}</div>
+            <div class="col-xs-2">{{mobilePhoneNumber}}</div>
+        </div>
+    </div>
+
+    {{/isBooked}}
+    {{#subAccomodation}}
+    {{#isBooked}}
+    <div class="row">
+        <div class="accomodation-row">
+            <div class="col-xs-2 ">{{name}}</div>
+            <div class="col-xs-2">{{bookingReference}}</div>
+            <div class="col-xs-2">{{memberName}}</div>
+            <div class="col-xs-4">{{memberEmailAddress}}</div>
+            <div class="col-xs-2">{{mobilePhoneNumber}}</div>
+        </div>
+    </div>
+
+    {{/isBooked}}
+    {{/subAccomodation}}
+    {{/subAccomodation}}
+    {{/accomodationDetails}}
+    {{/reportDetails}}
+</div>
+{{/data}}

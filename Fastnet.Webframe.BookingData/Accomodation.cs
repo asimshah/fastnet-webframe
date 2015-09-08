@@ -16,7 +16,7 @@ namespace Fastnet.Webframe.BookingData
         public OptionalExtras Extra { get; set; }
         public virtual Accomodation Accomodation { get; set; }
     }
-    public class Accomodation //: Hierarchy<Accomodation>
+    public class Accomodation : Hierarchy<Accomodation>
     {
         private ICollection<Booking> bookings;
         private ICollection<Accomodation> subAccomodationSet;
@@ -47,18 +47,10 @@ namespace Fastnet.Webframe.BookingData
             get { return bookings ?? (bookings = new HashSet<Booking>()); }
             set { bookings = value; }
         }
-        public bool IsBlocked(DateTime day)
+        public bool GetIsBlockedState(DateTime day)
         {
             bool result = Availabilities.Where(x => x.Blocked).ToArray()
                  .Any(x => x.Period.Includes(day));
-            //if (result)
-            //{
-            //    return result;
-            //}
-            //else if (ParentAccomodation != null)
-            //{
-            //    return ParentAccomodation.IsBlocked(day);
-            //}
             return result;
         }
         /// <summary>
@@ -66,7 +58,7 @@ namespace Fastnet.Webframe.BookingData
         /// </summary>
         /// <param name="day"></param>
         /// <returns></returns>
-        public bool IsBooked(DateTime day)
+        public bool GetIsBookedState(DateTime day)
         {
             string m = null;
             try
@@ -82,34 +74,48 @@ namespace Fastnet.Webframe.BookingData
                 Debugger.Break();
                 throw;
             }
-            //return Bookings.Count(b => day >= b.From && day <= b.To) > 0;
         }
         /// <summary>
         /// True if this accomodation item can be booked, ie. it is bookable and all subaccomodation IsAvailableToBook
         /// </summary>
         /// <param name="day"></param>
         /// <returns></returns>
-        public bool IsAvailableToBook(DateTime day)
+        public bool GetIsAvailableToBookState(DateTime day)
         {
-            bool free = Bookable && !IsBooked(day);
+            bool free = Bookable && !GetIsBookedState(day);
             if(free)
             {
-                bool subAccomodationFree = SubAccomodation.All(x => x.IsAvailableToBook(day));
-                bool parentFree = ParentAccomodation == null ? true : ParentAccomodation.IsAvailableToBook(day);
+                bool subAccomodationFree = SubAccomodation.All(x => x.GetIsAvailableToBookState(day));
+                bool parentFree = ParentAccomodation == null ? true : ParentAccomodation.GetIsAvailableToBookState(day);
                 return parentFree && subAccomodationFree;
             }
             return false;
         }
+        public override Accomodation GetParent()
+        {
+            return this.ParentAccomodation;
+        }
+        public override IEnumerable<Accomodation> GetChildren()
+        {
+            return this.SubAccomodation;
+        }
+        //[NotMapped]
+        //public bool IsBlocked { get; set; }
 
-        //public override Accomodation GetParent()
+        //private bool isAvailableTobook;
+        //[NotMapped]
+        //public bool IsAvailableToBook
         //{
-        //    return ParentAccomodation;
+        //    get { return isAvailableTobook; }
+        //    set
+        //    {
+        //        isAvailableTobook = value;
+        //    }
         //}
-
-        //public override IEnumerable<Accomodation> GetChildren()
-        //{
-        //    return SubAccomodation;
-        //}
+        //[NotMapped]
+        //public string BookingReference { get; set; }
+        //[NotMapped]
+        //public bool IsBooked { get; set; }
     }
 
 

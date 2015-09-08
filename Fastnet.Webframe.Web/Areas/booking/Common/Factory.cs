@@ -1,4 +1,5 @@
 ﻿using Fastnet.Web.Common;
+using Fastnet.Webframe.BookingData;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,18 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 return ((JObject)data).ToObject<AdminParameters>();
             }
             return new AdminParameters();
+        }
+        public static DayInformation GetDayInformationInstance(BookingDataContext bctx, DateTime day)
+        {
+            switch (FactoryName)
+            {
+                case FactoryName.None:
+                    return new DayInformation(bctx, day);
+                case FactoryName.DonWhillansHut:
+                    return new DWHDayInformation(bctx, day);
+                default:
+                    throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
+            }
         }
     }
     public interface ICustomisable

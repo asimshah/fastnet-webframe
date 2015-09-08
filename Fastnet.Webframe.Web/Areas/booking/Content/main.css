@@ -171,6 +171,10 @@
 .message-box-body {
   font-size: smaller;
 }
+button.side-button {
+  margin-top: 2.35em;
+  font-size: 0.75em;
+}
 .booking-reports .ui-chrome-titlebar,
 .booking-reports .ui-form-titlebar {
   background-image: none;
@@ -199,22 +203,22 @@
 }
 .booking-reports .ui-form-button {
   background-image: none !important;
-  background-color: #373737 !important;
+  background-color: #2d89ef !important;
   color: #ffffff !important;
-  border: 1px solid #040404 !important;
+  border: 1px solid #0d57a9 !important;
   min-width: 80px !important;
   font-size: 0.8em !important;
   outline: none !important;
 }
 .booking-reports .ui-form-button:hover {
-  background-color: #767676 !important;
+  background-color: #a3ccf8 !important;
   color: #ffffff !important;
 }
 .booking-reports .ui-form-button[disabled],
 .booking-reports .ui-form-button[disabled]:hover,
 .booking-reports .ui-form-button[disabled]:focus,
 .booking-reports .ui-form-button[disabled]:active {
-  background-color: #767676 !important;
+  background-color: #cecece !important;
   cursor: not-allowed !important;
   color: #ffffff !important;
 }
@@ -454,9 +458,10 @@
   font-size: 12px;
   padding-top: 0;
 }
-.parameters-form button.side-button {
-  margin-top: 2.35em;
-  font-size: 0.75em;
+.admin-reports label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
 }
 .admin-reports .ui-widget {
   font-size: 0.9em;
@@ -475,6 +480,44 @@
 }
 .admin-reports.occupancy-report .ui-widget-content {
   border: none;
+}
+.admin-reports.occupancy-report button.side-button {
+  margin-top: 2.60em;
+  font-size: 0.75em;
+}
+.admin-reports.occupancy-report .report-content {
+  margin-top: 12px;
+}
+.admin-reports.occupancy-report .report-content .day-row {
+  margin-top: 4px;
+  font-size: small;
+}
+.admin-reports.occupancy-report .report-content .day-row .status-description {
+  font-style: italic;
+}
+.admin-reports.occupancy-report .report-content .day-details.IsPartBooked,
+.admin-reports.occupancy-report .report-content .day-details.IsFull {
+  border: 0.01em solid #808080;
+  border-radius: 3px;
+  padding: 4px;
+}
+.admin-reports.occupancy-report .report-content .IsFree-day {
+  color: #00c800;
+}
+.admin-reports.occupancy-report .report-content .IsFull-day {
+  color: red;
+}
+.admin-reports.occupancy-report .report-content .IsClosed-day {
+  color: black;
+}
+.admin-reports.occupancy-report .report-content .IsPartBooked-day {
+  color: orange;
+}
+.admin-reports.occupancy-report .report-content .IsNotBookable-day {
+  color: #805050;
+}
+.admin-reports.occupancy-report .report-content .accomodation-row {
+  font-size: x-small;
 }
 .test-form label {
   font-size: x-small;

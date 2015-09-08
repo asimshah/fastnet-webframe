@@ -21,17 +21,17 @@ namespace Fastnet.Webframe.BookingData
                     throw new ApplicationException(string.Format("No Parameter type is available for factory", FactoryName));
             }
         }
-        public static DayInformation GetDayInformationInstance()
-        {
-            switch (FactoryName)
-            {
-                case FactoryName.None:
-                    return new DayInformation();
-                case FactoryName.DonWhillansHut:
-                    return new DWHDayInformation();
-                default:
-                    throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
-            }
-        }
+        //public static DayInformation GetDayInformationInstance()
+        //{
+        //    switch (FactoryName)
+        //    {
+        //        case FactoryName.None:
+        //            return new DayInformation();
+        //        case FactoryName.DonWhillansHut:
+        //            return new DWHDayInformation();
+        //        default:
+        //            throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
+        //    }
+        //}
     }
 }

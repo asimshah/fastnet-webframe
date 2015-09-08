@@ -117,9 +117,15 @@
     font-size: smaller;
 }
 
+button.side-button {
+    margin-top: 2.35em;
+    //font-style: italic;
+    font-size: 0.75em;
+}
+
 .booking-reports {
     .chrome(@dark-grey, @white, @red);
-    .form-buttons(@dark-grey, @white) !important;
+    .form-buttons(@blue, @white) !important;
 }
 
 .booking-forms {
@@ -320,15 +326,16 @@
 }
 
 .parameters-form {
-    button.side-button {
-        margin-top: 2.35em;
-        //font-style: italic;
-        font-size: 0.75em;
-    }
 }
 
 // report stuff
 .admin-reports {
+    label {
+        font-size: x-small;
+        color: @blue;
+        font-weight: normal;
+    }
+
     .ui-widget {
         font-size: 0.9em;
 
@@ -351,8 +358,66 @@
         .ui-datepicker-calendar {
             display: none;
         }
+
         .ui-widget-content {
             border: none;
+        }
+
+        button.side-button {
+            margin-top: 2.60em;
+            font-size: 0.75em;
+        }
+
+        .report-content {
+            margin-top: 12px;
+            //border-top: 1px solid black;
+
+            .day-row {
+                margin-top: 4px;
+                font-size: small;
+                //border-bottom: 1px solid black;
+                .status-icon {
+                    //margin-top: 4px;
+                }
+                .day-date {
+                    //vertical-align:middle;
+                    //padding-left: 4px;
+                    //border-radius: 2px;
+                }
+                .status-description {
+                    font-style: italic;
+                    //font-size: smaller;
+                    //vertical-align:bottom;
+                }
+            }
+            .day-details.IsPartBooked, .day-details.IsFull {
+                border: 0.01em solid #808080;
+                border-radius: 3px;
+                padding: 4px;
+            }
+            .IsFree-day {
+                color: @status-free-colour;
+            }
+
+            .IsFull-day {
+                color: @status-fully-booked-colour;
+            }
+
+            .IsClosed-day {
+                color: @status-outofservice-colour;
+            }
+
+            .IsPartBooked-day {
+                color: @status-part-booked-colour;
+            }
+
+            .IsNotBookable-day {
+                color: @status-not-bookable-colour;
+            }
+
+            .accomodation-row {
+                font-size: x-small;
+            }
         }
     }
 }

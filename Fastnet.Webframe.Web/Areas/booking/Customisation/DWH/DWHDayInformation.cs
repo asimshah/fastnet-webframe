@@ -1,25 +1,30 @@
-﻿using System;
+﻿using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.Web.Areas.booking.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace Fastnet.Webframe.BookingData
+namespace Fastnet.Webframe.Web.Areas.booking
 {
     class DWHDayInformation : DayInformation
     {
-        public override void PostProcess(BookingDataContext ctx, DateTime day)
+        public DWHDayInformation(BookingDataContext ctx, DateTime day): base(ctx, day)
         {
-            base.PostProcess(ctx, day);
-            if (Status == DayStatus.IsFree && day.DayOfWeek == DayOfWeek.Saturday)
+
+        }
+        public override void PostProcess()
+        {
+            //base.PostProcess(ctx, day);
+            if (Status == DayStatus.IsFree && this.Day.DayOfWeek == DayOfWeek.Saturday)
             {
                 Status = DayStatus.IsNotBookable;
             }
         }
-        public override string StatusToString()
+        public override string StatusDescription()
         {
             string descr = null;
-            switch(Status)
+            switch (Status)
             {
                 case DayStatus.IsClosed:
                     descr = string.Format("Don Whillans Hut is closed for maintenance");//, BookingGlobals.GetLodgementName());
@@ -28,7 +33,7 @@ namespace Fastnet.Webframe.BookingData
                     descr = "Saturdays are not separately bookable";
                     break;
                 default:
-                    descr = base.StatusToString();
+                    descr = base.StatusDescription();
                     break;
             }
 

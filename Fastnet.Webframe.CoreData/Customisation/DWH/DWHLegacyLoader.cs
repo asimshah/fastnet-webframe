@@ -644,6 +644,10 @@ namespace Fastnet.Webframe.CoreData
                     DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
                     Debug.Assert(member != null);
                     Debug.Print("Loading {0}", lBooking.Reference);
+                    //if (lBooking.Reference == "Apr15/004")
+                    //{
+                    //    Debugger.Break();
+                    //}
                     BookingData.Booking b = new BookingData.Booking
                     {
                         CreatedOn = lBooking.BookingDate,
@@ -657,22 +661,7 @@ namespace Fastnet.Webframe.CoreData
                         TotalCost = lBooking.TotalCost,
                         Under18sInParty = lBooking.Under18sInParty
                     };
-                    b.To = lBooking.ReleasedItems.Max(d => d.Date);
-                    foreach (var ri in lBooking.ReleasedItems)
-                    {
-                        switch (ri.BookableItem.Name)
-                        {
-                            case "Don Whillans Hut":
-                                Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
-                                b.AccomodationCollection.Add(ac);
-                                break;
-                            default:
-                                Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
-                                b.AccomodationCollection.Add(bed);
-                                break;
-                        }
-                    }
-                    bctx.Bookings.Add(b);
+                    CreateBookings(bctx, b, lBooking, member);
                 }
                 bctx.SaveChanges();
             }
@@ -682,6 +671,103 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
+
+        private void CreateBookings(BookingDataContext bctx, BookingData.Booking newBooking, DWH.Booking lBooking, DWHMember member)
+        {
+            Action<IEnumerable<ReleasedItem>> addAccomodation = (items) =>
+            {
+                foreach (var ri in items)
+                {
+                    switch (ri.BookableItem.Name)
+                    {
+                        case "Don Whillans Hut":
+                            Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                            newBooking.AccomodationCollection.Add(ac);
+                            break;
+                        default:
+                            Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
+                            newBooking.AccomodationCollection.Add(bed);
+                            break;
+                    }
+                }
+            };
+            var dates = lBooking.ReleasedItems.Select(r => r.Date).Distinct();
+            if (dates.Count() == 1)
+            {
+                // this booking is for a single day
+                newBooking.To = lBooking.ReleasedItems.First().Date;
+                if (lBooking.ReleasedItems.Count() == 12)
+                {
+                    Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                    newBooking.AccomodationCollection.Add(ac);
+                    bctx.Bookings.Add(newBooking);
+                }
+                else
+                {
+                    addAccomodation(lBooking.ReleasedItems);
+                    bctx.Bookings.Add(newBooking);
+                }
+            }
+            else
+            {
+                var itemsByDate = lBooking.ReleasedItems.GroupBy(x => x.Date, x=> x, (k, g) => new { Date = k, list = g, count = g.Count() });
+                var firstCount = itemsByDate.First().count;
+                bool allDaysHaveTheSameCount = itemsByDate.All(x => x.count == firstCount);
+                if (allDaysHaveTheSameCount)
+                {
+                    // this booking has the same number of items on every day
+                    // in practice this is either (a) n beds every day, or 1 hut every day
+                    if (firstCount == 12)
+                    {
+                        // change a 12 bed booking into a whole hut
+                        newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
+                        Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                        newBooking.AccomodationCollection.Add(ac);
+                        bctx.Bookings.Add(newBooking);
+                    }
+                    else
+                    {
+                        newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
+                        addAccomodation(lBooking.ReleasedItems);
+                        bctx.Bookings.Add(newBooking);
+                    }
+                }
+                else
+                {
+                    bool  everyDayIsTheHut = itemsByDate.All(x => x.count == 12 || x.count == 1 && x.list.First().BookableItem.Name == "Don Whillans Hut");
+                    if(everyDayIsTheHut)
+                    {
+                        newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
+                        Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+                        newBooking.AccomodationCollection.Add(ac);
+                        bctx.Bookings.Add(newBooking);
+                    }
+                    else
+                    {
+                        // this booking needs to split over multiple bookings
+                        Log.Write(EventSeverities.Error, "Booking {0} not loaded - needs to be split", lBooking.Reference);
+                    }
+                }
+            }
+
+            //b.To = lBooking.ReleasedItems.Max(d => d.Date);
+            //foreach (var ri in lBooking.ReleasedItems)
+            //{
+            //    switch (ri.BookableItem.Name)
+            //    {
+            //        case "Don Whillans Hut":
+            //            Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
+            //            b.AccomodationCollection.Add(ac);
+            //            break;
+            //        default:
+            //            Accomodation bed = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Bed && a.Name == ri.BookableItem.Name);
+            //            b.AccomodationCollection.Add(bed);
+            //            break;
+            //    }
+            //}
+            
+        }
+
         private void CreatePriceStructure(BookingDataContext bctx)
         {
             PriceStructure ps = new PriceStructure

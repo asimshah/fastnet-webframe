@@ -236,13 +236,17 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\booking\bookingAreaRegistration.cs" />
     <Compile Include="Areas\booking\Common\BookingBundleFactory.cs" />
+    <Compile Include="Areas\booking\Common\dailyAccomodation.cs" />
+    <Compile Include="Areas\booking\Common\dayInformation.cs" />
     <Compile Include="Areas\booking\Common\Factory.cs" />
     <Compile Include="Areas\booking\Common\Globals.cs" />
+    <Compile Include="Areas\booking\Common\DayInformationClasses.cs" />
     <Compile Include="Areas\booking\Controllers\AdminController.cs" />
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
     <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\AdminParameters.cs" />
     <Compile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs" />
@@ -350,6 +354,7 @@
     <Content Include="Areas\booking\Templates\adminIndex.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />
+    <Content Include="Areas\booking\Templates\OccupancyReportDay.html" />
     <Content Include="Areas\booking\Templates\Parameters.html" />
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
@@ -1618,6 +1623,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
+    <TypeScriptCompile Include="Areas\booking\Common\dailyAccomodation.cs.d.ts">
+      <DependentUpon>dailyAccomodation.cs</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\Common\dayInformation.cs.d.ts">
+      <DependentUpon>dayInformation.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs.d.ts">
       <DependentUpon>DWHAdminParameters.cs</DependentUpon>
     </TypeScriptCompile>
@@ -1653,6 +1664,7 @@
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\mustache\mustache.d.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

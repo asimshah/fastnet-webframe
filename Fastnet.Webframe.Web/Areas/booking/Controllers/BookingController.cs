@@ -1,6 +1,7 @@
 ﻿using Fastnet.EventSystem;
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.Web.Areas.booking.Common;
 using Fastnet.Webframe.WebApi;
 using Newtonsoft.Json;
 using System;
@@ -95,43 +96,37 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             }
         }
         [HttpGet]
-        [Route("calendar/status/day/{date}")]
-        public async Task<dynamic> GetDayStatus(DateTime date)
-        {
-            using (var ctx = new BookingDataContext())
-            {
-                DayInformation di = await ctx.GetDayInformation(date);
-                di.StatusDisplay = di.ToString();
-                di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload
-                return di;
-            }
-        }
-        [HttpGet]
         [Route("calendar/status/month/{year}/{month}")]
-        public async Task<dynamic> GetDayStatus(int year, int month)
+        public IEnumerable<dayInformation> GetDayStatus(int year, int month)
         {
             using (var ctx = new BookingDataContext())
             {
                 DateTime start = new DateTime(year, month, 1);
                 DateTime end = start.AddMonths(1).AddDays(-1);
-                return await ctx.GetDayStatusForDateRange(start, end);
+                List<DayInformation> dayList = new List<DayInformation>();
+                for (DateTime day = start; day <= end; day = day.AddDays(1))
+                {
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, day);
+                    dayList.Add(di);
+                }
+                return dayList.Select(x => x.ToClientType()).ToArray();
             }
         }
-        //[HttpGet]
-        //[Route("calendar/status/from/{start}/to/{end}")]
-        //public async Task<dynamic> GetDayStatus(DateTime start, DateTime end)
-        //{
-        //    return await GetDayStatusForDateRange(start, end);
-        //}
         [HttpGet]
         [Route("checkavailability/{start}/{to}/{peoplecount}")]
         public async Task<AvailabilityInfo> GetRequestedBookings(DateTime start, DateTime to, int peopleCount)
         {
             using (var ctx = new BookingDataContext())
             {
-                AvailabilityInfo ai = new AvailabilityInfo();
+
                 DateTime end = to.AddDays(-1);
-                var dayList = await ctx.GetDayStatusForDateRange(start, end, false);
+                List<DayInformation> dayList = new List<DayInformation>();
+                for (DateTime day = start; day <= end; day = day.AddDays(1))
+                {
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, day);
+                    dayList.Add(di);
+                }
+                AvailabilityInfo ai = new AvailabilityInfo();
                 bool unavailable = dayList.Any(d => d.Status == DayStatus.IsClosed || d.Status == DayStatus.IsFull);
                 if (unavailable)
                 {
@@ -143,16 +138,14 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 {
                     if (dayList.First().Status == DayStatus.IsNotBookable)
                     {
-                        // first day  cannot be a not bookable - this is DWH customisation?
+                        // TODO: first day  cannot be a not bookable - this is DWH customisation?
                         ai.Success = false;
-                        ai.Explanation = "Bookings cannot start on a Saturday";
+                        ai.Explanation = "Bookings cannot start on this day";
                     }
                     else
                     {
-                        var freeBeds = dayList.Where(x => x.Status == DayStatus.IsFree || x.Status == DayStatus.IsPartBooked)
-                            .Select(d => new { Date = d.Day, Beds = d.Accomodation.SelectMany(z => z.SelfAndDescendants).Count(z => z.Type == AccomodationType.Bed && z.IsAvailableToBook) });
-                        //var freeBeds = dayList.Where(x => x.Status == DayStatus.IsFree || x.Status == DayStatus.IsPartBooked).Select(d => new { Date = d.Day, Beds = d.Accomodation.Count(a => a.Type == AccomodationType.Bed && a.IsAvailableToBook) });
-                        var insufficientAvailability = freeBeds.Any(x => x.Beds < peopleCount);
+                        var capacity = dayList.Select(x => new { Day = x.Day, Status = x.Status,  AvailableBedCount = x.Accomodation.SelectMany(z => z.SelfAndDescendants).Count(zz => zz.Type == AccomodationType.Bed && zz.IsAvailableToBook) });
+                        var insufficientAvailability = capacity.Any(x => x.AvailableBedCount < peopleCount);
                         if (insufficientAvailability)
                         {
                             // there is at least one day when there are not enough free beds
@@ -161,53 +154,98 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         }
                         else
                         {
-                            ai.Success = true;
-                            CreateChoices(peopleCount, dayList);
+                            var choices = CreateChoices(peopleCount, dayList);
                         }
                     }
                 }
-                return ai;
             }
+
+            return null;
+        }
+
+        private object CreateChoices(int peopleCount, List<DayInformation> dayList)
+        {
+            throw new NotImplementedException();
         }
 
         [HttpGet]
-        [Route("test/{emailAddress}")]
-        public async Task<dynamic> Test(string emailAddress)
-        {
-            await Task.Delay(3000);
-            return  new { Success = false, Error = "Always false during testing (delay 3 secs)" };
-        }
-        private async Task<List<DayInformation>> GetDayStatusForDateRange(DateTime start, DateTime end, bool reducePayload = true)
+        [Route("test1")]
+        public dynamic Test1()
         {
             using (var ctx = new BookingDataContext())
             {
+                DateTime start = new DateTime(2015, 9, 21);
+                DayInformation di = Factory.GetDayInformationInstance(ctx, start);
+                dynamic r = di.ToClientType();
+                return r;
+            }
+        }
+        [HttpGet]
+        [Route("test2")]
+        public dynamic[] Test2()
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                DateTime start = new DateTime(2015, 9, 21);
+                DateTime end = new DateTime(2015, 10, 21);
                 List<DayInformation> dayList = new List<DayInformation>();
                 for (DateTime day = start; day <= end; day = day.AddDays(1))
                 {
-                    DayInformation di = await ctx.GetDayInformation(day);
-                    switch (di.Status)
-                    {
-                        case DayStatus.IsClosed:
-                        case DayStatus.IsFull:
-                        case DayStatus.IsPartBooked:
-                        case DayStatus.IsNotBookable:
-                        case DayStatus.IsFree:
-                            di.StatusDisplay = di.ToString();
-                            if (reducePayload)
-                            {
-                                di.Accomodation = null;// N.B (a) di.Accomodation needed for di.ToString(), (b) nulled to reduce payload    
-                            }                      
-                            dayList.Add(di);
-                            break;
-                    }
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, day);
+                    dayList.Add(di);
                 }
-                return dayList;
+                return dayList.Select(x => x.ToClientType()).ToArray();
             }
         }
-        private void CreateChoices(int peopleCount, List<DayInformation> dayList)
+        [HttpGet]
+        [Route("test3")]
+        public dynamic[] Test3()
         {
-            var firstDayAccomodation = dayList.First().Accomodation;
+            DayInformation one;
+            DayInformation two;
+            DayInformation three;
+            DayInformation four;
+            Debug.Print("test 1 ...");
+            using (var ctx = new BookingDataContext())
+            {
+                DateTime start = new DateTime(2015, 9, 21);
+                //one =  DayInformation2.GetDayInformation(ctx, start);
+                //four =  DayInformation2.GetDayInformation(ctx, start);
+                one = Factory.GetDayInformationInstance(ctx, start);
+                //four = Factory.GetDayInformationInstance(ctx, start);
+            }
+            using (var ctx = new BookingDataContext())
+            {
+                DateTime start = new DateTime(2015, 9, 21);
+                DateTime end = new DateTime(2015, 12, 21);
+                //DayInformation2 cached = null;
+                List<DayInformation> dayList = new List<DayInformation>();
+                for (DateTime day = start; day <= end; day = day.AddDays(1))
+                {
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, day);// DayInformation2.GetDayInformation(ctx, day);
+                    //if (cached == null)
+                    //{
+                    //    cached = di;
+                    //}
+                    //dayList.Add(di);
+                    //var fi = dayList.First();
+                    //Debug.Print("After adding {0}, on {1} {2}, Accomodation.Count() = {3}, SelfAndDescendants.Count() = {4}: {5}", day.ToString("ddMMMyyyy"),
+                    //    cached.Day.ToString("ddMMMyyyy"),
+                    //    cached.GetAvailabilitySummary(), cached.Accomodation.Count(),
+                    //    cached.Accomodation.First().SelfAndDescendants.Count(),
+                    //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants.Select(x => string.Format("{0}", x.IsAvailableToBook)).ToArray()),
+                    //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants
+                    //    .Select(x => string.Format("{0}", x.Bookings.Count())).ToArray())
+                    //    );
+                }
+            }
+            Debugger.Break();
+            return null;
         }
+        //private void CreateChoices(int peopleCount, List<DayInformation> dayList)
+        //{
+        //    var firstDayAccomodation = dayList.First().Accomodation;
+        //}
 
     }
 }
