@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
-    public class LongSpan 
+    public class LongSpan
     {
         public int Days { get; set; }
         public int Months { get; set; }
@@ -28,7 +28,7 @@ namespace Fastnet.Webframe.BookingData
         public bool Includes(DateTime day)
         {
             bool result = false;
-            switch(PeriodType)
+            switch (PeriodType)
             {
                 case PeriodType.Fixed:
                     result = day >= StartDate && (EndDate == null || day <= EndDate);
@@ -39,10 +39,28 @@ namespace Fastnet.Webframe.BookingData
                     result = day >= today && day <= endDate;
                     break;
                 case PeriodType.DaysInWeek:
-                    int dn = (int) day.DayOfWeek; // Sunday is dn 0
+                    int dn = (int)day.DayOfWeek; // Sunday is dn 0
                     dn = 1 << dn;
                     DaysOfTheWeek dtw = (DaysOfTheWeek)dn;
                     result = DaysOfTheWeek.HasFlag(dtw);
+                    break;
+            }
+            return result;
+        }
+        public DateTime GetStartDate()
+        {
+            return this.StartDate ?? BookingGlobals.GetToday();
+        }
+        public DateTime GetEndDate()
+        {
+            DateTime result = BookingGlobals.GetToday();
+            switch (PeriodType)
+            {
+                case PeriodType.Fixed:
+                    result = this.EndDate ?? DateTime.MaxValue;
+                    break;
+                case PeriodType.Rolling:
+                    result = GetRollingEndDate();
                     break;
             }
             return result;
@@ -58,6 +76,11 @@ namespace Fastnet.Webframe.BookingData
             Debug.Assert(PeriodType == PeriodType.Rolling);
             DateTime endDate = relativeTo.AddYears(Interval.Years).AddMonths(Interval.Months).AddDays(Interval.Days).AddDays(-1);
             return endDate;
+        }
+        public TimeSpan GetDuration()
+        {
+            TimeSpan ts = this.GetEndDate() - this.GetStartDate();
+            return ts;
         }
     }
 }

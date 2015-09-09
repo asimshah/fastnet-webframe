@@ -49,8 +49,16 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             using (var ctx = new BookingDataContext())
             {
+                var cal = ctx.GetCalendarSetupInfo();
+
                 DateTime start = new DateTime(fromYear, fromMonth, 1);
                 DateTime end = new DateTime(toYear, toMonth, DateTime.DaysInMonth(toYear, toMonth));
+                start = cal.StartAt > start ? cal.StartAt : start;
+                end = cal.Until < end ? cal.Until : end;
+                if (end < start)
+                {
+                    end = new DateTime(start.Year, start.Month, DateTime.DaysInMonth(start.Year, start.Month));
+                }
                 List<DayInformation> dayList = new List<DayInformation>();
                 for (DateTime day = start; day <= end; day = day.AddDays(1))
                 {

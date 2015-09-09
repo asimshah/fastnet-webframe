@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using Fastnet.Common;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 {
@@ -114,7 +115,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("checkavailability/{start}/{to}/{peoplecount}")]
-        public async Task<AvailabilityInfo> GetRequestedBookings(DateTime start, DateTime to, int peopleCount)
+        public AvailabilityInfo GetRequestedBookings(DateTime start, DateTime to, int peopleCount)
         {
             using (var ctx = new BookingDataContext())
             {
@@ -155,19 +156,86 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         else
                         {
                             var choices = CreateChoices(peopleCount, dayList);
+                            ai.Success = true;
+
+                            var r = BookingChoice.SelectCommonChoices(choices);
+                            foreach (var choice in r)
+                            {
+                                choice.AddPrices(ctx);
+                                //Debug.Print("{0}: {1}", choice.Day.ToDefault(), choice.ToString());
+                            }
+
                         }
                     }
                 }
+                return ai;
             }
 
-            return null;
+
         }
 
-        private object CreateChoices(int peopleCount, List<DayInformation> dayList)
+        private IEnumerable<BookingChoice> CreateChoices(int peopleCount, List<DayInformation> dayList)
         {
-            throw new NotImplementedException();
+            List<BookingChoice> choices = new List<BookingChoice>();
+            foreach(var day in dayList)
+            {
+                foreach (AccomodationType at in Enum.GetValues(typeof(AccomodationType)))
+                {
+                    var list = day.FindAvailableAccomodation(at);
+                    if (list.Count() > 0)
+                    {
+                        int capacity = list.Select(l => l.SelfAndDescendants.Count(x => x.Type == AccomodationType.Bed)).Sum();
+                        if (capacity == peopleCount)
+                        {
+                            var bc = new BookingChoice { Day = day.Day, Accomodation = list, Capacity = capacity };
+                            choices.Add(bc);
+                        }
+                        else //if (capacity > peopleCount)
+                        {
+                            // TODO: decide if this needs (a) generalisation for all accomodation types,
+                            // and/or (b) customisation for DWH
+                           
+                            switch (at)
+                            {
+                                case AccomodationType.Bed:
+                                    var bc = new BookingChoice { Day = day.Day };
+                                    bc.Accomodation = list.Take(peopleCount);
+                                    bc.Capacity = peopleCount;
+                                    choices.Add(bc);
+                                    break;
+                                case AccomodationType.Room:
+                                    var wholeRooms = day.FindWholeRooms(list, peopleCount);
+                                    // wholerooms maybe the same as the whole of the level above
+                                    foreach(var wr in wholeRooms)
+                                    {
+                                        var bc2 = new BookingChoice { Day = day.Day };
+                                        bc2.Accomodation = wr;
+                                        bc2.Capacity = wr.Sum(x => x.Capacity);
+                                        choices.Add(bc2);
+                                    }
+                                    var splitAccomdation = day.FindSplitAccomodation(list, peopleCount, day.FindAvailableAccomodation(AccomodationType.Bed));
+                                    foreach (var sa in splitAccomdation)
+                                    {
+                                        var bc2 = new BookingChoice { Day = day.Day };
+                                        bc2.Accomodation = sa;
+                                        bc2.Capacity = sa.Sum(x => x.Capacity);
+                                        choices.Add(bc2);
+                                    }
+                                    break;
+                                case AccomodationType.Hut:
+                                    var bc3 = new BookingChoice { Day = day.Day };
+                                    bc3.Accomodation = list.Take(1);
+                                    bc3.Capacity = bc3.Accomodation.First().Capacity;
+                                    choices.Add(bc3);
+                                    break;
+                            }
+                        }
+                        Debug.Print("Day {0}: {2}(s) {1} available, capacity: {3}", day.Day.ToString("ddMMMyyyy"), at.ToString(), list.Count(), capacity);
+                    }
+                }
+            }
+            return choices;
         }
-
         [HttpGet]
         [Route("test1")]
         public dynamic Test1()
