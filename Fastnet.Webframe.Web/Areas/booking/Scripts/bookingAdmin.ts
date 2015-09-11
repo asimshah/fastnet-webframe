@@ -15,10 +15,10 @@ module fastnet {
     }
     export module booking {
         export class adminApp {
-            public bookingParameters: server.BookingParameters;
+            public bookingParameters: server.bookingParameters;// server.BookingParameters;
             public start(): void {
                 this.initialise().then(() => {
-                    var index = new adminIndex();
+                    var index = new adminIndex(this);
                     index.start();
                 });
             }
@@ -30,14 +30,25 @@ module fastnet {
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
                 ajax.Get({ url: parametersUrl }, false).then((r) => {
-                    this.bookingParameters = <server.BookingParameters>r;
-                    factory.setFactory(this.bookingParameters.FactoryName);
+                    this.bookingParameters = <server.bookingParameters>r;
+                    factory.setFactory(this.bookingParameters.factoryName);// .FactoryName);
                     deferred.resolve();
                 });
                 return deferred.promise();
             }
         }
-        class adminIndex {
+        class adminSubapp {
+            protected app: adminApp;
+            constructor(app: adminApp) {
+                this.app = app;
+            }
+        }
+        class adminIndex extends adminSubapp {
+            //private app: adminApp;
+            constructor(app: adminApp) {
+                super(app);
+                //this.app = app;
+            }
             public start(): void {
                 debug.print("admin index started");
                 var aiForm = new forms.form(this, {
@@ -59,12 +70,12 @@ module fastnet {
                                 break;
                             case "edit-configuration":
                                 f.close();
-                                var ci = new configIndex();
+                                var ci = new configIndex(this.app);
                                 ci.start();
                                 break;
                             case "view-occupancy":
                                 f.close();
-                                var r = new occupancyReport();
+                                var r = new occupancyReport(this.app);
                                 r.start();
                                 break;
                             default:
@@ -76,7 +87,11 @@ module fastnet {
             }
 
         }
-        class configIndex {
+        class configIndex extends adminSubapp {
+            constructor(app: adminApp) {
+                super(app);
+                //this.app = app;
+            } 
             public start(): void {
                 debug.print("configuration index started");
                 var ciForm = new forms.form(this, {
@@ -96,7 +111,7 @@ module fastnet {
                         switch (cmd) {
                             case "cancel-command":
                                 f.close();
-                                var index = new adminIndex();
+                                var index = new adminIndex(this.app);
                                 index.start();
                                 break;
                             case "back-to-site":
@@ -105,7 +120,7 @@ module fastnet {
                                 break;
                             case "edit-parameters":
                                 f.close();
-                                var pf = new parametersApp();
+                                var pf = new parametersApp(this.app);
                                 pf.start();
                                 break;
                             default:
@@ -116,7 +131,11 @@ module fastnet {
                 });
             }
         }
-        class parametersApp {
+        class parametersApp extends adminSubapp {
+            constructor(app: adminApp) {
+                super(app);
+                //this.app = app;
+            } 
             public start(): void {
                 debug.print("configuration index started");
                 var model = factory.getParametersVM();
@@ -146,7 +165,7 @@ module fastnet {
                         switch (cmd) {
                             case "configuration-page":
                                 f.close();
-                                var index = new configIndex();
+                                var index = new configIndex(this.app);
                                 index.start();
                                 break;
                             case "back-to-site":
@@ -170,12 +189,15 @@ module fastnet {
                 });
             }
         }
-        class occupancyReport {
+        class occupancyReport extends adminSubapp {
             private minimumDate: Date;
             private maximumDate: Date;
             private dayTemplate: string;
+            constructor(app: adminApp) {
+                super(app);
+            }
             public start(): void {
-                var calendarInfoUrl = "bookingapi/calendar/setup/info";
+                var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", this.app.bookingParameters.currentAbode.id);
                 ajax.Get({ url: calendarInfoUrl }, false).then((r) => {
                     var csi: bookingData.calendarSetup = r;
                     var start = moment(csi.StartAt);//.toDate();// moment(r2[0].startAt).toDate();
@@ -204,7 +226,7 @@ module fastnet {
                                 switch (cmd) {
                                     case "cancel-command":
                                         f.close();
-                                        var index = new adminIndex();
+                                        var index = new adminIndex(this.app);
                                         index.start();
                                         break;
                                     case "back-to-site":
@@ -256,8 +278,9 @@ module fastnet {
                 var smonth = sm.month() + 1;
                 var eyear = em.year();
                 var emonth = em.month() + 1;
-                var dayTemplateUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}", syear, smonth, eyear, emonth);
-                var reportUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}", syear, smonth, eyear, emonth);
+                //var dayTemplateUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}", syear, smonth, eyear, emonth);
+                var reportUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}/{4}",
+                    this.app.bookingParameters.currentAbode.id, syear, smonth, eyear, emonth);
                 ajax.Get({ url: reportUrl }, false).then((r: server.dayInformation[]) => {
                     var html = $(Mustache.render(this.dayTemplate, { data: r }));
                     $(".report-content").empty().append($(html));

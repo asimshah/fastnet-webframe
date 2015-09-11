@@ -88,7 +88,7 @@ module fastnet {
             private dayDictionaryMonthsLoaded: collections.Dictionary<string, boolean>;
             private currentMember: server.MemberInfo;
             public calendarPeriod: period;
-            public bookingParameters: server.BookingParameters;
+            public bookingParameters: server.bookingParameters;
             public start(): void {
                 var config: forms.configuration = {
                     modelessContainer: "booking-interaction",
@@ -97,7 +97,14 @@ module fastnet {
                 forms.form.initialise(config);
                 this.dayDictionary = new collections.Dictionary<string, server.dayInformation>();
                 this.dayDictionaryMonthsLoaded = new collections.Dictionary<string, boolean>();
-                this.currentMember = { Anonymous: true, Fullname: null, MemberId: null, BookingDisallowed: true, Explanation: "Not logged in" };
+                this.currentMember = {
+                    Anonymous: true,
+                    Fullname: null,
+                    MemberId: null,
+                    OnBehalfOfMemberId: null,
+                    BookingPermission: server.BookingPermissions.Disallowed,
+                    Explanation: "Not logged in"
+                };
                 this.calendarPeriod = { start: null, end: null };
                 this.loadInitialisationData().then(() => {
                     this.setMember();
@@ -113,20 +120,23 @@ module fastnet {
                 // 2. the forward bookable period (for the booking calendar)
                 var deferred = $.Deferred<void>();
                 var parametersUrl = "bookingapi/parameters";
-                var calendarInfoUrl = "bookingapi/calendar/setup/info";
-                var memberInfoUrl = "bookingapi/member";
-                $.when(
-                    ajax.Get({ url: memberInfoUrl }, false),
-                    ajax.Get({ url: calendarInfoUrl }, false),
-                    ajax.Get({ url: parametersUrl }, false)
-                    ).then((r1, r2, r3) => {
-                        this.currentMember = <server.MemberInfo>r1[0];
-                        var csi: bookingData.calendarSetup = r2[0];
-                        this.calendarPeriod.start = moment(csi.StartAt).toDate();// moment(r2[0].startAt).toDate();
-                        this.calendarPeriod.end = moment(csi.Until).toDate();// moment(r2[0].until).toDate();
-                        this.bookingParameters = <server.BookingParameters>r3[0];
-                        deferred.resolve();
-                    });
+                ajax.Get({ url: parametersUrl }, false).then((p: server.bookingParameters) => {
+                    this.bookingParameters = p;
+                    var abodeId = this.bookingParameters.currentAbode.id;
+                    var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", abodeId);
+                    var memberInfoUrl = "bookingapi/member";
+                    $.when(
+                        ajax.Get({ url: memberInfoUrl }, false),
+                        ajax.Get({ url: calendarInfoUrl }, false)
+                        ).then((r1, r2, r3) => {
+                            this.currentMember = <server.MemberInfo>r1[0];
+                            var csi: bookingData.calendarSetup = r2[0];
+                            this.calendarPeriod.start = moment(csi.StartAt).toDate();// moment(r2[0].startAt).toDate();
+                            this.calendarPeriod.end = moment(csi.Until).toDate();// moment(r2[0].until).toDate();
+                            //this.bookingParameters = <server.BookingParameters>r3[0];
+                            deferred.resolve();
+                        });
+                });
                 return deferred.promise();
             }
             private loadDayDictionaryInSteps(startAt: Date, numberOfMonthsToLoad: number, afterLoad: callback) {
@@ -139,7 +149,7 @@ module fastnet {
                 var lmonth = ed.month() + 1;
                 this.loadDayDictionaryForMonth(this, { year: year, month: month }, numberOfMonthsToLoad,
                     (mt: monthTuple) => {
-                        $('#bookingCalendar').datepicker('refresh');
+                        //$('#bookingCalendar').datepicker('refresh');
                         var dt = moment(new Date(mt.year, mt.month - 1, 1)).add(1, 'M');
                         var y = dt.year();
                         var m = dt.month() + 1;
@@ -154,24 +164,28 @@ module fastnet {
             private loadDayDictionaryForMonth(app: bookingApp, month: monthTuple, numberOfMonthsToLoad: number, getNextMonth: getMonthTupleCallback, afterLoad: callback) {
                 function doNext() {
                     var next = getNextMonth(month);
-                    if (next == null || numberOfMonthsToLoad < 1) {
+                    if (next == null){// || numberOfMonthsToLoad < 1) {
                         afterLoad();
                     }
                     else {
                         app.loadDayDictionaryForMonth(app, next, numberOfMonthsToLoad - 1, getNextMonth, afterLoad);
                     }
                 }
-                var dayStatusForMonthUrl = str.format("bookingapi/calendar/status/month/{0}/{1}", month.year, month.month);
+                var dayStatusForMonthUrl = str.format("bookingapi/calendar/{2}/status/month/{0}/{1}", month.year, month.month, this.bookingParameters.currentAbode.id);
                 var monthKey = str.format("{0}-{1}", month.year, month.month);
                 var alreadyDone = app.dayDictionaryMonthsLoaded.containsKey(monthKey) && app.dayDictionaryMonthsLoaded.getValue(monthKey);
                 if (!alreadyDone) {
                     $.when(ajax.Get({ url: dayStatusForMonthUrl }, false)).then((r: server.dayInformation[]) => {
                         //var ds: DayInformation[] = r;
                         r.forEach((value, index, array) => {
-                            app.dayDictionary.setValue(moment(value.day).format("DDMMMYYYY"), value);
+                            //debug.print("value.day: {0}", value.day);
+                            //debug.print("moment(value.day: {0}", moment(value.day));
+                            //debug.print("moment(value.day).format('YYYY- MM - DD'): {0}", moment(value.day).format("YYYY-MM-DD"));
+                            //debug.print("adding key {0}", moment(value.day).format("DDMMMYYYY"));
+                            app.dayDictionary.setValue(moment(value.day, "DDMMMYYYY").format("DDMMMYYYY"), value);
                         });
                         app.dayDictionaryMonthsLoaded.setValue(monthKey, true);
-                        //debug.print("loaded: year {0}, month: {1}", month.year, month.month);
+                        //debug.print("loaded dictionary: year {0}, month: {1}", month.year, month.month);
                         app.refreshBookingCalendar();
                         doNext();
                     });
@@ -197,12 +211,14 @@ module fastnet {
                 }
                 return n;
             }
-            public calendarBeforeShowDate(d): any[] {
+            public calendarBeforeShowDate(d): any[]{
+                //debug.print("cbsd: {0}", d);
                 var day: moment.Moment = moment(d);
                 if (day.isBefore(this.calendarPeriod.start) || day.isAfter(this.calendarPeriod.end)) {
                     return [false, "blocked", "Out of range"];
                 }
                 if (this.dayDictionary.isEmpty()) {
+                    debug.print("day dictionary is empty");
                     return [false, "blocked", "not ready"];
                 } else {
                     if (this.dayDictionary.containsKey(day.format("DDMMMYYYY"))) {
@@ -229,6 +245,7 @@ module fastnet {
 
                     }
                     else {
+                        //debug.print("day dictionary does not contain key {0}", day.format("DDMMMYYYY"));
                         return [false, "blocked", "not ready"];
                     }
                 }
@@ -245,7 +262,7 @@ module fastnet {
                     maxDate: this.calendarPeriod.end,
                     beforeShowDay: (d) => { return this.calendarBeforeShowDate(d); },// this.calendarBeforeShowDate ,
                     onChangeMonthYear: (m, y) => {
-                        this.calendarOnChangeMonth(m, y);
+                        //this.calendarOnChangeMonth(m, y);
                     },                    
                     //onSelect: this.BookingDateSelected,
                     dateFormat: 'DD d M yy'
@@ -262,14 +279,27 @@ module fastnet {
                 } else {
                     $(".booking-interaction").off().empty();
                     $(".login-name").off().text(this.currentMember.Fullname);
-                    if (this.currentMember.BookingDisallowed) {
-                        var html = str.format("<div class='booking-disallowed'>Booking is currently unavailable:<div class='explanation'>{0}</div></div>", this.currentMember.Explanation);
-                        $(".booking-interaction").empty().append($(html));
-                    } else {
-                        $(".booking-interaction").empty();
-                        var bd = new bookDates();
-                        bd.start(this);
+                    switch (this.currentMember.BookingPermission) {
+                        case server.BookingPermissions.Disallowed:
+                            var html = str.format("<div class='booking-disallowed'>Booking is currently unavailable:<div class='explanation'>{0}</div></div>", this.currentMember.Explanation);
+                            $(".booking-interaction").empty().append($(html));
+                            break;
+                        case server.BookingPermissions.WithConfirmation:
+                        case server.BookingPermissions.WithoutConfirmation:
+                        default:
+                            $(".booking-interaction").empty();
+                            var bd = new bookDates();
+                            bd.start(this);
+                            break;
                     }
+                    //if (this.currentMember.BookingDisallowed) {
+                    //    var html = str.format("<div class='booking-disallowed'>Booking is currently unavailable:<div class='explanation'>{0}</div></div>", this.currentMember.Explanation);
+                    //    $(".booking-interaction").empty().append($(html));
+                    //} else {
+                    //    $(".booking-interaction").empty();
+                    //    var bd = new bookDates();
+                    //    bd.start(this);
+                    //}
                 }
             }
             private retryCredentials(): void {
@@ -363,8 +393,10 @@ module fastnet {
         import bookingModels = fastnet.booking;// bookingVM;
         class bookDates {
             private bookingApp: bookingApp;
-            private model: bookingModels.request;
-            private vm: bookingModels.observableRequest;
+            private step1_model: bookingModels.request;
+            private step1_vm: bookingModels.observableRequest;
+            private step2_model: any;// bookingModels.request;
+            private step2_vm: any;//bookingModels.observableRequest;
             private dpOptions: JQueryUI.DatepickerOptions;
             public start(app: bookingApp): void {
                 this.bookingApp = app;
@@ -375,17 +407,17 @@ module fastnet {
                     beforeShow: this.beforeShowingDatePicker,
                     beforeShowDay: (d) => { return this.beforeShowDay(d); },
                     onChangeMonthYear: (m, y) => {
-                        app.calendarOnChangeMonth(m, y);
+                        //debug.print("onChangeMonthYear: month {0} year {1}", m, y);
+                        //app.calendarOnChangeMonth(m, y);
                     },
+                   // onSelect: this.onSelectDate,
                     dateFormat: 'dMyy'
                 };
-                this.model = new bookingModels.request();
-                this.vm = new bookingModels.observableRequest(this.model, { maximumNumberOfPeople: this.bookingApp.bookingParameters.MaximumOccupants });
                 this.step1();
             }
             private subscribeToAppEvents() {
                 $(this.bookingApp).on("refresh-calendar", (event) => {
-                    debug.print("booking app calendar refresh");
+                    //debug.print("booking app calendar refresh");
                     $("#startDatePicker").datepicker("refresh");
                 });
             }
@@ -405,23 +437,25 @@ module fastnet {
                 return r;
             }
             private step1(): void {
-                var baf = new forms.form(this, {
+                this.step1_model = new bookingModels.request();
+                this.step1_vm = new bookingModels.observableRequest(this.step1_model, { maximumNumberOfPeople: this.bookingApp.bookingParameters.maximumOccupants });
+                var baf_step1 = new forms.form(this, {
                     modal: false,
                     title: "Book Accomodation - Step 1",
                     styleClasses: configuration.getFormStyleClasses(),
                     datepickerOptions: this.dpOptions,
                     okButtonText: "Next",
                     cancelButtonText: "Clear"
-                }, this.vm);
+                }, this.step1_vm);
                 var bafTemplateUrl = "booking/request-step1";
                 wt.getTemplate({ ctx: this, templateUrl: bafTemplateUrl }).then((r) => {
-                    baf.setContentHtml(r.template);
-                    baf.open((ctx: bookDates, f: forms.form, cmd: string, data: bookingModels.requestModels) => {
+                    baf_step1.setContentHtml(r.template);
+                    baf_step1.open((ctx: bookDates, f: forms.form, cmd: string, data: bookingModels.requestModels) => {
                         switch (cmd) {
                             case "cancel-command":
                                 //f.close();
                                 //this.start(this.bookingApp);
-                                this.vm.reset();
+                                this.step1_vm.reset();
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
@@ -434,7 +468,26 @@ module fastnet {
                     });
                 });
             }
+            private step2(choices: server.bookingChoice[]): void {
+                this.step2_model = null;
+                this.step2_vm = null;
+                var baf_step2 = new forms.form(this, {
+                    modal: false,
+                    title: "Book Accomodation - Step 2",
+                    styleClasses: configuration.getFormStyleClasses(),
+                    datepickerOptions: this.dpOptions,
+                    okButtonText: "Next",
+                    cancelButtonText: "Back"
+                }, this.step2_vm);
+                var bafTemplateUrl = "booking/request-step2";
+                wt.getTemplate({ ctx: this, templateUrl: bafTemplateUrl }).then((r) => {
+                    baf_step2.setContentHtml(r.template);
+                    baf_step2.open((ctx:bookDates, f:forms.form, cmd:string, data: any) => {
+                    });
+                });
+            }
             private beforeShowingDatePicker(input: any, inst: any): JQueryUI.DatepickerOptions {
+               // $("#startDatePicker").datepicker("refresh");
                 if (input.id === "startDatePicker") {
                     $("#ui-datepicker-div").addClass("booking-month").removeClass("end-month").addClass("start-month");
                 }
@@ -443,14 +496,23 @@ module fastnet {
                 }
                 return null;
             }
+            //private onSelectDate(dateText: string, inst: any) {
+            //    //debugger;
+            //    if (inst.id === "startDatePicker") {
+            //        $("#endDatePicker").focus();
+            //    }
+            //}
             private canGoToStep2(model: bookingModels.request): boolean {
-                var url = str.format("bookingapi/checkavailability/{0}/{1}/{2}", moment(model.startDate).format("DDMMMYYYY"), moment(model.endDate).format("DDMMMYYYY"), model.numberOfPeople);
-                ajax.Get({ url: url }, false).then((r: server.AvailabilityInfo) => {
-                    if (!r.Success) {
-                        debug.print(r.Explanation);
-                        forms.messageBox.show(r.Explanation).then(() => {
+                var url = str.format("bookingapi/get/choices/{0}/{1}/{2}/{3}",
+                    this.bookingApp.bookingParameters.currentAbode.id, moment(model.startDate).format("DDMMMYYYY"), moment(model.endDate).format("DDMMMYYYY"), model.numberOfPeople);
+                ajax.Get({ url: url }, false).then((r: server.availabilityInfo) => {
+                    if (!r.success) {
+                        debug.print(r.explanation);
+                        forms.messageBox.show(r.explanation).then(() => {
                             this.step1();
                         });
+                    } else {
+                        this.step2(r.choices);
                     }
                 });
                 return false;

@@ -1,15 +1,11 @@
 ﻿using Fastnet.Webframe.BookingData;
-using Fastnet.Webframe.Web.Areas.booking.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
 {
     class DWHDayInformation : DayInformation
     {
-        public DWHDayInformation(BookingDataContext ctx, DateTime day): base(ctx, day)
+        public DWHDayInformation(BookingDataContext ctx, long abodeId, DateTime day): base(ctx, abodeId, day)
         {
 
         }

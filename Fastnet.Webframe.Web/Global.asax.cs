@@ -31,6 +31,7 @@ namespace Fastnet.Webframe.Web
         }
         protected void Application_Start()
         {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             string appDataFolder = HostingEnvironment.MapPath("~/App_Data");
             if (!System.IO.Directory.Exists(appDataFolder))
             {
@@ -62,6 +63,12 @@ namespace Fastnet.Webframe.Web
             }
             BookingData.BookingGlobals.Startup();
         }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.Write(e.ExceptionObject as Exception);
+        }
+
         protected void Session_Start()
         {            
             var ctx = new HttpContextWrapper(this.Context);

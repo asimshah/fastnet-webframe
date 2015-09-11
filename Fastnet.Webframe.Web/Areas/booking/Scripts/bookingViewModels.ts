@@ -3,7 +3,7 @@
         import forms = fastnet.forms;
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
-
+        import debug = fastnet.util.debug;
         export module login {
             export class loginModels  extends forms.models{
                 current: credentials;
@@ -37,6 +37,12 @@
             public startDate: Date;
             public endDate: Date;
             public numberOfPeople: number;
+            constructor() {
+                super();
+                this.startDate = null;
+                this.endDate = null;
+                this.numberOfPeople = null;//0;
+            }
         }
         interface requestOptions {
             maximumNumberOfPeople: number;
@@ -48,6 +54,7 @@
             public helpText: any;// KnockoutComputed<string>;
             constructor(req: request, opts: requestOptions) {
                 super();
+                //var edChangeFocusBlocked = false;
                 this.startDate = ko.observable<Date>(req.startDate).extend({
                     required: { message: "A start date is required" },
                 });
@@ -55,13 +62,24 @@
                     required: { message: "An end date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
                 });
+                //this.endDate.subscribe((cd) => {
+                //    var edm = this.toMoment(cd);
+                //    debug.print("sub(): end {0}", edm.format("DDMMMYYYY"));
+                //    if (!edChangeFocusBlocked) {
+                //        $("#peopleCount").focus();
+                //    }
+                //});
                 this.startDate.subscribe((cd) => {
                     var sdm = this.toMoment(cd);
+                    //debug.print("sub(): start {0}", sdm.format("DDMMMYYYY"));
                     var edm = this.toMoment(this.endDate());
                     var duration = (edm === null) ? 0 : edm.diff(sdm);
                     if (duration < 1) {
+                        //edChangeFocusBlocked = true;
                         this.endDate(sdm.add(1, 'd').toDate());
+                        //edChangeFocusBlocked = false;
                     }
+                   // $("#endDatePicker").focus();
                 }, this);
                 this.numberOfPeople = ko.observable<number>(req.numberOfPeople).extend({
                     required: { message: "Please provide the number of people in the party" },

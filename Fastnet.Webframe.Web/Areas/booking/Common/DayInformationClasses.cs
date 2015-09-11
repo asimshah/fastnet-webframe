@@ -2,16 +2,12 @@
 using Fastnet.EventSystem;
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
-using Fastnet.Webframe.Web.Areas.booking.Common;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
 {
@@ -75,6 +71,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     return this.Descendants.Where(d => d.Type == AccomodationType.Bed).Count();
                 }
             }
+
+
             public decimal Price { get; set; }
             private string MemberId { get; set; }
             public List<DailyAccomodation> Subaccomodation { get; private set; }
@@ -179,7 +177,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 {
                     if (bookings.Count() > 1)
                     {
-                        Log.Write(EventSeverities.Error, "{0} booked multiple times on {1}", accomodation.Name, Day.ToString("ddMMMyyyy"));
+                        Log.Write(EventSeverities.Error, "{0} booked multiple times on {1}", accomodation.Name, Day.ToDefault());
                     }
                     var booking = bookings.First();
                     BookingReference = booking.Reference;
@@ -197,17 +195,22 @@ namespace Fastnet.Webframe.Web.Areas.booking
         }
         public DateTime Day { get; private set; }
         public DayStatus Status { get; set; }
-        public List<DailyAccomodation> Accomodation { get; private set; }
-        public DayInformation(BookingDataContext bctx, DateTime day)
+        //public List<DailyAccomodation> Accomodation { get; private set; }
+        public DailyAccomodation Accomodation { get; private set; }
+        public DayInformation(BookingDataContext bctx, long abodeId, DateTime day)
         {
             this.Day = day;
-            Accomodation = new List<DailyAccomodation>();
-            foreach (var item in bctx.AccomodationSet.Where(x => x.ParentAccomodation == null))
-            {
-                var da = new DailyAccomodation(day, item);
-                da.SetBookability();
-                Accomodation.Add(da);
-            }
+            //Accomodation = new List<DailyAccomodation>();
+            var abode = bctx.AccomodationSet.Single(x => x.ParentAccomodation == null && x.AccomodationId == abodeId);
+            var da = new DailyAccomodation(day, abode);
+            da.SetBookability();
+            Accomodation = da;
+            //foreach (var item in bctx.AccomodationSet.Where(x => x.ParentAccomodation == null))
+            //{
+            //    var da = new DailyAccomodation(day, item);
+            //    da.SetBookability();
+            //    Accomodation.Add(da);
+            //}
             SetDayState();
             // Debug.Print("{0} - {1}, {2}, {3}", this.Day.ToString("dddd ddMMMyyyy"), this.Status.ToString(), this.StatusDescription(), this.GetAvailabilitySummary());
             //foreach (var item in this.Accomodation)
@@ -225,7 +228,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             switch (Status)
             {
                 case DayStatus.IsClosed:
-                    descr = string.Format("{0} is closed on this day", BookingGlobals.GetLodgementName());
+                    descr = string.Format("{0} is closed on this day", BookingGlobals.GetAbodeName());
                     break;
                 case DayStatus.IsFree:
                     descr = string.Format("This day free");
@@ -247,7 +250,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
             StringBuilder sb = new StringBuilder();
             if (Status == DayStatus.IsPartBooked || Status == DayStatus.IsFree)
             {
-                var items = Accomodation.SelectMany(x => x.SelfAndDescendants);
+                //var items = Accomodation.SelectMany(x => x.SelfAndDescendants);
+                var items = Accomodation.SelfAndDescendants;
                 List<string> descrs = new List<string>();
                 int total = 0;
                 AccomodationType[] values = (AccomodationType[])Enum.GetValues(typeof(AccomodationType)).Clone();
@@ -273,7 +277,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public dayInformation ToClientType(bool includeAccomodation = false, bool extended = false, CoreDataContext ctx = null)
         {
             dayInformation d = new dayInformation();
-            d.day = Day.ToString("ddMMMyyyy");
+            //d.day = Day.ToString("yyyy-MM-dd");// Day.ToDefault();
+            d.day = Day.ToDefault();
             d.formattedDay = Day.ToString("ddd ddMMMyyyy");
             d.status = Status;//.ToString();
             d.statusName = Status.ToString();
@@ -283,7 +288,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
             d.calendarPopup = string.Format("{0}{1}", d.statusDescription, string.IsNullOrWhiteSpace(d.availabilitySummary) ? "" : "\n" + d.availabilitySummary);
             if (includeAccomodation)
             {
-                d.accomodationDetails = Accomodation.Select(a => a.ToClientType(extended, ctx)).ToList();
+                //d.accomodationDetails = Accomodation.Select(a => a.ToClientType(extended, ctx)).ToList();
+                d.accomodationDetails = Accomodation.ToClientType(extended, ctx);//.ToList();
             }
             else
             {
@@ -293,14 +299,17 @@ namespace Fastnet.Webframe.Web.Areas.booking
         }
         private void SetDayState()
         {
-            if (this.Accomodation.All(x => x.IsBlocked))
+            //if (this.Accomodation.All(x => x.IsBlocked))
+            if (this.Accomodation.IsBlocked)
             {
                 this.Status = DayStatus.IsClosed;
             }
             else
             {
-                int totalAvailableToBook = this.Accomodation.Select(x => x.SelfAndDescendants.Sum(y => y.IsAvailableToBook ? 1 : 0)).Sum();
-                int totalBookable = this.Accomodation.Select(x => x.SelfAndDescendants.Sum(y => y.IsBookable ? 1 : 0)).Sum();
+                //int totalAvailableToBook = this.Accomodation.Select(x => x.SelfAndDescendants.Sum(y => y.IsAvailableToBook ? 1 : 0)).Sum();
+                //int totalBookable = this.Accomodation.Select(x => x.SelfAndDescendants.Sum(y => y.IsBookable ? 1 : 0)).Sum();
+                int totalAvailableToBook = this.Accomodation.SelfAndDescendants.Sum(y => y.IsAvailableToBook ? 1 : 0);
+                int totalBookable = this.Accomodation.SelfAndDescendants.Sum(y => y.IsBookable ? 1 : 0);
                 if (totalAvailableToBook == 0)
                 {
                     this.Status = DayStatus.IsFull;
@@ -319,7 +328,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public IEnumerable<DailyAccomodation> FindAvailableAccomodation(AccomodationType at)
         {
             // for now we do not distinguish classes of accomodation
-            return Accomodation.SelectMany(x => x.SelfAndDescendants.Where(z => z.Type == at && z.IsAvailableToBook));
+            return Accomodation.SelfAndDescendants.Where(z => z.Type == at && z.IsAvailableToBook);
         }
         public List<IEnumerable<DailyAccomodation>> FindWholeRooms(IEnumerable<DailyAccomodation> rooms, int peopleCount)
         {
@@ -406,135 +415,5 @@ namespace Fastnet.Webframe.Web.Areas.booking
             return KeySelector(obj).GetHashCode();
         }
     }
-    public class BookingChoice
-    {
-        class ChoiceComparer : IEqualityComparer<BookingChoice>
-        {
-            public bool Equals(BookingChoice left, BookingChoice right)
-            {
-                //Debug.Print("Equals(): ");
-                bool result = left.Accomodation.Count() == right.Accomodation.Count();
-                if (result)
-                {
-                    var leftSet = left.Accomodation.OrderBy(x => x.Type).ThenBy(x => x.Class).ThenBy(x => x.Capacity).ToArray();
-                    var rightSet = right.Accomodation.OrderBy(x => x.Type).ThenBy(x => x.Class).ThenBy(x => x.Capacity).ToArray();
-                    for (int i = 0; i < leftSet.Count(); ++i)
-                    {
-                        bool r = leftSet[i].Type == rightSet[i].Type &&
-                            leftSet[i].Class == rightSet[i].Class &&
-                            leftSet[i].Capacity == rightSet[i].Capacity;
-                        if (!r)
-                        {
-                            result = r;
-                            break;
-                        }
-                    }
-                }
-                return result;
-            }
 
-            public int GetHashCode(BookingChoice obj)
-            {
-                //Debug.Print("GetHashCode(): ");
-                // always usse Equals()
-                return 45;
-            }
-        }
-        /// <summary>
-        /// Reduces a list of choices to those available on every day in the set
-        /// </summary>
-        /// <param name="choices"></param>
-        /// <returns></returns>
-        public static IEnumerable<BookingChoice> SelectCommonChoices(IEnumerable<BookingChoice> choices)
-        {
-            var byDay = choices.GroupBy(x => x.Day, x => x, (k, g) => new { Day = k, List = g });
-            var choicesperDay = byDay.Select(x => x.List);
-            var result = choicesperDay.Aggregate((prev, next) => prev.Intersect(next, new ChoiceComparer()).ToArray());
-            List<BookingChoice> selectedChoices = new List<BookingChoice>();
-            foreach (var dayItem in byDay)
-            {
-                foreach (var item in dayItem.List)
-                {
-                    if (result.Contains(item, new ChoiceComparer()))
-                    {
-                        selectedChoices.Add(item);
-                    }
-                }
-            }
-            return selectedChoices;
-        }
-        public DateTime Day { get; set; }
-        public IEnumerable<DayInformation.DailyAccomodation> Accomodation { get; set; }
-        public int Capacity { get; set; }
-        public void AddPrices(BookingDataContext ctx)
-        {
-            foreach (var item in Accomodation)
-            {
-                DateTime day = this.Day;
-                AccomodationType type = item.Type;
-                AccomodationClass @class = item.Class;
-                Debug.Print("price needed for {2} {1} on {0}", day.ToDefault(), type, @class);
-                var prices = ctx.Prices.Where(p => p.Type == type && p.Class == @class);
-                var applicablePrices = new List<Price>();
-                foreach (var p in prices)
-                {
-                    if (p.Period.Includes(day))
-                    {
-                        applicablePrices.Add(p);
-                    }
-                }
-                var period = findNarrowestPeriod(applicablePrices.Select(x => x.Period), day);
-                Price price = applicablePrices.Single(x => x.Period.PeriodId == period.PeriodId);
-                item.Price = price.Amount;
-            }
-        }
-        public override string ToString()
-        {
-            var group = Accomodation.GroupBy(x => x.Type, x => x, (k, g) => new { Type = k, List = g, Capacity = g.Sum(zz => zz.Capacity) });
-            StringBuilder sb = new StringBuilder();
-            List<string> lines = new List<string>();
-            foreach (var item in group)
-            {
-                if (item.Type == AccomodationType.Bed)
-                {
-                    string t = string.Format("{0} Bed{1}", item.List.Count(), item.List.Count() == 1 ? "" : "s");
-                    lines.Add(t);
-                }
-                else
-                {
-                    string t = string.Format("{0} {1}{2} for {3}", item.List.Count(), item.Type.ToString(), item.List.Count() == 1 ? "" : "s", item.Capacity);
-                    lines.Add(t);
-                }
-            }
-            var descr = lines[0];
-            if (lines.Count() > 1)
-            {
-                descr = string.Join(", ", lines.Take(lines.Count() - 1)) + " and " + lines.Last();
-            }
-            // var descr = string.Join(", ", group.Select(x => string.Format("{0} {1}(s) for {2}", x.List.Count(), x.Type.ToString(), x.Capacity)).ToArray());
-            return descr;// string.Format("{0} {1} capacity {2}", Day.ToString("ddMMMyyyy"), descr, Capacity);
-        }
-        private Period findNarrowestPeriod(IEnumerable<Period> periods, DateTime day)
-        {
-            DayOfWeek dw = day.DayOfWeek;
-            Period period = periods.FirstOrDefault(p => p.PeriodType == PeriodType.DaysInWeek && p.Includes(day));
-            if (period == null)
-            {
-
-                var timePeriods = periods.Where(p => p.PeriodType != PeriodType.DaysInWeek);
-                List<Period> selected = new List<Period>();
-                TimeSpan ts = TimeSpan.MaxValue;
-                foreach (var tp in timePeriods)
-                {
-                    if (tp.GetDuration() <= ts)
-                    {
-                        selected.Add(tp);
-                        ts = tp.GetDuration();
-                    }
-                }
-                period = selected.OrderByDescending(x => x.StartDate).First();
-            }
-            return period;
-        }
-    }
 }

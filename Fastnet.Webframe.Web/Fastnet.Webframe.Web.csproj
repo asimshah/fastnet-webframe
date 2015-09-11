@@ -236,6 +236,8 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\booking\bookingAreaRegistration.cs" />
     <Compile Include="Areas\booking\Common\BookingBundleFactory.cs" />
+    <Compile Include="Areas\booking\Common\bookingChoice.cs" />
+    <Compile Include="Areas\booking\Common\BookingChoiceClasses.cs" />
     <Compile Include="Areas\booking\Common\dailyAccomodation.cs" />
     <Compile Include="Areas\booking\Common\dayInformation.cs" />
     <Compile Include="Areas\booking\Common\Factory.cs" />
@@ -249,9 +251,9 @@
     <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\AdminParameters.cs" />
-    <Compile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\availabilityInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
-    <Compile Include="Areas\booking\TransferObjects\BookingParameters.cs" />
+    <Compile Include="Areas\booking\TransferObjects\bookingParameters.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -358,6 +360,7 @@
     <Content Include="Areas\booking\Templates\Parameters.html" />
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
+    <Content Include="Areas\booking\Templates\request-step2.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
@@ -1623,6 +1626,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
+    <TypeScriptCompile Include="Areas\booking\Common\bookingChoice.cs.d.ts">
+      <DependentUpon>bookingChoice.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\Common\dailyAccomodation.cs.d.ts">
       <DependentUpon>dailyAccomodation.cs</DependentUpon>
     </TypeScriptCompile>
@@ -1645,12 +1651,12 @@
     <TypeScriptCompile Include="Areas\booking\TransferObjects\AdminParameters.cs.d.ts">
       <DependentUpon>AdminParameters.cs</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Areas\booking\TransferObjects\AvailabilityInfo.cs.d.ts">
-      <DependentUpon>AvailabilityInfo.cs</DependentUpon>
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\availabilityInfo.cs.d.ts">
+      <DependentUpon>availabilityInfo.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\bookingdata.typings.ts" />
     <TypeScriptCompile Include="Areas\booking\TransferObjects\BookingParameters.cs.d.ts">
-      <DependentUpon>BookingParameters.cs</DependentUpon>
+      <DependentUpon>bookingParameters.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\MemberInfo.cs.d.ts">
       <DependentUpon>MemberInfo.cs</DependentUpon>

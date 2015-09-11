@@ -1,10 +1,6 @@
-﻿using Fastnet.Webframe.BookingData;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
-namespace Fastnet.Webframe.Web.Areas.booking.Common
+namespace Fastnet.Webframe.Web.Areas.booking
 {
     public enum DayStatus
     {
@@ -24,6 +20,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Common
         public string availabilitySummary { get; set; }
         public bool reportDetails { get; set; }
         public string calendarPopup { get; set; }
-        public List<dailyAccomodation> accomodationDetails { get; set; }
+        //public List<dailyAccomodation> accomodationDetails { get; set; }
+        public dailyAccomodation accomodationDetails { get; set; }
     }
 }

@@ -7,16 +7,23 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
 {
+    public enum BookingPermissions
+    {
+        Disallowed,
+        WithoutConfirmation,
+        WithConfirmation
+    }
     public class MemberInfo
     {
         public Boolean Anonymous { get; set; }
         public string MemberId { get; set; }
         public string Fullname { get; set; }
-        public bool BookingDisallowed { get; set; }
+        public BookingPermissions BookingPermission { get; set; }
         public string Explanation { get; set; }
+        public string OnBehalfOfMemberId { get; set; }
         public virtual Task UpdatePermissions()
         {
-            BookingDisallowed = false;
+            BookingPermission = BookingPermissions.WithConfirmation;
             Explanation = string.Empty;
             return Task.FromResult(0);
         }

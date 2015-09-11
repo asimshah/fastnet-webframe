@@ -3,12 +3,12 @@
         <div class="col-xs-12">
             <div class="form-group-sm">
                 <label for="startDatePicker">Arrival Date</label>
-                <input id="startDatePicker" type="date" class="form-control" data-bind="value: startDate" />
+                <input id="startDatePicker" type="text" data-input="date" class="form-control" data-bind="value: startDate" />
                 <span class="validationMessage" data-bind="validationMessage: startDate"></span>
             </div>
             <div class="form-group-sm">
                 <label for="endDatePicker">Departure Date</label>
-                <input id="endDatePicker" type="date" class="form-control"  data-bind="value: endDate, moment: endDate" />
+                <input id="endDatePicker" type="text" data-input="date" class="form-control"  data-bind="value: endDate, stdDateFormat: endDate" />
                 <span class="validationMessage" data-bind="validationMessage: endDate"></span>
             </div>
             <div class="form-group-sm">

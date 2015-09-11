@@ -9,5 +9,7 @@ namespace Fastnet.Webframe.BookingData
     public class DWHParameter : Parameter
     {
         public string NoBMCCheckGroup { get; set; }
+        public string BMCMembers { get; set; }
+
     }
 }

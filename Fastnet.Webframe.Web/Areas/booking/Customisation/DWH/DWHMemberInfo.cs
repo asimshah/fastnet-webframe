@@ -24,42 +24,31 @@ namespace Fastnet.Webframe.Web.Areas.booking
                         return string.Format(fmt, Globals.GetBookingSecretaryEmailAddress());
                     };
                     Group noCheckGroup = null;
+                    Group bmcMembers = null;
                     if (para.NoBMCCheckGroup != null)
                     {
                         noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NoBMCCheckGroup);
                     }
-                    DWHMember member = core.Members.OfType<DWHMember>().Single(x => x.Id == MemberId);
-                    if(noCheckGroup != null && member.IsMemberOf(noCheckGroup)) {
-                        BookingDisallowed = false;
+                    if (para.BMCMembers != null)
+                    {
+                        bmcMembers = core.Groups.SingleOrDefault(x => x.Name == para.BMCMembers);
                     }
+                    DWHMember member = core.Members.OfType<DWHMember>().Single(x => x.Id == MemberId);
+                    //if(noCheckGroup != null && member.IsMemberOf(noCheckGroup)) {
+                    //    BookingDisallowed = false;
+                    //}
+                    //else
+                    //{
+                    BookingPermission = BookingPermissions.WithConfirmation;
+
+                    if (member.IsMemberOf(bmcMembers) || member.IsMemberOf(noCheckGroup))
+                    {
+                        BookingPermission = BookingPermissions.WithConfirmation;
+                    }
+
                     else
                     {
-                        if (member.BMCMembership == null)
-                        {
-                            BookingDisallowed = true;
-                            Explanation = formatExplanation("We have no record of your BMC Membership number.");
-                        }
-                        else
-                        {
-                            // validate BMC Membership here
-                            DWHMemberFactory mf = new DWHMemberFactory();
-                            dynamic result = await mf.ValidateBMCNumber(member.BMCMembership, member.LastName);
-                            BMCMembershipStatus status = result.Status;
-                            switch (status)
-                            {
-                                case BMCMembershipStatus.Current:
-                                    BookingDisallowed = false;
-                                    break;
-                                case BMCMembershipStatus.Expired:
-                                    BookingDisallowed = true;
-                                    Explanation = formatExplanation("Your BMC membership has expired.");
-                                    break;
-                                case BMCMembershipStatus.NotFound:
-                                    BookingDisallowed = true;
-                                    Explanation = formatExplanation("Your BMC membership has failed validation.");
-                                    break;
-                            }
-                        } 
+                        Explanation = formatExplanation("You are not a member of the BMC");
                     }
                 }
             }

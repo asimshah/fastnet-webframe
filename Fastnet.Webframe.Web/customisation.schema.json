@@ -14,6 +14,10 @@
           "name": {
             "type": "string"
           },
+          "fullname": {
+            "default": null,
+            "type": "string"
+          },
           "accomodationclass": {
             "type": "string",
             "enum": [ "standard", "superior", "executive", "deluxe" ]
@@ -91,7 +95,7 @@
       "description": "Settings for the booking app",
       "additionalProperties": false,
       "properties": {
-        "lodgmentName": { "type": "string" },
+        //"lodgmentName": { "type": "string" },
         "rollDayManually": {
           "type": "boolean",
           "default": false

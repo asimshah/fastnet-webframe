@@ -38,14 +38,14 @@ namespace Fastnet.Webframe.Web.Areas.booking
             }
             return new AdminParameters();
         }
-        public static DayInformation GetDayInformationInstance(BookingDataContext bctx, DateTime day)
+        public static DayInformation GetDayInformationInstance(BookingDataContext bctx,long abodeId, DateTime day)
         {
             switch (FactoryName)
             {
                 case FactoryName.None:
-                    return new DayInformation(bctx, day);
+                    return new DayInformation(bctx, abodeId, day);
                 case FactoryName.DonWhillansHut:
-                    return new DWHDayInformation(bctx, day);
+                    return new DWHDayInformation(bctx, abodeId, day);
                 default:
                     throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
             }

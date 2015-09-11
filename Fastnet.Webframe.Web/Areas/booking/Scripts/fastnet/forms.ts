@@ -229,7 +229,7 @@ module fastnet {
                 }
             }
             private static addMomentBinding() {                
-                ko.bindingHandlers["moment"] = {
+                ko.bindingHandlers["stdDateFormat"] = {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
                         var val = valueAccessor();
                         var formatted = ""; // throw instead?
@@ -438,7 +438,7 @@ module fastnet {
                     this.observableModel = ko.validatedObservable(this.model);
                     ko.applyBindings(this.observableModel, this.rootElement);
                 }
-                var focusableElements = "input:not([type='checkbox']):not([type='button'])";
+                var focusableElements = "input:not([type='checkbox']):not([type='button']):not([type='date'])";
                 $(this.rootElement).find(focusableElements).each((i, c) => {
                     var v = $(c).val().trim();
                     if (v === null || v === "") {
@@ -598,7 +598,7 @@ module fastnet {
                 }
             }
             private attachDatePickers(): void {
-                $(this.rootElement).find("input[type=date]").datepicker((this.options.datepickerOptions || null));
+                $(this.rootElement).find("input[type=date], input[type=text][data-input='date']").datepicker((this.options.datepickerOptions || null));
             }
             private bindEmbeddedButtons(): void {
                 var contentSelector = null;

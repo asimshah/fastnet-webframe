@@ -11,19 +11,32 @@ namespace Fastnet.Webframe.BookingData
 {
     public class BookingGlobals : CustomFactory
     {
-        private readonly static string lodgmentName;
+        private readonly static string globalAbodeName;
         static BookingGlobals()
         {
-            lodgmentName = Settings?.bookingApp?.lodgmentName ?? "Lodgment";
+            switch (FactoryName)
+            {
+                case FactoryName.DonWhillansHut:
+                    using (var ctx = new BookingDataContext())
+                    {
+                        var abode = ctx.AccomodationSet.Single(x => x.ParentAccomodation == null);
+                        globalAbodeName = abode.DisplayName;
+                    }
+                    break;
+                default:
+                    globalAbodeName = "(No global name)";
+                    break;
+            }
+            
         }
         public static DateTime GetToday()
         {
             // FOR TESTING
             return new DateTime(2015, 9, 6);// DateTime.Today;// for now
         }
-        public static string GetLodgementName()
+        public static string GetAbodeName()
         {
-            return lodgmentName;
+            return globalAbodeName;
         }
         public static void Startup()
         {
@@ -34,14 +47,14 @@ namespace Fastnet.Webframe.BookingData
     {
         public static void Startup()
         {
-            Mapper.CreateMap<Accomodation, AccomodationTO>()
-                //.ForSourceMember(n => n.ParentAccomodation, opt => opt.Ignore())
-                //.ForMember(n => n.IsBookable, opt => opt.Ignore())
-                .ForMember(n => n.IsBooked, opt => opt.Ignore())
-                .ForMember(n => n.IsAvailableToBook, opt => opt.Ignore())
-                .ForMember(n => n.BookingReference, opt => opt.Ignore())
-                .ForMember(n => n.IsBlocked, opt => opt.Ignore());
-            Mapper.AssertConfigurationIsValid();
+            //Mapper.CreateMap<Accomodation, AccomodationTO>()
+            //    //.ForSourceMember(n => n.ParentAccomodation, opt => opt.Ignore())
+            //    //.ForMember(n => n.IsBookable, opt => opt.Ignore())
+            //    .ForMember(n => n.IsBooked, opt => opt.Ignore())
+            //    .ForMember(n => n.IsAvailableToBook, opt => opt.Ignore())
+            //    .ForMember(n => n.BookingReference, opt => opt.Ignore())
+            //    .ForMember(n => n.IsBlocked, opt => opt.Ignore());
+            //Mapper.AssertConfigurationIsValid();
             //Debugger.Break();
         }
     }

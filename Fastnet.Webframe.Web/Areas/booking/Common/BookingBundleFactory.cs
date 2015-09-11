@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using Fastnet.Web.Common;
 
-namespace Fastnet.Webframe.Web.Areas.booking.Common
+namespace Fastnet.Webframe.Web.Areas.booking
 {
     public class BookingBundleFactory : BundleFactory
     {

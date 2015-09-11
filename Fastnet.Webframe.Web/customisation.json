@@ -28,13 +28,14 @@
     }
   },
   "bookingApp": {
-    "lodgmentName": "Don Whillans Hut",
+    //"lodgmentName": "Don Whillans Hut",
     "rollDayManually": true,
     "enable": true,
     "accomodation": [
       {
         "accomodationtype": "hut",
-        "name": "Whole Hut",
+        "name": "Entire Hut",
+        "fullname":  "Don Whillans Hut",
         "accomodationclass": "standard",
         "bookable": true,
         "subItemsSeparatelyBookable": true,

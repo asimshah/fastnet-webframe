@@ -375,6 +375,12 @@ button.side-button {
 }
 .booking-month.ui-widget {
   font-size: 0.9em;
+  /*.ui-state-highlight {
+            
+        }
+        .ui-state-active {
+            background-color: @blue;
+        }*/
 }
 .booking-month.ui-widget .ui-state-disabled {
   opacity: inherit;

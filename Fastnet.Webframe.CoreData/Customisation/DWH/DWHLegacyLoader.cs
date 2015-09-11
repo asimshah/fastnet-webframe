@@ -49,6 +49,8 @@ namespace Fastnet.Webframe.CoreData
                 {
                     LoadGroups();
                     Log.Write("legacyData: Groups loaded");
+                    AddBMCGroups();
+                    Log.Write("Bmc groups added");
                     LoadMembers();
                     Log.Write("legacyData: Members loaded");
                     LoadDirectories();
@@ -66,7 +68,8 @@ namespace Fastnet.Webframe.CoreData
                     LoadMenus();
                     Log.Write("legacyData: Menus loaded");
 
-                    await CreateMembersFromVisitors();
+                    CreateMembersFromVisitors();
+                    await ValidateBMCMembership();
                     //LoadBookings();
                     //tran.Complete();
                     LoadBookingData();
@@ -225,12 +228,37 @@ namespace Fastnet.Webframe.CoreData
             {
                 addGroup(item, null);
             }
+
+            coreDb.SaveChanges();
+        }
+        internal void AddBMCGroups()
+        {
+            int weightIncrement = Group.GetWeightIncrement();
+            Group bmcMembers = new Group
+            {
+                Name = "BMC Members",
+                ParentGroup = Group.AllMembers,
+                Description = "Members who are also members of the BMC",
+                Weight = Group.AllMembers.Weight + weightIncrement,
+                Type = GroupTypes.User,
+            };
+            coreDb.Groups.Add(bmcMembers);
+            Group bypassBMCChecking = new Group
+            {
+                Name = "No BMC Check",
+                ParentGroup = Group.AllMembers,
+                Description = "Members whose membership of the BMC is never checked online",
+                Weight = Group.AllMembers.Weight + weightIncrement,
+                Type = GroupTypes.User,
+            };
+            coreDb.Groups.Add(bypassBMCChecking);
             coreDb.SaveChanges();
         }
         internal void LoadMembers()
         {
             try
             {
+                
                 foreach (var item in legacyDb.Members.OrderBy(x => x.UserId))
                 {
                     if (item.Name == "Administrator$")
@@ -407,7 +435,7 @@ namespace Fastnet.Webframe.CoreData
             coreDb.MenuMasters.Add(mm);
             coreDb.SaveChanges();
         }
-        internal async Task CreateMembersFromVisitors()
+        internal void CreateMembersFromVisitors()
         {
             Dictionary<string, List<dynamic>> candidates = new Dictionary<string, List<dynamic>>();
             Action<string, dynamic> addCandidate = (email, details) =>
@@ -452,60 +480,92 @@ namespace Fastnet.Webframe.CoreData
                 addCandidate(email, new { firstName = firstName, lastName = lastName, bmcNumber = bmcNumber, phoneNumber = phoneNumber, club = club });
                 //Debug.Print("{5}: {0}, {1}, {2}, {3}, {4}", email, firstName, lastName, bmcNumber, phoneNumber, count);
             }
-            await CreateMembersFromCandidates(candidates);
+            CreateMembersFromCandidates(candidates);
             coreDb.SaveChanges();
         }
-        private async Task CreateMembersFromCandidates(Dictionary<string, List<dynamic>> candidates)
+        private async Task ValidateBMCMembership()
+        {
+            DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
+            Group bmcGroup = coreDb.Groups.Single(x => x.Name == "BMC Members");
+            var allMembers = coreDb.Members.OfType<DWHMember>();
+            foreach(var member in allMembers)
+            {
+                string bmcNumber = member.BMCMembership;
+                //DateTime? expiry = null;
+                BMCMembershipStatus status = BMCMembershipStatus.Unknown;
+                if (!string.IsNullOrWhiteSpace(bmcNumber) && mf.EnableBMCApi)
+                {
+                    dynamic result = await mf.ValidateBMCNumber(bmcNumber, member.LastName);
+                    status = result.Status;
+                    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                    {
+                        member.BMCMembershipExpiresOn = result.Expiry;
+                        bmcGroup.Members.Add(member);
+                    }
+                }
+                else if (bmcNumber == null)
+                {
+                    status = BMCMembershipStatus.Missing;
+                    Log.Write("Member {1}, email {0} is not a member of the BMC", member.EmailAddress, member.Fullname);
+                }
+            }
+        }
+        private void CreateMembersFromCandidates(Dictionary<string, List<dynamic>> candidates)
         {
             Group allMembers = coreDb.Groups.ToArray().Single(x => x.Name == SystemGroups.AllMembers.ToString() && x.Type.HasFlag(GroupTypes.System));
+            Group bmcGroup = coreDb.Groups.Single(x => x.Name == "BMC Members");
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
             foreach (KeyValuePair<string, List<dynamic>> kvp in candidates)
             {
-                //++count;
-                //Debug.Print("{0}: {1}", count, kvp.Key);
-                BMCMembershipStatus status = BMCMembershipStatus.Unknown;
+                //BMCMembershipStatus status = BMCMembershipStatus.Unknown;
                 var bestDetail = kvp.Value.FirstOrDefault(z => z.bmcNumber != null);
                 if (bestDetail == null)
                 {
                     bestDetail = kvp.Value.First();
                 }
                 string bmcNumber = bestDetail.bmcNumber ?? null;
-                DateTime? expiry = null;
-                //good++;
-                if (bmcNumber != null && mf.EnableBMCApi)
-                {
-                    dynamic result = await mf.ValidateBMCNumber((string)bestDetail.bmcNumber, (string)bestDetail.lastName);
-                    status = result.Status;
-                    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
-                    {
-                        expiry = result.Expiry;
-                    }
-                }
-                else if (bmcNumber == null)
-                {
-                    status = BMCMembershipStatus.Missing;
-                }
+                //DateTime? expiry = null;
+                ////good++;
+                //if (bmcNumber != null && mf.EnableBMCApi)
+                //{
+                //    dynamic result = await mf.ValidateBMCNumber((string)bestDetail.bmcNumber, (string)bestDetail.lastName);
+                //    status = result.Status;
+                //    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                //    {
+                //        expiry = result.Expiry;
+
+                //    }
+                //}
+                //else if (bmcNumber == null)
+                //{
+                //    status = BMCMembershipStatus.Missing;
+                //}
                 //Debug.Print("{2}: validate: {0}, {1}, ***** {3}", (string)x.lastName, (string)x.bmcNumber, good, status.ToString());
                 //Debugger.Break();
                 string email = kvp.Key;
-                bool newlyCreated = false;
+                //bool newlyCreated = false;
                 DWHMember member = coreDb.Members.OfType<DWHMember>().SingleOrDefault(m => m.EmailAddress == email);
                 if (member == null)
                 {
-                    member = CreateMember(email, defaultMemberPassword, (string)bestDetail.firstName, (string)bestDetail.lastName, DateTime.Today, null, false);
+                    member = CreateMember(email, defaultMemberPassword, ((string)bestDetail.firstName).ToString(), ((string)bestDetail.lastName).ToString(), DateTime.Today, null, false);
                     allMembers.Members.Add(member);
                     member.PlainPassword = defaultMemberPassword;
-                    newlyCreated = true;
+                    //newlyCreated = true;
+                    //if (status == BMCMembershipStatus.Current)
+                    //{
+                    //    //p.BMCMembers = "BMC Members";
+                    //    bmcGroup.Members.Add(member);
+                    //}
                     //Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "No BMC Membership number", status.ToString());
                 }
-                member.BMCMembership = bmcNumber;
-                member.BMCMembershipExpiresOn = expiry;
+                member.BMCMembership = bmcNumber?.Trim();
+                //member.BMCMembershipExpiresOn = expiry;
                 member.Organisation = bestDetail.club;
                 member.PhoneNumber = bestDetail.phoneNumber;
-                if (newlyCreated)
-                {
-                    Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "**No BMC Membership number**", status.ToString());
-                }
+                //if (newlyCreated)
+                //{
+                //    Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "**No BMC Membership number**", status.ToString());
+                //}
             }
         }
         private DWHMember CreateMember(string email, string password, string firstName, string lastName,
@@ -600,16 +660,15 @@ namespace Fastnet.Webframe.CoreData
         {
             Period pp = new Period
             {
+                Name = "Rolling period",
+                Description = "Range is from today to one year ahead",
                 PeriodType = PeriodType.Rolling,
                 Interval = new LongSpan { Years = 1 }
             };
             DWHParameter p = Factory.CreateNewParameter() as DWHParameter;
             p.ForwardBookingPeriod = pp;
-            
-            //Parameter p = new Parameter
-            //{
-            //    ForwardBookingPeriod = pp
-            //};
+            p.BMCMembers = "BMC Members";
+            p.NoBMCCheckGroup = "No BMC Check";
             bctx.Periods.Add(pp);
             bctx.Parameters.Add(p);
             bctx.SaveChanges();
@@ -620,12 +679,16 @@ namespace Fastnet.Webframe.CoreData
             var blockeddays = legacyBookingData.DayBook.Where(db => db.Day >= DateTime.Today && db.IsUnavailable).Select(d => d.Day).OrderBy(x => x).ToList();
             var result = blockeddays.GroupWhile((p, n) => n == p.AddDays(1));
             List<Period> blockedPeriods = new List<Period>();
+            int count = 0;
             foreach (var set in result)
             {
+                ++count;
                 DateTime start = set.First();
                 DateTime end = set.Last();
                 Period p = new Period
                 {
+                    Name = string.Format("Fixed Period"),
+                    Description = string.Format("Range is from from {0} to {1}", start.ToDefault(), end.ToDefault()),
                     PeriodType = PeriodType.Fixed,
                     StartDate = start,
                     EndDate = end
@@ -776,6 +839,8 @@ namespace Fastnet.Webframe.CoreData
             };
             Period pp = new Period
             {
+                Name = "Fixed Period",
+                Description = "Range is from 1Jan2014 onwards",
                 PeriodType = PeriodType.Fixed,
                 StartDate = DateTime.Parse("1/1/2014"),
                 EndDate = null // i.e. forever
@@ -786,7 +851,7 @@ namespace Fastnet.Webframe.CoreData
                 Amount = 10.0M,
                 Class = AccomodationClass.Standard,
                 Type = AccomodationType.Bed,
-                MinimumUnits = 1
+                Capacity = 1
             };
             Price hutPrice = new Price
             {
@@ -794,7 +859,7 @@ namespace Fastnet.Webframe.CoreData
                 Amount = 120.0M,
                 Class = AccomodationClass.Standard,
                 Type = AccomodationType.Hut,
-                MinimumUnits = 1
+                Capacity = 1
             };
             ps.Periods.Add(pp);
             bctx.Prices.Add(bedPrice);
@@ -814,6 +879,7 @@ namespace Fastnet.Webframe.CoreData
                     string ac = item.accomodationclass;
                     AccomodationClass c = (AccomodationClass)Enum.Parse(typeof(AccomodationClass), ac, true);
                     string name = item.name;
+                    string fullname = item.fullname;
                     bool bookable = item.bookable;
                     bool? sisb = item.subItemsSeparatelyBookable;
                     List<dynamic> subitems = ((JArray)item.subitems)?.ToObject<List<dynamic>>();
@@ -823,6 +889,7 @@ namespace Fastnet.Webframe.CoreData
                         Class = c,// AccomodationClass.Standard,
                         Type = type,
                         Name = name,
+                        Fullname = fullname,
                         Bookable = bookable,
                         SubAccomodationSeparatelyBookable = sisb?? false
                     };
@@ -847,28 +914,31 @@ namespace Fastnet.Webframe.CoreData
 
             foreach (Accomodation acc in bctx.AccomodationSet.Where(x => x.ParentAccomodation == null))
             {
-                Period pp = new Period
-                {
-                    PeriodType = PeriodType.Rolling,
-                    Interval = new LongSpan { Years = 1 }
-                };
+                //Period pp = new Period
+                //{
+                //    Name = "What is this for?",
+                //    Description = "What is this for?",
+                //    PeriodType = PeriodType.Rolling,
+                //    Interval = new LongSpan { Years = 1 }
+                //};
 
-                Availability a1 = new Availability
-                {
-                    Accomodation = acc,
-                    Period = pp
-                };
+                //Availability a1 = new Availability
+                //{
+                //    Accomodation = acc,
+                //    Period = pp
+                //};
                 foreach (var p in blockedPeriods)
                 {
                     Availability a = new Availability
                     {
+                        Description = string.Format("{0} blocked (copied during conversion)", acc.Name),
                         Accomodation = acc,
                         Period = p,
                         Blocked = true
                     };
                     bctx.Availablities.Add(a);
                 }
-                bctx.Availablities.Add(a1);
+                //bctx.Availablities.Add(a1);
             };
 
             bctx.SaveChanges();

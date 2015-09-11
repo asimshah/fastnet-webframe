@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,10 @@ namespace Fastnet.Webframe.BookingData
             Interval = new LongSpan();
         }
         public long PeriodId { get; set; }
+        public Period ParentPeriod { get; set; }
+        [MaxLength(64)]
+        public string Name { get; set; }
+        public string Description { get; set; }
         public PeriodType PeriodType { get; set; }
         public DateTime? StartDate { get; set; } // must be non-null if PeriodType == Fixed
         public DateTime? EndDate { get; set; } // endless if null, if PeriodType == fixed
@@ -82,5 +87,6 @@ namespace Fastnet.Webframe.BookingData
             TimeSpan ts = this.GetEndDate() - this.GetStartDate();
             return ts;
         }
+        public virtual ICollection<Period> Subperiods { get; set; }
     }
 }

@@ -23,18 +23,15 @@ namespace Fastnet.Webframe.BookingData
     public class Price
     {
         [Key]
-        [Column(Order = 1)]
+        public long PriceId { get; set; }
+        [Index("ptcc",  IsUnique = true, Order = 1)]
         public virtual Period Period { get; set; }
-        //public long PriceId { get; set; }
-        [Key]
-        [Column(Order = 2)]
+        [Index("ptcc", IsUnique = true, Order = 2)]
         public AccomodationType Type { get; set; }
-        [Key]
-        [Column(Order = 3)]
+        [Index("ptcc", IsUnique = true, Order = 3)]
         public AccomodationClass Class { get; set; }
-        [Key]
-        [Column(Order = 4)]
-        public int MinimumUnits { get; set; } 
+        [Index("ptcc", IsUnique = true, Order = 4)]
+        public int Capacity { get; set; }
         [Required]
         public Decimal Amount { get; set; }
     }

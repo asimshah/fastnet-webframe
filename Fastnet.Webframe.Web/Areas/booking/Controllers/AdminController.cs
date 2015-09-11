@@ -1,16 +1,9 @@
 ﻿using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
-using Fastnet.Webframe.Web.Areas.booking.Common;
 using Fastnet.Webframe.WebApi;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
@@ -44,8 +37,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             adminParas.Save();
         }
         [HttpGet]
-        [Route("get/occupancy/{fromYear}/{fromMonth}/{toYear}/{toMonth}")]
-        public dayInformation[] GetOccupancy(int fromYear, int fromMonth, int toYear, int toMonth)
+        [Route("get/occupancy/{abodeId}/{fromYear}/{fromMonth}/{toYear}/{toMonth}")]
+        public dayInformation[] GetOccupancy(long abodeId, int fromYear, int fromMonth, int toYear, int toMonth)
         {
             using (var ctx = new BookingDataContext())
             {
@@ -62,7 +55,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 List<DayInformation> dayList = new List<DayInformation>();
                 for (DateTime day = start; day <= end; day = day.AddDays(1))
                 {
-                    DayInformation di = Factory.GetDayInformationInstance(ctx, day);
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);
                     dayList.Add(di);
                 }
                 return dayList.Select(x => x.ToClientType(true, true, DataContext)).ToArray();

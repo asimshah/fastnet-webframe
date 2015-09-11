@@ -17,6 +17,6 @@ declare module server {
 		availabilitySummary: string;
 		reportDetails: boolean;
 		calendarPopup: string;
-		accomodationDetails: server.dailyAccomodation[];
+		accomodationDetails: server.dailyAccomodation;
 	}
 }

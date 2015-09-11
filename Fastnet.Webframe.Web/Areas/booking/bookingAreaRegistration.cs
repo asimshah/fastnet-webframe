@@ -1,5 +1,4 @@
-﻿using Fastnet.Webframe.Web.Areas.booking.Common;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web.Areas.booking

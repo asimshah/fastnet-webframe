@@ -5,9 +5,16 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
 {
-    public class BookingParameters
+    public class abode
     {
-        public string FactoryName { get; set; }
-        public int MaximumOccupants { get; set; }
+        public long id { get; set; }
+        public string name { get; set; }        
+    }
+    public class bookingParameters
+    {
+        public string factoryName { get; set; }
+        public int maximumOccupants { get; set; }
+        public abode currentAbode { get; set; }
+        public List<abode> abodes { get; set; }
     }
 }
