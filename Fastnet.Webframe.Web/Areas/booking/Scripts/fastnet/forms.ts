@@ -11,6 +11,7 @@ module fastnet {
         import debug = fastnet.util.debug;
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
+        import ff = fastnet.force;
         interface modalPosition {
             openingHeight: number;
             openingWidth: number;
@@ -36,6 +37,13 @@ module fastnet {
             error?: string;
         }
         export class validations {
+            public static isChecked: knockoutValidator = function (val, params): boolean {
+                return val === true;
+            }            
+            public static phoneNumber: knockoutValidator = function (val, params): boolean {
+                var pattern = /^[+0-9][0-9]*$/;
+                return ko.validation.rules.pattern.validator(val, pattern);
+            }
             public static passwordComplexity: knockoutValidator = function (val, params): boolean {
                 var pattern = /(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
                 return ko.validation.rules.pattern.validator(val, pattern);
@@ -43,7 +51,9 @@ module fastnet {
             public static GetValidators(){
                 var rules: any[] = [];
                // rules.push({ name: "emailInUse", async: true, validator: validations.emailInUse, message: "This email address not found" });
-                rules.push({ name: "passwordComplexity", async: false, validator: validations.passwordComplexity, message: "Use at least one each of a digit, a non-alphanumeric and a lower and an upper case letter"});
+                rules.push({ name: "passwordComplexity", async: false, validator: validations.passwordComplexity, message: "Use at least one each of a digit, a non-alphanumeric and a lower and an upper case letter" });
+                rules.push({ name: "phoneNumber", async: false, validator: validations.phoneNumber, message: "Use all digits and spaces with an optional leading +" });
+                rules.push({ name: "isChecked", async: false, validator: validations.isChecked, message: "Box must be checked" });
                 return rules;
             }
         }
@@ -239,7 +249,12 @@ module fastnet {
                         if (date && date.isValid()) {
                             formatted = date.format(format);
                         }
-                        element.innerText = formatted;
+                        if (element.tagName === "INPUT") {
+                            $(element).val(formatted);
+                        } else {
+                            element.innerText = formatted;
+                        }
+                        
                     }
                 };
             }
@@ -402,7 +417,8 @@ module fastnet {
                         "data-cmd": item.command,
                         click: (e) => {
                             this.setMessage('');
-                            var cmd = $(e.target).attr("data-cmd");
+                            //var cmd = $(e.target).attr("data-cmd");
+                            var cmd = $(e.currentTarget).attr("data-cmd");
                             e.stopPropagation();
                             e.preventDefault();
                             this.onCommand(cmd);
@@ -438,7 +454,7 @@ module fastnet {
                     this.observableModel = ko.validatedObservable(this.model);
                     ko.applyBindings(this.observableModel, this.rootElement);
                 }
-                var focusableElements = "input:not([type='checkbox']):not([type='button']):not([type='date'])";
+                var focusableElements = "input:not([type='checkbox']):not([type='button']):not([type='date']):not([data-input='date'])";
                 $(this.rootElement).find(focusableElements).each((i, c) => {
                     var v = $(c).val().trim();
                     if (v === null || v === "") {
@@ -483,7 +499,8 @@ module fastnet {
                     $(formTemplate).find(".ui-form-buttonset").append($(buttonHtml));
                 });
                 $(formTemplate).find(".ui-form-buttonset button").click((e) => {
-                    var cmd = $(e.target).attr("data-cmd");
+                    //var cmd = $(e.target).attr("data-cmd");
+                    var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
                     this.onCommand(cmd);
@@ -609,7 +626,8 @@ module fastnet {
                 }
                 $(contentSelector).find("button[data-cmd]").on("click", (e) => {
                     this.setMessage('');
-                    var cmd = $(e.target).attr("data-cmd");
+                    //var cmd = $(e.target).attr("data-cmd");
+                    var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
                     this.onCommand(cmd);
@@ -628,13 +646,17 @@ module fastnet {
                             propertyName = tuple[1].trim();
                         }
                     });
-                    bindings.push("uniqueName: true");
-                    bindings.push("validationElement: " + propertyName);
+                    var inputType = $(element).attr("type");
+                    if (inputType !== "radio") {
+                        bindings.push("uniqueName: true");
+                        bindings.push("validationElement: " + propertyName);
+                    }
+
                     bindString = bindings.join(", ");
                     $(element).attr("data-bind", bindString);
-                    if (propertyName !== null) {
-                        $(element).attr("data-property", propertyName);
-                    }
+                    //if (propertyName !== null) {
+                    //    $(element).attr("data-property", propertyName);
+                    //}
                 });
             }
         }

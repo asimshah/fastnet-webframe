@@ -8,12 +8,19 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
+    internal class BookingDataInitializer : CreateDatabaseIfNotExists<BookingDataContext>// DropCreateDatabaseIfModelChanges<BookingDataContext>
+    {
+    }
     public partial class BookingDataContext : DbContext
     {
 
+        public static void SetInitializer()
+        {
+            System.Data.Entity.Database.SetInitializer(new BookingDataInitializer());
+        }
         public BookingDataContext() : base("CoreData")
         {
-
+           
         }
         public DbSet<Accomodation> AccomodationSet { get; set; }
         public DbSet<AccomodationExtra> AccomodationExtras { get; set; }

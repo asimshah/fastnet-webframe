@@ -53,5 +53,13 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 }
             }
         }
+        //public override void CopyBookingData(MemberBase m)
+        //{
+        //    base.CopyBookingData(m);
+        //    if(m is DWHMember)
+        //    {
+        //        MobileNumber = (m as DWHMember).PhoneNumber;
+        //    }
+        //}
     }
 }

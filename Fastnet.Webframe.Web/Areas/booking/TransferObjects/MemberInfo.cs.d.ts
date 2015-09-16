@@ -8,6 +8,7 @@
 		Anonymous: boolean;
 		MemberId: string;
 		Fullname: string;
+		MobileNumber: string;
 		BookingPermission: server.BookingPermissions;
 		Explanation: string;
 		OnBehalfOfMemberId: string;

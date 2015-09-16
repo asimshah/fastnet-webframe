@@ -16,8 +16,7 @@ namespace Fastnet.Webframe.CoreData
         public DateTime? BMCMembershipExpiresOn { get; set; }
         [MaxLength(128)]
         public string Organisation { get; set; }
-        [MaxLength(128)]
-        public string PhoneNumber { get; set; }
+
         internal DWHMember()
         {
 

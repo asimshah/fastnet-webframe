@@ -32,6 +32,16 @@
   font-family: Verdana, Arial, sans-serif;
   padding: 8px;
 }
+@media only screen and (max-width: 480px) {
+  .modeless-form .ui-form-titlebar .ui-form-title {
+    font-size: 1.0em;
+  }
+}
+@media only screen and (max-width: 320px) {
+  .modeless-form .ui-form-titlebar .ui-form-title {
+    font-size: 0.75em;
+  }
+}
 .modeless-form .ui-form-buttonpane {
   font-family: Verdana, Arial, sans-serif !important;
   margin-top: 12px;

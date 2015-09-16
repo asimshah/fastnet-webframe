@@ -21,23 +21,39 @@ namespace Fastnet.Webframe.Web.Areas.booking
             }
             throw new ApplicationException("Unable to create a MemberInfo instance");
         }
-        public static AdminParameters GetAdminParameters(dynamic data = null)
+        public static bookingParameters GetBookingParameters()
         {
+            bookingParameters bp = null;
             switch (FactoryName)
             {
                 case FactoryName.DonWhillansHut:
-                    if(data != null)
-                    {
-                        return ((JObject)data).ToObject<DWHAdminParameters>();
-                    }
-                    return new DWHAdminParameters();
+                    bp = new dwhBookingParameters();
+                    break;
+                default:
+                    bp = new bookingParameters();
+                    break;
             }
-            if (data != null)
-            {
-                return ((JObject)data).ToObject<AdminParameters>();
-            }
-            return new AdminParameters();
+            bp.factoryName = FactoryName.ToString();
+            return bp;
         }
+        //[Obsolete]
+        //public static adminParameters GetAdminParameters(dynamic data = null)
+        //{
+        //    switch (FactoryName)
+        //    {
+        //        case FactoryName.DonWhillansHut:
+        //            if(data != null)
+        //            {
+        //                return ((JObject)data).ToObject<dwhAdminParameters>();
+        //            }
+        //            return new dwhAdminParameters();
+        //    }
+        //    if (data != null)
+        //    {
+        //        return ((JObject)data).ToObject<adminParameters>();
+        //    }
+        //    return new adminParameters();
+        //}
         public static DayInformation GetDayInformationInstance(BookingDataContext bctx,long abodeId, DateTime day)
         {
             switch (FactoryName)
@@ -50,9 +66,5 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
             }
         }
-    }
-    public interface ICustomisable
-    {
-        void Customise();
     }
 }

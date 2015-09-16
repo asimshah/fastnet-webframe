@@ -1,4 +1,5 @@
-﻿/// <reference path="../../../scripts/typings/jquery/jquery.d.ts" />
+﻿/// <reference path="../../../../scripts/typings/jquery/jquery.d.ts" />
+/// <reference path="../../../../scripts/typings/moment/moment.d.ts" />
 
 
 module fastnet {
@@ -8,6 +9,13 @@ module fastnet {
     }
     interface templateResult extends templateRequest {
         template: string;
+    }
+    export module force {
+        export class dark {
+            public test(): void {
+                fastnet.util.debug.print("star wars");
+            }
+        }
     }
     export module web {
         //import ajax = fastnet.util.ajax;
@@ -24,6 +32,12 @@ module fastnet {
         }
     }
     export module util {
+        class utilOnReady {
+            public static init(): void {
+
+            }
+        }
+
         export class ajax {
             private static rootUrl: string = "/";
             public static init(url: string) {
@@ -71,6 +85,19 @@ module fastnet {
                 }
                 return fmt;
             }
+            public static toMoment(dateString: string): moment.Moment {
+                return moment(dateString, "DDMMMYYYY");
+            }
+            public static toDateString(d: Date | moment.Moment): string {
+                //debugger;
+                var md: moment.Moment;
+                if (d instanceof Date) {
+                    md = moment(d);
+                } else {
+                    md = <moment.Moment>d;
+                }
+                return md.format("DDMMMYYYY");
+            }
         }
         export class debug {
             public static routeMessagesToVisualStudio = false;
@@ -116,5 +143,6 @@ module fastnet {
                 return obj === null || obj === undefined;
             }
         }
+        utilOnReady.init();
     }
 }

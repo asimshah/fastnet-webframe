@@ -247,10 +247,9 @@
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
     <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
-    <Compile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
-    <Compile Include="Areas\booking\TransferObjects\AdminParameters.cs" />
     <Compile Include="Areas\booking\TransferObjects\availabilityInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\bookingParameters.cs" />
@@ -361,6 +360,7 @@
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\request-step2.html" />
+    <Content Include="Areas\booking\Templates\request-step3.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
@@ -1635,8 +1635,8 @@
     <TypeScriptCompile Include="Areas\booking\Common\dayInformation.cs.d.ts">
       <DependentUpon>dayInformation.cs</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Areas\booking\Customisation\DWH\DWHAdminParameters.cs.d.ts">
-      <DependentUpon>DWHAdminParameters.cs</DependentUpon>
+    <TypeScriptCompile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs.d.ts">
+      <DependentUpon>dwhBookingParameters.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\Scripts\adminViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
@@ -1647,10 +1647,7 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\testViewModels.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\utilities.ts" />
-    <TypeScriptCompile Include="Areas\booking\TransferObjects\AdminParameters.cs.d.ts">
-      <DependentUpon>AdminParameters.cs</DependentUpon>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\utilities.ts" />
     <TypeScriptCompile Include="Areas\booking\TransferObjects\availabilityInfo.cs.d.ts">
       <DependentUpon>availabilityInfo.cs</DependentUpon>
     </TypeScriptCompile>
@@ -1677,6 +1674,21 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Any CPU'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>None</TypeScriptModuleKind>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile>
+    </TypeScriptOutFile>
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />

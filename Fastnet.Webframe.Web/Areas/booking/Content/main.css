@@ -307,7 +307,58 @@ button.side-button {
 }
 .booking-forms .help-block {
   font-size: small;
-  color: #2d89ef;
+  font-style: italic;
+  color: #2b5797;
+}
+@media only screen and (max-width: 768px) {
+  .booking-forms {
+    font-size: 1.20em;
+  }
+}
+@media only screen and (max-width: 480px) {
+  .booking-forms {
+    font-size: 1.0em;
+  }
+}
+@media only screen and (max-width: 320px) {
+  .booking-forms {
+    font-size: 0.8em;
+  }
+}
+.booking-forms .checkbox {
+  margin-bottom: 0;
+}
+.booking-forms .choice-announcement {
+  font-size: smaller;
+}
+.booking-forms .choice-list {
+  margin-top: 12px;
+  font-size: smaller;
+}
+.booking-forms .choice-list .choice-button {
+  width: 0.5%;
+}
+.booking-forms .choice-list .choice-cost {
+  width: 0.5%;
+}
+.booking-forms .choice-list .choice-description {
+  font-size: smaller;
+}
+.booking-forms .booking-form button[data-cmd='show-tc'] {
+  font-style: italic;
+  font-size: x-small;
+  margin: 0;
+  padding: 0;
+}
+.booking-forms .parameters-form .inner-panel {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.booking-forms .parameters-form .inner-panel .row:not(:first-child):not(:last-child) {
+  border-top: 1px solid #8cbef6;
+}
+.booking-forms .parameters-form .help-block {
+  margin-top: 0;
 }
 .booking-disallowed {
   font-weight: bold;

@@ -82,6 +82,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
     }
     public class BookingChoice
     {
+        public int Number { get; set; }
         public DateTime Day { get; set; }
         public IEnumerable<DayInformation.DailyAccomodation> Accomodation { get; set; }
         public int Capacity { get; set; }
@@ -117,7 +118,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public bookingChoice ToClientType()
         {
             bookingChoice bc = new bookingChoice();
-            bc.selected = false;
+            bc.choiceNumber = Number;
+            //bc.selected = false;
             bc.totalCapacity = Capacity;
             bc.costs = new List<dailyCostItem>();
             foreach (var c in this.CostPerDay)

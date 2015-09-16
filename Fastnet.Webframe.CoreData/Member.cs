@@ -51,6 +51,8 @@ namespace Fastnet.Webframe.CoreData
         public string FirstName { get; set; }
         [MaxLength(128)]
         public string LastName { get; set; }
+        [MaxLength(128)]
+        public string PhoneNumber { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime? LastLoginDate { get; set; }
         public bool Disabled { get; set; }

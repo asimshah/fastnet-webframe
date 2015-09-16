@@ -15,7 +15,7 @@ module fastnet {
     }
     export module booking {
         export class adminApp {
-            public bookingParameters: server.bookingParameters;// server.BookingParameters;
+            public parameters: parameters;// server.bookingParameters;// server.BookingParameters;
             public start(): void {
                 this.initialise().then(() => {
                     var index = new adminIndex(this);
@@ -30,8 +30,9 @@ module fastnet {
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
                 ajax.Get({ url: parametersUrl }, false).then((r) => {
-                    this.bookingParameters = <server.bookingParameters>r;
-                    factory.setFactory(this.bookingParameters.factoryName);// .FactoryName);
+                    this.parameters = factory.getParameters(r);
+                    //this.bookingParameters = <server.bookingParameters>r;
+                    //factory.setFactory(this.bookingParameters.factoryName);// .FactoryName);
                     deferred.resolve();
                 });
                 return deferred.promise();
@@ -137,16 +138,17 @@ module fastnet {
                 //this.app = app;
             } 
             public start(): void {
-                debug.print("configuration index started");
-                var model = factory.getParametersVM();
-                var url = "bookingadmin/parameters";
-                ajax.Get({ url: url }, false).then((r: server.AdminParameters) => {
-                    model.setFromJSON(r);
+                debug.print("parametersApp started");
+                
+                var url = "bookingapi/parameters";
+                ajax.Get({ url: url }, false).then((r: server.bookingParameters) => {
+                    var model = factory.getParameters(r);
+                    //model.setFromJSON(r);
                     var vm = model.getObservable();
                     this.showForm(vm);
                 });
             }
-            public showForm(vm: adminVM.observableParameters) {
+            public showForm(vm: observableParameters) {
                 var paraForm = new forms.form(this, {
                     modal: false,
                     title: "Parameters",
@@ -161,7 +163,7 @@ module fastnet {
                 var configurationIndexFormTemplateUrl = "booking/parameters";
                 wt.getTemplate({ ctx: this, templateUrl: configurationIndexFormTemplateUrl }).then((r) => {
                     paraForm.setContentHtml(r.template);
-                    paraForm.open((ctx: configIndex, f: forms.form, cmd: string, data: adminVM.models) => {
+                    paraForm.open((ctx: configIndex, f: forms.form, cmd: string, data: parameterModels) => {
                         switch (cmd) {
                             case "configuration-page":
                                 f.close();
@@ -182,7 +184,7 @@ module fastnet {
                     });
                 });
             }
-            public saveParameters(f: forms.form, models: adminVM.models): void {
+            public saveParameters(f: forms.form, models: parameterModels): void {
                 var url = "bookingadmin/save/parameters";
                 ajax.Post({ url: url, data: models.current }).then((r) => {
                     f.setMessage("Changes saved");
@@ -197,7 +199,7 @@ module fastnet {
                 super(app);
             }
             public start(): void {
-                var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", this.app.bookingParameters.currentAbode.id);
+                var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", this.app.parameters.currentAbode.id);
                 ajax.Get({ url: calendarInfoUrl }, false).then((r) => {
                     var csi: bookingData.calendarSetup = r;
                     var start = moment(csi.StartAt);//.toDate();// moment(r2[0].startAt).toDate();
@@ -280,7 +282,7 @@ module fastnet {
                 var emonth = em.month() + 1;
                 //var dayTemplateUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}", syear, smonth, eyear, emonth);
                 var reportUrl = str.format("bookingadmin/get/occupancy/{0}/{1}/{2}/{3}/{4}",
-                    this.app.bookingParameters.currentAbode.id, syear, smonth, eyear, emonth);
+                    this.app.parameters.currentAbode.id, syear, smonth, eyear, emonth);
                 ajax.Get({ url: reportUrl }, false).then((r: server.dayInformation[]) => {
                     var html = $(Mustache.render(this.dayTemplate, { data: r }));
                     $(".report-content").empty().append($(html));

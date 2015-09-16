@@ -24,7 +24,6 @@ namespace Fastnet.Webframe.Web.Areas.membership.Common
                     }
                 }
             }
-
         }
     }
 }

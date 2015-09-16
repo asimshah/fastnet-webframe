@@ -15,6 +15,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
     [RoutePrefix("bookingapi")]
     public class BookingController : BaseApiController
     {
+        private CoreDataContext DataContext = Core.GetDataContext();
         [HttpGet]
         [Route("banner")]
         public dynamic GetBannerHtml()
@@ -41,9 +42,11 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             else
             {
                 var mi = Factory.GetMemberInfo();
-                mi.Anonymous = false;
-                mi.MemberId = m.Id;
-                mi.Fullname = m.Fullname;
+                mi.CopyBookingData(m);
+                //mi.Anonymous = false;
+                //mi.MemberId = m.Id;
+                //mi.Fullname = m.Fullname;
+                //mi.MobileNumber = m.p
                 if (!Globals.BookingIsOpen())
                 {
                     mi.BookingPermission = BookingPermissions.Disallowed;
@@ -60,35 +63,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("parameters")]
         public async Task<bookingParameters> GetParameters()
         {
-            using (var ctx = new BookingDataContext())
-            {
-                var allAccomodation = await ctx.GetTotalAccomodation();
-                int bedCount = 0;
-                foreach (var accomodation in allAccomodation)
-                {
-                    foreach (var item in accomodation.SelfAndDescendants)
-                    {
-                        if (item.Type == AccomodationType.Bed)
-                        {
-                            bedCount++;
-                        }
-                    }
-                }
-                bookingParameters pars = new bookingParameters();
-                pars.factoryName = Factory.FactoryName.ToString();
-                pars.maximumOccupants = bedCount;
-                pars.abodes = ctx.AccomodationSet.Where(x => x.ParentAccomodation == null).Select(x => new abode { id = x.AccomodationId, name = x.Name }).ToList();
-                if (pars.abodes.Count() == 1)
-                {
-                    pars.currentAbode = pars.abodes.First();
-                }
-                else
-                {
-                    throw new Exception("need method for current abode");
-                }
-                return pars;
-            }
-
+            bookingParameters pars = Factory.GetBookingParameters();
+            await pars.Load(DataContext);
+            return pars;
         }
         [HttpGet]
         [Route("calendar/{abodeId}/setup/info")]
@@ -185,8 +162,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                                     choice.CostPerDay.Add(new CostPerDay { Day = dt, Cost = cost });
                                 }
                             }
+ 
                             foreach (var choice in common)
                             {
+
                                 ai.AddChoice(choice);
                             }
                             ai.choices = ai.choices.OrderBy(x => x.totalCost).ToList();
@@ -233,11 +212,15 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                                     // wholerooms maybe the same as the whole of the level above
                                     foreach (var wr in wholeRooms)
                                     {
-                                        var bc2 = new BookingChoice { Day = day.Day };
-                                        bc2.Accomodation = wr;
-                                        bc2.Capacity = wr.Sum(x => x.Capacity);
-                                        dcs.Choices.Add(bc2);
-                                        choices.Add(bc2);
+                                        int roomCapacity = wr.Sum(x => x.Capacity);
+                                        if (roomCapacity >= peopleCount)
+                                        {
+                                            var bc2 = new BookingChoice { Day = day.Day };
+                                            bc2.Accomodation = wr;
+                                            bc2.Capacity = wr.Sum(x => x.Capacity);
+                                            dcs.Choices.Add(bc2);
+                                            choices.Add(bc2);
+                                        }
                                     }
                                     var splitAccomdation = day.FindSplitAccomodation(list, peopleCount, day.FindAvailableAccomodation(AccomodationType.Bed));
                                     foreach (var sa in splitAccomdation)

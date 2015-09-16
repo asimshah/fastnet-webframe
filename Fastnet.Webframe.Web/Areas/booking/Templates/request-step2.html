@@ -1,11 +1,32 @@
 ﻿<div class="booking-form">
     <div class="row">
-        Choose from the folliwing
+        <div class="col-xs-12">
+            <div class="choice-announcement">
+                <span data-bind="text: announcement"></span>
+            </div>
+        </div>
     </div>
-    <div class="choice-list">
-        <div class="row">
+    <div class="choice-list" data-bind="foreach: choices">
+        <!--<div class="row">
+            <div class="col-xs-1">
+                <input type="radio" name="choices" data-bind="checkedValue: choiceNumber, checked: $root.selected" />
+            </div>
+            <div class="col-xs-6">
+                <span data-bind="text: description"></span>
+            </div>
             <div class="col-xs-3">
-                
+                <span data-bind="text: totalCost"></span>
+            </div>
+        </div>-->
+        <div class="row">
+            <div class="col-xs-12">
+               <div class="input-group">
+                   <span class="input-group-addon choice-button">
+                       <input type="radio" name="choices" data-bind="checkedValue: choiceNumber, checked: $root.selected" />
+                   </span>
+                   <span class="input-group-addon choice-description" data-bind="text: description"></span>
+                   <span class="input-group-addon choice-cost" data-bind="text: totalCost"></span>
+               </div>
             </div>
         </div>
     </div>

@@ -79,6 +79,10 @@
     }*/
 }
 
+@very-wide: 768px;
+@wide: 480px;
+@narrow: 320px;
+
 .BannerContent {
     position: relative;
 
@@ -89,19 +93,19 @@
         left: 64px; // reposition for phone
         color: #ffffff;
         font-size: 2em; // make this smaller for phone
-        @media only screen and (max-width: 768px) {
+        @media only screen and (max-width: @very-wide) {
             left: 44px;
             top: 8px;
             font-size: 1.25em;
         }
 
-        @media only screen and (max-width: 480px) {
+        @media only screen and (max-width: @wide) {
             left: 24px;
             top: 6px;
             font-size: 1.0em;
         }
 
-        @media only screen and (max-width: 320px) {
+        @media only screen and (max-width: @narrow) {
             left: 4px;
             top: 4px;
             font-size: 0.75em;
@@ -160,7 +164,69 @@ button.side-button {
 
     .help-block {
         font-size: small;
-        color: @blue;
+        font-style: italic;
+        color: @dark-blue;
+    }
+
+    @media only screen and (max-width: @very-wide) {
+        font-size: 1.20em;
+    }
+
+    @media only screen and (max-width: @wide) {
+        font-size: 1.0em;
+    }
+
+    @media only screen and (max-width: @narrow) {
+        font-size: 0.8em;
+    }
+
+    .checkbox {
+        margin-bottom: 0;
+    }
+
+    .choice-announcement {
+        font-size: smaller;
+    }
+
+    .choice-list {
+        margin-top: 12px;
+        font-size: smaller;
+
+        .choice-button {
+            width: 0.5%;
+        }
+
+        .choice-cost {
+            width: 0.5%;
+        }
+
+        .choice-description {
+            font-size: smaller;
+        }
+    }
+    .booking-form {
+        button[data-cmd='show-tc'] {
+            font-style: italic;
+            font-size: x-small;
+            margin: 0;
+            padding: 0;
+        }
+    }
+    .parameters-form {
+
+        .inner-panel {
+            @separator-colour: lighten(@blue, 20%);
+            padding-left: 15px;
+            padding-right: 15px;
+
+            .row:not(:first-child):not(:last-child) {
+                border-top: 1px solid @separator-colour;
+            }
+        }
+
+        .help-block {
+            margin-top: 0;
+        }
     }
 }
 
@@ -376,7 +442,6 @@ button.side-button {
         .report-content {
             margin-top: 12px;
             //border-top: 1px solid black;
-
             .day-row {
                 margin-top: 4px;
                 font-size: small;
@@ -384,22 +449,26 @@ button.side-button {
                 .status-icon {
                     //margin-top: 4px;
                 }
+
                 .day-date {
                     //vertical-align:middle;
                     //padding-left: 4px;
                     //border-radius: 2px;
                 }
+
                 .status-description {
                     font-style: italic;
                     //font-size: smaller;
                     //vertical-align:bottom;
                 }
             }
+
             .day-details.IsPartBooked, .day-details.IsFull {
                 border: 0.01em solid #808080;
                 border-radius: 3px;
                 padding: 4px;
             }
+
             .IsFree-day {
                 color: @status-free-colour;
             }

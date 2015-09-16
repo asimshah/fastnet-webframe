@@ -1,5 +1,6 @@
 ﻿using Fastnet.EventSystem;
 using Fastnet.Web.Common;
+using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Common;
 using System;
@@ -42,6 +43,7 @@ namespace Fastnet.Webframe.Web
 
             Log.SetApplicationName(ConfigurationManager.AppSettings["SiteUrl"]);
             CoreDataContext.SetInitializer();
+            BookingDataContext.SetInitializer();
             RouteConfig.MapMVC(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);

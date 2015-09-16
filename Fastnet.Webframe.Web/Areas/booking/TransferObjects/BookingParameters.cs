@@ -1,10 +1,19 @@
-﻿using System;
+﻿using Fastnet.Common;
+using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.CoreData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
 {
+    public class IGroup
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+    }
     public class abode
     {
         public long id { get; set; }
@@ -13,8 +22,68 @@ namespace Fastnet.Webframe.Web.Areas.booking
     public class bookingParameters
     {
         public string factoryName { get; set; }
+        public IGroup[] availableGroups { get; set; }
+        public string termsAndConditionsUrl { get; set; }
+        public bool paymentGatewayAvailable { get; set; }
         public int maximumOccupants { get; set; }
         public abode currentAbode { get; set; }
         public List<abode> abodes { get; set; }
+        public string today { get; set; }
+        public void Save()
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var para = ctx.Parameters.Single();
+                para.TermsAndConditionsUrl = this.termsAndConditionsUrl;
+                BeforeSave(para);
+                ctx.SaveChanges();
+            }
+        }
+        protected virtual void BeforeSave(ParameterBase para)
+        {
+        }
+        protected virtual void AfterLoad(CoreDataContext core, ParameterBase para)
+        {
+
+        }
+        public async Task Load(CoreDataContext core)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var para = ctx.Parameters.Single();
+                var groups = core.Groups.Where(x => !x.Type.HasFlag(GroupTypes.System)).ToList();
+                groups.Add(Group.AllMembers);
+                groups.Add(Group.Administrators);
+                availableGroups = groups.OrderBy(x => x.Name).Select(x => new IGroup { Id = x.GroupId, Name = x.Name }).ToArray();
+                termsAndConditionsUrl = para.TermsAndConditionsUrl;
+                
+                var allAccomodation = await ctx.GetTotalAccomodation();
+                int bedCount = 0;
+                foreach (var accomodation in allAccomodation)
+                {
+                    foreach (var item in accomodation.SelfAndDescendants)
+                    {
+                        if (item.Type == AccomodationType.Bed)
+                        {
+                            bedCount++;
+                        }
+                    }
+                }
+                maximumOccupants = bedCount;
+                abodes = ctx.AccomodationSet.Where(x => x.ParentAccomodation == null).Select(x => new abode { id = x.AccomodationId, name = x.Name }).ToList();
+                if (abodes.Count() == 1)
+                {
+                    currentAbode = abodes.First();
+                }
+                else
+                {
+                    throw new Exception("need method for current abode");
+                }
+                today = BookingGlobals.GetToday().ToDefault();
+                paymentGatewayAvailable = true;
+                AfterLoad(core, para);
+            }
+        }
     }
+   
 }

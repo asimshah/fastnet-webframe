@@ -7,7 +7,7 @@ declare module server {
 		capacity: number;
 	}
 	interface bookingChoice {
-		selected: boolean;
+		choiceNumber: number;
 		totalCapacity: number;
 		costs: server.dailyCostItem[];
 		costsAreEqualEveryDay: boolean;

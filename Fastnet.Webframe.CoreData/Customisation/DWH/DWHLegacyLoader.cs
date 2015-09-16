@@ -669,6 +669,8 @@ namespace Fastnet.Webframe.CoreData
             p.ForwardBookingPeriod = pp;
             p.BMCMembers = "BMC Members";
             p.NoBMCCheckGroup = "No BMC Check";
+            p.ShortBookingInterval = 28;
+            p.TermsAndConditionsUrl = "page/11";
             bctx.Periods.Add(pp);
             bctx.Parameters.Add(p);
             bctx.SaveChanges();

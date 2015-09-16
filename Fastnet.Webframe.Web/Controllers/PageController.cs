@@ -73,8 +73,9 @@ namespace Fastnet.Webframe.Web.Controllers
             Page page = DataContext.Pages.Find(pageId);
             var m = GetCurrentMember();
             AccessResult ar = m.GetAccessResult(page);
+            string descr = ar.ToString().ToLower();
             //bool result = admins.Members.Contains(m) || m.CanEdit(page);
-            return this.Request.CreateResponse(HttpStatusCode.OK, new { Access = ar.ToString().ToLower() });
+            return this.Request.CreateResponse(HttpStatusCode.OK, new { Access = descr });
         }
         [HttpGet]
         [Route("sidepages/{id}")]

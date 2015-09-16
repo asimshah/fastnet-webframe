@@ -17,6 +17,7 @@ namespace Fastnet.Webframe.BookingData
         public bool TestMode { get; set; }
         public string BookingSecretaryEmailAddress { get; set; }
         public virtual Period ForwardBookingPeriod { get; set; }
+        public string TermsAndConditionsUrl { get; set; }
         //public int EntryCodeBridgePeriod { get; set; }
         //public int EntryCodeNotificatioNPeriod { get; set; }
     }

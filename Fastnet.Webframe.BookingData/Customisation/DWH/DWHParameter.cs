@@ -10,6 +10,6 @@ namespace Fastnet.Webframe.BookingData
     {
         public string NoBMCCheckGroup { get; set; }
         public string BMCMembers { get; set; }
-
+        public int ShortBookingInterval { get; set; }
     }
 }

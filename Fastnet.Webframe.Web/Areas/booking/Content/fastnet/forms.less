@@ -129,6 +129,14 @@
             line-height: 2.0em;
             font-family: Verdana, Arial, sans-serif;
             padding: 8px;
+
+            @media only screen and (max-width: 480px) {
+                font-size: 1.0em;
+            }
+
+            @media only screen and (max-width: 320px) {
+                font-size: 0.75em;
+            }
         }
     }
 
@@ -152,9 +160,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        opacity:0.6;
+        opacity: 0.6;
         background-color: #3399ff;
         cursor: none;
+
         .indicator {
             color: white;
         }

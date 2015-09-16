@@ -13,28 +13,22 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
     public class AdminController : BaseApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
-        [HttpGet]
-        [Route("parameters")]
-        public AdminParameters GetAdminParameters()
-        {
-            var groups = DataContext.Groups.Where(x => !x.Type.HasFlag(GroupTypes.System)).ToList();
-            groups.Add(Group.AllMembers);
-            groups.Add(Group.Administrators);
-            var groupTuples = groups.OrderBy(x => x.Name).Select(x => new IGroup { Id =  x.GroupId, Name = x.Name });
-            var adminParas = Factory.GetAdminParameters();
-            adminParas.AvailableGroups = groupTuples.ToArray();
-            if (adminParas is ICustomisable)
-            {
-                adminParas.Customise();
-            }
-            return adminParas;
-        }
+        //[HttpGet]
+        //[Route("parameters")]
+        //public adminParameters GetAdminParameters()
+        //{
+        //    var adminParas = Factory.GetAdminParameters();
+        //    adminParas.Load(DataContext);
+        //    return adminParas;
+        //}
         [HttpPost]
         [Route("save/parameters")]
         public void SaveAdminParameters(dynamic data)
         {
-            var adminParas = Factory.GetAdminParameters(data);
-            adminParas.Save();
+            var paras = Factory.GetBookingParameters();
+            paras.Save();
+            //var adminParas = Factory.GetAdminParameters(data);
+            //adminParas.Save();
         }
         [HttpGet]
         [Route("get/occupancy/{abodeId}/{fromYear}/{fromMonth}/{toYear}/{toMonth}")]

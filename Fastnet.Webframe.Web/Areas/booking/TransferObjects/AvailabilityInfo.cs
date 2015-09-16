@@ -21,6 +21,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             choices = new List<bookingChoice>();
         }
         public void AddChoice(BookingChoice choice) {
+            choice.Number = choices.Count() + 1;
             choices.Add(choice.ToClientType());
         }
             

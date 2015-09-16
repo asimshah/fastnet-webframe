@@ -44,7 +44,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Scripts/knockout.mapping-latest.js",
                 "~/Scripts/knockout.validation.js",
                 "~/Scripts/collections/collections.js",
-                "~/Areas/booking/Scripts/utilities.js",
+                "~/Areas/booking/Scripts/fastnet/utilities.js",
                 "~/Areas/booking/Scripts/fastnet/forms.js"
                 ));
 
@@ -55,8 +55,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                  //"~/Areas/booking/Scripts/tests.js"
                 ));
             bundles.Add(new ScriptBundle("~/bundles/booking/admin").Include(
-                 "~/Areas/booking/Scripts/factory.js",
-                 "~/Areas/booking/Scripts/adminViewModels.js",
+                "~/Areas/booking/Scripts/factory.js",
+                "~/Areas/booking/Scripts/bookingViewModels.js",
+                "~/Areas/booking/Scripts/adminViewModels.js",
                 "~/Areas/booking/Scripts/bookingAdmin.js"
                 ));
             AddCustomScripts(bundles);

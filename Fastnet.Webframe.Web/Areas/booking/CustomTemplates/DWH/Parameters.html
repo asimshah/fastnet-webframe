@@ -1,26 +1,48 @@
 ﻿<div class="parameters-form">
-    <div class="form-group-sm hide">
-        <label>Booking Period</label>
-        <span class="form-control">TBA</span>
-    </div>
-    <div class="row">
-        <div class="col-xs-8">
-            <div class="form-group-sm">
-                <label for="groupList">BMC check bypass group</label>
-                <select id="groupList" class="selectpicker form-control" data-bind="options: AvailableGroups,
-                optionsText: 'Name', value: NoBMCCheckGroup,  optionsCaption: 'Select a group ...', event: {change: selectionChanged}"></select>
-                <span class="help-block">Online verification of BMC Membership will not occur for members of this group</span>
-            </div>
-        </div>
-        <div class="col-xs-4">
-            <div class="form-group-sm">
-                <button class="btn btn-danger side-button" data-bind="click: clearNoBMCCheckGroup()">Clear</button>
-            </div>
-        </div>
-    </div>
-    <div class="row">
+    <div class="row inner-panel">
         <div class="col-xs-12">
-            <span class="message-block" data-bind="text: message"></span>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Short Term Booking Interval
+                            <input type="number" class="form-control" min="1" data-bind="value: shortBookingInterval" />
+                        </label>
+                        <span class="help-block">Enter a number of days. Bookings within this period will only be confirmed on successful online payment.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Terms and Conditions Url
+                            <input type="text" class="form-control" data-bind="value: termsAndConditionsUrl" />
+                        </label>
+                        <span class="help-block">Enter the internal url of the T&amp;C's page, i.e. page/n.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-8">
+                    <div class="form-group-sm">
+                        <label for="groupList">BMC check bypass group</label>
+                        <select id="groupList" class="selectpicker form-control" data-bind="options: availableGroups,
+                optionsText: 'Name', value: noBMCCheckGroup,  optionsCaption: 'Select a group ...', event: {change: selectionChanged}"></select>
+                        <span class="help-block">Online verification of BMC Membership will not occur for members of this group</span>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="form-group-sm">
+                        <button class="btn btn-danger side-button" data-bind="click: clearNoBMCCheckGroup()">Clear</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <span class="message-block" data-bind="text: message"></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
