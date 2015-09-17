@@ -102,7 +102,7 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
                 .Include(
-                   // "~/Scripts/jquery-ui-{version}.js",
+                    // "~/Scripts/jquery-ui-{version}.js",
                     "~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/dropzone/dropzone.js",
@@ -124,11 +124,31 @@ namespace Fastnet.Webframe.Web
                    "~/Content/fastnet/treeview.css",
                    "~/Content/fastnet/forms.css",
                    "~/Content/main/main.css"));
-
-            bundles.Add(new StyleBundle("~/Content/jqueryui/css").Include(
+            // bundles.Add(new StyleBundle("~/Content/jqueryui/css").Include(
+            bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
                 //"~/Content/bootstrap-datetimepicker.css"
                 //"~/Content/themes/base/all.css"
-                "~/Content/themes/base/base.css",
+                //"~/Content/themes/base/base.css",
+                "~/Content/themes/base/core.css",
+                "~/Content/themes/base/accordion.css",
+                "~/Content/themes/base/autocomplete.css",
+                "~/Content/themes/base/button.css",
+                "~/Content/themes/base/datepicker.css",
+                "~/Content/themes/base/dialog.css",
+                                                                                                "~/Content/themes/base/accordion.css",
+                "~/Content/themes/base/draggable.css",
+                "~/Content/themes/base/menu.css",
+                "~/Content/themes/base/progressbar.css",
+                "~/Content/themes/base/resizable.css",
+                "~/Content/themes/base/selectable.css",
+                                                                                                                "~/Content/themes/base/accordion.css",
+                "~/Content/themes/base/selectmenu.css",
+                "~/Content/themes/base/sortable.css",
+                "~/Content/themes/base/slider.css",
+                "~/Content/themes/base/spinner.css",
+                "~/Content/themes/base/tabs.css",
+                "~/Content/themes/base/tooltip.css",
+
                 "~/Content/themes/base/theme.css"
                 ));
 
@@ -172,7 +192,7 @@ namespace Fastnet.Webframe.Web
                 "~/Content/datatables/css/jquery.datatables.css"
                 ));
 
-            AddCustomCSS(bundles);            
+            AddCustomCSS(bundles);
         }
 
         private static void EnsureUserCssFilesArePresent()
@@ -202,7 +222,7 @@ namespace Fastnet.Webframe.Web
         {
             var customStyle = new StyleBundle("~/Content/customcss");
             BundleFactory bf = new BundleFactory();
-            foreach(var cssFile in bf.CSSFiles)
+            foreach (var cssFile in bf.CSSFiles)
             {
                 customStyle.Include(cssFile);
             }
