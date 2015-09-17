@@ -104,13 +104,17 @@ var fastnet;
                 return moment(dateString, "DDMMMYYYY");
             };
             str.toDateString = function (d) {
-                //debugger;
                 var md;
-                if (d instanceof Date) {
-                    md = moment(d);
+                if (typeof d === "string") {
+                    md = this.toMoment(d);
                 }
                 else {
-                    md = d;
+                    if (d instanceof Date) {
+                        md = moment(d);
+                    }
+                    else {
+                        md = d;
+                    }
                 }
                 return md.format("DDMMMYYYY");
             };

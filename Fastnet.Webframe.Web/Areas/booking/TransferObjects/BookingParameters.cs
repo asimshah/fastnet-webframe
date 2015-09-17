@@ -80,7 +80,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new Exception("need method for current abode");
                 }
                 today = BookingGlobals.GetToday().ToDefault();
-                paymentGatewayAvailable = true;
+                PaymentGateway pg = new PaymentGateway();
+                paymentGatewayAvailable = pg.Enabled;
                 AfterLoad(core, para);
             }
         }

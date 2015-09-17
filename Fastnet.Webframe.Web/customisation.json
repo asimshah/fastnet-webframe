@@ -16,7 +16,7 @@
     },
     {
       "Name": "booking",
-      "Scripts": ["~/Areas/booking/scripts/dwh/dwhbooking.js"]
+      "Scripts": [ "~/Areas/booking/scripts/dwh/dwhbooking.js" ]
     }
   ],
   "bmc": {
@@ -29,13 +29,13 @@
   },
   "bookingApp": {
     //"lodgmentName": "Don Whillans Hut",
-    "rollDayManually": true,
+    "rollDayManually": false,
     "enable": true,
     "accomodation": [
       {
         "accomodationtype": "hut",
         "name": "Entire Hut",
-        "fullname":  "Don Whillans Hut",
+        "fullname": "Don Whillans Hut",
         "accomodationclass": "standard",
         "bookable": true,
         "subItemsSeparatelyBookable": true,
@@ -71,7 +71,7 @@
                 "name": "Bed 4",
                 "bookable": true
               },
-                            {
+              {
                 "accomodationtype": "bed",
                 "accomodationclass": "standard",
                 "name": "Bed 5",
@@ -132,6 +132,9 @@
           }
         ]
       }
-    ]
+    ],
+    "paymentGateway": {
+      "enable":  false
+    }
   }
 }

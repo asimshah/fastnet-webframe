@@ -364,6 +364,7 @@ var fastnet;
                 var root = this.prepareFormRoot();
                 var dg = $(root).dialog({
                     width: this.options.initialWidth,
+                    height: this.options.initialHeight,
                     buttons: buttons,
                     autoOpen: false,
                     modal: true,

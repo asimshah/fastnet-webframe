@@ -89,11 +89,14 @@ var fastnet;
         booking.step1Models = step1Models;
         var request_step1 = (function (_super) {
             __extends(request_step1, _super);
-            function request_step1() {
+            function request_step1(today, shortTermBookingAllowed, shortBookingInterval) {
                 _super.call(this);
                 this.startDate = null;
                 this.endDate = null;
                 this.numberOfPeople = null; //0;
+                this.today = today;
+                this.shortBookingInterval = shortBookingInterval;
+                this.shortTermBookingAllowed = shortTermBookingAllowed;
             }
             return request_step1;
         })(forms.model);
@@ -103,10 +106,22 @@ var fastnet;
             function observableRequest_step1(m, opts) {
                 var _this = this;
                 _super.call(this);
-                //var edChangeFocusBlocked = false;
-                this.startDate = ko.observable(m.startDate).extend({
-                    required: { message: "A start date is required" },
-                });
+                this.today = m.today;
+                this.shortBookingInterval = m.shortBookingInterval;
+                this.shortTermBookingAllowed = m.shortTermBookingAllowed;
+                if (!this.shortTermBookingAllowed) {
+                    var minStart = this.today.add(this.shortBookingInterval, 'd');
+                    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
+                    this.startDate = ko.observable(m.startDate).extend({
+                        required: { message: "A start date is required" },
+                        dateGreaterThan: { params: minStart, date: minStart, message: msg }
+                    });
+                }
+                else {
+                    this.startDate = ko.observable(m.startDate).extend({
+                        required: { message: "A start date is required" },
+                    });
+                }
                 this.endDate = ko.observable(m.endDate).extend({
                     required: { message: "An end date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
@@ -215,6 +230,14 @@ var fastnet;
             return observableRequest_step2;
         })(forms.viewModel);
         booking.observableRequest_step2 = observableRequest_step2;
+        var step3Models = (function (_super) {
+            __extends(step3Models, _super);
+            function step3Models() {
+                _super.apply(this, arguments);
+            }
+            return step3Models;
+        })(forms.models);
+        booking.step3Models = step3Models;
         var request_step3 = (function (_super) {
             __extends(request_step3, _super);
             function request_step3(fromDate, toDate, choice, tcLink, isShortTermBooking, shortTermBookingInterval, paymentGatewayAvailable) {

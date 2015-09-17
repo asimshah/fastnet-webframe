@@ -31,8 +31,15 @@ namespace Fastnet.Webframe.BookingData
         }
         public static DateTime GetToday()
         {
-            // FOR TESTING
-            return new DateTime(2015, 9, 6);// DateTime.Today;// for now
+            bool rollManually = Settings.bookingApp.rollDayManually;
+            if (rollManually)
+            {
+                return new DateTime(2015, 9, 6);// DateTime.Today;// for now
+            }
+            else
+            {
+                return DateTime.Today;
+            }
         }
         public static string GetAbodeName()
         {

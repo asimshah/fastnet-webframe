@@ -243,6 +243,7 @@
     <Compile Include="Areas\booking\Common\Factory.cs" />
     <Compile Include="Areas\booking\Common\Globals.cs" />
     <Compile Include="Areas\booking\Common\DayInformationClasses.cs" />
+    <Compile Include="Areas\booking\Common\PaymentGateway.cs" />
     <Compile Include="Areas\booking\Controllers\AdminController.cs" />
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />

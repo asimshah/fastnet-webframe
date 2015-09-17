@@ -95,7 +95,6 @@
       "description": "Settings for the booking app",
       "additionalProperties": false,
       "properties": {
-        //"lodgmentName": { "type": "string" },
         "rollDayManually": {
           "type": "boolean",
           "default": false
@@ -106,6 +105,12 @@
         },
         "accomodation": {
           "$ref": "#/definitions/accomodation"
+        },
+        "paymentGateway": {
+          "enable": {
+            "type": "boolean",
+            "default":  false
+          }
         }
       }
     },

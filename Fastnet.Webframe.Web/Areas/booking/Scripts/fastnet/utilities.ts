@@ -88,13 +88,16 @@ module fastnet {
             public static toMoment(dateString: string): moment.Moment {
                 return moment(dateString, "DDMMMYYYY");
             }
-            public static toDateString(d: Date | moment.Moment): string {
-                //debugger;
+            public static toDateString(d: Date | moment.Moment | string): string {
                 var md: moment.Moment;
-                if (d instanceof Date) {
-                    md = moment(d);
+                if (typeof d === "string") {
+                    md = this.toMoment(d);
                 } else {
-                    md = <moment.Moment>d;
+                    if (d instanceof Date) {
+                        md = moment(d);
+                    } else {
+                        md = <moment.Moment>d;
+                    }
                 }
                 return md.format("DDMMMYYYY");
             }

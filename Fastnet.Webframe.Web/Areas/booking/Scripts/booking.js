@@ -24,11 +24,25 @@ var fastnet;
         var bookingAppValidations = (function () {
             function bookingAppValidations() {
             }
+            //public static validateBookingEndDate2: forms.knockoutAsyncValidator = function (val, params, callback): void {
+            //    var startDate: Date = params;
+            //    var startMoment = moment(startDate);
+            //    var endMoment = moment(val);
+            //    debugger;
+            //    callback({ isValid: false, message: "some message or other" });
+            //}
             bookingAppValidations.GetValidators = function () {
                 var rules = [];
                 rules.push({ name: "bookingEndDate", async: false, validator: bookingAppValidations.validateBookingEndDate, message: "This end date is not valid" });
-                rules.push({ name: "bookingEndDate2", async: true, validator: bookingAppValidations.validateBookingEndDate2, message: "This end date is not valid" });
+                rules.push({ name: "dateGreaterThan", async: false, validator: bookingAppValidations.validateDateGreaterThan, message: "This date is not valid" });
+                //rules.push({ name: "bookingEndDate2", async: true, validator: bookingAppValidations.validateBookingEndDate2, message: "This end date is not valid" });
                 return rules;
+            };
+            bookingAppValidations.validateDateGreaterThan = function (val, params) {
+                var refDate = str.toMoment(params);
+                var thisDate = str.toMoment(val);
+                var diff = thisDate.diff(refDate, 'd');
+                return diff >= 0;
             };
             bookingAppValidations.validateBookingEndDate = function (val, params) {
                 if (h$.isNullOrUndefined(val)) {
@@ -50,16 +64,8 @@ var fastnet;
                     return false;
                 }
             };
-            bookingAppValidations.validateBookingEndDate2 = function (val, params, callback) {
-                var startDate = params;
-                var startMoment = moment(startDate);
-                var endMoment = moment(val);
-                debugger;
-                callback({ isValid: false, message: "some message or other" });
-            };
             return bookingAppValidations;
         })();
-        // export class bookingParameters implements server.bookingParameters {
         var bookingApp = (function () {
             function bookingApp() {
             }
@@ -69,10 +75,6 @@ var fastnet;
                     modelessContainer: "booking-interaction",
                     additionalValidations: bookingAppValidations.GetValidators()
                 };
-                //var today = new Date();
-                //debug.print(str.toDateString(today));
-                //debug.print(str.toDateString(moment(today)));
-                //debugger;
                 forms.form.initialise(config);
                 this.dayDictionary = new collections.Dictionary();
                 this.dayDictionaryMonthsLoaded = new collections.Dictionary();
@@ -382,7 +384,10 @@ var fastnet;
                     // onSelect: this.onSelectDate,
                     dateFormat: 'dMyy'
                 };
-                this.step1_model = new bookingModels.request_step1();
+                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable;
+                var shortBookingInterval = this.getShortTermBookingInterval();
+                var today = str.toMoment(this.bookingApp.bookingParameters.today);
+                this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
                 this.step1_model.mobileNumber = app.currentMember.MobileNumber;
                 this.step1_vm = new bookingModels.observableRequest_step1(this.step1_model, { maximumNumberOfPeople: this.bookingApp.bookingParameters.maximumOccupants });
                 this.step1();
@@ -497,10 +502,9 @@ var fastnet;
                 var ed = this.step1_vm.endDate();
                 var np = parseInt(this.step1_vm.numberOfPeople());
                 var daysToStart = str.toMoment(sd).diff(td, 'd');
-                //Todo: implment a way to avoid hard coding the cast to dwhParameters)
-                var dwhParameters = this.bookingApp.bookingParameters;
-                var isShortTerm = daysToStart < dwhParameters.shortBookingInterval;
-                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, dwhParameters.shortBookingInterval, this.bookingApp.bookingParameters.paymentGatewayAvailable);
+                var shortBookingInterval = this.getShortTermBookingInterval();
+                var isShortTerm = daysToStart < shortBookingInterval;
+                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, this.bookingApp.bookingParameters.paymentGatewayAvailable);
                 this.step3_vm = new booking.observableRequest_step3(this.step3_model);
                 var buttons = [
                     {
@@ -523,6 +527,9 @@ var fastnet;
                     baf_step3.setContentHtml(r.template);
                     baf_step3.open(function (ctx, f, cmd, data) {
                         switch (cmd) {
+                            case "show-tc":
+                                _this.showTC();
+                                break;
                             case "cancel-command":
                                 _this.step1_vm.reset();
                                 _this.step1();
@@ -537,12 +544,35 @@ var fastnet;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
-                                    debug.print("go to confirmation");
+                                    _this.saveBookingChoice(data.current);
                                 }
                                 break;
                         }
                     });
                 });
+            };
+            bookDates.prototype.saveBookingChoice = function (model) {
+                var _this = this;
+                var tempHtml = "<div>At this point the booking will be saved and message appear here that a confirmation email has ben sent ...</div>\n                                <div> ... when I've done the coding!</div>";
+                var choice = model.choice;
+                var cf = new forms.form(this, {
+                    modal: true,
+                    title: "Booking Confirmed",
+                    styleClasses: configuration.getFormStyleClasses(),
+                    datepickerOptions: this.dpOptions,
+                    cancelButton: null
+                }, null);
+                cf.setContentHtml(tempHtml);
+                cf.open(function (ctx, f, cmd, data) {
+                    f.close();
+                    _this.step1_vm.reset();
+                    _this.step1();
+                });
+            };
+            bookDates.prototype.getShortTermBookingInterval = function () {
+                //ToDo: implement a way to avoid hard coding the cast to dwhParameters)
+                var dwhParameters = this.bookingApp.bookingParameters;
+                return dwhParameters.shortBookingInterval;
             };
             bookDates.prototype.beforeShowingDatePicker = function (input, inst) {
                 // $("#startDatePicker").datepicker("refresh");
@@ -556,9 +586,9 @@ var fastnet;
             };
             bookDates.prototype.canGoToStep2 = function (model) {
                 var _this = this;
-                //var url = str.format("bookingapi/get/choices/{0}/{1}/{2}/{3}",
-                //    this.bookingApp.bookingParameters.currentAbode.id, moment(model.startDate).format("DDMMMYYYY"), moment(model.endDate).format("DDMMMYYYY"), model.numberOfPeople);
-                var url = str.format("bookingapi/get/choices/{0}/{1}/{2}/{3}", this.bookingApp.bookingParameters.currentAbode.id, model.startDate, model.endDate, model.numberOfPeople);
+                var sd = str.toDateString(model.startDate);
+                var ed = str.toDateString(model.endDate);
+                var url = str.format("bookingapi/get/choices/{0}/{1}/{2}/{3}", this.bookingApp.bookingParameters.currentAbode.id, sd, ed, model.numberOfPeople);
                 ajax.Get({ url: url }, false).then(function (r) {
                     if (!r.success) {
                         debug.print(r.explanation);
@@ -576,6 +606,24 @@ var fastnet;
                     }
                 });
                 return false;
+            };
+            bookDates.prototype.showTC = function () {
+                var _this = this;
+                var url = str.format("pageapi/{0}", this.bookingApp.bookingParameters.termsAndConditionsUrl);
+                ajax.Get({ url: url }, true).then(function (r) {
+                    var tcf = new forms.form(_this, {
+                        modal: true,
+                        initialWidth: 600,
+                        initialHeight: 300,
+                        title: "Terms and Conditions",
+                        styleClasses: configuration.getFormStyleClasses(),
+                        datepickerOptions: _this.dpOptions,
+                        cancelButton: null
+                    }, null);
+                    tcf.setContentHtml(r.HtmlText);
+                    tcf.open(function (ctx, f, cmd, data) {
+                    });
+                });
             };
             return bookDates;
         })();

@@ -93,6 +93,10 @@ module fastnet {
             /**
              * Start form at this width
              */
+            initialHeight?: number,
+            /**
+             * Start form at this width
+             */
             initialWidth?: number,
             /**
              * true for pop-up forms, else embedded
@@ -468,6 +472,7 @@ module fastnet {
                 var root = this.prepareFormRoot();
                 var dg = $(root).dialog({
                     width: this.options.initialWidth,
+                    height: this.options.initialHeight,
                     buttons: buttons,
                     autoOpen: false,
                     modal: true,

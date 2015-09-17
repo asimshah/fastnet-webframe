@@ -36,24 +36,6 @@ namespace Fastnet.Webframe.Web.Areas.booking
             bp.factoryName = FactoryName.ToString();
             return bp;
         }
-        //[Obsolete]
-        //public static adminParameters GetAdminParameters(dynamic data = null)
-        //{
-        //    switch (FactoryName)
-        //    {
-        //        case FactoryName.DonWhillansHut:
-        //            if(data != null)
-        //            {
-        //                return ((JObject)data).ToObject<dwhAdminParameters>();
-        //            }
-        //            return new dwhAdminParameters();
-        //    }
-        //    if (data != null)
-        //    {
-        //        return ((JObject)data).ToObject<adminParameters>();
-        //    }
-        //    return new adminParameters();
-        //}
         public static DayInformation GetDayInformationInstance(BookingDataContext bctx,long abodeId, DateTime day)
         {
             switch (FactoryName)

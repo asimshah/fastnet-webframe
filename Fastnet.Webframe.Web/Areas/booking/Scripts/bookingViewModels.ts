@@ -73,11 +73,17 @@
             public endDate: Date;
             public numberOfPeople: number;
             public mobileNumber: string;
-            constructor() {
+            public shortTermBookingAllowed: boolean;
+            public shortBookingInterval: number;
+            public today: moment.Moment;
+            constructor(today:moment.Moment, shortTermBookingAllowed: boolean, shortBookingInterval: number) {
                 super();
                 this.startDate = null;
                 this.endDate = null;
                 this.numberOfPeople = null;//0;
+                this.today = today;
+                this.shortBookingInterval = shortBookingInterval;
+                this.shortTermBookingAllowed = shortTermBookingAllowed;
             }
         }
         interface requestOptions {
@@ -89,12 +95,27 @@
             public numberOfPeople: KnockoutObservable<number>;
             public helpText: any;// KnockoutComputed<string>;
             public mobileNumber: KnockoutObservable<string>;
+            public shortTermBookingAllowed: boolean;
+            public shortBookingInterval: number;
+            public today: moment.Moment;
             constructor(m: request_step1, opts: requestOptions) {
                 super();
-                //var edChangeFocusBlocked = false;
-                this.startDate = ko.observable<Date>(m.startDate).extend({
-                    required: { message: "A start date is required" },
-                });
+                this.today = m.today;
+                this.shortBookingInterval = m.shortBookingInterval;
+                this.shortTermBookingAllowed = m.shortTermBookingAllowed;
+                if (!this.shortTermBookingAllowed) {
+                    var minStart = this.today.add(this.shortBookingInterval, 'd');
+                    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
+                    this.startDate = ko.observable<Date>(m.startDate).extend({
+                        required: { message: "A start date is required" },
+                        dateGreaterThan: { params: minStart,  date: minStart, message: msg }
+                    });
+                } else {
+                    this.startDate = ko.observable<Date>(m.startDate).extend({
+                        required: { message: "A start date is required" },
+                    });
+                }
+
                 this.endDate = ko.observable<Date>(m.endDate).extend({
                     required: { message: "An end date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
@@ -195,6 +216,10 @@
                 this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} people:",
                     this.fromDate, this.toDate, this.numberOfPeople);
             }
+        }
+        export class step3Models extends forms.models {
+            current: request_step3;
+            original: request_step3;
         }
         export class request_step3 extends forms.model {
             public fromDate: string;
