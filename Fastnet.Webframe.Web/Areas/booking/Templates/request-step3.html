@@ -1,0 +1,90 @@
+﻿<div class="booking-form">
+    <div class="row">
+        <div class="col-xs-5">
+            <div>From: </div>
+        </div>
+        <div class="col-xs-6">
+            <div data-bind="text: fromDate"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-5">
+            <div>To: </div>
+        </div>
+        <div class="col-xs-5">
+            <div data-bind="text: toDate"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-5">
+            <div>For: </div>
+        </div>
+        <div class="col-xs-5">
+            <span data-bind="text: choice.totalCapacity"></span><span> people</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-5">
+            <div>Cost: </div>
+        </div>
+        <div class="col-xs-5">
+            <div data-bind="text: choice.totalCost"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-5">
+            <div>Accomodation: </div>
+        </div>
+        <div class="col-xs-5">
+            <div data-bind="text: choice.description"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" data-bind="value: under18Present" />
+                    Under 18s in Party
+                </label>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div data-bind="if: tcLinkAvailable">
+                <div class="checkbox">
+                    <!--<label>
+                        <input type="checkbox" data-bind="checked: tcAgreed" />
+                        I have read and agreed with the <a href="#">Terms and Conditions</a>
+                    </label>-->
+                    <label>
+                        <input type="checkbox" data-bind="checked: tcAgreed" />
+                        I have read and agreed with the <button class="btn-sm btn-link" data-cmd="show-tc">Terms and Conditions</button>
+                    </label>
+                </div>
+            </div>
+            <div data-bind="ifnot: tcLinkAvailable">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" data-bind="checked: tcAgreed" />
+                        I have read and agreed with the Terms and Conditions
+                    </label>
+                </div>
+            </div>
+            <span class="validationMessage" data-bind="validationMessage: tcAgreed"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div data-bind="if: showPaymentRequiredMessage">
+                <div class="help-block">
+                    <span>As this booking is within the next </span>
+                    <span data-bind="text: shortTermBookingInterval"></span>
+                    <span> days, payment is required immediately. The next step will go the payment gateway.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
