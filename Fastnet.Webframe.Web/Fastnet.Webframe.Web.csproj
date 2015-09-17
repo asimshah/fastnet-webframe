@@ -1162,7 +1162,7 @@
     <Content Include="Content\fastnet\menusystem.css.map">
       <DependentUpon>menusystem.css</DependentUpon>
     </Content>
-    <Content Include="customisation.json" />
+    <Content Include="customisation.dwh.json" />
     <Content Include="customisation.schema.json" />
     <Content Include="Content\DWH\custom.less" />
     <Content Include="Areas\booking\Views\web.config" />

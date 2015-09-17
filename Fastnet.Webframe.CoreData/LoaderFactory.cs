@@ -17,16 +17,19 @@ namespace Fastnet.Webframe.CoreData
         }
         public static LoaderFactory Get(CoreDataContext context)
         {
-            bool? dataloadRequired = Settings.legacy?.dataload;
-            if(dataloadRequired == true)
+            bool? dataloadRequired = false;
+            //bool? dataloadRequired = Settings.legacy?.dataload;
+            switch (FactoryName)
             {
-                switch(FactoryName)
-                {
-                    case FactoryName.DonWhillansHut:
+                case FactoryName.DonWhillansHut:
+                    dataloadRequired = Settings?.legacy?.dataload ?? false;
+                    if (dataloadRequired == true)
+                    {
                         return new DWHLegacyLoader(context);
-                    default:
-                        throw new ApplicationException(string.Format("Factory {0}: dataload specified but no load factory exists", FactoryName.ToString()));
-                }
+                    }
+                    break;
+                default:
+                    break;
             }
             return null;
         }
