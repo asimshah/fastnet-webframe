@@ -127,9 +127,9 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new StyleBundle("~/Content/jqueryui/css").Include(
                 //"~/Content/bootstrap-datetimepicker.css"
-                "~/Content/themes/base/all.css"
-                //"~/Content/themes/base/base.css",
-                //"~/Content/themes/base/theme.css"
+                //"~/Content/themes/base/all.css"
+                "~/Content/themes/base/base.css",
+                "~/Content/themes/base/theme.css"
                 ));
 
             bundles.Add(new StyleBundle("~/Content/site/css")
