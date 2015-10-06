@@ -165,7 +165,7 @@ namespace Fastnet.Webframe.BookingData
         //    di.PostProcess(this, day);
         //    return di;
         //}
-        public CalendarSetupTO GetCalendarSetupInfo()
+        public calendarSetup GetCalendarSetupInfo()
         {
             ParameterBase p = Parameters.Single();
             Period fp = p.ForwardBookingPeriod;
@@ -191,7 +191,7 @@ namespace Fastnet.Webframe.BookingData
                     //Log.Write(xe2);
                     throw xe2;
             }
-            return new CalendarSetupTO { StartAt = start, Until = end };
+            return new calendarSetup { Today = BookingGlobals.GetToday(), StartAt = start, Until = end };
         }
         //public async Task<List<DayInformation>> GetDayStatusForDateRange(DateTime start, DateTime end, bool reducePayload = true)
         //{

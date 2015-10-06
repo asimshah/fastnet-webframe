@@ -3,7 +3,7 @@
 /// <reference path="../../../../scripts/typings/knockout/knockout.d.ts" />
 /// <reference path="../../../../scripts/typings/knockout.mapping/knockout.mapping.d.ts" />
 /// <reference path="../../../../scripts/typings/jquery.blockui/jquery.blockui.d.ts" />
-/// <reference path="../../../../scripts/typings/knockout.validation/knockout.validation.modified.d.ts" />
+///// <reference path="../../../../scripts/typings/knockout.validation/knockout.validation.modified.d.ts" />
 var fastnet;
 (function (fastnet) {
     var forms;
@@ -159,12 +159,18 @@ var fastnet;
                 form.config = $.extend(defaultConfig, (config || {}));
                 if (!form.systemInitialised) {
                     form.addMomentBinding();
-                    ko.validation.init({
+                    var initOptions = {
                         errorsAsTitle: false,
                         insertMessages: false,
                         decorateElement: true,
-                        errorElementClass: 'validation-error',
-                    });
+                        errorElementClass: 'validation-error', };
+                    //ko.validation.init({
+                    //    errorsAsTitle: false,
+                    //    insertMessages: false,
+                    //    decorateElement: true,
+                    //    errorElementClass: 'validation-error',
+                    //});
+                    ko.validation.init(initOptions);
                     var rules = validations.GetValidators();
                     this.addValidations(rules);
                     if (form.config.additionalValidations) {
@@ -590,4 +596,3 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=forms.js.map

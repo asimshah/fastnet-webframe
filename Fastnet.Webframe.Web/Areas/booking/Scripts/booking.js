@@ -3,6 +3,7 @@
 /// <reference path="../../../scripts/typings/moment/moment.d.ts" />
 /// <reference path="../../../scripts/typings/knockout/knockout.d.ts" />
 /// <reference path="../../../scripts/collections/collections.d.ts" />
+/// <reference path="../../../../fastnet.webframe.bookingdata/transferobjects/calendarsetup.cs.d.ts" />
 var fastnet;
 (function (fastnet) {
     var booking;
@@ -75,6 +76,7 @@ var fastnet;
                     modelessContainer: "booking-interaction",
                     additionalValidations: bookingAppValidations.GetValidators()
                 };
+                this.today = new Date();
                 forms.form.initialise(config);
                 this.dayDictionary = new collections.Dictionary();
                 this.dayDictionaryMonthsLoaded = new collections.Dictionary();
@@ -90,10 +92,12 @@ var fastnet;
                 this.calendarPeriod = { start: null, end: null };
                 this.loadInitialisationData().then(function () {
                     _this.setMember();
-                    var initialNumberOfMonths = _this.addBookingCalendar();
-                    _this.loadDayDictionaryInSteps(_this.calendarPeriod.start, initialNumberOfMonths, function () {
-                        //debugger;
-                    });
+                    var initialNumberOfMonths = _this.getCalendarMonthCount();
+                    _this.addBookingCalendar(initialNumberOfMonths);
+                    //var initialNumberOfMonths = this.addBookingCalendar();
+                    //this.loadDayDictionaryInSteps(this.calendarPeriod.start, initialNumberOfMonths, () => {
+                    //    //debugger;
+                    //});
                 });
             };
             bookingApp.prototype.loadInitialisationData = function () {
@@ -106,72 +110,81 @@ var fastnet;
                     var abodeId = _this.bookingParameters.currentAbode.id;
                     var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", abodeId);
                     var memberInfoUrl = "bookingapi/member";
-                    $.when(ajax.Get({ url: memberInfoUrl }, false), ajax.Get({ url: calendarInfoUrl }, false)).then(function (r1, r2, r3) {
+                    var dayStatusUrl = str.format("bookingapi/calendar/{0}/status", _this.bookingParameters.currentAbode.id);
+                    $.when(ajax.Get({ url: memberInfoUrl }, false), ajax.Get({ url: calendarInfoUrl }, false), ajax.Get({ url: dayStatusUrl }, false)).then(function (r1, r2, r3) {
                         _this.currentMember = r1[0];
                         var csi = r2[0];
+                        _this.today = moment(csi.Today).toDate();
                         _this.calendarPeriod.start = moment(csi.StartAt).toDate(); // moment(r2[0].startAt).toDate();
                         _this.calendarPeriod.end = moment(csi.Until).toDate(); // moment(r2[0].until).toDate();
-                        //this.bookingParameters = <server.BookingParameters>r3[0];
+                        var dayInformation = r3[0];
+                        _this.loadDayInformation(dayInformation);
                         deferred.resolve();
                     });
                 });
                 return deferred.promise();
             };
-            bookingApp.prototype.loadDayDictionaryInSteps = function (startAt, numberOfMonthsToLoad, afterLoad) {
-                var lastMonth = false;
-                var sd = moment(startAt);
-                var ed = moment(this.calendarPeriod.end);
-                var year = sd.year();
-                var month = sd.month() + 1;
-                var lyear = ed.year();
-                var lmonth = ed.month() + 1;
-                this.loadDayDictionaryForMonth(this, { year: year, month: month }, numberOfMonthsToLoad, function (mt) {
-                    //$('#bookingCalendar').datepicker('refresh');
-                    var dt = moment(new Date(mt.year, mt.month - 1, 1)).add(1, 'M');
-                    var y = dt.year();
-                    var m = dt.month() + 1;
-                    if (y > lyear || (y === lyear && m > lmonth)) {
-                        return null;
-                    }
-                    return { year: y, month: m };
-                }, function () {
-                    afterLoad();
+            bookingApp.prototype.loadDayInformation = function (diList) {
+                var _this = this;
+                diList.forEach(function (value, index, array) {
+                    _this.dayDictionary.setValue(value.day, value);
                 });
             };
-            bookingApp.prototype.loadDayDictionaryForMonth = function (app, month, numberOfMonthsToLoad, getNextMonth, afterLoad) {
-                function doNext() {
-                    var next = getNextMonth(month);
-                    if (next == null) {
-                        afterLoad();
-                    }
-                    else {
-                        app.loadDayDictionaryForMonth(app, next, numberOfMonthsToLoad - 1, getNextMonth, afterLoad);
-                    }
-                }
-                var dayStatusForMonthUrl = str.format("bookingapi/calendar/{2}/status/month/{0}/{1}", month.year, month.month, this.bookingParameters.currentAbode.id);
-                var monthKey = str.format("{0}-{1}", month.year, month.month);
-                var alreadyDone = app.dayDictionaryMonthsLoaded.containsKey(monthKey) && app.dayDictionaryMonthsLoaded.getValue(monthKey);
-                if (!alreadyDone) {
-                    $.when(ajax.Get({ url: dayStatusForMonthUrl }, false)).then(function (r) {
-                        //var ds: DayInformation[] = r;
-                        r.forEach(function (value, index, array) {
-                            //app.dayDictionary.setValue(moment(value.day, "DDMMMYYYY").format("DDMMMYYYY"), value);
-                            app.dayDictionary.setValue(value.day, value);
-                        });
-                        app.dayDictionaryMonthsLoaded.setValue(monthKey, true);
-                        app.refreshBookingCalendar();
-                        doNext();
-                    });
-                }
-                else {
-                    doNext();
-                }
-            };
+            //private loadDayDictionaryInSteps(startAt: Date, numberOfMonthsToLoad: number, afterLoad: callback) {
+            //    var lastMonth = false;
+            //    var sd = moment(startAt);
+            //    var ed = moment(this.calendarPeriod.end);
+            //    var year = sd.year();
+            //    var month = sd.month() + 1;
+            //    var lyear = ed.year();
+            //    var lmonth = ed.month() + 1;
+            //    this.loadDayDictionaryForMonth(this, { year: year, month: month }, numberOfMonthsToLoad,
+            //        (mt: monthTuple) => {
+            //            //$('#bookingCalendar').datepicker('refresh');
+            //            var dt = moment(new Date(mt.year, mt.month - 1, 1)).add(1, 'M');
+            //            var y = dt.year();
+            //            var m = dt.month() + 1;
+            //            if (y > lyear || (y === lyear && m > lmonth)) {
+            //                return null;
+            //            }
+            //            return { year: y, month: m };
+            //        }, () => {
+            //            afterLoad();
+            //        });
+            //}
+            //private loadDayDictionaryForMonth(app: bookingApp, month: monthTuple, numberOfMonthsToLoad: number, getNextMonth: getMonthTupleCallback, afterLoad: callback) {
+            //    function doNext() {
+            //        var next = getNextMonth(month);
+            //        if (next == null) {// || numberOfMonthsToLoad < 1) {
+            //            afterLoad();
+            //        }
+            //        else {
+            //            app.loadDayDictionaryForMonth(app, next, numberOfMonthsToLoad - 1, getNextMonth, afterLoad);
+            //        }
+            //    }
+            //    var dayStatusForMonthUrl = str.format("bookingapi/calendar/{2}/status/month/{0}/{1}", month.year, month.month, this.bookingParameters.currentAbode.id);
+            //    var monthKey = str.format("{0}-{1}", month.year, month.month);
+            //    var alreadyDone = app.dayDictionaryMonthsLoaded.containsKey(monthKey) && app.dayDictionaryMonthsLoaded.getValue(monthKey);
+            //    if (!alreadyDone) {
+            //        $.when(ajax.Get({ url: dayStatusForMonthUrl }, false)).then((r: server.dayInformation[]) => {
+            //            //var ds: DayInformation[] = r;
+            //            r.forEach((value, index, array) => {
+            //                //app.dayDictionary.setValue(moment(value.day, "DDMMMYYYY").format("DDMMMYYYY"), value);
+            //                app.dayDictionary.setValue(value.day, value);
+            //            });
+            //            app.dayDictionaryMonthsLoaded.setValue(monthKey, true);
+            //            app.refreshBookingCalendar();
+            //            doNext();
+            //        });
+            //    } else {
+            //        doNext();
+            //    }
+            //}
             bookingApp.prototype.refreshBookingCalendar = function () {
                 $('#bookingCalendar').datepicker("refresh");
                 $(this).trigger("refresh-calendar");
             };
-            bookingApp.prototype.setCalendarMonthCount = function () {
+            bookingApp.prototype.getCalendarMonthCount = function () {
                 var fw = $(window).width();
                 var w = fw - 450;
                 var factor = 220;
@@ -179,6 +192,21 @@ var fastnet;
                 if (w <= (factor * 2)) {
                     n = Math.round((w + (factor / 2)) / factor) + 1;
                 }
+                //var cn = $('#bookingCalendar').datepicker("option", "numberOfMonths");
+                //if (n != cn) {
+                //    $('#bookingCalendar').datepicker("option", "numberOfMonths", n);
+                //}
+                return n;
+            };
+            bookingApp.prototype.setCalendarMonthCount = function () {
+                //var fw = $(window).width();
+                //var w = fw - 450;
+                //var factor = 220;
+                //var n = 4;
+                //if (w <= (factor * 2)) {
+                //    n = Math.round((w + (factor / 2)) / factor) + 1;
+                //}
+                var n = this.getCalendarMonthCount();
                 var cn = $('#bookingCalendar').datepicker("option", "numberOfMonths");
                 if (n != cn) {
                     $('#bookingCalendar').datepicker("option", "numberOfMonths", n);
@@ -216,31 +244,34 @@ var fastnet;
                                 break;
                             case 1 /* IsFree */:
                                 r = [true, "free", di.calendarPopup];
+                                //default:
+                                //    r = [true, "free", "default pop-up"];
                                 break;
                         }
                         return r;
                     }
                     else {
                         //debug.print("day dictionary does not contain key {0}", day.format("DDMMMYYYY"));
-                        return [false, "blocked", "not ready"];
+                        return [true, "free", "This day is free"];
                     }
                 }
             };
-            bookingApp.prototype.calendarOnChangeMonth = function (year, month) {
-                var sd = new Date(year, month, 1);
-                this.loadDayDictionaryInSteps(sd, 3, function () {
-                });
-            };
-            bookingApp.prototype.addBookingCalendar = function () {
+            //public calendarOnChangeMonth(year, month) {
+            //    var sd = new Date(year, month, 1);
+            //    this.loadDayDictionaryInSteps(sd, 3, () => {
+            //    });
+            //}
+            bookingApp.prototype.addBookingCalendar = function (nm) {
                 var _this = this;
                 $('#bookingCalendar').datepicker({
-                    numberOfMonths: 4,
+                    defaultDate: this.today,
+                    numberOfMonths: nm,
                     minDate: this.calendarPeriod.start,
                     maxDate: this.calendarPeriod.end,
                     beforeShowDay: function (d) { return _this.calendarBeforeShowDate(d); },
-                    onChangeMonthYear: function (m, y) {
-                        //this.calendarOnChangeMonth(m, y);
-                    },
+                    //onChangeMonthYear: (m, y) => {
+                    //    //this.calendarOnChangeMonth(m, y);
+                    //},                    
                     //onSelect: this.BookingDateSelected,
                     dateFormat: 'DD d M yy'
                 }).val('');
@@ -629,4 +660,3 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=booking.js.map

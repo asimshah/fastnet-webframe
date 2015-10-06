@@ -52,8 +52,8 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Fastnet.Common, Version=1.0.5730.30996, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fastnet.Common.1.0.5730.30996\lib\net45\Fastnet.Common.dll</HintPath>
+    <Reference Include="Fastnet.Common, Version=1.0.5757.17969, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Fastnet.Common.1.0.5757.17969\lib\net45\Fastnet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Fastnet.EventSystem.Logging, Version=3.2.5689.34098, Culture=neutral, processorArchitecture=MSIL">

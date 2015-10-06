@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
-    public class CalendarSetupTO
+    public class calendarSetup
     {
+        public DateTime Today { get; set; }
         public DateTime StartAt { get; set; }
         public DateTime Until { get; set; }
     }

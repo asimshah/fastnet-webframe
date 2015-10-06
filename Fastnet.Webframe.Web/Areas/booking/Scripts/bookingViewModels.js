@@ -1,8 +1,7 @@
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var fastnet;
 (function (fastnet) {
@@ -119,11 +118,11 @@ var fastnet;
                 }
                 else {
                     this.startDate = ko.observable(m.startDate).extend({
-                        required: { message: "A start date is required" },
+                        required: { message: "An arrival date is required" },
                     });
                 }
                 this.endDate = ko.observable(m.endDate).extend({
-                    required: { message: "An end date is required" },
+                    required: { message: "A departure date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
                 });
                 this.startDate.subscribe(function (cd) {
@@ -279,4 +278,3 @@ var fastnet;
         booking.observableRequest_step3 = observableRequest_step3;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingViewModels.js.map

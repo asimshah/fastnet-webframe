@@ -201,7 +201,7 @@ module fastnet {
             public start(): void {
                 var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", this.app.parameters.currentAbode.id);
                 ajax.Get({ url: calendarInfoUrl }, false).then((r) => {
-                    var csi: bookingData.calendarSetup = r;
+                    var csi: server.calendarSetup = r;
                     var start = moment(csi.StartAt);//.toDate();// moment(r2[0].startAt).toDate();
                     var end = moment(csi.Until);//.toDate();// moment(r2[0].until).toDate();
                     this.minimumDate = new Date(start.year(), start.month(), 1);

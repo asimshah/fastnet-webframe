@@ -86,6 +86,28 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             }
         }
         [HttpGet]
+        [Route("calendar/{abodeId}/status")]
+        public IEnumerable<dayInformation> GetDayStatus(long abodeId)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var cs = ctx.GetCalendarSetupInfo();
+                DateTime start = new DateTime(cs.StartAt.Year, cs.StartAt.Month, 1);// new DateTime(year, month, 1);
+                var end = cs.Until.AddDays(1);
+                DateTime until = new DateTime(end.Year, end.Month, DateTime.DaysInMonth(end.Year, end.Month));// start.AddMonths(1).AddDays(-1);
+                List<DayInformation> dayList = new List<DayInformation>();
+                for (DateTime day = start; day <= until; day = day.AddDays(1))
+                {
+                    DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);
+                    if (di.Status != DayStatus.IsFree)
+                    {
+                        dayList.Add(di);
+                    }
+                }
+                return dayList.Select(x => x.ToClientType()).ToArray();
+            }
+        }
+        [HttpGet]
         [Route("calendar/{abodeId}/status/month/{year}/{month}")]
         public IEnumerable<dayInformation> GetDayStatus(long abodeId, int year, int month)
         {

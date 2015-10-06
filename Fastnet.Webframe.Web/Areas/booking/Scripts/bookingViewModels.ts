@@ -112,12 +112,12 @@
                     });
                 } else {
                     this.startDate = ko.observable<Date>(m.startDate).extend({
-                        required: { message: "A start date is required" },
+                        required: { message: "An arrival date is required" },
                     });
                 }
 
                 this.endDate = ko.observable<Date>(m.endDate).extend({
-                    required: { message: "An end date is required" },
+                    required: { message: "A departure date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
                 });
                 this.startDate.subscribe((cd) => {
