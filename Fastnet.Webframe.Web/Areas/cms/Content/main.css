@@ -113,7 +113,7 @@
 .home-link:hover,
 .home-link:focus,
 .home-link.focus {
-  color: #333333;
+  color: #333;
   text-decoration: none;
 }
 .home-link:active,
@@ -214,12 +214,12 @@ fieldset[disabled] a.home-link {
 }
 .report-container .dataTables_wrapper .dataTables_paginate .paginate_button a {
   background-color: #337ab7;
-  color: #ffffff;
+  color: #fff;
   outline: none;
 }
 .report-container .dataTables_wrapper .dataTables_paginate .paginate_button a:hover {
   background-color: #f0ad4e;
-  color: #ffffff;
+  color: #fff;
   outline: none;
 }
 .report-container.report-site-content .folder .folder-name {

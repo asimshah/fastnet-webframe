@@ -2,6 +2,7 @@
 
 declare module server {
 	interface accomodationItem {
+		id: number;
 		type: any;
 		name: string;
 		capacity: number;
@@ -12,7 +13,14 @@ declare module server {
 		costs: server.dailyCostItem[];
 		costsAreEqualEveryDay: boolean;
 		totalCost: number;
+		formattedCost: string;
 		accomodationItems: server.accomodationItem[];
 		description: string;
+	}
+	interface bookingRequest {
+		fromDate: string;
+		toDate: string;
+		choice: server.bookingChoice;
+		under18spresent: boolean;
 	}
 }

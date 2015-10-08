@@ -17,15 +17,8 @@ var fastnet;
                         break;
                 }
             };
-            //public static getAdminParameters(): admin.parameters {
-            //    switch (factory.name) {
-            //        case FactoryName.DonWhillansHut:
-            //            return new admin.dwhParameters();
-            //    }
-            //    return new admin.parameters();
-            //}
             factory.getParameters = function (p) {
-                this.setFactory(p.factoryName);
+                //this.setFactory(p.factoryName);
                 var bp = null;
                 switch (factory.name) {
                     case FactoryName.DonWhillansHut:
@@ -38,9 +31,19 @@ var fastnet;
                 bp.setFromJSON(p);
                 return bp;
             };
+            factory.getRequestCustomiser = function () {
+                switch (factory.name) {
+                    case FactoryName.DonWhillansHut:
+                        return new booking.dwhRequestCustomiser();
+                        break;
+                    default:
+                        return new booking.requestCustomiser();
+                }
+            };
             factory.name = FactoryName.None;
             return factory;
         })();
         booking.factory = factory;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=factory.js.map

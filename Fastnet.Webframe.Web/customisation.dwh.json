@@ -16,7 +16,7 @@
     },
     {
       "Name": "booking",
-      "Scripts": [ "~/Areas/booking/scripts/dwh/dwhbooking.js" ]
+      "Scripts": ["~/Areas/booking/scripts/dwh/dwhbooking.js", "~/Areas/booking/scripts/dwh/dwhRequestCustomiser.js"]
     }
   ],
   "bmc": {

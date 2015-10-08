@@ -71,7 +71,28 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public int GetHashCode(BookingChoice obj)
         {
             //Debug.Print("GetHashCode(): ");
-            // always usse Equals()
+            // always use Equals()
+            return 45;
+        }
+    }
+    public class EquivalentChoiceComparer : IEqualityComparer<BookingChoice>
+    {
+        public bool Equals(BookingChoice left, BookingChoice right)
+        {
+            bool result = left.Accomodation.Count() == right.Accomodation.Count();
+            if(result)
+            {
+                // here we check if the underlying accomodation is the same, using the pk's
+                var leftSet = left.Accomodation.Select(x => x.AccomodationId);
+                var rightSet = right.Accomodation.Select(x => x.AccomodationId);
+                result = leftSet.Except(rightSet).Count() == 0;
+            }
+            return result;
+        }
+
+        public int GetHashCode(BookingChoice obj)
+        {
+            // always use Equals()
             return 45;
         }
     }
@@ -133,7 +154,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             List<dailyAccomodation> list = new List<dailyAccomodation>();
             foreach (var item in Accomodation)
             {
-                suggested.Add(new accomodationItem { type = item.Type, name = item.Type.ToString(), capacity = item.Capacity });
+                suggested.Add(new accomodationItem { id = item.AccomodationId, type = item.Type, name = item.Type.ToString(), capacity = item.Capacity });
             }
             bc.accomodationItems = suggested;
             var byGroup = bc.accomodationItems.GroupBy(x => x.type, x => x, (k, g) => new { type = k, list = g });

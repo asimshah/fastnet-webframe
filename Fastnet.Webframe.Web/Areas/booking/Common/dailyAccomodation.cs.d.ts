@@ -1,5 +1,6 @@
 ﻿declare module server {
 	interface dailyAccomodation {
+		id: number;
 		name: string;
 		isBookable: boolean;
 		isBlocked: boolean;

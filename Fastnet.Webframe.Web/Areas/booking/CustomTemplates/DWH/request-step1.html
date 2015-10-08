@@ -1,0 +1,28 @@
+﻿<div class="booking-form">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group-sm">
+                <label for="startDatePicker">Arrival Date</label>
+                <input id="startDatePicker" type="text" data-input="date" class="form-control" data-bind="value: startDate" />
+                <span class="validationMessage" data-bind="validationMessage: startDate"></span>
+            </div>
+            <div class="form-group-sm">
+                <label for="endDatePicker">Departure Date</label>
+                <input id="endDatePicker" type="text" data-input="date" class="form-control"  data-bind="value: endDate, stdDateFormat: endDate" />
+                <span class="validationMessage" data-bind="validationMessage: endDate"></span>
+            </div>
+            <div class="form-group-sm">
+                <label for="peopleCount">Number of people</label>
+                <input id="peopleCount" type="number" class="form-control"  data-bind="textInput: numberOfPeople" />
+                <span class="validationMessage" data-bind="validationMessage: numberOfPeople"></span>
+            </div>
+            <div class="form-group-sm">
+                <label for="phoneNumber">Mobile Number</label>
+                <input id="phoneNumber" type="text" class="form-control" data-bind="textInput: mobileNumber" />
+                <span class="validationMessage" data-bind="validationMessage: mobileNumber"></span>
+            </div>
+            <div class="help-block" data-bind="text: helpText()"></div>
+            <div class="help-block">A Friday booking always includes the next day. Any booking that includes a Friday has to be for the whole hut.</div>
+        </div>
+    </div>
+</div>

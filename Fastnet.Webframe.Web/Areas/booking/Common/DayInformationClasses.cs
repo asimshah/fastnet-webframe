@@ -132,6 +132,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 {
                     d = new dailyAccomodation();
                 }
+                d.id = AccomodationId;
                 d.name = Name;
                 d.isBookable = IsBookable;
                 d.isBlocked = IsBlocked;

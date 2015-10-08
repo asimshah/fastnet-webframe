@@ -7,6 +7,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
 {
     public class dailyAccomodation
     {
+        public long id { get; set; }
         public string name { get; set; }
         public bool isBookable { get; set; }
         public bool isBlocked { get; set; }

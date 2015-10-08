@@ -48,5 +48,17 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new ApplicationException(string.Format("No DayInformation type is available for factory", FactoryName));
             }
         }
+        public static ChoiceFilter GetChoiceFilter()
+        {
+            switch (FactoryName)
+            {
+                case FactoryName.None:
+                    return new ChoiceFilter();
+                case FactoryName.DonWhillansHut:
+                    return new DWHChoiceFilter();
+                default:
+                    throw new ApplicationException(string.Format("No ChoiceFilter type is available for factory", FactoryName));
+            }
+        }
     }
 }

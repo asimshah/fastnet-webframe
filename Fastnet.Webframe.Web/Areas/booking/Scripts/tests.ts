@@ -2,7 +2,7 @@
 /// <reference path="../../../scripts/typings/jqueryui/jqueryui.d.ts" />
 /// <reference path="../../../scripts/typings/moment/moment.d.ts" />
 /// <reference path="../../../scripts/typings/knockout/knockout.d.ts" />
-/// <reference path="../../../scripts/collections/collections.d.ts" />
+/////// <reference path="../../../scripts/collections/collections.d.ts" />
 ///// <reference path="../../../scripts/typings/knockout.validation/knockout.validation.modified.d.ts" />
 
 

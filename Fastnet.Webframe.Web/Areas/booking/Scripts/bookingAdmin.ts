@@ -29,7 +29,8 @@ module fastnet {
                 };
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
-                ajax.Get({ url: parametersUrl }, false).then((r) => {
+                ajax.Get({ url: parametersUrl }, false).then((r: server.bookingParameters) => {
+                    factory.setFactory(r.factoryName);
                     this.parameters = factory.getParameters(r);
                     //this.bookingParameters = <server.bookingParameters>r;
                     //factory.setFactory(this.bookingParameters.factoryName);// .FactoryName);
@@ -142,6 +143,7 @@ module fastnet {
                 
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then((r: server.bookingParameters) => {
+                    factory.setFactory(r.factoryName);
                     var model = factory.getParameters(r);
                     //model.setFromJSON(r);
                     var vm = model.getObservable();

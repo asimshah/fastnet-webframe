@@ -14,36 +14,6 @@ var fastnet;
         //    Id: number;
         //    Name: string;
         //}
-        var parameterModels = (function (_super) {
-            __extends(parameterModels, _super);
-            function parameterModels() {
-                _super.apply(this, arguments);
-            }
-            return parameterModels;
-        })(forms.models);
-        booking.parameterModels = parameterModels;
-        var parameters = (function () {
-            function parameters() {
-            }
-            parameters.prototype.getObservable = function () {
-                return new observableParameters(this);
-            };
-            parameters.prototype.setFromJSON = function (data) {
-                $.extend(this, data);
-            };
-            return parameters;
-        })();
-        booking.parameters = parameters;
-        var observableParameters = (function (_super) {
-            __extends(observableParameters, _super);
-            function observableParameters(m) {
-                _super.call(this);
-                this.termsAndConditionsUrl = ko.observable(m.termsAndConditionsUrl);
-                this.availableGroups = m.availableGroups;
-            }
-            return observableParameters;
-        })(forms.viewModel);
-        booking.observableParameters = observableParameters;
         var login;
         (function (login) {
             var loginModels = (function (_super) {
@@ -128,7 +98,7 @@ var fastnet;
                 this.startDate.subscribe(function (cd) {
                     var sdm = _this.toMoment(cd);
                     var edm = _this.toMoment(_this.endDate());
-                    var duration = (edm === null) ? 0 : edm.diff(sdm);
+                    var duration = (edm === null) ? 0 : edm.diff(sdm, "days");
                     if (duration < 1) {
                         //edChangeFocusBlocked = true;
                         _this.endDate(sdm.add(1, 'd').toDate());
@@ -149,6 +119,9 @@ var fastnet;
                 this.helpText = function () {
                     return this.getHelpText();
                 };
+                //var tester = factory.getTest();
+                var customiser = booking.factory.getRequestCustomiser();
+                customiser.customise_Step1(this);
             }
             observableRequest_step1.prototype.toMoment = function (d) {
                 if (h$.isNullOrUndefined(d)) {
@@ -205,6 +178,7 @@ var fastnet;
                 _super.call(this);
                 this.choiceNumber = m.choiceNumber;
                 this.totalCost = m.totalCost;
+                this.formattedCost = accounting.formatMoney(this.totalCost, "£", 0, ",", ".", "%s%v");
                 this.description = m.description;
             }
             return observableBookingChoice;
@@ -224,7 +198,7 @@ var fastnet;
                 });
                 // initially choose the first item in the array
                 this.selected = ko.observable(m.choices[0].choiceNumber);
-                this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} people:", this.fromDate, this.toDate, this.numberOfPeople);
+                this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} {3}:", this.fromDate, this.toDate, this.numberOfPeople, this.numberOfPeople === 1 ? "person" : "people");
             }
             return observableRequest_step2;
         })(forms.viewModel);
@@ -261,6 +235,7 @@ var fastnet;
                 this.fromDate = str.toMoment(m.fromDate).format("ddd DDMMMYYYY");
                 this.toDate = str.toMoment(m.toDate).format("ddd DDMMMYYYY"); // m.toDate;
                 this.choice = m.choice;
+                this.choice.formattedCost = accounting.formatMoney(this.choice.totalCost, "£", 0, ",", ".", "%s%v");
                 //this.phoneNumber = ko.observable(m.phoneNumber);
                 this.under18Present = ko.observable(false);
                 this.tcLinkAvailable = m.tcLinkAvailable;
@@ -278,3 +253,4 @@ var fastnet;
         booking.observableRequest_step3 = observableRequest_step3;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=bookingViewModels.js.map

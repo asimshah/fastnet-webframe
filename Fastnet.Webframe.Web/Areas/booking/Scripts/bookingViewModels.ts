@@ -8,38 +8,7 @@
         //    Id: number;
         //    Name: string;
         //}
-        export class parameterModels extends forms.models {
-            current: parameters;
-            original: parameters;
-        }
-        export class parameters implements server.bookingParameters {
-            public factoryName: string;
-            public availableGroups: server.IGroup[];
-            public termsAndConditionsUrl: string;
-            public maximumOccupants: number;
-            public currentAbode: server.abode;
-            public abodes: server.abode[];
-            public paymentGatewayAvailable: boolean;
-            public today: string;
-            constructor() {
 
-            }
-            public getObservable(): observableParameters {
-                return new observableParameters(this);
-            }
-            public setFromJSON(data: any) {
-                $.extend(this, data);
-            }
-        }
-        export class observableParameters extends forms.viewModel  {
-            public availableGroups: server.IGroup[];
-            public termsAndConditionsUrl: KnockoutObservable<string>;
-            constructor(m: parameters) {
-                super();
-                this.termsAndConditionsUrl = ko.observable(m.termsAndConditionsUrl);
-                this.availableGroups = m.availableGroups;
-            }
-        }
         export module login {
             export class loginModels extends forms.models {
                 current: credentials;
@@ -120,10 +89,11 @@
                     required: { message: "A departure date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
                 });
+                
                 this.startDate.subscribe((cd) => {
                     var sdm = this.toMoment(cd);
                     var edm = this.toMoment(this.endDate());
-                    var duration = (edm === null) ? 0 : edm.diff(sdm);
+                    var duration = (edm === null) ? 0 : edm.diff(sdm, "days");
                     if (duration < 1) {
                         //edChangeFocusBlocked = true;
                         this.endDate(sdm.add(1, 'd').toDate());
@@ -145,8 +115,11 @@
                 this.helpText = function () {
                     return this.getHelpText();
                 }
+                //var tester = factory.getTest();
+                var customiser = factory.getRequestCustomiser();
+                customiser.customise_Step1(this);
             }
-            private toMoment(d: Date): moment.Moment {
+            public toMoment(d: Date): moment.Moment {
                 if (h$.isNullOrUndefined(d)) {
                     return null;
                 } else {
@@ -187,11 +160,13 @@
         export class observableBookingChoice extends forms.viewModel {  
             public choiceNumber: number;      
             public totalCost: number;
+            public formattedCost: string;
             public description: string;
             constructor(m: server.bookingChoice) {
                 super();
                 this.choiceNumber = m.choiceNumber;
                 this.totalCost = m.totalCost;
+                this.formattedCost = accounting.formatMoney(this.totalCost, "£", 0, ",", ".", "%s%v");
                 this.description = m.description;
             }
         }
@@ -213,8 +188,8 @@
                 });
                 // initially choose the first item in the array
                 this.selected = ko.observable(m.choices[0].choiceNumber);
-                this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} people:",
-                    this.fromDate, this.toDate, this.numberOfPeople);
+                this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} {3}:",
+                    this.fromDate, this.toDate, this.numberOfPeople, this.numberOfPeople === 1 ? "person" : "people");
             }
         }
         export class step3Models extends forms.models {
@@ -266,6 +241,7 @@
                 this.fromDate = str.toMoment(m.fromDate).format("ddd DDMMMYYYY");
                 this.toDate = str.toMoment(m.toDate).format("ddd DDMMMYYYY");// m.toDate;
                 this.choice = m.choice;
+                this.choice.formattedCost = accounting.formatMoney(this.choice.totalCost, "£", 0, ",", ".", "%s%v");
                 //this.phoneNumber = ko.observable(m.phoneNumber);
                 this.under18Present = ko.observable(false);
                 this.tcLinkAvailable = m.tcLinkAvailable;

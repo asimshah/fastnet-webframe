@@ -57,3 +57,4 @@ var fastnet;
         booking.observableDwhParameters = observableDwhParameters;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=dwhbooking.js.map

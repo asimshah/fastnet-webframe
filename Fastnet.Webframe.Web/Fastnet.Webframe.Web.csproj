@@ -26,6 +26,8 @@
     <RestorePackages>true</RestorePackages>
     <TypeScriptToolsVersion>1.6</TypeScriptToolsVersion>
     <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -238,6 +240,7 @@
     <Compile Include="Areas\booking\Common\BookingBundleFactory.cs" />
     <Compile Include="Areas\booking\Common\bookingChoice.cs" />
     <Compile Include="Areas\booking\Common\BookingChoiceClasses.cs" />
+    <Compile Include="Areas\booking\Common\ChoiceFilterBase.cs" />
     <Compile Include="Areas\booking\Common\dailyAccomodation.cs" />
     <Compile Include="Areas\booking\Common\dayInformation.cs" />
     <Compile Include="Areas\booking\Common\Factory.cs" />
@@ -249,6 +252,7 @@
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
     <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\DWHChoiceFilter.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\availabilityInfo.cs" />
@@ -353,7 +357,9 @@
       <DependentUpon>main.css</DependentUpon>
     </Content>
     <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
+    <Content Include="Areas\booking\CustomTemplates\DWH\request-step1.html" />
     <Content Include="Areas\booking\Templates\adminIndex.html" />
+    <Content Include="Areas\booking\Templates\bookingConfirmation.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />
     <Content Include="Areas\booking\Templates\OccupancyReportDay.html" />
@@ -1007,11 +1013,12 @@
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="Icon.png" />
     <Content Include="Models\IdentityModels Readme.txt" />
+    <Content Include="Scripts\accounting.js" />
+    <Content Include="Scripts\accounting.min.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.js" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\bootstrap-select.js" />
     <Content Include="Scripts\bootstrap-select.min.js" />
-    <Content Include="Scripts\collections\collections.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.js" />
     <Content Include="Scripts\datatables\dataTables.autoFill.min.js" />
     <Content Include="Scripts\datatables\datatables.bootstrap.js" />
@@ -1609,10 +1616,13 @@
     <Folder Include="Areas\cms\Common\" />
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Content\Main\CustomLess\" />
+    <Folder Include="Scripts\collections\" />
     <Folder Include="Scripts\main\Archive\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
@@ -1642,10 +1652,13 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\adminViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\booking.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\bookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhbooking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhRequestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\factory.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\requestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\testViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\utilities.ts" />
@@ -1658,7 +1671,8 @@
     <TypeScriptCompile Include="Areas\booking\TransferObjects\MemberInfo.cs.d.ts">
       <DependentUpon>MemberInfo.cs</DependentUpon>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="Scripts\collections\collections.d.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\collections\collections.ts" />
+    <TypeScriptCompile Include="Scripts\typings\accounting\accounting.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
@@ -1720,7 +1734,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets'))" />
   </Target>
+  <Import Project="..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets" Condition="Exists('..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

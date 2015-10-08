@@ -43,22 +43,29 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Scripts/knockout-3.3.0.js",
                 "~/Scripts/knockout.mapping-latest.js",
                 "~/Scripts/knockout.validation.js",
-                "~/Scripts/collections/collections.js",
+                //"~/Scripts/collections/collections.js",
+                "~/Areas/booking/Scripts/collections/collections.js",
                 "~/Areas/booking/Scripts/fastnet/utilities.js",
                 "~/Areas/booking/Scripts/fastnet/forms.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/booking").Include(
+                "~/Scripts/accounting.js",
+                "~/Areas/booking/Scripts/bookingCommon.js",
                 "~/Areas/booking/Scripts/factory.js",
                 "~/Areas/booking/Scripts/bookingViewModels.js",
-                "~/Areas/booking/Scripts/booking.js"//,
-                 //"~/Areas/booking/Scripts/tests.js"
+                "~/Areas/booking/Scripts/booking.js"
+                //"~/Areas/booking/scripts/requestCustomiser.js"
+                 //"~/Areas/booking/scripts/dwh/dwhRequestCustomiser.js"
                 ));
             bundles.Add(new ScriptBundle("~/bundles/booking/admin").Include(
+                "~/Scripts/accounting.js",
+                "~/Areas/booking/Scripts/bookingCommon.js",
                 "~/Areas/booking/Scripts/factory.js",
-                "~/Areas/booking/Scripts/bookingViewModels.js",
+                //"~/Areas/booking/Scripts/bookingViewModels.js",
                 "~/Areas/booking/Scripts/adminViewModels.js",
                 "~/Areas/booking/Scripts/bookingAdmin.js"
+                
                 ));
             AddCustomScripts(bundles);
         }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Web.Http;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
@@ -126,7 +127,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("get/choices/{abodeId}/{start}/{to}/{peoplecount}")]
-        public availabilityInfo GetRequestedBookings(long abodeId, DateTime start, DateTime to, int peopleCount)
+        public availabilityInfo GetChoices(long abodeId, DateTime start, DateTime to, int peopleCount)
         {
             using (var ctx = new BookingDataContext())
             {
@@ -175,7 +176,6 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                                 choice.CostPerDay = new List<CostPerDay>();
                                 foreach (DateTime dt in choices.Select(x => x.Day))
                                 {
-
                                     decimal cost = 0.0M;
                                     foreach (var aa in choice.Accomodation)
                                     {
@@ -184,12 +184,26 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                                     choice.CostPerDay.Add(new CostPerDay { Day = dt, Cost = cost });
                                 }
                             }
- 
                             foreach (var choice in common)
                             {
-
-                                ai.AddChoice(choice);
+                                // only select choices that are different inpractice, e.g. for DWH 1 Hut = 1 4-bed room plus 8 beds = 12 beds
+                                var existing = GetExistingChoice(ai.choices, choice);
+                                if (existing == null)
+                                {
+                                    ai.AddChoice(choice);
+                                }
+                                else
+                                {
+                                    var t = choice.ToClientType();
+                                    if(t.totalCost < existing.totalCost)
+                                    {
+                                        ai.choices.Remove(existing);
+                                        ai.choices.Add(t);
+                                    }
+                                }
                             }
+                            var filter = Factory.GetChoiceFilter();
+                            ai = filter.FilterChoices(start, to, ai);
                             ai.choices = ai.choices.OrderBy(x => x.totalCost).ToList();
                         }
                     }
@@ -197,7 +211,105 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 return ai;
             }
         }
+        [HttpPost]
+        [Route("create")]
+        public async Task<dynamic> MakeBooking(bookingRequest request)
+        {
+            // default isolation level is Serializable, meaning no one else can do anything
+            string reference = null;
+            using (var tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    using (var ctx = new BookingDataContext())
+                    {
+                        Func<string> newBookingReference = () =>
+                        {
+                            DateTime today = BookingGlobals.GetToday();
+                            int bookingsToday = ctx.Bookings.ToArray().Where(x => x.CreatedOn.Year == today.Year && x.CreatedOn.Month == today.Month).Count();
+                            return string.Format("{0}/{1}", today.ToString("MMMyy"), (bookingsToday + 1).ToString("00#"));
+                        };
+                        DateTime from = DateTime.Parse(request.fromDate);
+                        DateTime to = DateTime.Parse(request.toDate);
+                        to = to.AddDays(-1);
+                        List<Accomodation> toBeBooked = new List<Accomodation>();
+                        foreach (var item in request.choice.accomodationItems)
+                        {
+                            var a = await ctx.AccomodationSet.FindAsync(item.id);
+                            if (a == null)
+                            {
+                                throw new Exception(string.Format("Accomodation item {0} not found: system error!", item.id));
+                            }
+                            else
+                            {
+                                var overlapping = a.Bookings.Where(ex => ex.From <= to && from <= ex.To);
+                                if(overlapping.Count() > 0)
+                                {
+                                    return new { Success = false, Error = "Accomodation no longer available", Code = "AvailabilityLost" };
+                                }
+                                else
+                                {
+                                    toBeBooked.Add(a);
+                                }
+                            }
+                        }
+                        // we can make this booking
+                        Booking b = new Booking
+                        {
+                            CreatedOn = BookingGlobals.GetToday(),
+                            EntryInformation = null,
+                            From = from,// request.fromDate,
+                            IsPaid = false,
+                            MemberId = this.GetCurrentMember().Id,
+                            Notes = null,
+                            Reference = newBookingReference(),
+                            To = to, //request.toDate,
+                            TotalCost = request.choice.totalCost,
+                            Under18sInParty = request.under18spresent
+                        };
+                        foreach(var a in toBeBooked)
+                        {
+                            b.AccomodationCollection.Add(a);
+                        }
+                        ctx.Bookings.Add(b);
+                        await ctx.SaveChangesAsync();
+                        tran.Complete();
+                        //
+                        reference = b.Reference;
 
+                    }
+
+                }
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
+                    return new { Success = false, Error = xe.Message, Code = "SystemError" };
+                }
+            }
+            return new
+            {
+                Success = true,
+                Error = string.Empty,
+                BookingReference = reference,
+                MemberEmailAddress = this.GetCurrentMember().EmailAddress,
+                BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress()
+            };
+        }
+        private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
+        {
+            bookingChoice result = null;
+            var choiceSet = choice.Accomodation.SelectMany(x => x.SelfAndDescendants).Where(x => x.Type == AccomodationType.Bed).Select(x => x.AccomodationId);
+            foreach (var existing in list)
+            {
+                var existingSet = existing.accomodationItems.Select(x => x.id);
+                if (choiceSet.Except(existingSet).Count() == 0)
+                {
+                    result = existing;
+                    break;
+                }
+            }
+            return result;
+        }
         private IEnumerable<DailyChoices> CreateChoices(int peopleCount, List<DayInformation> dayList)
         {
             List<BookingChoice> choices = new List<BookingChoice>();

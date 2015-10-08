@@ -40,6 +40,7 @@ var fastnet;
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
                 ajax.Get({ url: parametersUrl }, false).then(function (r) {
+                    booking.factory.setFactory(r.factoryName);
                     _this.parameters = booking.factory.getParameters(r);
                     //this.bookingParameters = <server.bookingParameters>r;
                     //factory.setFactory(this.bookingParameters.factoryName);// .FactoryName);
@@ -159,6 +160,7 @@ var fastnet;
                 debug.print("parametersApp started");
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then(function (r) {
+                    booking.factory.setFactory(r.factoryName);
                     var model = booking.factory.getParameters(r);
                     //model.setFromJSON(r);
                     var vm = model.getObservable();
@@ -310,3 +312,4 @@ var fastnet;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=bookingAdmin.js.map
