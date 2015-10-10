@@ -33,9 +33,18 @@
                 }
             }
         }
-
-        export module admin {
-
+        export class dwhBookingModel extends bookingModel implements server.dwhBooking {
+            bmcMembership: string;
+            organisation: string;
+        }
+        export class observableDwhBookingModel extends observableBookingModel {
+            bmcMembership: string;
+            organisation: string;
+            constructor(dwhb: dwhBookingModel) {
+                super(dwhb);
+                this.bmcMembership = dwhb.bmcMembership;
+                this.organisation = dwhb.organisation;
+            }
         }
     }
 }

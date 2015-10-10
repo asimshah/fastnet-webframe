@@ -22,6 +22,12 @@ var fastnet;
     })();
     var booking;
     (function (booking_1) {
+        var bookingModel = (function () {
+            function bookingModel() {
+            }
+            return bookingModel;
+        })();
+        booking_1.bookingModel = bookingModel;
         var bookingReportType;
         (function (bookingReportType) {
             bookingReportType[bookingReportType["normal"] = 0] = "normal";
@@ -309,6 +315,7 @@ var fastnet;
                                         debug.print("cmd: {0}, id {1}, reference: {2}", cmd, id, booking.reference);
                                         switch (cmd) {
                                             case "mark-paid":
+                                                _this.showSetPaidForm(booking);
                                                 break;
                                             case "mark-not-paid":
                                                 break;
@@ -338,11 +345,13 @@ var fastnet;
                 if (makeUnpaid === void 0) { makeUnpaid = false; }
                 var setPaidFormTemplate = "booking/setpaidform";
                 wt.getTemplate({ ctx: this, templateUrl: setPaidFormTemplate }).then(function (r) {
+                    var bm = booking_1.factory.getObservableBookingModel(booking);
                     var spf = new forms.form(_this, {
+                        initialWidth: 600,
                         modal: true,
-                        title: "",
+                        title: str.format("Booking: {0}", booking.reference),
                         okButtonText: "Set Paid"
-                    }, null);
+                    }, bm);
                     spf.setContentHtml(r.template);
                     spf.open(function (ctx, f, cmd, data) {
                     });
@@ -450,3 +459,4 @@ var fastnet;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=bookingAdmin.js.map

@@ -60,8 +60,6 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Areas/booking/Scripts/factory.js",
                 "~/Areas/booking/Scripts/bookingViewModels.js",
                 "~/Areas/booking/Scripts/booking.js"
-                //"~/Areas/booking/scripts/requestCustomiser.js"
-                 //"~/Areas/booking/scripts/dwh/dwhRequestCustomiser.js"
                 ));
             bundles.Add(new ScriptBundle("~/bundles/booking/admin").Include(
                 "~/Scripts/datatables/jquery.dataTables.js",
@@ -71,7 +69,6 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Scripts/accounting.js",
                 "~/Areas/booking/Scripts/bookingCommon.js",
                 "~/Areas/booking/Scripts/factory.js",
-                //"~/Areas/booking/Scripts/bookingViewModels.js",
                 "~/Areas/booking/Scripts/adminViewModels.js",
                 "~/Areas/booking/Scripts/bookingAdmin.js"
                 

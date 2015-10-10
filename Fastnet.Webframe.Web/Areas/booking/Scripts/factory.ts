@@ -36,15 +36,16 @@
                         return new requestCustomiser();
                 }
             }
-            //public static getTest(): testBase {
-            //    switch (factory.name) {
-            //        case FactoryName.DonWhillansHut:
-            //            return new dwhTest();
-            //            break;
-            //        default:
-            //            return null;// new requestCustomiser();
-            //    }
-            //}
+            public static getObservableBookingModel(b: bookingModel | dwhBookingModel): observableBookingModel {
+                switch (factory.name) {
+                    case FactoryName.DonWhillansHut:
+                        var dwhbm = <dwhBookingModel>b;
+                        return new observableDwhBookingModel(dwhbm);
+                        break;
+                    default:
+                        return new observableBookingModel(b);
+                }
+            }
         }
 
     }

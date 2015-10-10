@@ -40,6 +40,16 @@ var fastnet;
                         return new booking.requestCustomiser();
                 }
             };
+            factory.getObservableBookingModel = function (b) {
+                switch (factory.name) {
+                    case FactoryName.DonWhillansHut:
+                        var dwhbm = b;
+                        return new booking.observableDwhBookingModel(dwhbm);
+                        break;
+                    default:
+                        return new booking.observableBookingModel(b);
+                }
+            };
             factory.name = FactoryName.None;
             return factory;
         })();

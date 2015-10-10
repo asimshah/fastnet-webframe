@@ -373,6 +373,7 @@
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\request-step2.html" />
     <Content Include="Areas\booking\Templates\request-step3.html" />
+    <Content Include="Areas\booking\Templates\setPaidForm.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
     <Content Include="Areas\cms\Content\images\bannerpage.png" />
@@ -1652,6 +1653,9 @@
     <TypeScriptCompile Include="Areas\booking\Common\dayInformation.cs.d.ts">
       <DependentUpon>dayInformation.cs</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\Customisation\DWH\dwhBooking.cs.d.ts">
+      <DependentUpon>dwhBooking.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs.d.ts">
       <DependentUpon>dwhBookingParameters.cs</DependentUpon>
     </TypeScriptCompile>
@@ -1660,11 +1664,10 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwkBookingModels.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhBookingModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhRequestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\factory.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\requestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\tests.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\testViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\utilities.ts" />

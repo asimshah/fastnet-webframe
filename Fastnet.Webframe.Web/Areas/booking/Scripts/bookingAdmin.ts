@@ -15,6 +15,26 @@ module fastnet {
         }
     }
     export module booking {
+        export class bookingModel implements server.booking {
+            bookingId: number;
+            reference: string;
+            status: string;
+            memberId: string;
+            memberName: string;
+            memberEmailAddress: string;
+            memberPhoneNumber: string;
+            from: string;
+            to: string;
+            createdOn: string;
+            totalCost: number;
+            formattedCost: string;
+            isPaid: boolean;
+            notes: string;
+            entryInformation: string;
+            under18sInParty: boolean;
+            numberOfNights: number;
+            hasMultipleDays: boolean;
+        }
         enum bookingReportType {
             normal,
             unpaid,
@@ -262,7 +282,7 @@ module fastnet {
                     }, null);
                     wt.getTemplate({ ctx: this, templateUrl: reportTemplate }).then((dt) => {
                         var template = dt.template;
-                        ajax.Get({ url: dataurl }, false).then((bookingList: server.booking[]) => {
+                        ajax.Get({ url: dataurl }, false).then((bookingList: bookingModel[]) => {
                             var html = Mustache.render(template, { heading: heading, data: bookingList });
                             oform.setContentHtml(html);
                             oform.open((ctx: any, f: forms.form, cmd: string, data: any, ct: EventTarget) => {
@@ -287,6 +307,7 @@ module fastnet {
                                         debug.print("cmd: {0}, id {1}, reference: {2}", cmd, id, booking.reference);
                                         switch (cmd) {
                                             case "mark-paid":
+                                                this.showSetPaidForm(booking);
                                                 break;
                                             case "mark-not-paid":
                                                 break;
@@ -307,19 +328,21 @@ module fastnet {
                 });
 
             }
-            private findBooking(list: server.booking[], id: number): server.booking {
+            private findBooking(list: bookingModel[], id: number): bookingModel {
                 return list.filter((item) => {
                     return item.bookingId === id;
                 })[0];
             }
-            private showSetPaidForm(booking: server.booking, makeUnpaid = false): void {
+            private showSetPaidForm(booking: bookingModel, makeUnpaid = false): void {
                 var setPaidFormTemplate = "booking/setpaidform";
                 wt.getTemplate({ ctx: this, templateUrl: setPaidFormTemplate }).then((r) => {
+                    var bm = factory.getObservableBookingModel(booking);
                     var spf = new forms.form(this, {
+                        initialWidth: 600,
                         modal: true,
-                        title: "",
+                        title: str.format("Booking: {0}", booking.reference),
                         okButtonText: "Set Paid"
-                    }, null);
+                    }, bm);
                     spf.setContentHtml(r.template);
                     spf.open((ctx: any, f: forms.form, cmd: string, data: any) => {
                     });
