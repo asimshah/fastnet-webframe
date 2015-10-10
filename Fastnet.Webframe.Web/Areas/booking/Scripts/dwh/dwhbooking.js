@@ -7,13 +7,6 @@ var fastnet;
 (function (fastnet) {
     var booking;
     (function (booking) {
-        //export class dwhBookingParameters extends bookingParameters implements server.dwhBookingParameters {
-        //export class dwhBookingParameters extends parameters {
-        //    public shortBookingInterval: number;
-        //    public constructor() {
-        //        super();
-        //    }
-        //}
         var h$ = fastnet.util.helper;
         var dwhParameters = (function (_super) {
             __extends(dwhParameters, _super);
@@ -57,4 +50,3 @@ var fastnet;
         booking.observableDwhParameters = observableDwhParameters;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=dwhbooking.js.map

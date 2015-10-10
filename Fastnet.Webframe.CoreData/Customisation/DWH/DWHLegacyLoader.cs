@@ -708,11 +708,12 @@ namespace Fastnet.Webframe.CoreData
                 {
                     DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
                     Debug.Assert(member != null);
-                    Debug.Print("Loading {0}", lBooking.Reference);
+                    //Debug.Print("Loading {0}", lBooking.Reference);
                     //if (lBooking.Reference == "Apr15/004")
                     //{
                     //    Debugger.Break();
                     //}
+                    DateTime to = lBooking.ReleasedItems.Max(x => x.Date);
                     BookingData.Booking b = new BookingData.Booking
                     {
                         CreatedOn = lBooking.BookingDate,
@@ -722,7 +723,8 @@ namespace Fastnet.Webframe.CoreData
                         MemberId = member.Id,
                         Notes = lBooking.Notes,
                         Reference = lBooking.Reference,
-                        To = lBooking.To,
+                        Status = (BookingData.BookingStatus)(int)lBooking.Status,
+                        To = to,// lBooking.To,
                         TotalCost = lBooking.TotalCost,
                         Under18sInParty = lBooking.Under18sInParty
                     };

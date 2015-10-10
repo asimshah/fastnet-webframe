@@ -7,19 +7,11 @@ var fastnet;
 (function (fastnet) {
     var booking;
     (function (booking) {
-        //export class dwhTest extends testBase {
-        //    public method1(): void {
-        //        debugger;
-        //    }
-        //}
         var dwhRequestCustomiser = (function (_super) {
             __extends(dwhRequestCustomiser, _super);
             function dwhRequestCustomiser() {
                 _super.apply(this, arguments);
             }
-            //constructor() {
-            //    super();
-            //}
             dwhRequestCustomiser.prototype.customise_Step1 = function (stepObservable) {
                 stepObservable.startDate.subscribe(function (sd) {
                     var sdm = stepObservable.toMoment(sd);
@@ -37,4 +29,3 @@ var fastnet;
         booking.dwhRequestCustomiser = dwhRequestCustomiser;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=dwhRequestCustomiser.js.map

@@ -1,5 +1,6 @@
 ﻿using Fastnet.Web.Common;
 using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.CoreData;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,20 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     return new DWHMemberInfo();
             }
             throw new ApplicationException("Unable to create a MemberInfo instance");
+        }
+        public static booking GetBooking(CoreDataContext ctx, Booking booking)
+        {
+            booking b = null;
+            switch (FactoryName)
+            {
+                case FactoryName.DonWhillansHut:
+                    b = new dwhBooking(ctx, booking);
+                    break;
+                default:
+                    b = new booking(ctx, booking);
+                    break;
+            }
+            return b;
         }
         public static bookingParameters GetBookingParameters()
         {

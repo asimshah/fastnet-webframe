@@ -4,15 +4,7 @@
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
         import debug = fastnet.util.debug;
-        //export class dwhTest extends testBase {
-        //    public method1(): void {
-        //        debugger;
-        //    }
-        //}
         export class dwhRequestCustomiser extends requestCustomiser {
-            //constructor() {
-            //    super();
-            //}
             public customise_Step1(stepObservable: observableRequest_step1): void {
                 stepObservable.startDate.subscribe((sd) => {
                     var sdm = stepObservable.toMoment(sd);

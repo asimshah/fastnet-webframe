@@ -322,7 +322,7 @@ var fastnet;
                             var cmd = $(e.currentTarget).attr("data-cmd");
                             e.stopPropagation();
                             e.preventDefault();
-                            _this.onCommand(cmd);
+                            _this.onCommand(cmd, null);
                         },
                         "class": ""
                     };
@@ -407,7 +407,7 @@ var fastnet;
                     var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
-                    _this.onCommand(cmd);
+                    _this.onCommand(cmd, null);
                 });
                 var formHtml = this.prepareFormRoot();
                 formTemplate.find(".ui-form-content").append(formHtml);
@@ -431,7 +431,7 @@ var fastnet;
                 if (closedUsingSystemButton) {
                     this.unbindKnockout();
                     var cmd = "system-close";
-                    this.onCommand(cmd);
+                    this.onCommand(cmd, null);
                 }
             };
             // ui_dialog must be the ".ui-dialog" tagged element of a jQuery-ui dialog widget
@@ -503,7 +503,7 @@ var fastnet;
                     }
                 }
             };
-            form.prototype.onCommand = function (cmd) {
+            form.prototype.onCommand = function (cmd, ct) {
                 if (this.commandCallback === null) {
                     var msg = str.format("No OnCommand handler:\n form id: {0}, title: {1}, command: {2}", this.formId, this.options.title, cmd);
                     alert(msg);
@@ -515,7 +515,7 @@ var fastnet;
                         data.current = ko.toJS(this.observableModel);
                         data.original = this.unwrappedOriginal;
                     }
-                    this.commandCallback(this.ctx, this, cmd, data);
+                    this.commandCallback(this.ctx, this, cmd, data, ct);
                 }
             };
             form.prototype.attachDatePickers = function () {
@@ -536,7 +536,7 @@ var fastnet;
                     var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
-                    _this.onCommand(cmd);
+                    _this.onCommand(cmd, e.currentTarget);
                 });
             };
             form.prototype.updateElementAttributes = function () {
@@ -596,4 +596,3 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=forms.js.map

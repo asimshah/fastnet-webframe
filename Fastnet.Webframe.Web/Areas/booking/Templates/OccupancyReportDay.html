@@ -1,6 +1,14 @@
 ﻿{{#data}}
 <div class="row">
     <div class="day-row">
+        <div class="col-xs-12">
+            <span class="fa fa-circle  {{statusName}}-day status-icon"></span>
+            <span class="day-date">{{formattedDay}}</span>
+            <span class="status-description">{{statusDescription}}</span>
+        </div>
+
+    </div>
+    <!--<div class="day-row">
         <div class="col-xs-1">
             <span class="fa fa-circle  {{statusName}}-day status-icon"></span>
         </div>
@@ -10,7 +18,7 @@
         <div class="col-xs-7">
             <div class="status-description">{{statusDescription}}</div>
         </div>
-    </div>
+    </div>-->
 </div>
 
 <div class="day-details {{statusName}}">

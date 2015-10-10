@@ -1,0 +1,36 @@
+﻿<div class="booking-report admin-reports">
+    <table  id="booking-report-table" class="table table-bordered table-striped dt-responsive" style="width:100%">
+        <thead>
+            <tr>
+                <th><div class="reference">Reference</div></th>
+                <th><div class="dates">Date</div></th>
+                <th><div class="nights">Nights</div></th>
+                <th><div class="status">Status</div></th>
+                <th><div class="member-name">Name</div></th>
+                <th><div class="member-email">Email Address</div></th>
+                <th><div class="member-phone">Phone</div></th>
+                <th><div class="member-bmc">BMC</div></th>
+                <th><div class="total-cost">Cost</div></th>
+                <th><div class="is-paid">Paid</div></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#data}}
+            <tr>
+                <td><button class="btn btn-xs btn-link edit-button" data-cmd="edit-booking" data-booking-id="{{bookingId}}">{{reference}}</button></td>
+                <td>{{from}}</td>
+                <td>{{numberOfNights}}</td>
+                <td><span class="status-{{status}}">{{status}}</span></td>
+                <td>{{memberName}}</td>
+                <td><a href="mailto://{{memberEmailAddress}}?Subject=Booking Reference {{reference}}">{{memberEmailAddress}}</a></td>
+                <td>{{memberPhoneNumber}}</td>
+                <td>{{bmcMembership}}</td>
+                <td>{{formattedCost}}</td>
+                <td>{{#isPaid}}<span class="fa fa-check"></span>{{/isPaid}}</td>
+                <td>{{^isPaid}}<button class="btn btn-xs btn-primary" data-cmd="mark-paid" data-booking-id="{{bookingId}}">Mark as Paid</button>{{/isPaid}}{{#isPaid}}<button class="btn btn-xs btn-info" data-cmd="mark-not-paid" data-booking-id="{{bookingId}}">Mark as not Paid</button>{{/isPaid}}</td>
+            </tr>
+            {{/data}}
+        </tbody>
+    </table>
+</div>

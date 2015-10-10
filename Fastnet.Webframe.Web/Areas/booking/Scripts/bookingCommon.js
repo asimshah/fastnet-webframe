@@ -48,4 +48,3 @@ var fastnet;
         booking.requestCustomiser = requestCustomiser;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingCommon.js.map

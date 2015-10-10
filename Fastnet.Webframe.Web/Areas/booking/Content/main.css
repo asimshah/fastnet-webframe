@@ -175,53 +175,6 @@ button.side-button {
   margin-top: 2.35em;
   font-size: 0.75em;
 }
-.booking-reports .ui-chrome-titlebar,
-.booking-reports .ui-form-titlebar {
-  background-image: none;
-  border-left: none !important;
-  border-right: none !important;
-  border-top: none !important;
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  background-color: #373737;
-}
-.booking-reports .ui-chrome-title,
-.booking-reports .ui-form-title {
-  color: #ffffff;
-}
-.booking-reports .ui-chrome-systemclose {
-  color: #ee1111;
-}
-.booking-reports .ui-chrome-systemclose:hover,
-.booking-reports .ui-chrome-systemclose:focus,
-.booking-reports .ui-chrome-systemclose:active {
-  background-color: transparent !important;
-  color: #ffffff !important;
-}
-.booking-reports .ui-form-buttonpane {
-  border-top: 2px solid #373737;
-}
-.booking-reports .ui-form-button {
-  background-image: none !important;
-  background-color: #2d89ef !important;
-  color: #ffffff !important;
-  border: 1px solid #0d57a9 !important;
-  min-width: 80px !important;
-  font-size: 0.8em !important;
-  outline: none !important;
-}
-.booking-reports .ui-form-button:hover {
-  background-color: #a3ccf8 !important;
-  color: #ffffff !important;
-}
-.booking-reports .ui-form-button[disabled],
-.booking-reports .ui-form-button[disabled]:hover,
-.booking-reports .ui-form-button[disabled]:focus,
-.booking-reports .ui-form-button[disabled]:active {
-  background-color: #cecece !important;
-  cursor: not-allowed !important;
-  color: #ffffff !important;
-}
 .booking-confirmation {
   margin-left: 5px;
   margin-right: 5px;
@@ -526,6 +479,57 @@ button.side-button {
   font-size: 12px;
   padding-top: 0;
 }
+.report-forms .ui-chrome-titlebar,
+.report-forms .ui-form-titlebar {
+  background-image: none;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  background-color: #373737;
+}
+.report-forms .ui-chrome-title,
+.report-forms .ui-form-title {
+  color: #ffffff;
+}
+.report-forms .ui-chrome-systemclose {
+  color: #ee1111;
+}
+.report-forms .ui-chrome-systemclose:hover,
+.report-forms .ui-chrome-systemclose:focus,
+.report-forms .ui-chrome-systemclose:active {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+.report-forms .ui-form-buttonpane {
+  border-top: 2px solid #373737;
+}
+.report-forms .ui-form-button {
+  background-image: none !important;
+  background-color: #2d89ef !important;
+  color: #ffffff !important;
+  border: 1px solid #0d57a9 !important;
+  min-width: 80px !important;
+  font-size: 0.8em !important;
+  outline: none !important;
+}
+.report-forms .ui-form-button:hover {
+  background-color: #a3ccf8 !important;
+  color: #ffffff !important;
+}
+.report-forms .ui-form-button[disabled],
+.report-forms .ui-form-button[disabled]:hover,
+.report-forms .ui-form-button[disabled]:focus,
+.report-forms .ui-form-button[disabled]:active {
+  background-color: #cecece !important;
+  cursor: not-allowed !important;
+  color: #ffffff !important;
+}
+.admin-reports {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
 .admin-reports label {
   font-size: x-small;
   color: #2d89ef;
@@ -542,6 +546,76 @@ button.side-button {
 }
 .admin-reports .ui-widget.ui-datepicker th {
   font-weight: normal;
+}
+.admin-reports .dataTables_wrapper .dataTables_length select {
+  height: 24px;
+  padding: 3px;
+  border: 1px solid #00a300;
+  border-radius: 3px;
+}
+.admin-reports .dataTables_wrapper .dataTables_filter input {
+  height: 24px;
+  border: 1px solid #00a300;
+  border-radius: 3px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.admin-reports .dataTables_wrapper .dataTables_paginate .paginate_button {
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  padding: 3px 6px;
+  font-size: 12px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #fff !important;
+  background-image: none;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.admin-reports .dataTables_wrapper .dataTables_paginate .paginate_button:focus,
+.admin-reports .dataTables_wrapper .dataTables_paginate .paginate_button:active,
+.admin-reports .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background-image: none;
+  outline: 0;
+}
+.admin-reports .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background-color: #286090;
+  border-color: #204d74;
+}
+.admin-reports.booking-report {
+  font-size: 0.8em;
+  /*.report-title {
+            margin: 4px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }*/
+}
+.admin-reports.booking-report table {
+  width: 100%;
+}
+.admin-reports.booking-report .status-Confirmed {
+  color: #1e7145;
+}
+.admin-reports.booking-report .status-Provisional {
+  color: #ee1111;
+}
+.admin-reports.booking-report .status-Cancelled {
+  color: #333333;
+}
+.admin-reports.booking-report button.edit-button {
+  font-size: 1.0em;
 }
 .admin-reports.occupancy-report .ui-datepicker-calendar {
   display: none;
@@ -560,13 +634,18 @@ button.side-button {
   margin-top: 4px;
   font-size: small;
 }
+.admin-reports.occupancy-report .report-content .day-row .day-date {
+  display: inline-block;
+  width: 10%;
+}
 .admin-reports.occupancy-report .report-content .day-row .status-description {
   font-style: italic;
 }
 .admin-reports.occupancy-report .report-content .day-details.IsPartBooked,
 .admin-reports.occupancy-report .report-content .day-details.IsFull {
-  border: 0.01em solid #808080;
-  border-radius: 3px;
+  margin-left: 24px;
+  /*border: 0.01em solid #808080;
+                border-radius: 3px;*/
   padding: 4px;
 }
 .admin-reports.occupancy-report .report-content .IsFree-day {

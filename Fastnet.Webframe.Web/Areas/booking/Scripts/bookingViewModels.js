@@ -10,10 +10,6 @@ var fastnet;
         var forms = fastnet.forms;
         var str = fastnet.util.str;
         var h$ = fastnet.util.helper;
-        //export interface IGroup {
-        //    Id: number;
-        //    Name: string;
-        //}
         var login;
         (function (login) {
             var loginModels = (function (_super) {
@@ -253,4 +249,3 @@ var fastnet;
         booking.observableRequest_step3 = observableRequest_step3;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingViewModels.js.map

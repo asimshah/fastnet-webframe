@@ -3,6 +3,9 @@
     ViewBag.Title = "Booking Admin";
     ViewBag.AppName = BookingGlobals.GetAbodeName() + " Booking System";
 }
+@section styles {
+    @Styles.Render("~/Content/booking/admin/css")
+}
 <div class="row">
     <div class="col-xs-12">
         <div class="admin-interaction"></div>

@@ -172,7 +172,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     lines.Add(string.Format("{0} {1}{2} for {3}", count, typeItem.type, count > 1 ? "s" : "", itemCapacity));
                 }
             }
-            bc.description = string.Join(", ", lines);
+            bc.description = string.Join(" plus ", lines);
             return bc;
         }
     }

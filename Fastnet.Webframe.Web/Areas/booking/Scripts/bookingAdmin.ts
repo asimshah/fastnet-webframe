@@ -1,4 +1,5 @@
 ﻿/// <reference path="../../../scripts/typings/mustache/mustache.d.ts" />
+/// <reference path="../../../scripts/typings/jquery.datatables/jquery.datatables.d.ts" />
 
 module fastnet {
     import ajax = fastnet.util.ajax;
@@ -14,7 +15,14 @@ module fastnet {
         }
     }
     export module booking {
+        enum bookingReportType {
+            normal,
+            unpaid,
+            archived,
+            cancelled
+        }
         export class adminApp {
+
             public parameters: parameters;// server.bookingParameters;// server.BookingParameters;
             public start(): void {
                 this.initialise().then(() => {
@@ -77,8 +85,28 @@ module fastnet {
                                 break;
                             case "view-occupancy":
                                 f.close();
-                                var r = new occupancyReport(this.app);
-                                r.start();
+                                var or = new occupancyReport(this.app);
+                                or.start();
+                                break;
+                            case "view-bookings":
+                                f.close();
+                                var br = new bookingReport(this.app);
+                                br.start();
+                                break;
+                            case "view-unpaid-bookings":
+                                f.close();
+                                var br = new bookingReport(this.app);
+                                br.start(bookingReportType.unpaid);
+                                break;
+                            case "view-cancelled-bookings":
+                                f.close();
+                                var br = new bookingReport(this.app);
+                                br.start(bookingReportType.cancelled);
+                                break;
+                            case "view-archived-bookings":
+                                f.close();
+                                var br = new bookingReport(this.app);
+                                br.start(bookingReportType.archived);
                                 break;
                             default:
                                 forms.messageBox.show("This feature not yet implemented").then(() => { });
@@ -93,7 +121,7 @@ module fastnet {
             constructor(app: adminApp) {
                 super(app);
                 //this.app = app;
-            } 
+            }
             public start(): void {
                 debug.print("configuration index started");
                 var ciForm = new forms.form(this, {
@@ -137,10 +165,10 @@ module fastnet {
             constructor(app: adminApp) {
                 super(app);
                 //this.app = app;
-            } 
+            }
             public start(): void {
                 debug.print("parametersApp started");
-                
+
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then((r: server.bookingParameters) => {
                     factory.setFactory(r.factoryName);
@@ -193,6 +221,111 @@ module fastnet {
                 });
             }
         }
+        class bookingReport extends adminSubapp {
+            constructor(app: adminApp) {
+                super(app);
+            }
+            public start(rt: bookingReportType = bookingReportType.normal): void {
+                $.fn.dataTable.moment('DDMMMYYYY');
+                var reportFormTemplate = "booking/bookingreportform";
+                var reportTemplate = "booking/bookingreport";
+                var dataurl = str.format("bookingadmin/get/bookings/{0}", this.app.parameters.currentAbode.id);
+                var heading = "All Bookings";
+                switch (rt) {
+                    case bookingReportType.normal:
+                    default:
+                        break;
+                    case bookingReportType.unpaid:
+                        heading = "All Unpaid Bookings";
+                        dataurl += "/true";
+                        break;
+                    case bookingReportType.cancelled:
+                        heading = "Cancelled Bookings";
+                        dataurl = str.format("bookingadmin/get/bookings/cancelled/{0}", this.app.parameters.currentAbode.id);
+                        break;
+                    case bookingReportType.archived:
+                        heading = "Archived Bookings";
+                        dataurl = str.format("bookingadmin/get/bookings/history/{0}", this.app.parameters.currentAbode.id);
+                        break;
+                }
+                wt.getTemplate({ ctx: this, templateUrl: reportFormTemplate }).then((r) => {
+                    var formTemplate = r.template;
+                    var oform = new forms.form(this, {
+                        modal: false,
+                        title: heading,
+                        styleClasses: ["report-forms"], //configuration.getFormStyleClasses(),
+                        cancelButtonText: "Administration page",
+                        okButton: null,
+                        additionalButtons: [
+                            { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
+                        ]
+                    }, null);
+                    wt.getTemplate({ ctx: this, templateUrl: reportTemplate }).then((dt) => {
+                        var template = dt.template;
+                        ajax.Get({ url: dataurl }, false).then((bookingList: server.booking[]) => {
+                            var html = Mustache.render(template, { heading: heading, data: bookingList });
+                            oform.setContentHtml(html);
+                            oform.open((ctx: any, f: forms.form, cmd: string, data: any, ct: EventTarget) => {
+                                switch (cmd) {
+                                    default:
+                                        debug.print("cmd: {0} - not implemented", cmd);
+                                        break;
+                                    case "cancel-command":
+                                        f.close();
+                                        var index = new adminIndex(this.app);
+                                        index.start();
+                                        break;
+                                    case "back-to-site":
+                                        f.close();
+                                        location.href = "/home";
+                                        break;
+                                    case "mark-paid":
+                                    case "mark-not-paid":
+                                    case "edit-booking":
+                                        var id = parseInt($(ct).attr("data-booking-id"));
+                                        var booking = this.findBooking(bookingList, id);
+                                        debug.print("cmd: {0}, id {1}, reference: {2}", cmd, id, booking.reference);
+                                        switch (cmd) {
+                                            case "mark-paid":
+                                                break;
+                                            case "mark-not-paid":
+                                                break;
+                                            case "edit-booking":
+                                                break;
+                                        }
+                                        break;
+                                }
+                            }).then(() => {
+                                oform.find("#booking-report-table").DataTable({
+                                    "columnDefs": [{ "type": "natural", targets: 0 }],
+                                    pagingType: "simple",
+                                    order: [[0, 'asc']]
+                                });
+                            });
+                        });
+                    });
+                });
+
+            }
+            private findBooking(list: server.booking[], id: number): server.booking {
+                return list.filter((item) => {
+                    return item.bookingId === id;
+                })[0];
+            }
+            private showSetPaidForm(booking: server.booking, makeUnpaid = false): void {
+                var setPaidFormTemplate = "booking/setpaidform";
+                wt.getTemplate({ ctx: this, templateUrl: setPaidFormTemplate }).then((r) => {
+                    var spf = new forms.form(this, {
+                        modal: true,
+                        title: "",
+                        okButtonText: "Set Paid"
+                    }, null);
+                    spf.setContentHtml(r.template);
+                    spf.open((ctx: any, f: forms.form, cmd: string, data: any) => {
+                    });
+                });
+            }
+        }
         class occupancyReport extends adminSubapp {
             private minimumDate: Date;
             private maximumDate: Date;
@@ -212,7 +345,7 @@ module fastnet {
                     var oform = new forms.form(this, {
                         modal: false,
                         title: "Occupancy Report",
-                        styleClasses: ["booking-reports"], //configuration.getFormStyleClasses(),
+                        styleClasses: ["report-forms"], //configuration.getFormStyleClasses(),
                         cancelButtonText: "Administration page",
                         okButton: null,
                         additionalButtons: [

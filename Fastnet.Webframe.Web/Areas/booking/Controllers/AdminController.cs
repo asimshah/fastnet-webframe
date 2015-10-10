@@ -4,7 +4,9 @@ using Fastnet.Webframe.WebApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
+using System.Data.Entity;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 {
@@ -13,22 +15,50 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
     public class AdminController : BaseApiController
     {
         private CoreDataContext DataContext = Core.GetDataContext();
-        //[HttpGet]
-        //[Route("parameters")]
-        //public adminParameters GetAdminParameters()
-        //{
-        //    var adminParas = Factory.GetAdminParameters();
-        //    adminParas.Load(DataContext);
-        //    return adminParas;
-        //}
         [HttpPost]
         [Route("save/parameters")]
         public void SaveAdminParameters(dynamic data)
         {
             var paras = Factory.GetBookingParameters();
             paras.Save();
-            //var adminParas = Factory.GetAdminParameters(data);
-            //adminParas.Save();
+        }
+        [HttpGet]
+        [Route("get/bookings/{abodeId}/{unpaidOnly?}")]
+        public async Task<IEnumerable<booking>> GetBookings(long abodeId, bool unpaidOnly = false)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var today = BookingGlobals.GetToday();                
+                var bookings = await ctx.Bookings.Where(x => x.Status != BookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
+                    .Where(x => unpaidOnly == false || x.IsPaid == false)
+                    .OrderBy(x => x.Reference).ToArrayAsync();
+                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                return data;
+            }
+        }
+        [HttpGet]
+        [Route("get/bookings/history/{abodeId}/")]
+        public async Task<IEnumerable<booking>> GetHistoricBookings(long abodeId)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var today = BookingGlobals.GetToday();
+                var bookings = await ctx.Bookings.Where(x => x.Status != BookingStatus.Cancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
+                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                return data;
+            }
+        }
+        [HttpGet]
+        [Route("get/bookings/cancelled/{abodeId}/")]
+        public async Task<IEnumerable<booking>> GetCancelledBookings(long abodeId)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var today = BookingGlobals.GetToday();
+                var bookings = await ctx.Bookings.Where(x => x.Status == BookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
+                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                return data;
+            }
         }
         [HttpGet]
         [Route("get/occupancy/{abodeId}/{fromYear}/{fromMonth}/{toYear}/{toMonth}")]

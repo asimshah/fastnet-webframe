@@ -1,12 +1,5 @@
 ﻿module fastnet {
     export module booking {
-        //export class dwhBookingParameters extends bookingParameters implements server.dwhBookingParameters {
-        //export class dwhBookingParameters extends parameters {
-        //    public shortBookingInterval: number;
-        //    public constructor() {
-        //        super();
-        //    }
-        //}
         import h$ = fastnet.util.helper;
         export class dwhParameters extends parameters {
             public noBMCCheckGroup: server.IGroup;

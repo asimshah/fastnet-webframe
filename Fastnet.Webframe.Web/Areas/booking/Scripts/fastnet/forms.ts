@@ -80,7 +80,7 @@ module fastnet {
          * This function will be called whenever a formButton in the form is clicked
          */
         export interface CommandCallback {
-            (ctx: any, f: form, cmd: string, data: models): void;
+            (ctx: any, f: form, cmd: string, data: models, currentTarget: EventTarget): void;
         }
         export interface formButton {
             text: string;
@@ -431,7 +431,7 @@ module fastnet {
                             var cmd = $(e.currentTarget).attr("data-cmd");
                             e.stopPropagation();
                             e.preventDefault();
-                            this.onCommand(cmd);
+                            this.onCommand(cmd, null);
                         },
                         "class": ""
                     };
@@ -514,7 +514,7 @@ module fastnet {
                     var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
-                    this.onCommand(cmd);
+                    this.onCommand(cmd, null);
                 });
                 var formHtml = this.prepareFormRoot();
                 formTemplate.find(".ui-form-content").append(formHtml);
@@ -538,7 +538,7 @@ module fastnet {
                 if (closedUsingSystemButton) {
                     this.unbindKnockout();
                     let cmd: string = "system-close";
-                    this.onCommand(cmd);
+                    this.onCommand(cmd, null);
                 }
             }
             // ui_dialog must be the ".ui-dialog" tagged element of a jQuery-ui dialog widget
@@ -610,7 +610,7 @@ module fastnet {
                     }
                 }
             }
-            private onCommand(cmd: string) {
+            private onCommand(cmd: string, ct: EventTarget) {
                 if (this.commandCallback === null) {
                     var msg = str.format("No OnCommand handler:\n form id: {0}, title: {1}, command: {2}", this.formId, this.options.title, cmd);
                     alert(msg);
@@ -622,7 +622,7 @@ module fastnet {
                         data.original = this.unwrappedOriginal;
                         //data.observable = this.observableModel;
                     }
-                    this.commandCallback(this.ctx, this, cmd, data);
+                    this.commandCallback(this.ctx, this, cmd, data, ct);
                 }
             }
             private attachDatePickers(): void {
@@ -641,7 +641,7 @@ module fastnet {
                     var cmd = $(e.currentTarget).attr("data-cmd");
                     e.stopPropagation();
                     e.preventDefault();
-                    this.onCommand(cmd);
+                    this.onCommand(cmd, e.currentTarget);
                 });
             }
             private updateElementAttributes(): void {

@@ -251,11 +251,13 @@
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
     <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\dwhBooking.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHChoiceFilter.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\availabilityInfo.cs" />
+    <Compile Include="Areas\booking\TransferObjects\booking.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\bookingParameters.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
@@ -356,10 +358,13 @@
     <Content Include="Areas\booking\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\booking\CustomTemplates\DWH\BookingReport.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\request-step1.html" />
     <Content Include="Areas\booking\Templates\adminIndex.html" />
     <Content Include="Areas\booking\Templates\bookingConfirmation.html" />
+    <Content Include="Areas\booking\Templates\BookingReport.html" />
+    <Content Include="Areas\booking\Templates\BookingReportForm.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />
     <Content Include="Areas\booking\Templates\OccupancyReportDay.html" />
@@ -1040,6 +1045,7 @@
     <Content Include="Scripts\datatables\dataTables.scroller.min.js" />
     <Content Include="Scripts\datatables\dataTables.tableTools.js" />
     <Content Include="Scripts\datatables\dataTables.tableTools.min.js" />
+    <Content Include="Scripts\datatables\datetime-moment.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.js" />
     <Content Include="Scripts\datatables\jquery.dataTables.min.js" />
     <Content Include="Scripts\dropzone\basic.css" />
@@ -1654,7 +1660,7 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhbooking.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwkBookingModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhRequestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\factory.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
@@ -1665,6 +1671,9 @@
     <TypeScriptCompile Include="Areas\booking\TransferObjects\availabilityInfo.cs.d.ts">
       <DependentUpon>availabilityInfo.cs</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\booking.cs.d.ts">
+      <DependentUpon>booking.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\BookingParameters.cs.d.ts">
       <DependentUpon>bookingParameters.cs</DependentUpon>
     </TypeScriptCompile>
@@ -1674,6 +1683,7 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\collections\collections.ts" />
     <TypeScriptCompile Include="Scripts\typings\accounting\accounting.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jquery.dataTables\jquery.dataTables.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout.mapping\knockout.mapping.d.ts" />

@@ -145,7 +145,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 {
                     // at least one day is not possible
                     ai.success = false;
-                    ai.explanation = "The hut is full (or closed) during this period";
+                    ai.explanation = "The hut is full (or closed) during this period. Please choose some alternate dates.";
                 }
                 else
                 {
@@ -256,6 +256,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         // we can make this booking
                         Booking b = new Booking
                         {
+                            Status = BookingStatus.Provisional,
                             CreatedOn = BookingGlobals.GetToday(),
                             EntryInformation = null,
                             From = from,// request.fromDate,

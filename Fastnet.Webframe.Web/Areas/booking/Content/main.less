@@ -127,22 +127,22 @@ button.side-button {
     font-size: 0.75em;
 }
 
-.booking-reports {
-    .chrome(@dark-grey, @white, @red);
-    .form-buttons(@blue, @white) !important;
-}
+
 
 .booking-confirmation {
     margin-left: 5px;
     margin-right: 5px;
+
     .paragraph {
         margin-bottom: 8px;
     }
+
     .boiler-plate {
         font-size: 0.8em;
         color: @dark-grey;
     }
 }
+
 .booking-forms {
     .chrome(@blue, @white, @red);
     .form-buttons(@blue, @white) !important;
@@ -215,6 +215,7 @@ button.side-button {
             font-size: smaller;
         }
     }
+
     .booking-form {
         button[data-cmd='show-tc'] {
             font-style: italic;
@@ -223,6 +224,7 @@ button.side-button {
             padding: 0;
         }
     }
+
     .parameters-form {
 
         .inner-panel {
@@ -410,7 +412,15 @@ button.side-button {
 .parameters-form {
 }
 // report stuff
+.report-forms {
+    .chrome(@dark-grey, @white, @red);
+    .form-buttons(@blue, @white) !important;
+}
+
 .admin-reports {
+    margin-top: 8px;
+    margin-bottom: 8px;
+
     label {
         font-size: x-small;
         color: @blue;
@@ -432,6 +442,90 @@ button.side-button {
             th {
                 font-weight: normal;
             }
+        }
+    }
+
+    .dataTables_wrapper {
+        .dataTables_length {
+            select {
+                height: 24px;
+                padding: 3px;
+                border: 1px solid @green;
+                border-radius: 3px;
+            }
+        }
+
+        .dataTables_filter {
+            input {
+                height: 24px;
+                border: 1px solid @green;
+                border-radius: 3px;
+                padding-left: 2px;
+                padding-right: 2px;
+            }
+        }
+
+        .dataTables_paginate {
+            .paginate_button {
+                display: inline-block;
+                margin-bottom: 0;
+                font-weight: normal;
+                text-align: center;
+                vertical-align: middle;
+                -ms-touch-action: manipulation;
+                touch-action: manipulation;
+                cursor: pointer;
+                background-image: none;
+                border: 1px solid transparent;
+                white-space: nowrap;
+                padding: 3px 6px;
+                font-size: 12px;
+                line-height: 1.42857143;
+                border-radius: 4px;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                color: #fff !important;
+                background-image: none;
+                background-color: #337ab7;
+                border-color: #2e6da4;
+
+                &:focus, &:active, &:hover {
+                    background-image: none;
+                    outline: 0;
+                }
+
+                &:hover {
+                    background-color: #286090;
+                    border-color: #204d74;
+                }
+            }
+        }
+    }
+
+    &.booking-report {
+        font-size: 0.8em;
+
+        table {
+            width: 100%;
+        }
+        .status-Confirmed {
+            color: @dark-green;
+        }
+        .status-Provisional {
+            color: @red;
+        }
+        .status-Cancelled {
+            color: @gray-dark;
+        }
+        /*.report-title {
+            margin: 4px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }*/
+        button.edit-button {
+            font-size: 1.0em;
         }
     }
 
@@ -461,21 +555,19 @@ button.side-button {
                 }
 
                 .day-date {
-                    //vertical-align:middle;
-                    //padding-left: 4px;
-                    //border-radius: 2px;
+                    display: inline-block;
+                    width: 10%;
                 }
 
                 .status-description {
                     font-style: italic;
-                    //font-size: smaller;
-                    //vertical-align:bottom;
                 }
             }
 
             .day-details.IsPartBooked, .day-details.IsFull {
-                border: 0.01em solid #808080;
-                border-radius: 3px;
+                margin-left: 24px;
+                /*border: 0.01em solid #808080;
+                border-radius: 3px;*/
                 padding: 4px;
             }
 

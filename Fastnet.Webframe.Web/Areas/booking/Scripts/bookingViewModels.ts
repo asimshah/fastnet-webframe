@@ -4,11 +4,6 @@
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
         import debug = fastnet.util.debug;
-        //export interface IGroup {
-        //    Id: number;
-        //    Name: string;
-        //}
-
         export module login {
             export class loginModels extends forms.models {
                 current: credentials;

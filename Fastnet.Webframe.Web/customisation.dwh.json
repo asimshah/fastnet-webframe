@@ -21,7 +21,7 @@
   ],
   "bmc": {
     "api": {
-      "enable": false,
+      "enable": true,
       "apikey": "Tk1MXeExO7ijIW4Pos1BA6RT2lbAsiAKUIMdC4r%2F5oA6UYsLoTedhhHP5klP2ZrF2eqgna9SNgLZAZoliXHlrw%3D%3D",
       "apiurl": "https://webtier-staging.thebmc.co.uk",
       "apiuser": "DWMH"
