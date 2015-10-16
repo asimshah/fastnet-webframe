@@ -71,7 +71,7 @@
     <Compile Include="Accomodation.cs" />
     <Compile Include="Customisation\DWH\DWHParameter.cs" />
     <Compile Include="Factory.cs" />
-    <Compile Include="TransferObjects\calendarSetup.cs" />
+    <Compile Include="Classes with typings\calendarSetup.cs" />
     <Compile Include="Availability.cs" />
     <Compile Include="Booking.cs" />
     <Compile Include="BookingDataContext.cs" />
@@ -91,7 +91,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="TransferObjects\calendarSetup.cs.d.ts">
+    <TypeScriptCompile Include="Classes with typings\calendarSetup.cs.d.ts">
       <DependentUpon>calendarSetup.cs</DependentUpon>
     </TypeScriptCompile>
   </ItemGroup>
