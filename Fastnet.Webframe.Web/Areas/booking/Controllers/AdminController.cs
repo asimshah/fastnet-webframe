@@ -7,6 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Data.Entity;
+using System.Diagnostics;
+using System.Transactions;
+using Fastnet.Common;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 {
@@ -83,6 +86,56 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     dayList.Add(di);
                 }
                 return dayList.Select(x => x.ToClientType(true, true, DataContext)).ToArray();
+            }
+        }
+        [HttpPost]
+        [Route("update/booking/{id}/paidstate/{paid}")]
+        public void UpdateBooking(long id, bool paid)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var m = this.GetCurrentMember();
+                var name = m.Fullname;
+                var booking = ctx.Bookings.Find(id);
+                var today = BookingGlobals.GetToday();
+
+                if(booking != null)
+                {
+                    booking.IsPaid = paid;
+                    booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
+                }
+                ctx.SaveChanges();
+            }
+        }
+        [HttpPost]
+        [Route("update/booking")]
+        public void UpdateBooking(dynamic data)
+        {
+            long id = data.bookingId;
+            string number = data.memberPhoneNumber;
+            string notes = data.notes;
+            using (var tran = new TransactionScope())
+            {
+                using (var ctx = new BookingDataContext())
+                {
+                    var booking = ctx.Bookings.Find(id);
+                    if (booking != null)
+                    {
+                        var mf = MemberFactory.GetInstance();
+                        MemberBase m = mf.Find(DataContext, booking.MemberId);
+                        if (m.PhoneNumber != number)
+                        {
+                            m.PhoneNumber = number;
+                        }
+                        if (booking.Notes != notes)
+                        {
+                            booking.Notes = notes;
+                        }
+                        ctx.SaveChanges();
+                        DataContext.SaveChanges();
+                        tran.Complete();
+                    }
+                } 
             }
         }
     }

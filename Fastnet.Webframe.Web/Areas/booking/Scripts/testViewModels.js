@@ -73,3 +73,4 @@ var fastnet;
         test.observableTestModel = observableTestModel;
     })(test = fastnet.test || (fastnet.test = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=testViewModels.js.map

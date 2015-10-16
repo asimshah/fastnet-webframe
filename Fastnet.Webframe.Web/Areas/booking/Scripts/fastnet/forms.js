@@ -53,18 +53,13 @@ var fastnet;
             return model;
         })();
         forms.model = model;
-        var models = (function () {
-            function models() {
-            }
-            return models;
-        })();
-        forms.models = models;
         /**
          * base class for a data class to be used with a form
          * current version uses knockout
          */
         var viewModel = (function () {
             function viewModel() {
+                this.__$formId = null;
                 this.message = ko.observable("");
                 this.okEnabled = ko.observable(true);
                 this.cancelEnabled = ko.observable(true);
@@ -79,13 +74,21 @@ var fastnet;
             return viewModel;
         })();
         forms.viewModel = viewModel;
+        var models = (function () {
+            function models() {
+            }
+            return models;
+        })();
+        forms.models = models;
         /**
          * creates a new form
          */
         var form = (function () {
             function form(ctx, opts, model, contentHtml) {
                 var _this = this;
+                this.editors = null;
                 this.contentHtml = null;
+                //private model: model = null;
                 this.model = null;
                 this.knockoutIsBound = false;
                 // ctx will be passed through to the CommandCallback
@@ -115,6 +118,9 @@ var fastnet;
                     debug.print("form options are invalid");
                 }
                 this.formId = "ff-" + form.formCount++;
+                if (this.model != null) {
+                    this.model.__$formId = this.formId;
+                }
                 if (this.options.okButton !== null && !h$.isNullOrUndefined(this.options.okButtonText)) {
                     this.options.okButton.text = this.options.okButtonText;
                 }
@@ -154,7 +160,8 @@ var fastnet;
             };
             form.initialise = function (config) {
                 var defaultConfig = {
-                    modelessContainer: "forms-container"
+                    modelessContainer: "forms-container",
+                    enableRichText: false
                 };
                 form.config = $.extend(defaultConfig, (config || {}));
                 if (!form.systemInitialised) {
@@ -163,13 +170,8 @@ var fastnet;
                         errorsAsTitle: false,
                         insertMessages: false,
                         decorateElement: true,
-                        errorElementClass: 'validation-error', };
-                    //ko.validation.init({
-                    //    errorsAsTitle: false,
-                    //    insertMessages: false,
-                    //    decorateElement: true,
-                    //    errorElementClass: 'validation-error',
-                    //});
+                        errorElementClass: 'validation-error',
+                    };
                     ko.validation.init(initOptions);
                     var rules = validations.GetValidators();
                     this.addValidations(rules);
@@ -177,9 +179,76 @@ var fastnet;
                         this.addValidations(form.config.additionalValidations);
                     }
                     ko.validation.registerExtenders();
-                    debug.print("ko.validation initialised");
+                    //debug.print("ko.validation initialised");
+                    form.addRichTextBinding(form.config.enableRichText);
                     form.systemInitialised = true;
                 }
+            };
+            form.addRichTextBinding = function (enable) {
+                function getPropertyName(element) {
+                    var bindString = $(element).attr("data-bind");
+                    var propertyName = null;
+                    var bindings = bindString.split(",");
+                    $.each(bindings, function (i, b) {
+                        bindings[i] = b.trim();
+                        var tuple = b.split(":");
+                        var key = tuple[0].trim();
+                        if (key === "richtext") {
+                            propertyName = tuple[1].trim();
+                        }
+                    });
+                    return propertyName;
+                }
+                ko.bindingHandlers["richtext"] = {
+                    init: function (element, valueAccessor, allBindingsAccessor, viewModel, arg1) {
+                        if (!enable) {
+                            var msg = str.format("forms: richtext needs to be enabled first (and tinymce needs to be included!)");
+                            alert(msg);
+                        }
+                        else {
+                            var propertyName = getPropertyName(element);
+                            $(element).attr("data-property", propertyName);
+                            var html = ko.unwrap(valueAccessor());
+                            $(element).val(html);
+                            debug.print("richtext init()");
+                        }
+                        //tinymce.init({
+                        //    inline: true,
+                        //    toolbar_items_size: 'small',
+                        //    toolbar: ["undo redo | cut copy paste | styleselect | fontselect fontsizeselect ",
+                        //        "bold italic forecolor backcolor | bullist numlist | alignleft aligncenter alignright outdent indent "],
+                        //    setup: function (editor) {
+                        //        debug.print("tinymce editor setup()");
+                        //    }
+                        //});
+                    },
+                    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                        if (enable) {
+                            debug.print("richtext update()");
+                            var editor = $(element).tinymce({
+                                menubar: false,
+                                statusbar: false,
+                                content_css: form.config.richTextCssUrl,
+                                //inline: true,
+                                //toolbar_items_size: 'small',
+                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist",
+                                setup: function (editor) {
+                                    var vm = viewModel;
+                                    //var html = valueAccessor();
+                                    //editor.setContent(html());
+                                    var f = form.getForm(vm.__$formId);
+                                    f.registorEditor($(element).attr("data-property"), editor);
+                                    editor.on('change', function (e) {
+                                        var ctx = bindingContext;
+                                        var propertyName = $(e.target.targetElm).attr("data-property");
+                                        var f = form.getForm(vm.__$formId);
+                                        f.notifyChange(propertyName);
+                                    });
+                                }
+                            });
+                        }
+                    }
+                };
             };
             form.addMomentBinding = function () {
                 ko.bindingHandlers["stdDateFormat"] = {
@@ -208,6 +277,16 @@ var fastnet;
                     cf.block();
                 }
             };
+            form.getForm = function (formId) {
+                var result = null;
+                this.formStack.forEach(function (f) {
+                    if (f.formId == formId) {
+                        result = f;
+                        return false;
+                    }
+                });
+                return result;
+            };
             form.decrementAsyncValidatorCount = function () {
                 form.asyncValCounter--;
                 var cf = form.formStack.peek();
@@ -228,10 +307,11 @@ var fastnet;
                     $("#" + this.formId).off().closest(".ui-form").remove();
                 }
             };
-            form.prototype.open = function (onCommand) {
+            form.prototype.open = function (onCommand, onChange) {
                 var deferred = $.Deferred();
                 form.formStack.push(this);
                 this.commandCallback = onCommand;
+                this.changeCallback = onChange;
                 if (this.options.modal) {
                     this.openModal();
                 }
@@ -271,6 +351,18 @@ var fastnet;
                     this.observableModel().message(text);
                 }
                 //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
+            };
+            form.prototype.registorEditor = function (propertyName, editor) {
+                if (this.editors == null) {
+                    this.editors = new collections.Dictionary();
+                }
+                this.editors.setValue(propertyName, editor);
+            };
+            form.prototype.notifyChange = function (propertyName) {
+                debug.print("property {0}: value changed", propertyName);
+                if (this.changeCallback != null) {
+                    this.changeCallback(this, propertyName);
+                }
             };
             form.prototype.getBlockRoot = function () {
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent(); //.parent();
@@ -346,6 +438,7 @@ var fastnet;
                 return $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
             };
             form.prototype.finalise = function () {
+                var _this = this;
                 this.rootElement = this.getRoot().get(0);
                 this.bindEmbeddedButtons();
                 this.attachDatePickers();
@@ -362,6 +455,12 @@ var fastnet;
                         $(c).focus();
                         return false;
                     }
+                });
+                var changeDetectElements = "input";
+                $(this.rootElement).find(changeDetectElements).on("input", function (e) {
+                    var element = e.currentTarget;
+                    var propertyName = $(element).attr("data-property");
+                    _this.notifyChange(propertyName);
                 });
             };
             form.prototype.openModal = function () {
@@ -512,6 +611,14 @@ var fastnet;
                     var data = null;
                     if (this.model !== null) {
                         data = new models();
+                        var to = this.observableModel;
+                        if (this.editors != null) {
+                            this.editors.forEach(function (k, v) {
+                                var content = v.getContent();
+                                to()[k](content);
+                                //debugger;
+                            });
+                        }
                         data.current = ko.toJS(this.observableModel);
                         data.original = this.unwrappedOriginal;
                     }
@@ -559,9 +666,9 @@ var fastnet;
                     }
                     bindString = bindings.join(", ");
                     $(element).attr("data-bind", bindString);
-                    //if (propertyName !== null) {
-                    //    $(element).attr("data-property", propertyName);
-                    //}
+                    if (propertyName !== null) {
+                        $(element).attr("data-property", propertyName);
+                    }
                 });
             };
             form.formStack = new collections.Stack();
@@ -596,3 +703,4 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=forms.js.map

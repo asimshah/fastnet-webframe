@@ -52,7 +52,10 @@ namespace Fastnet.Webframe.CoreData
             Fill(member, id, emailAddress, firstName, lastName);
             return member;
         }
-
+        public virtual MemberBase Find(CoreDataContext ctx, string id)
+        {
+            return ctx.Members.Find(id) as Member;
+        }
         public async virtual Task<ExpandoObject> ValidateRegistration(dynamic data)
         {
             dynamic result = new ExpandoObject();
@@ -60,36 +63,5 @@ namespace Fastnet.Webframe.CoreData
             result.Error = "";
             return await Task.FromResult(result);
         }
-        //public static MemberBase CreateNew(string id, string emailAddress, string firstName, string lastName)
-        //{
-        //    MemberFactory mf = new MemberFactory();
-        //    return mf.Create(id, emailAddress, firstName, lastName);
-        //}
-
-        //private MemberBase Create(string id, string emailAddress, string firstName, string lastName)
-        //{
-
-        //    MemberBase member = null;
-
-        //    switch (this.FactoryName)
-        //    {
-        //        case FactoryName.None:
-        //            member = new Member();
-        //            break;
-        //        case FactoryName.DonWhillansHut:
-        //            var m = new DWHMember();
-        //            m.BMCMembership = null;
-        //            m.DateOfBirth = null;
-        //            m.Organisation = null;
-        //            member = m;
-        //            break;
-        //    }
-        //    member.Id = id;
-        //    member.EmailAddress = emailAddress;
-        //    member.FirstName = firstName;
-        //    member.LastName = lastName;
-        //    member.CreationDate = DateTime.UtcNow;
-        //    return member;
-        //}
     }
 }

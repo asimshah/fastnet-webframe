@@ -1,0 +1,42 @@
+﻿<div class="booking-forms">
+    <div class="edit-booking-form">
+        <div class="row">
+            <div class="col-xs-3">Name</div>
+            <div class="col-xs-8" data-bind="text: memberName" />
+        </div>
+        <div class="row">
+            <div class="col-xs-3">Email Address</div>
+            <div class="col-xs-8" data-bind="text: memberEmailAddress" />
+        </div>
+        <div class="row">
+            <div class="col-xs-3">From</div>
+            <div class="col-xs-8" data-bind="text: duration" />
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <label>History (UTC)</label>
+                <div class="booking-history" data-bind="html: history"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <label for="phoneNumber">Mobile Number</label>
+                <input id="phoneNumber" type="text" class="form-control" data-bind="textInput: memberPhoneNumber" />
+                <span class="validationMessage" data-bind="validationMessage: memberPhoneNumber"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <label>Notes</label>
+                <div class="form-control rich-text" data-bind="richtext: notes"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <span class="message-block" data-bind="text: message"></span>
+            </div>
+        </div>
+    </div>
+</div>
+

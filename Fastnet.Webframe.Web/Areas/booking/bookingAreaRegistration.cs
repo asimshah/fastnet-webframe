@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using Fastnet.Webframe.Web.Common;
+using System.Web.Mvc;
 using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web.Areas.booking
@@ -60,20 +61,22 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Areas/booking/Scripts/factory.js",
                 "~/Areas/booking/Scripts/bookingViewModels.js",
                 "~/Areas/booking/Scripts/booking.js"
-                ));
+                ).AddCustomScripts("booking"));
             bundles.Add(new ScriptBundle("~/bundles/booking/admin").Include(
                 "~/Scripts/datatables/jquery.dataTables.js",
                 "~/Scripts/datatables/datetime-moment.js",
                 //"~/Scripts/datatables/dataTables.bootstrap.js",
                 "~/Scripts/datatables/dataTables.responsive.js",
                 "~/Scripts/accounting.js",
+                "~/Scripts/tinymce/tinymce.js",
+                "~/Scripts/tinymce/jquery.tinymce.min.js",
+                //"~/Scripts/wysiwyg.js",
                 "~/Areas/booking/Scripts/bookingCommon.js",
                 "~/Areas/booking/Scripts/factory.js",
                 "~/Areas/booking/Scripts/adminViewModels.js",
-                "~/Areas/booking/Scripts/bookingAdmin.js"
-                
-                ));
-            AddCustomScripts(bundles);
+                "~/Areas/booking/Scripts/bookingAdmin.js"                
+                ).AddCustomScripts("booking"));
+            //AddCustomScripts(bundles);
         }
         private void AddCustomScripts(BundleCollection bundles)
         {

@@ -14,6 +14,7 @@
 		formattedCost: string;
 		isPaid: boolean;
 		notes: string;
+		history: string;
 		entryInformation: string;
 		under18sInParty: boolean;
 		numberOfNights: number;

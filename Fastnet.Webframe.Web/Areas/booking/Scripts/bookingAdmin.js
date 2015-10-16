@@ -22,12 +22,6 @@ var fastnet;
     })();
     var booking;
     (function (booking_1) {
-        var bookingModel = (function () {
-            function bookingModel() {
-            }
-            return bookingModel;
-        })();
-        booking_1.bookingModel = bookingModel;
         var bookingReportType;
         (function (bookingReportType) {
             bookingReportType[bookingReportType["normal"] = 0] = "normal";
@@ -50,6 +44,8 @@ var fastnet;
                 var deferred = $.Deferred();
                 var config = {
                     modelessContainer: "admin-interaction",
+                    enableRichText: true,
+                    richTextCssUrl: "../areas/booking/content/richtext.css"
                 };
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
@@ -246,10 +242,17 @@ var fastnet;
             };
             return parametersApp;
         })(adminSubapp);
+        var editBookingResult = (function () {
+            function editBookingResult() {
+            }
+            return editBookingResult;
+        })();
         var bookingReport = (function (_super) {
             __extends(bookingReport, _super);
             function bookingReport(app) {
                 _super.call(this, app);
+                this.propertyInfo = new collections.Dictionary();
+                this.dataTable = null;
             }
             bookingReport.prototype.start = function (rt) {
                 var _this = this;
@@ -290,7 +293,22 @@ var fastnet;
                     }, null);
                     wt.getTemplate({ ctx: _this, templateUrl: reportTemplate }).then(function (dt) {
                         var template = dt.template;
+                        var phoneNumberCellIndex = _this.findCellIndexInTemplate(template, "memberPhoneNumber");
+                        _this.propertyInfo.setValue("memberPhoneNumber", phoneNumberCellIndex);
                         ajax.Get({ url: dataurl }, false).then(function (bookingList) {
+                            //**NB** 
+                            // bookingList is defined to be a bookingModel[]
+                            // BUT it consists of a list of objects that are NOT instances of bookingModel -
+                            // this is because the json data retrieved using ajax is converted into javascript objects
+                            // and there is no way that javascript knows that I would prefer the typescript class bookingModel to be used.
+                            // You can see this difference if you create an instance of bookingModel, i.e.
+                            // var xxx = new bookingModel();
+                            // now xxx instanceof fastnet.booking.bookingModel returns true, whereas
+                            // bookingList[0] instanceof fastnet.booking.bookingModel returns false!
+                            // This would be particularly useful in this code because i would like to be able
+                            // define a method on bookingModel, have it overridden in dwhBookingModel, and call it
+                            // so that I can have customised behaviour in the normal OOP style.
+                            // Luckily, so far, I do not need customised editing of a booking
                             var html = Mustache.render(template, { heading: heading, data: bookingList });
                             oform.setContentHtml(html);
                             oform.open(function (ctx, f, cmd, data, ct) {
@@ -307,25 +325,25 @@ var fastnet;
                                         f.close();
                                         location.href = "/home";
                                         break;
-                                    case "mark-paid":
-                                    case "mark-not-paid":
-                                    case "edit-booking":
-                                        var id = parseInt($(ct).attr("data-booking-id"));
-                                        var booking = _this.findBooking(bookingList, id);
-                                        debug.print("cmd: {0}, id {1}, reference: {2}", cmd, id, booking.reference);
-                                        switch (cmd) {
-                                            case "mark-paid":
-                                                _this.showSetPaidForm(booking);
-                                                break;
-                                            case "mark-not-paid":
-                                                break;
-                                            case "edit-booking":
-                                                break;
-                                        }
-                                        break;
                                 }
                             }).then(function () {
-                                oform.find("#booking-report-table").DataTable({
+                                // 16Oct2015 why data-table-cmd instead of data-cmd?
+                                // the forms system supports "embedded" buttons using the data-cmd attribute
+                                // BUT this does not work when there is a table in the form and this table is
+                                // handled by jquery.datatables.
+                                // The reason is that datatables restructures the table (rows for paging
+                                // and columns as a result of column hiding). If the data content is then updated
+                                // (as required by the edit booking semantics) then the row is regenerated by
+                                // datatables thus loosing the button[data-cmd] click binding.
+                                // The solution here is that I separately bind button[data-table-cmd] and rebind that as
+                                // and when data updates occur.
+                                // A better solution would be to integrate datatables into the forms system -
+                                // but this is a lot of work and I am not prepared to do it for now.
+                                oform.find("#booking-report-table button[data-table-cmd]").on("click", function (e) {
+                                    debug.print("data-table-cmd");
+                                    _this.embeddedButtonHandler(bookingList, e);
+                                });
+                                _this.dataTable = oform.find("#booking-report-table").DataTable({
                                     "columnDefs": [{ "type": "natural", targets: 0 }],
                                     pagingType: "simple",
                                     order: [[0, 'asc']]
@@ -335,6 +353,57 @@ var fastnet;
                     });
                 });
             };
+            bookingReport.prototype.findCellIndexInTemplate = function (template, property) {
+                var selector = "td:contains('{{" + property + "}}')";
+                //var x = $(template).find("td:contains('{{memberPhoneNumber}}')");
+                //$(x).closest("tr").find("td").index(x)
+                var cell = $(template).find(selector);
+                return $(cell).closest("tr").find("td").index(cell);
+            };
+            bookingReport.prototype.embeddedButtonHandler = function (bookingList, e) {
+                var _this = this;
+                e.stopPropagation();
+                var ct = e.target;
+                var cmd = $(ct).attr("data-table-cmd");
+                var id = parseInt($(ct).closest("tr").attr("data-booking-id"));
+                var booking = this.findBooking(bookingList, id);
+                debug.print("data-table-cmd: {0} {1}", cmd, id);
+                switch (cmd) {
+                    case "mark-paid":
+                    case "mark-not-paid":
+                        var makeUnpaid = cmd === "mark-not-paid" ? true : false;
+                        this.showSetPaidForm(booking, makeUnpaid).then(function (updated) {
+                            if (updated) {
+                                var row = _this.dataTable.row($(ct).closest("tr")[0]);
+                                if (makeUnpaid) {
+                                    $(row.node()).removeClass("is-paid");
+                                }
+                                else {
+                                    $(row.node()).addClass("is-paid");
+                                }
+                            }
+                        });
+                        break;
+                    case "edit-booking":
+                        this.showEditBookingForm(booking).then(function (r) {
+                            if (r.dataUpdated) {
+                                booking.memberPhoneNumber = r.booking.memberPhoneNumber;
+                                booking.notes = r.booking.notes;
+                                var rowElement = $(ct).closest("tr");
+                                var d = _this.dataTable.row(rowElement).data();
+                                var pnIndex = _this.propertyInfo.getValue("memberPhoneNumber");
+                                //debug.print("before change: {0}", d[pnIndex]);
+                                d[pnIndex] = r.booking.memberPhoneNumber;
+                                _this.dataTable.row(rowElement).data(d).draw();
+                                $(rowElement).find("button[data-table-cmd]").on("click", function (e) {
+                                    _this.embeddedButtonHandler(bookingList, e);
+                                });
+                                var d2 = _this.dataTable.row(rowElement).data();
+                            }
+                        });
+                        break;
+                }
+            };
             bookingReport.prototype.findBooking = function (list, id) {
                 return list.filter(function (item) {
                     return item.bookingId === id;
@@ -343,6 +412,7 @@ var fastnet;
             bookingReport.prototype.showSetPaidForm = function (booking, makeUnpaid) {
                 var _this = this;
                 if (makeUnpaid === void 0) { makeUnpaid = false; }
+                var deferred = $.Deferred();
                 var setPaidFormTemplate = "booking/setpaidform";
                 wt.getTemplate({ ctx: this, templateUrl: setPaidFormTemplate }).then(function (r) {
                     var bm = booking_1.factory.getObservableBookingModel(booking);
@@ -350,12 +420,103 @@ var fastnet;
                         initialWidth: 600,
                         modal: true,
                         title: str.format("Booking: {0}", booking.reference),
-                        okButtonText: "Set Paid"
+                        okButtonText: makeUnpaid ? "Set Not Paid" : "Set Paid"
                     }, bm);
                     spf.setContentHtml(r.template);
                     spf.open(function (ctx, f, cmd, data) {
+                        switch (cmd) {
+                            case "ok-command":
+                                _this.changePaidState(booking, makeUnpaid ? false : true).then(function () {
+                                    f.close();
+                                    deferred.resolve(true);
+                                });
+                                break;
+                            case "cancel-command":
+                                f.close();
+                            //break;
+                            default:
+                                deferred.resolve(false);
+                                break;
+                        }
                     });
                 });
+                return deferred.promise();
+            };
+            bookingReport.prototype.showEditBookingForm = function (booking) {
+                var _this = this;
+                var result = new editBookingResult();
+                result.dataUpdated = false;
+                result.statusChanged = false;
+                var deferred = $.Deferred();
+                var editBookingFormTemplate = "booking/editBookingform";
+                wt.getTemplate({ ctx: this, templateUrl: editBookingFormTemplate }).then(function (r) {
+                    var bm = booking_1.factory.getObservableBookingModel(booking);
+                    var options = {
+                        initialWidth: 600,
+                        modal: true,
+                        title: str.format("Booking: {0}", booking.reference),
+                        okButtonText: "Save Changes",
+                    };
+                    switch (booking.status) {
+                        case "Provisional":
+                            options.additionalButtons = [
+                                { text: "Cancel Booking", command: "cancel-booking", position: 1 /* left */ },
+                                { text: "Confirm Booking", command: "confirm-booking", position: 1 /* left */ }
+                            ];
+                            break;
+                        case "Confirmed":
+                            options.additionalButtons = [
+                                { text: "Cancel Booking", command: "cancel-booking", position: 1 /* left */ },
+                            ];
+                            break;
+                    }
+                    var spf = new forms.form(_this, options, bm);
+                    spf.setContentHtml(r.template);
+                    spf.open(function (ctx, f, cmd, data) {
+                        switch (cmd) {
+                            case "ok-command":
+                                _this.updateBooking(data.current).then(function () {
+                                    result.dataUpdated = true;
+                                    result.booking = data.current;
+                                    f.enableCommand("cancel-booking");
+                                    f.enableCommand("confirm-booking");
+                                    f.setMessage("Changes saved");
+                                });
+                                break;
+                            case "confirm-booking":
+                                break;
+                            case "cancel-booking":
+                                break;
+                            case "cancel-command":
+                                f.close();
+                            //break;
+                            default:
+                                deferred.resolve(result);
+                                break;
+                        }
+                    }, function (f, property) {
+                        f.setMessage("");
+                        f.disableCommand("cancel-booking");
+                        f.disableCommand("confirm-booking");
+                    });
+                });
+                return deferred.promise();
+            };
+            bookingReport.prototype.updateBooking = function (booking) {
+                var deferred = $.Deferred();
+                var url = str.format("bookingadmin/update/booking");
+                ajax.Post({ url: url, data: booking }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            bookingReport.prototype.changePaidState = function (booking, paid) {
+                var deferred = $.Deferred();
+                var url = str.format("bookingadmin/update/booking/{0}/paidstate/{1}", booking.bookingId, paid);
+                ajax.Post({ url: url, data: null }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
             };
             return bookingReport;
         })(adminSubapp);

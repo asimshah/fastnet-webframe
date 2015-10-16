@@ -147,6 +147,11 @@ button.side-button {
     .chrome(@blue, @white, @red);
     .form-buttons(@blue, @white) !important;
 
+    hr {
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+
     .help-button {
         .button-style(@teal, @white);
     }
@@ -222,6 +227,32 @@ button.side-button {
             font-size: x-small;
             margin: 0;
             padding: 0;
+        }
+    }
+
+    .edit-booking-form {
+        .booking-history {
+            border: 1px solid @gray;
+            border-radius: 3px;
+            padding: 4px;
+            min-height: 100px;
+            font-size: 0.8em;
+            overflow-y: scroll;
+
+            .system-note {
+                .notes-timestamp {
+                    color: @dark-green;
+                }
+
+                .notes-by {
+                    color: @dark-grey;
+                }
+
+                .notes-text {
+                    color: @dark-grey;
+                    font-style: italic;
+                }
+            }
         }
     }
 
@@ -385,27 +416,27 @@ button.side-button {
 
 .index-page {
     .sub-section {
+        font-size: 12px;
+        line-height: 18px;
+
         .heading {
             margin: 12px;
             font-size: larger;
             font-weight: bold;
             //font-family: Cambria;
         }
-
-        .row {
+        /*.row {
             //border-top: 1px solid black;
-            font-size: 12px;
-            line-height: 18px;
-            /*div:first-child {
-                padding-right: 0;
-            }*/
-        }
 
-        .btn-link {
-            font-family: Verdana;
-            font-size: 12px;
-            padding-top: 0;
-        }
+
+            }*/
+    }
+
+    .btn-link {
+        font-family: Verdana;
+        font-size: 12px;
+        padding-top: 0;
+        text-align: left;
     }
 }
 
@@ -509,15 +540,54 @@ button.side-button {
 
         table {
             width: 100%;
+
+            tr.is-paid {
+                td.payment-indicator {
+                    span.fa-check {
+                        display: inline;
+                    }
+                }
+
+                td.payment-buttons {
+                    button[data-table-cmd='mark-paid'] {
+                        display: none;
+                    }
+                }
+            }
+
+            tr:not(.is-paid) {
+                td.payment-indicator {
+                    span.fa-check {
+                        display: none;
+                    }
+                }
+
+                td.payment-buttons {
+                    button[data-table-cmd='mark-not-paid'] {
+                        display: none;
+                    }
+                }
+            }
+
+            tr.status-Cancelled {
+                td.payment-buttons {
+                    display: none;
+                }
+            }
         }
-        .status-Confirmed {
-            color: @dark-green;
-        }
-        .status-Provisional {
-            color: @red;
-        }
-        .status-Cancelled {
-            color: @gray-dark;
+
+        td.status {
+            .status-Confirmed {
+                color: @dark-green;
+            }
+
+            .status-Provisional {
+                color: @red;
+            }
+
+            .status-Cancelled {
+                color: @gray-dark;
+            }
         }
         /*.report-title {
             margin: 4px;
@@ -598,6 +668,15 @@ button.side-button {
     }
 }
 //
+.ui-form-button[data-cmd='cancel-booking'] {
+    background-image: none;
+    background-color: @red;
+    color: @white;
+    border: 1px solid darken(@red, 20%);
+    min-width: 80px;
+    font-size: 0.8em;
+    outline: none;
+}
 //
 .test-form {
     label {

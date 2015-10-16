@@ -233,6 +233,10 @@ button.side-button {
   cursor: not-allowed !important;
   color: #ffffff !important;
 }
+.booking-forms hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
 .booking-forms .help-button {
   background-image: none !important;
   background-color: #00aba9 !important;
@@ -313,6 +317,24 @@ button.side-button {
   font-size: x-small;
   margin: 0;
   padding: 0;
+}
+.booking-forms .edit-booking-form .booking-history {
+  border: 1px solid #555555;
+  border-radius: 3px;
+  padding: 4px;
+  min-height: 100px;
+  font-size: 0.8em;
+  overflow-y: scroll;
+}
+.booking-forms .edit-booking-form .booking-history .system-note .notes-timestamp {
+  color: #1e7145;
+}
+.booking-forms .edit-booking-form .booking-history .system-note .notes-by {
+  color: #373737;
+}
+.booking-forms .edit-booking-form .booking-history .system-note .notes-text {
+  color: #373737;
+  font-style: italic;
 }
 .booking-forms .parameters-form .inner-panel {
   padding-left: 15px;
@@ -462,22 +484,25 @@ button.side-button {
 .booking-month.end-month .out-of-service.allow a {
   background: #545454;
 }
+.index-page .sub-section {
+  font-size: 12px;
+  line-height: 18px;
+  /*.row {
+            //border-top: 1px solid black;
+
+
+            }*/
+}
 .index-page .sub-section .heading {
   margin: 12px;
   font-size: larger;
   font-weight: bold;
 }
-.index-page .sub-section .row {
-  font-size: 12px;
-  line-height: 18px;
-  /*div:first-child {
-                padding-right: 0;
-            }*/
-}
-.index-page .sub-section .btn-link {
+.index-page .btn-link {
   font-family: Verdana;
   font-size: 12px;
   padding-top: 0;
+  text-align: left;
 }
 .report-forms .ui-chrome-titlebar,
 .report-forms .ui-form-titlebar {
@@ -605,13 +630,28 @@ button.side-button {
 .admin-reports.booking-report table {
   width: 100%;
 }
-.admin-reports.booking-report .status-Confirmed {
+.admin-reports.booking-report table tr.is-paid td.payment-indicator span.fa-check {
+  display: inline;
+}
+.admin-reports.booking-report table tr.is-paid td.payment-buttons button[data-table-cmd='mark-paid'] {
+  display: none;
+}
+.admin-reports.booking-report table tr:not(.is-paid) td.payment-indicator span.fa-check {
+  display: none;
+}
+.admin-reports.booking-report table tr:not(.is-paid) td.payment-buttons button[data-table-cmd='mark-not-paid'] {
+  display: none;
+}
+.admin-reports.booking-report table tr.status-Cancelled td.payment-buttons {
+  display: none;
+}
+.admin-reports.booking-report td.status .status-Confirmed {
   color: #1e7145;
 }
-.admin-reports.booking-report .status-Provisional {
+.admin-reports.booking-report td.status .status-Provisional {
   color: #ee1111;
 }
-.admin-reports.booking-report .status-Cancelled {
+.admin-reports.booking-report td.status .status-Cancelled {
   color: #333333;
 }
 .admin-reports.booking-report button.edit-button {
@@ -665,6 +705,15 @@ button.side-button {
 }
 .admin-reports.occupancy-report .report-content .accomodation-row {
   font-size: x-small;
+}
+.ui-form-button[data-cmd='cancel-booking'] {
+  background-image: none;
+  background-color: #ee1111;
+  color: #ffffff;
+  border: 1px solid #8f0a0a;
+  min-width: 80px;
+  font-size: 0.8em;
+  outline: none;
 }
 .test-form label {
   font-size: x-small;

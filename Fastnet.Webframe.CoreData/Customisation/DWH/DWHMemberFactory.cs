@@ -53,29 +53,16 @@ namespace Fastnet.Webframe.CoreData
             m.Organisation = data.organisation?.Value ?? "";
             return m;
         }
+        public override MemberBase Find(CoreDataContext ctx, string id)
+        {
+            return ctx.Members.Find(id) as DWHMember;
+        }
         public string ExtractBmcMembership(dynamic data)
         {
             string bmcMembership = data.bmcMembership?.Value ?? "";
             return bmcMembership.Trim();
         }
-        //public DateTime? ExtractDob(dynamic data)
-        //{
-        //    object r = data.dob?.Value ?? null;
-        //    if (r is string)
-        //    {
-        //        DateTime dt;
-        //        if (DateTime.TryParse((string)r, out dt))
-        //        {
-        //            return dt;
-        //        }
-        //    }
-        //    if (r.GetType() == typeof(DateTime))
-        //    {
-        //        return (DateTime)r;
-        //    }
-        //    return null;
 
-        //}
         public async override Task<ExpandoObject> ValidateRegistration(dynamic data)
         {
             string lastName = ((string)data.lastName).Trim();

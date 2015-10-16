@@ -310,6 +310,8 @@
     <Compile Include="Areas\membership\Models\MembershipModel.cs" />
     <Compile Include="Common\ActionLogging.cs" />
     <Compile Include="Common\AutofacConfig.cs" />
+    <Compile Include="Common\BundleExtensions.cs" />
+    <Compile Include="Common\BundleFactory.cs" />
     <Compile Include="Common\CustomFactory.cs" />
     <Compile Include="Common\DataModule.cs" />
     <Compile Include="Common\DirectoryExtensions.cs" />
@@ -373,6 +375,7 @@
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\request-step2.html" />
     <Content Include="Areas\booking\Templates\request-step3.html" />
+    <Content Include="Areas\booking\Templates\editBookingForm.html" />
     <Content Include="Areas\booking\Templates\setPaidForm.html" />
     <Content Include="Areas\booking\Templates\TestForm.html" />
     <Content Include="Areas\cms\Content\constants.less" />
@@ -1017,6 +1020,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\CollectionModelDescription.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
+    <Content Include="HtmlPage1.html" />
     <Content Include="Icon.png" />
     <Content Include="Models\IdentityModels Readme.txt" />
     <Content Include="Scripts\accounting.js" />
@@ -1187,6 +1191,7 @@
     <Content Include="Areas\booking\Content\constants.less" />
     <Content Include="Areas\booking\Content\fastnet\forms.less" />
     <Content Include="Areas\booking\Views\Management\Index.cshtml" />
+    <Content Include="Areas\booking\Content\richtext.less" />
     <None Include="compilerconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
@@ -1283,6 +1288,7 @@
     <Content Include="Scripts\moment.min.js" />
     <Content Include="Scripts\mustache.js" />
     <Content Include="Scripts\npm.js" />
+    <Content Include="Scripts\tinymce\jquery.tinymce.min.js" />
     <Content Include="Scripts\tinymce\license.txt" />
     <Content Include="Scripts\tinymce\plugins\advlist\plugin.js" />
     <Content Include="Scripts\tinymce\plugins\advlist\plugin.min.js" />
@@ -1612,9 +1618,8 @@
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.ttf" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.json" />
     <Content Include="Scripts\tinymce\skins\lightgray\fonts\tinymce.eot" />
-    <Content Include="Scripts\tinymce\skins\lightgray\fonts\readme.md" />
-    <Content Include="Scripts\tinymce\langs\readme.md" />
     <Content Include="Scripts\knockout.validation.min.js.map" />
+    <Content Include="test.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1664,7 +1669,8 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
-    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhBookingModels.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhBookingCommon.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhAdminViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhRequestCustomiser.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\factory.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\fastnet\forms.ts" />
@@ -1691,11 +1697,14 @@
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout.mapping\knockout.mapping.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\knockout.validation\knockout.validation.d.ts" />
+    <Content Include="Scripts\tinymce\skins\lightgray\fonts\readme.md" />
+    <Content Include="Scripts\tinymce\langs\readme.md" />
     <None Include="Scripts\typings\knockout.validation\knockout.validation.modified.d.ts.old" />
     <TypeScriptCompile Include="Scripts\typings\knockout\knockout.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment-node.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\moment\moment.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\mustache\mustache.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\tinymce\tinymce.d.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -1739,6 +1748,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

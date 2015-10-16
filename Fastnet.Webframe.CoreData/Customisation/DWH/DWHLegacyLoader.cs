@@ -728,6 +728,7 @@ namespace Fastnet.Webframe.CoreData
                         TotalCost = lBooking.TotalCost,
                         Under18sInParty = lBooking.Under18sInParty
                     };
+                    b.AddHistory("System", "Created during conversion");
                     CreateBookings(bctx, b, lBooking, member);
                 }
                 bctx.SaveChanges();

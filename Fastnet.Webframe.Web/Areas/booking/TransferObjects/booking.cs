@@ -24,6 +24,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public string formattedCost { get; set; }
         public bool isPaid { get; set; }
         public string notes { get; set; }
+        public string history { get; set; }
         public string entryInformation { get; set; }
         public bool under18sInParty { get; set; }
         public int numberOfNights { get; set; }
@@ -42,6 +43,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.formattedCost = string.Format("£{0:#0}", this.totalCost);
             this.isPaid = b.IsPaid;
             this.notes = b.Notes;
+            this.history = b.History;
             this.entryInformation = b.EntryInformation;
             this.under18sInParty = b.Under18sInParty;
             this.memberId = b.MemberId;

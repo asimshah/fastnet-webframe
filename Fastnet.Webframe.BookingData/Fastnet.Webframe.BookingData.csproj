@@ -72,7 +72,6 @@
     <Compile Include="Customisation\DWH\DWHParameter.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="TransferObjects\calendarSetup.cs" />
-    <Compile Include="TransferObjects\AccomodationTO.cs" />
     <Compile Include="Availability.cs" />
     <Compile Include="Booking.cs" />
     <Compile Include="BookingDataContext.cs" />

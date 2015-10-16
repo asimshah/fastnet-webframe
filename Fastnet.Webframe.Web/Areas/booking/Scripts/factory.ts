@@ -13,6 +13,9 @@
                         break;
                 }
             }
+            public static getFactory(): FactoryName {
+                return factory.name;
+            }
             public static getParameters(p: server.bookingParameters): parameters {
                 //this.setFactory(p.factoryName);
                 var bp: parameters = null;

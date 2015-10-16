@@ -34,13 +34,31 @@
           }
         }
       }
+    },
+    "scripts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+      }
     }
   },
   "title": "JSON Schema for customisation JSON file format",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-
     "Scripts": {
       "description": "An array of additional scripts to include in the custom bundle",
       "type": "array",
@@ -49,6 +67,9 @@
         "minItems": 1,
         "uniqueItems": true
       }
+    },
+    "XScripts": {
+      "$ref": "#/definitions/scripts"
     },
     "CSSFiles": {
       "description": "An array of css files to include in the custom bundle",
@@ -109,7 +130,7 @@
         "paymentGateway": {
           "enable": {
             "type": "boolean",
-            "default":  false
+            "default": false
           }
         }
       }
@@ -123,6 +144,9 @@
           "Name": {
             "type": "string",
             "enum": [ "membership", "booking" ]
+          },
+          "XScripts": {
+            "$ref": "#/definitions/scripts"
           },
           "Scripts": {
             "description": "An array of additional scripts to include in the custom bundle",

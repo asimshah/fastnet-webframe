@@ -17,6 +17,9 @@ var fastnet;
                         break;
                 }
             };
+            factory.getFactory = function () {
+                return factory.name;
+            };
             factory.getParameters = function (p) {
                 //this.setFactory(p.factoryName);
                 var bp = null;
@@ -56,3 +59,4 @@ var fastnet;
         booking.factory = factory;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=factory.js.map

@@ -1,4 +1,5 @@
 ﻿using Fastnet.Web.Common;
+using Fastnet.Webframe.Web.Common;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using System.Web.Hosting;
@@ -6,37 +7,7 @@ using System.Web.Optimization;
 
 namespace Fastnet.Webframe.Web
 {
-    public class BundleFactory : CustomFactory
-    {
-        public string[] CSSFiles { get; set; }
-        public string[] Scripts { get; set; }
-        public string[] AppScripts { get; set; } = new string[0];
-        public BundleFactory(string appName = null)
-        {
-            if (FactoryName != FactoryName.None)
-            {
-                CSSFiles = Settings.CSSFiles == null ? new string[0] : ((JArray)Settings.CSSFiles).ToObject<string[]>();
-                Scripts = Settings.Scripts == null ? new string[0] : ((JArray)Settings.Scripts).ToObject<string[]>();
-                if (appName != null)
-                {
-                    dynamic[] apps = Settings.apps == null ? new dynamic[0] : ((JArray)Settings.apps).ToObject<dynamic[]>();
-                    foreach (var app in apps)
-                    {
-                        if (app.Name == appName)
-                        {
-                            AppScripts = app.Scripts == null ? new string[0] : ((JArray)app.Scripts).ToObject<string[]>();
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                CSSFiles = new string[0];
-                Scripts = new string[0];
-            }
-        }
-    }
+
     public class BundleConfig
     {
 
@@ -135,13 +106,13 @@ namespace Fastnet.Webframe.Web
                 "~/Content/themes/base/button.css",
                 "~/Content/themes/base/datepicker.css",
                 "~/Content/themes/base/dialog.css",
-                                                                                                "~/Content/themes/base/accordion.css",
+                "~/Content/themes/base/accordion.css",
                 "~/Content/themes/base/draggable.css",
                 "~/Content/themes/base/menu.css",
                 "~/Content/themes/base/progressbar.css",
                 "~/Content/themes/base/resizable.css",
                 "~/Content/themes/base/selectable.css",
-                                                                                                                "~/Content/themes/base/accordion.css",
+                "~/Content/themes/base/accordion.css",
                 "~/Content/themes/base/selectmenu.css",
                 "~/Content/themes/base/sortable.css",
                 "~/Content/themes/base/slider.css",

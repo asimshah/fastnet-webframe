@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Fastnet.Web.Common;
 using Newtonsoft.Json.Linq;
+using Fastnet.Webframe.Web.Common;
 
 namespace Fastnet.Webframe.Web.Areas.membership.Common
 {

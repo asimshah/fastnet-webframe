@@ -36,6 +36,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             }
             return b;
         }
+
         public static bookingParameters GetBookingParameters()
         {
             bookingParameters bp = null;

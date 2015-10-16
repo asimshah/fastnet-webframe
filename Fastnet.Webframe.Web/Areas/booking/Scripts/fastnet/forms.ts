@@ -12,13 +12,14 @@ module fastnet {
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
         import ff = fastnet.force;
+
         interface modalPosition {
             openingHeight: number;
             openingWidth: number;
             windowWidth: number;
         }
         export interface knockoutValidator {
-            (value:any, params: any ): boolean;
+            (value: any, params: any): boolean;
         }
         export interface knockoutAsyncValidator {
             (value: any, params: any, callback: KnockoutValidationAsyncCallback): void;
@@ -30,6 +31,8 @@ module fastnet {
         export interface configuration {
             modelessContainer: string;
             additionalValidations?: any[];
+            enableRichText?: boolean;
+            richTextCssUrl?: string;
         }
         export interface validationResult {
             property?: string;
@@ -39,7 +42,7 @@ module fastnet {
         export class validations {
             public static isChecked: knockoutValidator = function (val, params): boolean {
                 return val === true;
-            }            
+            }
             public static phoneNumber: knockoutValidator = function (val, params): boolean {
                 var pattern = /^[+0-9][0-9]*$/;
                 return ko.validation.rules.pattern.validator(val, pattern);
@@ -48,9 +51,9 @@ module fastnet {
                 var pattern = /(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
                 return ko.validation.rules.pattern.validator(val, pattern);
             }
-            public static GetValidators(){
+            public static GetValidators() {
                 var rules: any[] = [];
-               // rules.push({ name: "emailInUse", async: true, validator: validations.emailInUse, message: "This email address not found" });
+                // rules.push({ name: "emailInUse", async: true, validator: validations.emailInUse, message: "This email address not found" });
                 rules.push({ name: "passwordComplexity", async: false, validator: validations.passwordComplexity, message: "Use at least one each of a digit, a non-alphanumeric and a lower and an upper case letter" });
                 rules.push({ name: "phoneNumber", async: false, validator: validations.phoneNumber, message: "Use all digits and spaces with an optional leading +" });
                 rules.push({ name: "isChecked", async: false, validator: validations.isChecked, message: "Box must be checked" });
@@ -70,6 +73,24 @@ module fastnet {
                 return null;
             }
         }
+        /**
+         * base class for a data class to be used with a form
+         * current version uses knockout
+         */
+        export class viewModel {
+            public __$formId: string = null;
+            public message: KnockoutObservable<string> = ko.observable("");
+            public okEnabled: KnockoutObservable<boolean> = ko.observable(true);
+            public cancelEnabled: KnockoutObservable<boolean> = ko.observable(true);
+            /**
+             * populate this object from a javascript object
+             * like { alpha: "hello", beta: "world" }
+             */
+            public fromJSObject(data: any): void {
+
+                $.extend(this, data);
+            }
+        }
         export class models {
             current: model;
             original: model;
@@ -81,6 +102,9 @@ module fastnet {
          */
         export interface CommandCallback {
             (ctx: any, f: form, cmd: string, data: models, currentTarget: EventTarget): void;
+        }
+        export interface ChangeCallback {
+            (f: form, property: string): void
         }
         export interface formButton {
             text: string;
@@ -147,24 +171,9 @@ module fastnet {
              *
              */
             messageClass?: string;
-        }
-        /**
-         * base class for a data class to be used with a form
-         * current version uses knockout
-         */
-        export class viewModel {
-            public message: KnockoutObservable<string> = ko.observable("");
-            public okEnabled: KnockoutObservable<boolean> = ko.observable(true);
-            public cancelEnabled: KnockoutObservable<boolean> = ko.observable(true);
-            /**
-             * populate this object from a javascript object
-             * like { alpha: "hello", beta: "world" }
-             */
-            public fromJSObject(data: any): void {
 
-                $.extend(this, data);
-            }
         }
+
         /**
          * creates a new form
          */
@@ -184,15 +193,18 @@ module fastnet {
                     <div class='ui-form-buttonset' ></div>
                 </div>
             </div>`.trim();
+            private editors: collections.Dictionary<string, any> = null;
             private options: formOptions;// = {};//null;
             private formId: string;
             private modalPosition: modalPosition;
             private commandCallback: CommandCallback;
+            private changeCallback: ChangeCallback;
             private buttons: formButton[];
             private contentHtml: string = null;
             private ctx: any;
             private unwrappedOriginal: any;
-            private model: model = null;
+            //private model: model = null;
+            private model: viewModel = null;
             private observableModel: any;
             private knockoutIsBound: boolean = false;
             private rootElement: HTMLElement;
@@ -219,7 +231,8 @@ module fastnet {
             }
             public static initialise(config?: configuration): void {
                 var defaultConfig: configuration = {
-                    modelessContainer: "forms-container"
+                    modelessContainer: "forms-container",
+                    enableRichText: false
                 };
                 form.config = <configuration>$.extend(defaultConfig, (config || {}));
                 if (!form.systemInitialised) {
@@ -228,14 +241,8 @@ module fastnet {
                         errorsAsTitle: false,
                         insertMessages: false,
                         decorateElement: true,
-                        errorElementClass: 'validation-error',};
-                    //ko.validation.init({
-                    //    errorsAsTitle: false,
-                    //    insertMessages: false,
-                    //    decorateElement: true,
-                    //    errorElementClass: 'validation-error',
-
-                    //});
+                        errorElementClass: 'validation-error',
+                    };
                     ko.validation.init(initOptions);
                     var rules = validations.GetValidators();
                     this.addValidations(rules);
@@ -244,11 +251,79 @@ module fastnet {
                     }
 
                     ko.validation.registerExtenders();
-                    debug.print("ko.validation initialised");
+                    //debug.print("ko.validation initialised");
+                    form.addRichTextBinding(form.config.enableRichText);
                     form.systemInitialised = true;
                 }
             }
-            private static addMomentBinding() {                
+            private static addRichTextBinding(enable: boolean) {
+                function getPropertyName(element: Element): string {
+                    var bindString = $(element).attr("data-bind");
+                    var propertyName: string = null;
+                    var bindings = bindString.split(",");
+                    $.each(bindings, (i, b) => {
+                        bindings[i] = b.trim();
+                        var tuple = b.split(":");
+                        var key = tuple[0].trim();
+                        if (key === "richtext") {
+                            propertyName = tuple[1].trim();
+                        }
+                    });
+                    return propertyName;
+                }
+                ko.bindingHandlers["richtext"] = {
+                    init: function (element, valueAccessor, allBindingsAccessor, viewModel, arg1) {
+                        if (!enable) {
+                            var msg = str.format("forms: richtext needs to be enabled first (and tinymce needs to be included!)");
+                            alert(msg);
+                        } else {
+                            var propertyName = getPropertyName(element);
+                            $(element).attr("data-property", propertyName);
+                            var html = ko.unwrap(valueAccessor());
+                            $(element).val(html);
+                            debug.print("richtext init()");
+                        }
+                        //tinymce.init({
+                        //    inline: true,
+                        //    toolbar_items_size: 'small',
+                        //    toolbar: ["undo redo | cut copy paste | styleselect | fontselect fontsizeselect ",
+                        //        "bold italic forecolor backcolor | bullist numlist | alignleft aligncenter alignright outdent indent "],
+                        //    setup: function (editor) {
+                        //        debug.print("tinymce editor setup()");
+                        //    }
+                        //});
+                    },
+                    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                        if (enable) {
+                            debug.print("richtext update()");
+
+                            var editor = $(element).tinymce({
+                                menubar: false,
+                                statusbar: false,
+                                content_css: form.config.richTextCssUrl,
+                                //inline: true,
+                                //toolbar_items_size: 'small',
+                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist",
+                                setup: function (editor) {
+                                    var vm: viewModel = viewModel;
+                                    //var html = valueAccessor();
+                                    //editor.setContent(html());
+                                    var f = form.getForm(vm.__$formId);
+                                    f.registorEditor($(element).attr("data-property"), editor);
+                                    editor.on('change', function (e) {
+                                        var ctx = bindingContext;
+                                        var propertyName = $(e.target.targetElm).attr("data-property");
+                                        var f = form.getForm(vm.__$formId);
+                                        f.notifyChange(propertyName);
+                                    });
+                                }
+                            });
+
+                        }
+                    }
+                }
+            }
+            private static addMomentBinding() {
                 ko.bindingHandlers["stdDateFormat"] = {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
                         var val = valueAccessor();
@@ -264,7 +339,7 @@ module fastnet {
                         } else {
                             element.innerText = formatted;
                         }
-                        
+
                     }
                 };
             }
@@ -272,26 +347,37 @@ module fastnet {
                 form.asyncValCounter++;
                 var cf = form.formStack.peek();
                 if (form.asyncValCounter === 1 && !h$.isNullOrUndefined(cf)) {
-                   cf.block();
+                    cf.block();
                 }
+            }
+            private static getForm(formId: string): form {
+                var result: form = null;
+                this.formStack.forEach((f) => {
+                    if (f.formId == formId) {
+                        result = f;
+                        return false;
+                    }
+                });
+                return result;
             }
             private static decrementAsyncValidatorCount(): void {
                 form.asyncValCounter--;
                 var cf = form.formStack.peek();
                 if (form.asyncValCounter === 0 && !h$.isNullOrUndefined(cf)) {
-                   cf.unBlock();
+                    cf.unBlock();
                 }
             }
-            constructor(ctx: any, opts: formOptions, model: any, contentHtml?: string) {
+            constructor(ctx: any, opts: formOptions, model: viewModel, contentHtml?: string) {
                 // ctx will be passed through to the CommandCallback
                 if (!form.systemInitialised) {
                     throw new Error("forms system not initialised: call  to form.initialise() missing?");
                 }
                 this.ctx = ctx;
                 this.model = model;
+
                 this.unwrappedOriginal = ko.toJS(this.model);
                 this.buttons = [];
-                this.options = {                    
+                this.options = {
                     modal: false,
                     title: "title required",
                     modelessContainer: null,
@@ -310,6 +396,9 @@ module fastnet {
                     debug.print("form options are invalid");
                 }
                 this.formId = "ff-" + form.formCount++;
+                if (this.model != null) {
+                    this.model.__$formId = this.formId;
+                }
                 if (this.options.okButton !== null && !h$.isNullOrUndefined(this.options.okButtonText)) {
                     this.options.okButton.text = this.options.okButtonText;
                 }
@@ -322,7 +411,7 @@ module fastnet {
                 if (this.options.okButton != null) {
                     this.buttons.push(this.options.okButton);
                 }
-                $.each((this.options.additionalButtons || []),  (i, b) => {
+                $.each((this.options.additionalButtons || []), (i, b) => {
                     this.buttons.push(b);
                 });
             }
@@ -338,10 +427,11 @@ module fastnet {
                     $(`#${this.formId}`).off().closest(".ui-form").remove();
                 }
             }
-            public open(onCommand: CommandCallback): JQueryPromise<form> {
+            public open(onCommand: CommandCallback, onChange?: ChangeCallback): JQueryPromise<form> {
                 var deferred = $.Deferred<form>();
                 form.formStack.push(this);
                 this.commandCallback = onCommand;
+                this.changeCallback = onChange;
                 if (this.options.modal) {
                     this.openModal();
                 }
@@ -381,6 +471,18 @@ module fastnet {
                 }
                 //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             }
+            private registorEditor(propertyName: string, editor: any): void {
+                if (this.editors == null) {
+                    this.editors = new collections.Dictionary<string, any>();
+                }
+                this.editors.setValue(propertyName, editor);
+            }
+            private notifyChange(propertyName: string) {
+                debug.print("property {0}: value changed", propertyName);
+                if (this.changeCallback != null) {
+                    this.changeCallback(this, propertyName);
+                }
+            }
             private getBlockRoot(): JQuery {
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent();//.parent();
             }
@@ -410,7 +512,7 @@ module fastnet {
             }
             private modelessBlock(): void {
                 var uiForm = this.getRoot().closest(".ui-form");
-                var blockHtml = 
+                var blockHtml =
                     `<div class='modeless-block' style="width:100%; height: 100%;position:absolute;left:0;top:0;z-index:1000;">
                         <div class='indicator'><i class="fa fa-gear fa-spin fa-3x"></i></div>
                     </div>`;
@@ -419,7 +521,7 @@ module fastnet {
             private getRoot(): JQuery {
                 return this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);
             }
-            private prepareButtons(): any[]{
+            private prepareButtons(): any[] {
                 var buttons = [];
                 $.each(this.buttons, (i, item) => {
                     var b = {
@@ -471,6 +573,13 @@ module fastnet {
                         $(c).focus();
                         return false;
                     }
+                });
+                var changeDetectElements = "input";
+                $(this.rootElement).find(changeDetectElements).on("input", (e) => {
+                    var element = <HTMLElement>e.currentTarget;
+                    var propertyName = $(element).attr("data-property");
+
+                    this.notifyChange(propertyName);
                 });
             }
             private openModal(): void {
@@ -586,7 +695,7 @@ module fastnet {
             }
             private styleModelessForm(ft: JQuery): void {
                 ft.addClass("modeless-form");
-               
+
                 if (!h$.isNullOrUndefined(this.options.styleClasses)) {
                     $.each(this.options.styleClasses, function (i, item) {
                         ft.addClass(item);
@@ -618,9 +727,17 @@ module fastnet {
                     var data: models = null;
                     if (this.model !== null) {
                         data = new models();
+                        var to = this.observableModel;
+                        if (this.editors != null) {
+                            this.editors.forEach((k, v) => {
+                                var content = v.getContent();
+                                to()[k](content);
+                                //debugger;
+                            });
+                        }
                         data.current = ko.toJS(this.observableModel);
                         data.original = this.unwrappedOriginal;
-                        //data.observable = this.observableModel;
+
                     }
                     this.commandCallback(this.ctx, this, cmd, data, ct);
                 }
@@ -646,6 +763,7 @@ module fastnet {
             }
             private updateElementAttributes(): void {
                 $(this.rootElement).find("input[data-bind]").each((index, element) => {
+
                     var bindString = $(element).attr("data-bind");
                     var propertyName: string = null;
                     var bindings = bindString.split(",");
@@ -665,14 +783,15 @@ module fastnet {
 
                     bindString = bindings.join(", ");
                     $(element).attr("data-bind", bindString);
-                    //if (propertyName !== null) {
-                    //    $(element).attr("data-property", propertyName);
-                    //}
+                    if (propertyName !== null) {
+                        $(element).attr("data-property", propertyName);
+                    }
                 });
             }
+
         }
         export class messageBox {
-            public static show(msg: string) : JQueryPromise<void> {
+            public static show(msg: string): JQueryPromise<void> {
                 var deferred = $.Deferred<void>();
                 var messageHtml = `<div class='message-box-body'>${msg}</div>`;
                 var mf = new form(null, {
