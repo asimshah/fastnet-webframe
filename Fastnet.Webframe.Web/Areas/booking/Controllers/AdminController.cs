@@ -32,7 +32,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();                
-                var bookings = await ctx.Bookings.Where(x => x.Status != BookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
+                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
                     .Where(x => unpaidOnly == false || x.IsPaid == false)
                     .OrderBy(x => x.Reference).ToArrayAsync();
                 var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
@@ -46,7 +46,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status != BookingStatus.Cancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
+                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
                 var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
                 return data;
             }
@@ -58,7 +58,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status == BookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
+                var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
                 var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
                 return data;
             }
@@ -103,8 +103,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 {
                     booking.IsPaid = paid;
                     booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
+                    ctx.SaveChanges();
                 }
-                ctx.SaveChanges();
+
             }
         }
         [HttpPost]
@@ -136,6 +137,25 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         tran.Complete();
                     }
                 } 
+            }
+        }
+        [HttpPost]
+        [Route("update/booking/{id}/status/{status}")]
+        public void UpdateBooking(long id, bookingStatus status)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var m = this.GetCurrentMember();
+                var name = m.Fullname;
+                var booking = ctx.Bookings.Find(id);
+                var today = BookingGlobals.GetToday();
+                if(booking.Status != status)
+                {
+                    bookingStatus old = booking.Status;
+                    booking.Status = status;
+                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    ctx.SaveChanges();
+                }
             }
         }
     }

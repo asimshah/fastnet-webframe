@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Accomodation.cs" />
+    <Compile Include="Classes with typings\bookingStatus.cs" />
     <Compile Include="Customisation\DWH\DWHParameter.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="Classes with typings\calendarSetup.cs" />
@@ -91,6 +92,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Classes with typings\bookingStatus.cs.d.ts">
+      <DependentUpon>bookingStatus.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Classes with typings\calendarSetup.cs.d.ts">
       <DependentUpon>calendarSetup.cs</DependentUpon>
     </TypeScriptCompile>

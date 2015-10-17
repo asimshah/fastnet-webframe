@@ -12,7 +12,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
     {
         public long bookingId { get; set; }
         public string reference { get; set; }
-        public string status { get; set; }
+        public string statusName { get; set; }
+        public bookingStatus status { get; set; }
         public string memberId { get; set; }
         public string memberName { get; set; }
         public string memberEmailAddress { get; set; }
@@ -33,7 +34,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
             this.bookingId = b.BookingId;
             this.reference = b.Reference;
-            this.status = b.Status.ToString();// "unknown";
+            this.status = b.Status;
+            this.statusName = b.Status.ToString();// "unknown";
             this.from = b.From.ToDefault();
             this.to = b.To.ToDefault();
             this.numberOfNights = (int)(b.To - b.From).TotalDays + 1;

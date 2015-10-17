@@ -3,7 +3,7 @@
         <thead>
             <tr>
                 <th class="all"><div class="reference">Reference</div></th>
-                <th><div class="dates">Date</div></th>
+                <th><div class="dates">From</div></th>
                 <th><div class="nights">Nights</div></th>
                 <th><div class="status">Status</div></th>
                 <th><div class="member-name">Name</div></th>
@@ -17,11 +17,12 @@
         </thead>
         <tbody>
             {{#data}}
-            <tr class="{{#isPaid}}is-paid{{/isPaid}} status-{{status}}" data-booking-id="{{bookingId}}">
+            <tr class="{{#isPaid}}is-paid{{/isPaid}} status-{{statusName}}" data-booking-id="{{bookingId}}">
                 <td><button class="btn btn-xs btn-link edit-button" data-table-cmd="edit-booking">{{reference}}</button></td>
                 <td>{{from}}</td>
                 <td>{{numberOfNights}}</td>
-                <td class="status"><span class="status-{{status}}">{{status}}</span></td>
+                <!--<td class="status"><span class="status-{{statusName}}">{{statusName}}</span></td>-->
+                <td class="status">{{statusName}}</td>
                 <td>{{memberName}}</td>
                 <td><a href="mailto://{{memberEmailAddress}}?Subject=Booking Reference {{reference}}">{{memberEmailAddress}}</a></td>
                 <td class="phone-number">{{memberPhoneNumber}}</td>

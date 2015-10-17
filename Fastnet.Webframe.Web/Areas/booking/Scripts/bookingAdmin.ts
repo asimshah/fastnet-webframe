@@ -275,6 +275,7 @@ module fastnet {
                         var template = dt.template;
                         var phoneNumberCellIndex = this.findCellIndexInTemplate(template, "memberPhoneNumber");
                         this.propertyInfo.setValue("memberPhoneNumber", phoneNumberCellIndex);
+                        this.propertyInfo.setValue("statusName", this.findCellIndexInTemplate(template, "statusName"));
                         ajax.Get({ url: dataurl }, false).then((bookingList: bookingModel[]) => {
                             //**NB** 
                             // bookingList is defined to be a bookingModel[]
@@ -378,8 +379,32 @@ module fastnet {
                                 $(rowElement).find("button[data-table-cmd]").on("click", (e) => {
                                     this.embeddedButtonHandler(bookingList, e);
                                 });
-                                var d2 = this.dataTable.row(rowElement).data();
+                                //var d2 = this.dataTable.row(rowElement).data();
                                 //debug.print("after change: {0}", d2[pnIndex]);
+                            } else if (r.statusChanged) {
+                                function bookingStatusToString(s: server.bookingStatus): string {
+                                    switch (s) {
+                                        case server.bookingStatus.Provisional:
+                                            return "Provisional";
+                                        case server.bookingStatus.Cancelled:
+                                            return "Cancelled";
+                                        case server.bookingStatus.Confirmed:
+                                            return "Confirmed";
+                                    }
+                                }
+                                booking.status = r.booking.status;
+                                booking.statusName = bookingStatusToString(booking.status);
+                                var rowElement = $(ct).closest("tr");
+                                var d = this.dataTable.row(rowElement).data();
+                                var snIndex = this.propertyInfo.getValue("statusName");
+                                var oldStatus = d[snIndex];
+                                d[snIndex] = booking.statusName;
+                                $(rowElement).removeClass("status-" + oldStatus).addClass("status-" + booking.statusName);
+                                this.dataTable.row(rowElement).data(d).draw();
+                                //var cells = $(rowElement).find("td");
+                                $(rowElement).find("button[data-table-cmd]").on("click", (e) => {
+                                    this.embeddedButtonHandler(bookingList, e);
+                                });
                             }
                         });
                         break;
@@ -436,13 +461,13 @@ module fastnet {
                         okButtonText: "Save Changes",
                     };
                     switch (booking.status) {
-                        case "Provisional":
+                        case server.bookingStatus.Provisional:
                             options.additionalButtons = [
                                 { text: "Cancel Booking", command: "cancel-booking", position: forms.buttonPosition.left },
                                 { text: "Confirm Booking", command: "confirm-booking", position: forms.buttonPosition.left }
                             ];
                             break;
-                        case "Confirmed":
+                        case server.bookingStatus.Confirmed:
                             options.additionalButtons = [
                                 { text: "Cancel Booking", command: "cancel-booking", position: forms.buttonPosition.left },
                             ];
@@ -456,14 +481,33 @@ module fastnet {
                                 this.updateBooking(data.current).then(() => {
                                     result.dataUpdated = true;
                                     result.booking = data.current;
-                                    f.enableCommand("cancel-booking");
-                                    f.enableCommand("confirm-booking");
+                                    if (result.booking.status != server.bookingStatus.Cancelled) {
+                                        f.enableCommand("cancel-booking");
+                                        if (result.booking.status != server.bookingStatus.Confirmed) {
+                                            f.enableCommand("confirm-booking");
+                                        }
+                                    }
                                     f.setMessage("Changes saved");
                                 });
                                 break;
                             case "confirm-booking":
+                                f.disableCommand("confirm-booking");
+                                data.current.status = server.bookingStatus.Confirmed;
+                                this.changeStatus(data.current).then(() => {
+                                    result.statusChanged = true;
+                                    result.booking = data.current;
+                                    f.setMessage("Booking confirmed");
+                                });
                                 break;
                             case "cancel-booking":
+                                f.disableCommand("confirm-booking");
+                                f.disableCommand("cancel-booking");
+                                data.current.status = server.bookingStatus.Cancelled;
+                                this.changeStatus(data.current).then(() => {
+                                    result.statusChanged = true;
+                                    result.booking = data.current;
+                                    f.setMessage("Booking cancelled");
+                                });
                                 break;
                             case "cancel-command":
                                 f.close();
@@ -477,6 +521,14 @@ module fastnet {
                         f.disableCommand("cancel-booking");
                         f.disableCommand("confirm-booking");
                     });
+                });
+                return deferred.promise();
+            }
+            private changeStatus(booking: bookingModel): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var url = str.format("bookingadmin/update/booking/{0}/status/{1}", booking.bookingId, booking.status);
+                ajax.Post({ url: url, data: null }).then(() => {
+                    deferred.resolve();
                 });
                 return deferred.promise();
             }

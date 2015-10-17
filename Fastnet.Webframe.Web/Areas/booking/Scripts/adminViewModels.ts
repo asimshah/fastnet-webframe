@@ -1,4 +1,4 @@
-﻿
+﻿/// <reference path="../../../../fastnet.webframe.bookingdata/classes with typings/bookingStatus.cs.d.ts" />
 module fastnet {
     export module booking {
         import forms = fastnet.forms;
@@ -7,7 +7,8 @@ module fastnet {
         export class bookingModel extends forms.model implements server.booking  {
             bookingId: number;
             reference: string;
-            status: string;
+            status: server.bookingStatus;
+            statusName: string;
             memberId: string;
             memberName: string;
             memberEmailAddress: string;
@@ -28,7 +29,8 @@ module fastnet {
         export class observableBookingModel extends forms.viewModel {
             public bookingId: number;
             public reference: string;
-            status: string;
+            status: server.bookingStatus;
+            statusName: string;
             memberId: string;
             memberName: string;
             memberEmailAddress: string;
@@ -51,6 +53,7 @@ module fastnet {
                 this.bookingId = b.bookingId;
                 this.reference = b.reference;
                 this.status = b.status;
+                this.statusName = b.statusName;
                 this.memberId = b.memberId;
                 this.memberName = b.memberName;
                 this.memberEmailAddress = b.memberEmailAddress;

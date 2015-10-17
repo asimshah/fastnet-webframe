@@ -256,7 +256,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         // we can make this booking
                         Booking b = new Booking
                         {
-                            Status = BookingStatus.Provisional,
+                            Status = bookingStatus.Provisional,
                             CreatedOn = BookingGlobals.GetToday(),
                             EntryInformation = null,
                             From = from,// request.fromDate,

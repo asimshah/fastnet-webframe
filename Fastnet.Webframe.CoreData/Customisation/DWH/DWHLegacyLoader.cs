@@ -723,7 +723,7 @@ namespace Fastnet.Webframe.CoreData
                         MemberId = member.Id,
                         Notes = lBooking.Notes,
                         Reference = lBooking.Reference,
-                        Status = (BookingData.BookingStatus)(int)lBooking.Status,
+                        Status = (BookingData.bookingStatus)(int)lBooking.Status,
                         To = to,// lBooking.To,
                         TotalCost = lBooking.TotalCost,
                         Under18sInParty = lBooking.Under18sInParty

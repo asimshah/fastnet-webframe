@@ -621,11 +621,6 @@ button.side-button {
 }
 .admin-reports.booking-report {
   font-size: 0.8em;
-  /*.report-title {
-            margin: 4px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }*/
 }
 .admin-reports.booking-report table {
   width: 100%;
@@ -645,13 +640,13 @@ button.side-button {
 .admin-reports.booking-report table tr.status-Cancelled td.payment-buttons {
   display: none;
 }
-.admin-reports.booking-report td.status .status-Confirmed {
+.admin-reports.booking-report table tr.status-Confirmed td.status {
   color: #1e7145;
 }
-.admin-reports.booking-report td.status .status-Provisional {
+.admin-reports.booking-report table tr.status-Provisional td.status {
   color: #ee1111;
 }
-.admin-reports.booking-report td.status .status-Cancelled {
+.admin-reports.booking-report table tr.status-Cancelled td.status {
   color: #333333;
 }
 .admin-reports.booking-report button.edit-button {

@@ -574,26 +574,27 @@ button.side-button {
                     display: none;
                 }
             }
+
+            tr {
+                &.status-Confirmed {
+                    td.status {
+                        color: @dark-green;
+                    }
+                }
+
+                &.status-Provisional {
+                    td.status {
+                        color: @red;
+                    }
+                }
+
+                &.status-Cancelled {
+                    td.status {
+                        color: @gray-dark;
+                    }
+                }
+            }
         }
-
-        td.status {
-            .status-Confirmed {
-                color: @dark-green;
-            }
-
-            .status-Provisional {
-                color: @red;
-            }
-
-            .status-Cancelled {
-                color: @gray-dark;
-            }
-        }
-        /*.report-title {
-            margin: 4px;
-            font-size: 1.2em;
-            font-weight: bold;
-        }*/
         button.edit-button {
             font-size: 1.0em;
         }

@@ -8,18 +8,12 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
-    public enum BookingStatus
-    {
-        Provisional,
-        Confirmed,
-        Cancelled,
-        Accepted
-    }
+
     public class Booking
     {
         private ICollection<Accomodation> accomodationSet;
         public long BookingId { get; set; }
-        public BookingStatus Status { get; set; }
+        public bookingStatus Status { get; set; }
         [MaxLength(32)]
         public string Reference { get; set; }
         [MaxLength(128)]

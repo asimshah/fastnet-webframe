@@ -3,6 +3,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+/// <reference path="../../../../fastnet.webframe.bookingdata/classes with typings/bookingStatus.cs.d.ts" />
 var fastnet;
 (function (fastnet) {
     var booking;
@@ -28,6 +29,7 @@ var fastnet;
                 this.bookingId = b.bookingId;
                 this.reference = b.reference;
                 this.status = b.status;
+                this.statusName = b.statusName;
                 this.memberId = b.memberId;
                 this.memberName = b.memberName;
                 this.memberEmailAddress = b.memberEmailAddress;

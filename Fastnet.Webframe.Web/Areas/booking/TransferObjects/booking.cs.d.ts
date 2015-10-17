@@ -2,7 +2,8 @@
 	interface booking {
 		bookingId: number;
 		reference: string;
-		status: string;
+		statusName: string;
+		status: any;
 		memberId: string;
 		memberName: string;
 		memberEmailAddress: string;

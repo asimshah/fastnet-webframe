@@ -50,7 +50,7 @@
   },
   "bookingApp": {
     //"lodgmentName": "Don Whillans Hut",
-    "rollDayManually": true,
+    "rollDayManually": false,
     "enable": true,
     "accomodation": [
       {

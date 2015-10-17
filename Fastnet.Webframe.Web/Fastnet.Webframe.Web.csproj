@@ -1623,6 +1623,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\booking\Links\" />
     <Folder Include="Areas\booking\Models\" />
     <Folder Include="Areas\booking\Scripts\typings\" />
     <Folder Include="Areas\cms\Common\" />
