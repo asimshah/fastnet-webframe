@@ -215,7 +215,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = (Member)await DataContext.Members.FindAsync(key);
+                MemberBase m = await DataContext.Members.FindAsync(key);
                 group.Members.Add(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberAddition, m.EmailAddress);
             }
@@ -232,7 +232,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             cd.Group group = await DataContext.Groups.FindAsync(groupId);
             foreach (string key in members)
             {
-                Member m = (Member)await DataContext.Members.FindAsync(key);
+                MemberBase m = await DataContext.Members.FindAsync(key);
                 group.Members.Remove(m);
                 group.RecordChanges(this.GetCurrentMember().Fullname, GroupAction.GroupActionTypes.MemberRemoval, m.EmailAddress);
             }

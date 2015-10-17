@@ -288,7 +288,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("activate/{userId}/{code}")]
         public async Task<ActionResult> Activate(string userId, string code)
         {
-            Member member = DataContext.Members.OfType<Member>().SingleOrDefault(m => m.Id == userId);
+            MemberBase member = DataContext.Members.SingleOrDefault(m => m.Id == userId);
             if (member != null && member.ActivationCode == code)
             {
                 var user = await UserManager.FindByEmailAsync(member.EmailAddress);
@@ -318,7 +318,7 @@ namespace Fastnet.Webframe.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                Member member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == model.emailAddress);
+                MemberBase member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
                 member.PasswordResetCode = Guid.NewGuid().ToString();
                 member.PasswordResetEmailSentDate = DateTime.UtcNow;
                 member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordResetRequest);
@@ -336,7 +336,7 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("passwordreset/{userId}/{code}")]
         public async Task<ActionResult> PasswordReset(string userId, string code)
         {
-            Member member = DataContext.Members.OfType<Member>().SingleOrDefault(m => m.Id == userId);
+            MemberBase member = DataContext.Members.SingleOrDefault(m => m.Id == userId);
             if (member != null && member.PasswordResetCode == code)
             {
                 member.PasswordResetCode = null; // ensure it cannot be done again
@@ -359,7 +359,7 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 string emailAddress = model.emailAddress;
                 string newPassword = model.password;
-                Member member = DataContext.Members.OfType<Member>().Single(m => m.EmailAddress == model.emailAddress);
+                MemberBase member = DataContext.Members.Single(m => m.EmailAddress == model.emailAddress);
                 //bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false); //SiteSetting.Get("VisiblePassword", false);
                 //if (visiblePassword)
                 //{
@@ -586,7 +586,7 @@ namespace Fastnet.Webframe.Web.Controllers
             pm.SetClientAction(name, member);
             return pm;
         }
-        private PageModel GetPageModel(ClientSideActions name, Member member)
+        private PageModel GetPageModel(ClientSideActions name, MemberBase member)
         {
             PageModel pm = GetPageModel();
             pm.SetClientAction(name, member);
