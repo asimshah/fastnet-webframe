@@ -53,6 +53,15 @@ var fastnet;
                         return new booking.observableBookingModel(b);
                 }
             };
+            factory.getCustomAdminIndex = function () {
+                switch (factory.name) {
+                    case FactoryName.DonWhillansHut:
+                        return new booking.dwhAdminIndex();
+                        break;
+                    default:
+                        return null;
+                }
+            };
             factory.name = FactoryName.None;
             return factory;
         })();

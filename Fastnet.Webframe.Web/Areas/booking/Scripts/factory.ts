@@ -49,6 +49,15 @@
                         return new observableBookingModel(b);
                 }
             }
+            public static getCustomAdminIndex(): adminCustomIndex {
+                switch (factory.name) {
+                    case FactoryName.DonWhillansHut:
+                        return new dwhAdminIndex();
+                        break;
+                    default:
+                        return null;
+                }
+            }
         }
 
     }

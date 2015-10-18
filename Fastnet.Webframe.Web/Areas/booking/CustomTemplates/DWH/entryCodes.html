@@ -1,0 +1,63 @@
+﻿<div class="admin-reports entry-codes">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="current-code-panel">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="current-code-text">
+                            <span>Current code is:</span>
+                            <span data-bind="text: currentEntryCode"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="current-code-text">
+                            <span>This code is valid till:</span>
+                            <span data-bind="text: validTo"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="code-list-panel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Starting From</th>
+                            <th>Code</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: codeList">
+                        <tr data-bind="attr: {'data-id': entryCodeId}">
+                            <td><div data-bind="text: applicableFrom"></div></td>
+                            <td><div data-bind="text: code"></div></td>
+                            <td><button class="btn btn-sm btn-primary" data-cmd="remove-code">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label>New Entry Code</label>
+                <div class="input-group add-entry-form">
+                    <input type="text" data-input="date" class="form-control" placeholder="from" data-bind="value: applicableFrom, stdDateFormat: applicableFrom">
+                    <input  type="text"  class="form-control" placeholder="code" data-bind="textInput: newCode">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" data-cmd="add-code">Add Entry Code</button>
+                    </div>
+                </div>
+                <span class="validationMessage" data-bind="validationMessage: applicableFrom"></span>
+                <span class="validationMessage" data-bind="validationMessage: newCode"></span>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -253,13 +253,15 @@ var fastnet;
             form.addMomentBinding = function () {
                 ko.bindingHandlers["stdDateFormat"] = {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
+                        var format = allBindingsAccessor().format || 'DDMMMYYYY';
                         var val = valueAccessor();
                         var formatted = ""; // throw instead?
-                        var date = moment(ko.utils.unwrapObservable(val));
-                        //var format = allBindingsAccessor().format || 'MM/DD/YYYY';
-                        var format = allBindingsAccessor().format || 'DDMMMYYYY';
-                        if (date && date.isValid()) {
-                            formatted = date.format(format);
+                        var unwrapped = ko.utils.unwrapObservable(val);
+                        if (typeof unwrapped !== "undefined") {
+                            var date = moment(unwrapped);
+                            if (date && date.isValid()) {
+                                formatted = date.format(format);
+                            }
                         }
                         if (element.tagName === "INPUT") {
                             $(element).val(formatted);
@@ -440,15 +442,16 @@ var fastnet;
             form.prototype.finalise = function () {
                 var _this = this;
                 this.rootElement = this.getRoot().get(0);
-                this.bindEmbeddedButtons();
-                this.attachDatePickers();
                 if (this.model !== null) {
                     this.knockoutIsBound = true;
                     this.updateElementAttributes();
                     this.observableModel = ko.validatedObservable(this.model);
                     ko.applyBindings(this.observableModel, this.rootElement);
                 }
-                var focusableElements = "input:not([type='checkbox']):not([type='button']):not([type='date']):not([data-input='date'])";
+                this.bindEmbeddedButtons();
+                this.attachDatePickers();
+                //var focusableElements = "input:not([type='checkbox']):not([type='button']):not([type='date']):not([data-input='date'])";
+                var focusableElements = "[data-focus]";
                 $(this.rootElement).find(focusableElements).each(function (i, c) {
                     var v = $(c).val().trim();
                     if (v === null || v === "") {
@@ -626,7 +629,9 @@ var fastnet;
                 }
             };
             form.prototype.attachDatePickers = function () {
-                $(this.rootElement).find("input[type=date], input[type=text][data-input='date']").datepicker((this.options.datepickerOptions || null));
+                var dpOptions = $.extend({ dateFormat: 'dMyy' }, this.options.datepickerOptions || null);
+                //$(this.rootElement).find("input[type=date], input[type=text][data-input='date']").datepicker((this.options.datepickerOptions || null));
+                $(this.rootElement).find("input[type=date], input[type=text][data-input='date']").datepicker(dpOptions);
             };
             form.prototype.bindEmbeddedButtons = function () {
                 var _this = this;

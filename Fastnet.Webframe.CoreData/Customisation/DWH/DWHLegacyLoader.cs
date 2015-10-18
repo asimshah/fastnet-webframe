@@ -644,7 +644,6 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
-
         private void LoadBookingData()
         {
             using (BookingDataContext bctx = new BookingDataContext())
@@ -653,9 +652,21 @@ namespace Fastnet.Webframe.CoreData
                 CreateAccomodation(bctx);
                 CreatePriceStructure(bctx);
                 LoadBookings(bctx);
+                LoadEntryCodes(bctx);
             }
         }
-
+        private void LoadEntryCodes(BookingDataContext bctx)
+        {
+            var codes = legacyBookingData.EntryCodes;
+            foreach (var item in codes)
+            {
+                BookingData.EntryCode ec = new BookingData.EntryCode();
+                ec.ApplicableFrom = item.ApplicableFrom;
+                ec.Code = item.Code;
+                bctx.EntryCodes.Add(ec);
+            }
+            bctx.SaveChanges();
+        }
         private void SetParameters(BookingDataContext bctx)
         {
             Period pp = new Period
@@ -675,7 +686,6 @@ namespace Fastnet.Webframe.CoreData
             bctx.Parameters.Add(p);
             bctx.SaveChanges();
         }
-
         private List<Period> LoadBlockedDays(BookingDataContext bctx)
         {
             var blockeddays = legacyBookingData.DayBook.Where(db => db.Day >= DateTime.Today && db.IsUnavailable).Select(d => d.Day).OrderBy(x => x).ToList();
@@ -739,7 +749,6 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
-
         private void CreateBookings(BookingDataContext bctx, BookingData.Booking newBooking, DWH.Booking lBooking, DWHMember member)
         {
             Action<IEnumerable<ReleasedItem>> addAccomodation = (items) =>
@@ -835,7 +844,6 @@ namespace Fastnet.Webframe.CoreData
             //}
             
         }
-
         private void CreatePriceStructure(BookingDataContext bctx)
         {
             PriceStructure ps = new PriceStructure

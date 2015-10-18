@@ -33,8 +33,10 @@
         },
         {
           "path": "~/bundles/booking/admin",
-          "files": [ "~/Areas/booking/scripts/dwh/dwhBookingCommon.js", 
-                     "~/Areas/booking/scripts/dwh/dwhAdminViewModels.js" ]
+          "files": [ "~/Areas/booking/scripts/dwh/dwhBookingCommon.js",
+            "~/Areas/booking/scripts/dwh/dwhAdminViewModels.js",
+            "~/Areas/booking/scripts/dwh/dwhBookingAdmin.js"
+          ]
         }
       ],
       "Scripts": [ "~/Areas/booking/scripts/dwh/dwhbookingModels.js", "~/Areas/booking/scripts/dwh/dwhRequestCustomiser.js" ]

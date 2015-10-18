@@ -18,5 +18,6 @@ namespace Fastnet.Webframe.CoreData.DWH
         public DbSet<ReleasedItem> ReleasedItems { get; set; }
         public DbSet<PricingCategory> PricingCategories { get; set; }
         public DbSet<DayBookEntry> DayBook { get; set; }
+        public DbSet<EntryCode> EntryCodes { get; set; }
     }
 }

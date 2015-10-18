@@ -94,4 +94,11 @@ namespace Fastnet.Webframe.CoreData.DWH
         public DateTime Day { get; set; }
         public bool IsUnavailable { get; set; }
     }
+    public class EntryCode
+    {
+        public long EntryCodeId { get; set; }
+        public DateTime ApplicableFrom { get; set; }
+        public string Code { get; set; }
+
+    }
 }

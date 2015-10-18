@@ -50,20 +50,23 @@ module fastnet {
                 return deferred.promise();
             }
         }
-        class adminSubapp {
+        export class adminSubapp {
             protected app: adminApp;
             constructor(app: adminApp) {
                 this.app = app;
             }
         }
-        class adminIndex extends adminSubapp {
+        export abstract class adminCustomIndex {
+            public abstract handleCommand(parent: forms.form, app: adminApp, cmd: string): void;
+        }
+        export class adminIndex extends adminSubapp {
             //private app: adminApp;
             constructor(app: adminApp) {
                 super(app);
                 //this.app = app;
             }
             public start(): void {
-                debug.print("admin index started");
+                //debug.print("admin index started");
                 var aiForm = new forms.form(this, {
                     modal: false,
                     title: "Booking Administration",
@@ -74,7 +77,6 @@ module fastnet {
                 var adminIndexFormTemplateUrl = "booking/adminIndex";
                 wt.getTemplate({ ctx: this, templateUrl: adminIndexFormTemplateUrl }).then((r) => {
                     aiForm.setContentHtml(r.template);
-
                     aiForm.open((ctx: adminIndex, f: forms.form, cmd: string, data: any) => {
                         switch (cmd) {
                             case "cancel-command":
@@ -112,13 +114,16 @@ module fastnet {
                                 br.start(bookingReportType.archived);
                                 break;
                             default:
-                                forms.messageBox.show("This feature not yet implemented").then(() => { });
+                                var ch = factory.getCustomAdminIndex();
+                                if (ch != null && ch.handleCommand(f, this.app, cmd)) {
+                                } else {
+                                    forms.messageBox.show("This feature not yet implemented").then(() => { });
+                                }
                                 break;
                         }
                     });
                 });
             }
-
         }
         class configIndex extends adminSubapp {
             constructor(app: adminApp) {
@@ -126,7 +131,7 @@ module fastnet {
                 //this.app = app;
             }
             public start(): void {
-                debug.print("configuration index started");
+                //debug.print("configuration index started");
                 var ciForm = new forms.form(this, {
                     modal: false,
                     title: "Booking Configuration",
@@ -170,13 +175,11 @@ module fastnet {
                 //this.app = app;
             }
             public start(): void {
-                debug.print("parametersApp started");
-
+                //debug.print("parametersApp started");
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then((r: server.bookingParameters) => {
                     factory.setFactory(r.factoryName);
                     var model = factory.getParameters(r);
-                    //model.setFromJSON(r);
                     var vm = model.getObservable();
                     this.showForm(vm);
                 });
@@ -236,7 +239,7 @@ module fastnet {
                 super(app);
             }
             public start(rt: bookingReportType = bookingReportType.normal): void {
-                
+
                 $.fn.dataTable.moment('DDMMMYYYY');
                 var reportFormTemplate = "booking/bookingreportform";
                 var reportTemplate = "booking/bookingreport";
@@ -325,7 +328,7 @@ module fastnet {
                                     debug.print("data-table-cmd");
                                     this.embeddedButtonHandler(bookingList, e);
                                 });
-                                this.dataTable =  oform.find("#booking-report-table").DataTable({
+                                this.dataTable = oform.find("#booking-report-table").DataTable({
                                     "columnDefs": [{ "type": "natural", targets: 0 }],
                                     pagingType: "simple",
                                     order: [[0, 'asc']]
@@ -437,7 +440,7 @@ module fastnet {
                                 break;
                             case "cancel-command":
                                 f.close();
-                                //break;
+                            //break;
                             default:
                                 deferred.resolve(false);
                                 break;
@@ -472,8 +475,8 @@ module fastnet {
                                 { text: "Cancel Booking", command: "cancel-booking", position: forms.buttonPosition.left },
                             ];
                             break;
-                    }    
-                    var spf = new forms.form(this, options, bm);               
+                    }
+                    var spf = new forms.form(this, options, bm);
                     spf.setContentHtml(r.template);
                     spf.open((ctx: any, f: forms.form, cmd: string, data: bookingModels) => {
                         switch (cmd) {

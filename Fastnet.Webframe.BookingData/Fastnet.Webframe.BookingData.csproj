@@ -71,6 +71,7 @@
     <Compile Include="Accomodation.cs" />
     <Compile Include="Classes with typings\bookingStatus.cs" />
     <Compile Include="Customisation\DWH\DWHParameter.cs" />
+    <Compile Include="EntryCode.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="Classes with typings\calendarSetup.cs" />
     <Compile Include="Availability.cs" />

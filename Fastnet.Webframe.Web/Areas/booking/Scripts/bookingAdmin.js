@@ -67,6 +67,13 @@ var fastnet;
             }
             return adminSubapp;
         })();
+        booking_1.adminSubapp = adminSubapp;
+        var adminCustomIndex = (function () {
+            function adminCustomIndex() {
+            }
+            return adminCustomIndex;
+        })();
+        booking_1.adminCustomIndex = adminCustomIndex;
         var adminIndex = (function (_super) {
             __extends(adminIndex, _super);
             //private app: adminApp;
@@ -76,7 +83,7 @@ var fastnet;
             }
             adminIndex.prototype.start = function () {
                 var _this = this;
-                debug.print("admin index started");
+                //debug.print("admin index started");
                 var aiForm = new forms.form(this, {
                     modal: false,
                     title: "Booking Administration",
@@ -124,7 +131,12 @@ var fastnet;
                                 br.start(bookingReportType.archived);
                                 break;
                             default:
-                                forms.messageBox.show("This feature not yet implemented").then(function () { });
+                                var ch = booking_1.factory.getCustomAdminIndex();
+                                if (ch != null && ch.handleCommand(f, _this.app, cmd)) {
+                                }
+                                else {
+                                    forms.messageBox.show("This feature not yet implemented").then(function () { });
+                                }
                                 break;
                         }
                     });
@@ -132,6 +144,7 @@ var fastnet;
             };
             return adminIndex;
         })(adminSubapp);
+        booking_1.adminIndex = adminIndex;
         var configIndex = (function (_super) {
             __extends(configIndex, _super);
             function configIndex(app) {
@@ -140,7 +153,7 @@ var fastnet;
             }
             configIndex.prototype.start = function () {
                 var _this = this;
-                debug.print("configuration index started");
+                //debug.print("configuration index started");
                 var ciForm = new forms.form(this, {
                     modal: false,
                     title: "Booking Configuration",
@@ -187,12 +200,11 @@ var fastnet;
             }
             parametersApp.prototype.start = function () {
                 var _this = this;
-                debug.print("parametersApp started");
+                //debug.print("parametersApp started");
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then(function (r) {
                     booking_1.factory.setFactory(r.factoryName);
                     var model = booking_1.factory.getParameters(r);
-                    //model.setFromJSON(r);
                     var vm = model.getObservable();
                     _this.showForm(vm);
                 });

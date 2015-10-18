@@ -258,6 +258,7 @@
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\availabilityInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\booking.cs" />
+    <Compile Include="Areas\booking\TransferObjects\entryCode.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\bookingParameters.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
@@ -360,7 +361,9 @@
     <Content Include="Areas\booking\Content\main.min.css">
       <DependentUpon>main.css</DependentUpon>
     </Content>
+    <Content Include="Areas\booking\CustomTemplates\DWH\adminIndex.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\BookingReport.html" />
+    <Content Include="Areas\booking\CustomTemplates\DWH\entryCodes.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\request-step1.html" />
     <Content Include="Areas\booking\Templates\adminIndex.html" />
@@ -1622,7 +1625,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\booking\Links\" />
     <Folder Include="Areas\booking\Models\" />
     <Folder Include="Areas\booking\Scripts\typings\" />
     <Folder Include="Areas\cms\Common\" />
@@ -1669,6 +1671,7 @@
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\bookingViewModels.ts" />
+    <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhBookingAdmin.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhBookingCommon.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhAdminViewModels.ts" />
     <TypeScriptCompile Include="Areas\booking\Scripts\dwh\dwhRequestCustomiser.ts" />
@@ -1685,6 +1688,9 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\BookingParameters.cs.d.ts">
       <DependentUpon>bookingParameters.cs</DependentUpon>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\entryCode.cs.d.ts">
+      <DependentUpon>entryCode.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\TransferObjects\MemberInfo.cs.d.ts">
       <DependentUpon>MemberInfo.cs</DependentUpon>

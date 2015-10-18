@@ -560,6 +560,24 @@ button.side-button {
   color: #2d89ef;
   font-weight: normal;
 }
+.admin-reports .message-block {
+  font-size: small;
+  color: #1e7145;
+  font-style: italic;
+}
+.admin-reports .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.admin-reports .validation-error {
+  border: 1px solid red;
+}
+.admin-reports .help-block {
+  font-size: small;
+  font-style: italic;
+  color: #2b5797;
+}
 .admin-reports .ui-widget {
   font-size: 0.9em;
 }
@@ -700,6 +718,16 @@ button.side-button {
 }
 .admin-reports.occupancy-report .report-content .accomodation-row {
   font-size: x-small;
+}
+.admin-reports.entry-codes .current-code-panel {
+  border-bottom: 1px solid #373737;
+  padding-bottom: 12px;
+}
+.admin-reports.entry-codes .code-list-panel {
+  padding: 8px;
+}
+.admin-reports.entry-codes .add-entry-form input {
+  width: 50%;
 }
 .ui-form-button[data-cmd='cancel-booking'] {
   background-image: none;

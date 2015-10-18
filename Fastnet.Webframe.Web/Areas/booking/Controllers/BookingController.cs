@@ -384,82 +384,82 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             }
             return dcsList;
         }
-        [HttpGet]
-        [Route("test1")]
-        public dynamic Test1()
-        {
-            long abodeId = 1;
-            using (var ctx = new BookingDataContext())
-            {
-                DateTime start = new DateTime(2015, 9, 21);
-                DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, start);
-                dynamic r = di.ToClientType();
-                return r;
-            }
-        }
-        [HttpGet]
-        [Route("test2")]
-        public dynamic[] Test2()
-        {
-            long abodeId = 1;
-            using (var ctx = new BookingDataContext())
-            {
-                DateTime start = new DateTime(2015, 9, 21);
-                DateTime end = new DateTime(2015, 10, 21);
-                List<DayInformation> dayList = new List<DayInformation>();
-                for (DateTime day = start; day <= end; day = day.AddDays(1))
-                {
-                    DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);
-                    dayList.Add(di);
-                }
-                return dayList.Select(x => x.ToClientType()).ToArray();
-            }
-        }
-        [HttpGet]
-        [Route("test3")]
-        public dynamic[] Test3()
-        {
-            DayInformation one;
-            DayInformation two;
-            DayInformation three;
-            DayInformation four;
-            long abodeId = 1;
-            Debug.Print("test 1 ...");
-            using (var ctx = new BookingDataContext())
-            {
-                DateTime start = new DateTime(2015, 9, 21);
-                //one =  DayInformation2.GetDayInformation(ctx, start);
-                //four =  DayInformation2.GetDayInformation(ctx, start);
-                one = Factory.GetDayInformationInstance(ctx, abodeId, start);
-                //four = Factory.GetDayInformationInstance(ctx, start);
-            }
-            using (var ctx = new BookingDataContext())
-            {
-                DateTime start = new DateTime(2015, 9, 21);
-                DateTime end = new DateTime(2015, 12, 21);
-                //DayInformation2 cached = null;
-                List<DayInformation> dayList = new List<DayInformation>();
-                for (DateTime day = start; day <= end; day = day.AddDays(1))
-                {
-                    DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);// DayInformation2.GetDayInformation(ctx, day);
-                    //if (cached == null)
-                    //{
-                    //    cached = di;
-                    //}
-                    //dayList.Add(di);
-                    //var fi = dayList.First();
-                    //Debug.Print("After adding {0}, on {1} {2}, Accomodation.Count() = {3}, SelfAndDescendants.Count() = {4}: {5}", day.ToString("ddMMMyyyy"),
-                    //    cached.Day.ToString("ddMMMyyyy"),
-                    //    cached.GetAvailabilitySummary(), cached.Accomodation.Count(),
-                    //    cached.Accomodation.First().SelfAndDescendants.Count(),
-                    //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants.Select(x => string.Format("{0}", x.IsAvailableToBook)).ToArray()),
-                    //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants
-                    //    .Select(x => string.Format("{0}", x.Bookings.Count())).ToArray())
-                    //    );
-                }
-            }
-            Debugger.Break();
-            return null;
-        }
+        //[HttpGet]
+        //[Route("test1")]
+        //public dynamic Test1()
+        //{
+        //    long abodeId = 1;
+        //    using (var ctx = new BookingDataContext())
+        //    {
+        //        DateTime start = new DateTime(2015, 9, 21);
+        //        DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, start);
+        //        dynamic r = di.ToClientType();
+        //        return r;
+        //    }
+        //}
+        //[HttpGet]
+        //[Route("test2")]
+        //public dynamic[] Test2()
+        //{
+        //    long abodeId = 1;
+        //    using (var ctx = new BookingDataContext())
+        //    {
+        //        DateTime start = new DateTime(2015, 9, 21);
+        //        DateTime end = new DateTime(2015, 10, 21);
+        //        List<DayInformation> dayList = new List<DayInformation>();
+        //        for (DateTime day = start; day <= end; day = day.AddDays(1))
+        //        {
+        //            DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);
+        //            dayList.Add(di);
+        //        }
+        //        return dayList.Select(x => x.ToClientType()).ToArray();
+        //    }
+        //}
+        //[HttpGet]
+        //[Route("test3")]
+        //public dynamic[] Test3()
+        //{
+        //    DayInformation one;
+        //    DayInformation two;
+        //    DayInformation three;
+        //    DayInformation four;
+        //    long abodeId = 1;
+        //    Debug.Print("test 1 ...");
+        //    using (var ctx = new BookingDataContext())
+        //    {
+        //        DateTime start = new DateTime(2015, 9, 21);
+        //        //one =  DayInformation2.GetDayInformation(ctx, start);
+        //        //four =  DayInformation2.GetDayInformation(ctx, start);
+        //        one = Factory.GetDayInformationInstance(ctx, abodeId, start);
+        //        //four = Factory.GetDayInformationInstance(ctx, start);
+        //    }
+        //    using (var ctx = new BookingDataContext())
+        //    {
+        //        DateTime start = new DateTime(2015, 9, 21);
+        //        DateTime end = new DateTime(2015, 12, 21);
+        //        //DayInformation2 cached = null;
+        //        List<DayInformation> dayList = new List<DayInformation>();
+        //        for (DateTime day = start; day <= end; day = day.AddDays(1))
+        //        {
+        //            DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);// DayInformation2.GetDayInformation(ctx, day);
+        //            //if (cached == null)
+        //            //{
+        //            //    cached = di;
+        //            //}
+        //            //dayList.Add(di);
+        //            //var fi = dayList.First();
+        //            //Debug.Print("After adding {0}, on {1} {2}, Accomodation.Count() = {3}, SelfAndDescendants.Count() = {4}: {5}", day.ToString("ddMMMyyyy"),
+        //            //    cached.Day.ToString("ddMMMyyyy"),
+        //            //    cached.GetAvailabilitySummary(), cached.Accomodation.Count(),
+        //            //    cached.Accomodation.First().SelfAndDescendants.Count(),
+        //            //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants.Select(x => string.Format("{0}", x.IsAvailableToBook)).ToArray()),
+        //            //    string.Join(", ", cached.Accomodation.First().SelfAndDescendants
+        //            //    .Select(x => string.Format("{0}", x.Bookings.Count())).ToArray())
+        //            //    );
+        //        }
+        //    }
+        //    Debugger.Break();
+        //    return null;
+        //}
     }
 }

@@ -158,5 +158,73 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
             }
         }
+        [HttpGet]
+        [Route("get/entrycodes")]
+        public dynamic GetEntryCodes()
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                try
+                {
+                    DateTime today = BookingGlobals.GetToday();
+                    DateTime startListAt = today.AddMonths(-1);
+                    startListAt = new DateTime(startListAt.Year, startListAt.Month, 1);
+                    var entryCodes = ctx.EntryCodes.OrderBy(x => x.ApplicableFrom).ToArray();
+                    var allCodes = entryCodes.Where(x => x.ApplicableFrom >= startListAt).Select(x => new entryCode(x));
+                    EntryCode current = entryCodes.Where(x => x.ApplicableFrom <= today).LastOrDefault();
+                    EntryCode next = null;
+                    if (current != null)
+                    {
+                        next = entryCodes.Where(x => x.ApplicableFrom > current.ApplicableFrom).OrderBy(x => x.ApplicableFrom).FirstOrDefault();
+                    }
+                    return new
+                    {
+                        currentEntryCode = current != null ? new entryCode(current) : null,
+                        validFrom = current?.ApplicableFrom.ToDefault(),
+                        validTo = next?.ApplicableFrom.AddDays(-1).ToDefault(),
+                        allCodes = allCodes
+                    };
+                }
+                catch (Exception)
+                {
+                    
+                    throw;
+                }
+            }
+        }
+        [HttpPost]
+        [Route("add/entrycode")]
+        public void AddEntryCode(dynamic data)
+        {
+            string afd = data.from;
+            string code = data.code;
+            DateTime from = DateTime.Parse(afd);
+            using (var ctx = new BookingDataContext())
+            {
+                EntryCode ec = ctx.EntryCodes.SingleOrDefault(x => x.ApplicableFrom == from);
+                if(ec == null)
+                {
+                    ec = new EntryCode();
+                    ec.ApplicableFrom = from;
+                    ctx.EntryCodes.Add(ec);
+                }
+                ec.Code = code;
+                ctx.SaveChanges();
+            }
+        }
+        [HttpPost]
+        [Route("remove/entrycode/{id}")]
+        public void RemoveEntryCode(long id)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                EntryCode ec = ctx.EntryCodes.Find(id);
+                if (ec != null)
+                {
+                    ctx.EntryCodes.Remove(ec);
+                    ctx.SaveChanges();
+                }
+            }
+        }
     }
 }
