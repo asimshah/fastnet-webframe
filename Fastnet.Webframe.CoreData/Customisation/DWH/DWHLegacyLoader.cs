@@ -718,12 +718,11 @@ namespace Fastnet.Webframe.CoreData
                 {
                     DWHMember member = coreDb.Members.Single(m => m.EmailAddress == lBooking.Visitor.Email) as DWHMember;
                     Debug.Assert(member != null);
-                    //Debug.Print("Loading {0}", lBooking.Reference);
-                    //if (lBooking.Reference == "Apr15/004")
+                    DateTime to = lBooking.ReleasedItems.Max(x => x.Date);
+                    //if(lBooking.Reference == "Aug15/001")
                     //{
                     //    Debugger.Break();
                     //}
-                    DateTime to = lBooking.ReleasedItems.Max(x => x.Date);
                     BookingData.Booking b = new BookingData.Booking
                     {
                         CreatedOn = lBooking.BookingDate,
@@ -775,12 +774,14 @@ namespace Fastnet.Webframe.CoreData
                 newBooking.To = lBooking.ReleasedItems.First().Date;
                 if (lBooking.ReleasedItems.Count() == 12)
                 {
+                    newBooking.PartySize = 12;// we have no information as to the party size
                     Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
                     newBooking.AccomodationCollection.Add(ac);
                     bctx.Bookings.Add(newBooking);
                 }
                 else
                 {
+                    newBooking.PartySize = lBooking.ReleasedItems.Count();
                     addAccomodation(lBooking.ReleasedItems);
                     bctx.Bookings.Add(newBooking);
                 }
@@ -797,6 +798,7 @@ namespace Fastnet.Webframe.CoreData
                     if (firstCount == 12)
                     {
                         // change a 12 bed booking into a whole hut
+                        newBooking.PartySize = 12;// we have no information as to the party size
                         newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
                         Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
                         newBooking.AccomodationCollection.Add(ac);
@@ -805,6 +807,15 @@ namespace Fastnet.Webframe.CoreData
                     else
                     {
                         newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
+                        if (lBooking.ReleasedItems.Select(x => x.BookableItem).All(x => x.Type == BookableItemTypes.Hut))
+                        {
+                            newBooking.PartySize = 12;
+                        }
+                        else
+                        {
+                            newBooking.PartySize = lBooking.ReleasedItems.Where(x => x.Date == newBooking.To).Count();
+                        }
+
                         addAccomodation(lBooking.ReleasedItems);
                         bctx.Bookings.Add(newBooking);
                     }
@@ -814,6 +825,7 @@ namespace Fastnet.Webframe.CoreData
                     bool  everyDayIsTheHut = itemsByDate.All(x => x.count == 12 || x.count == 1 && x.list.First().BookableItem.Name == "Don Whillans Hut");
                     if(everyDayIsTheHut)
                     {
+                        newBooking.PartySize = 12;// we have no information as to the party size
                         newBooking.To = lBooking.ReleasedItems.Max(d => d.Date);
                         Accomodation ac = bctx.AccomodationSet.Single(a => a.Type == AccomodationType.Hut);
                         newBooking.AccomodationCollection.Add(ac);
@@ -852,7 +864,7 @@ namespace Fastnet.Webframe.CoreData
             };
             Period pp = new Period
             {
-                Name = "Fixed Period",
+                Name = "Rolling Period",
                 Description = "Range is from 1Jan2014 onwards",
                 PeriodType = PeriodType.Fixed,
                 StartDate = DateTime.Parse("1/1/2014"),
@@ -866,17 +878,17 @@ namespace Fastnet.Webframe.CoreData
                 Type = AccomodationType.Bed,
                 Capacity = 1
             };
-            Price hutPrice = new Price
-            {
-                Period = pp,
-                Amount = 120.0M,
-                Class = AccomodationClass.Standard,
-                Type = AccomodationType.Hut,
-                Capacity = 1
-            };
+            //Price hutPrice = new Price
+            //{
+            //    Period = pp,
+            //    Amount = 120.0M,
+            //    Class = AccomodationClass.Standard,
+            //    Type = AccomodationType.Hut,
+            //    Capacity = 12
+            //};
             ps.Periods.Add(pp);
             bctx.Prices.Add(bedPrice);
-            bctx.Prices.Add(hutPrice);
+            //bctx.Prices.Add(hutPrice);
             bctx.PriceStructures.Add(ps);
             bctx.SaveChanges();
         }

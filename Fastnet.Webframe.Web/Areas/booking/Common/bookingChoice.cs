@@ -19,6 +19,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public int choiceNumber { get; set; }
         //public bool selected { get; set; }
         public int totalCapacity { get; set; }
+        public int partySize { get; set; }
         public List<dailyCostItem> costs { get; set; }
         public bool costsAreEqualEveryDay { get; set; }
         public decimal totalCost { get; set; }

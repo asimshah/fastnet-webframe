@@ -4,8 +4,10 @@
             <tr>
                 <th class="all"><div class="reference">Reference</div></th>
                 <th><div class="dates">From</div></th>
-                <th><div class="nights">Nights</div></th>
                 <th><div class="status">Status</div></th>
+                <th><div class="nights">Nights</div></th>
+                <th ><div class="party-size">Party</div></th>
+                <th ><div class="under-age">Under 18s</div></th>
                 <th><div class="member-name">Name</div></th>
                 <th><div class="member-email">Email Address</div></th>
                 <th><div class="member-phone">Phone</div></th>
@@ -20,9 +22,10 @@
             <tr class="{{#isPaid}}is-paid{{/isPaid}} status-{{statusName}}" data-booking-id="{{bookingId}}">
                 <td><button class="btn btn-xs btn-link edit-button" data-table-cmd="edit-booking">{{reference}}</button></td>
                 <td>{{from}}</td>
-                <td>{{numberOfNights}}</td>
-                <!--<td class="status"><span class="status-{{statusName}}">{{statusName}}</span></td>-->
                 <td class="status">{{statusName}}</td>
+                <td>{{numberOfNights}}</td>
+                <td>{{partySize}}</td>
+                <td>{{under18sInParty}}</td>
                 <td>{{memberName}}</td>
                 <td><a href="mailto://{{memberEmailAddress}}?Subject=Booking Reference {{reference}}">{{memberEmailAddress}}</a></td>
                 <td class="phone-number">{{memberPhoneNumber}}</td>

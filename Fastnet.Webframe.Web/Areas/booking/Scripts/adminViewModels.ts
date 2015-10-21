@@ -16,6 +16,7 @@ module fastnet {
             from: string;
             to: string;
             createdOn: string;
+            partySize: number;
             totalCost: number;
             formattedCost: string;
             isPaid: boolean;
@@ -38,14 +39,14 @@ module fastnet {
             from: string;
             to: string;
             createdOn: string;
-            //totalCost: number;
+            partySize: number;
             formattedCost: string;
             isPaid: boolean;// KnockoutObservable<boolean>;
             notes: KnockoutObservable<string>;
             history: string;
             duration: string;
             //entryInformation: string;
-            //under18sInParty: boolean;
+            under18sInParty: boolean;
             //numberOfNights: number;
             //hasMultipleDays: boolean;
             constructor(b: bookingModel) {
@@ -64,6 +65,8 @@ module fastnet {
                 this.from = b.from;
                 this.to = b.to;
                 this.createdOn = b.createdOn;
+                this.partySize = b.partySize;
+                this.under18sInParty = b.under18sInParty;
                 this.formattedCost = b.formattedCost;
                 this.isPaid = b.isPaid;// ko.observable(b.isPaid);
                 this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);

@@ -20,8 +20,6 @@ var fastnet;
         booking.bookingModel = bookingModel;
         var observableBookingModel = (function (_super) {
             __extends(observableBookingModel, _super);
-            //entryInformation: string;
-            //under18sInParty: boolean;
             //numberOfNights: number;
             //hasMultipleDays: boolean;
             function observableBookingModel(b) {
@@ -40,6 +38,8 @@ var fastnet;
                 this.from = b.from;
                 this.to = b.to;
                 this.createdOn = b.createdOn;
+                this.partySize = b.partySize;
+                this.under18sInParty = b.under18sInParty;
                 this.formattedCost = b.formattedCost;
                 this.isPaid = b.isPaid; // ko.observable(b.isPaid);
                 this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);
@@ -130,3 +130,4 @@ var fastnet;
         booking.observableManageDaysModel = observableManageDaysModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=adminViewModels.js.map

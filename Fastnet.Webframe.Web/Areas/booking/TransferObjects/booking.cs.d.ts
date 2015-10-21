@@ -11,6 +11,7 @@
 		from: string;
 		to: string;
 		createdOn: string;
+		partySize: number;
 		totalCost: number;
 		formattedCost: string;
 		isPaid: boolean;

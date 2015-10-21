@@ -10,6 +10,7 @@ declare module server {
 	interface bookingChoice {
 		choiceNumber: number;
 		totalCapacity: number;
+		partySize: number;
 		costs: server.dailyCostItem[];
 		costsAreEqualEveryDay: boolean;
 		totalCost: number;

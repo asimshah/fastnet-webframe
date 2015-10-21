@@ -686,3 +686,4 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=booking.js.map

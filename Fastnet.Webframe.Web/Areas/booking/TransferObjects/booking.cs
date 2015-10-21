@@ -21,6 +21,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public string from { get; set; }
         public string to { get; set; }
         public string createdOn { get; set; }
+        public int partySize { get; set; }
         public Decimal totalCost { get; set; }
         public string formattedCost { get; set; }
         public bool isPaid { get; set; }
@@ -41,6 +42,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.numberOfNights = (int)(b.To - b.From).TotalDays + 1;
             this.hasMultipleDays = this.numberOfNights > 1;
             this.createdOn = b.CreatedOn.ToDefault();
+            this.partySize = b.PartySize;
             this.totalCost = b.TotalCost;
             this.formattedCost = string.Format("£{0:#0}", this.totalCost);
             this.isPaid = b.IsPaid;

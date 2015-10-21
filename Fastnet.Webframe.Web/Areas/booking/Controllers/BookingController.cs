@@ -173,6 +173,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             var common = DailyChoices.SelectCommonChoices(choices);
                             foreach (var choice in common)
                             {
+                                choice.PartySize = peopleCount;
                                 choice.CostPerDay = new List<CostPerDay>();
                                 foreach (DateTime dt in choices.Select(x => x.Day))
                                 {
@@ -266,7 +267,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             Reference = newBookingReference(),
                             To = to, //request.toDate,
                             TotalCost = request.choice.totalCost,
-                            Under18sInParty = request.under18spresent
+                            Under18sInParty = request.under18spresent,
+                            PartySize = request.choice.partySize
                         };
                         foreach(var a in toBeBooked)
                         {

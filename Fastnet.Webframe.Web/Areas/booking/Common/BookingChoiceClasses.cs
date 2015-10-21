@@ -107,7 +107,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public DateTime Day { get; set; }
         public IEnumerable<DayInformation.DailyAccomodation> Accomodation { get; set; }
         public int Capacity { get; set; }
-        //public decimal Cost { get; set; }
+        public int PartySize { get; set; }
         public List<CostPerDay> CostPerDay { get; set; } // used only by pricing
         public override string ToString()
         {
