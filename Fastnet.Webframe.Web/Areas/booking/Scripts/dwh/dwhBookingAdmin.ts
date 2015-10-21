@@ -41,6 +41,7 @@
                 var ecform = new forms.form(this, {
                     modal: false,
                     title: "Entry Codes",
+                    styleClasses: ["report-forms"],
                     cancelButtonText: "Administration page",
                     okButton: null,
                     additionalButtons: [

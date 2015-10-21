@@ -16,7 +16,7 @@ var fastnet;
         function configuration() {
         }
         configuration.getFormStyleClasses = function () {
-            return ["booking-forms"];
+            return ["report-forms"];
         };
         return configuration;
     })();
@@ -45,7 +45,7 @@ var fastnet;
                 var config = {
                     modelessContainer: "admin-interaction",
                     enableRichText: true,
-                    richTextCssUrl: "../areas/booking/content/richtext.css"
+                    richTextCssUrl: "../areas/booking/content/richtext.css" //,
                 };
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
@@ -129,6 +129,11 @@ var fastnet;
                                 f.close();
                                 var br = new bookingReport(_this.app);
                                 br.start(bookingReportType.archived);
+                                break;
+                            case "manage-booking-days":
+                                f.close();
+                                var md = new manageDays(_this.app);
+                                md.start();
                                 break;
                             default:
                                 var ch = booking_1.factory.getCustomAdminIndex();
@@ -253,6 +258,251 @@ var fastnet;
                 });
             };
             return parametersApp;
+        })(adminSubapp);
+        var manageDays = (function (_super) {
+            __extends(manageDays, _super);
+            function manageDays(app) {
+                _super.call(this, app);
+            }
+            manageDays.prototype.start = function () {
+                var _this = this;
+                this.dayDictionary = new collections.Dictionary();
+                //this.abodeId = this.app.parameters.currentAbode.id;
+                this.calendarPeriod = { start: null, end: null };
+                this.loadInitialisationData().then(function () {
+                    // current period and all day status information has all been loaded
+                    _this.showForm();
+                });
+            };
+            manageDays.prototype.addBookingCalendar = function (nm) {
+                var _this = this;
+                $('#bookingCalendar').datepicker({
+                    defaultDate: this.today,
+                    numberOfMonths: nm,
+                    minDate: this.calendarPeriod.start,
+                    maxDate: this.calendarPeriod.end,
+                    beforeShowDay: function (d) { return _this.calendarBeforeShowDate(d); },
+                    //onChangeMonthYear: (m, y) => {
+                    //    //this.calendarOnChangeMonth(m, y);
+                    //},                    
+                    //onSelect: this.BookingDateSelected,
+                    dateFormat: 'DD d M yy'
+                }).val('');
+                window.onresize = function (e) {
+                    _this.setCalendarMonthCount();
+                };
+                return this.setCalendarMonthCount();
+            };
+            manageDays.prototype.calendarBeforeShowDate = function (d) {
+                var day = moment(d);
+                if (day.isBefore(this.calendarPeriod.start) || day.isAfter(this.calendarPeriod.end)) {
+                    return [false, "blocked", "Out of range"];
+                }
+                if (this.dayDictionary.isEmpty()) {
+                    return [false, "blocked", "not ready"];
+                }
+                else {
+                    if (this.dayDictionary.containsKey(str.toDateString(day))) {
+                        var di = this.dayDictionary.getValue(str.toDateString(day));
+                        var r;
+                        switch (di.status) {
+                            case 0 /* IsClosed */:
+                                r = [false, "out-of-service", di.calendarPopup];
+                                break;
+                            case 2 /* IsFull */:
+                                r = [false, "fully-booked", di.calendarPopup];
+                                break;
+                            case 4 /* IsNotBookable */:
+                                r = [false, "not-bookable", di.calendarPopup];
+                                break;
+                            case 3 /* IsPartBooked */:
+                                r = [true, "part-booked", di.calendarPopup];
+                                break;
+                            case 1 /* IsFree */:
+                                r = [true, "free", di.calendarPopup];
+                                break;
+                        }
+                        return r;
+                    }
+                    else {
+                        return [true, "free", "This day is free"];
+                    }
+                }
+            };
+            manageDays.prototype.getCalendarMonthCount = function () {
+                var fw = $(window).width();
+                var w = fw - 450;
+                var factor = 220;
+                var n = 4;
+                if (w <= (factor * 2)) {
+                    n = Math.round((w + (factor / 2)) / factor) + 1;
+                }
+                return n;
+            };
+            manageDays.prototype.setCalendarMonthCount = function () {
+                var n = this.getCalendarMonthCount();
+                var cn = $('#bookingCalendar').datepicker("option", "numberOfMonths");
+                if (n != cn) {
+                    $('#bookingCalendar').datepicker("option", "numberOfMonths", n);
+                }
+                return n;
+            };
+            manageDays.prototype.loadInitialisationData = function () {
+                var _this = this;
+                var deferred = $.Deferred();
+                var calendarInfoUrl = str.format("bookingapi/calendar/{0}/setup/info", this.app.parameters.currentAbode.id); // returns today, and overall date range
+                var dayStatusUrl = str.format("bookingapi/calendar/{0}/status", this.app.parameters.currentAbode.id); // returns individual day status for every day
+                $.when(ajax.Get({ url: calendarInfoUrl }, false), ajax.Get({ url: dayStatusUrl }, false)).then(function (r1, r2) {
+                    var csi = r1[0];
+                    _this.today = moment(csi.Today).toDate();
+                    _this.calendarPeriod.start = moment(csi.StartAt).toDate(); // moment(r2[0].startAt).toDate();
+                    _this.calendarPeriod.end = moment(csi.Until).toDate(); // moment(r2[0].until).toDate();
+                    var dayInformation = r2[0];
+                    _this.loadDayInformation(dayInformation);
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            manageDays.prototype.loadDayInformation = function (diList) {
+                var _this = this;
+                diList.forEach(function (value, index, array) {
+                    _this.dayDictionary.setValue(value.day, value);
+                });
+            };
+            manageDays.prototype.showForm = function () {
+                var _this = this;
+                var url = str.format("bookingadmin/get/blockedperiods/{0}", this.app.parameters.currentAbode.id);
+                ajax.Get({ url: url }, false).then(function (d) {
+                    //var bookingOpen = d.bookingOpen;
+                    var mdm = new booking_1.manageDaysModel(d);
+                    //mdm.isOpen = bookingOpen;
+                    _this.vm = new booking_1.observableManageDaysModel(mdm);
+                    var templateUrl = "booking/managedays";
+                    wt.getTemplate({ ctx: _this, templateUrl: templateUrl }).then(function (r) {
+                        var f = new forms.form(_this, {
+                            modal: false,
+                            title: "Manage Booking Days",
+                            styleClasses: ["report-forms"],
+                            okButton: null,
+                            cancelButtonText: "Administration page",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: 1 /* left */ }
+                            ],
+                        }, _this.vm);
+                        f.setContentHtml(r.template);
+                        f.open(function (ctx, f, cmd, data, ct) {
+                            switch (cmd) {
+                                case "remove-blocked-period":
+                                    var id = parseInt($(ct).closest("tr").attr("data-id"));
+                                    _this.removeBlockedPeriod(id).then(function () {
+                                        _this.reloadCalendar().then(function () {
+                                            f.close();
+                                            var md = new manageDays(_this.app);
+                                            md.start();
+                                        });
+                                    });
+                                    break;
+                                case "save-new-period":
+                                    if (f.isValid()) {
+                                        _this.saveBlockedPeriod(data.current).then(function (r) {
+                                            if (r.success) {
+                                                // reload this form
+                                                f.close();
+                                                var md = new manageDays(_this.app);
+                                                md.start();
+                                            }
+                                            else {
+                                                f.setMessage(r.message);
+                                            }
+                                        });
+                                    }
+                                    break;
+                                case "open-new-period-form":
+                                    f.find(".online-booking-subform").addClass("hidden");
+                                    f.find(".new-period-subform").removeClass("hidden");
+                                    f.find(".new-period-button").addClass("hidden");
+                                    break;
+                                case "close-new-period-form":
+                                    f.find(".online-booking-subform").removeClass("hidden");
+                                    f.find(".new-period-subform").addClass("hidden");
+                                    f.find(".new-period-button").removeClass("hidden");
+                                    break;
+                                case "cancel-command":
+                                    f.close();
+                                    var index = new adminIndex(_this.app);
+                                    index.start();
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                                case "close-online-booking":
+                                    _this.setOnlineBooking(false).then(function () {
+                                        _this.vm.isOpen(false);
+                                    });
+                                    break;
+                                case "open-online-booking":
+                                    _this.setOnlineBooking(true).then(function () {
+                                        _this.vm.isOpen(true);
+                                    });
+                                    break;
+                            }
+                        }).then(function () {
+                            var initialNumberOfMonths = _this.getCalendarMonthCount();
+                            _this.addBookingCalendar(initialNumberOfMonths);
+                        });
+                    });
+                });
+            };
+            manageDays.prototype.reloadCalendar = function () {
+                var _this = this;
+                var deferred = $.Deferred();
+                var dayStatusUrl = str.format("bookingapi/calendar/{0}/status", this.app.parameters.currentAbode.id); // returns individual day status for every day
+                ajax.Get({ url: dayStatusUrl }, false).then(function (di) {
+                    var dayInformation = di;
+                    _this.loadDayInformation(dayInformation);
+                    $('#bookingCalendar').datepicker("refresh");
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            manageDays.prototype.removeBlockedPeriod = function (id) {
+                var deferred = $.Deferred();
+                var url = str.format("bookingadmin/delete/blockedperiod/{0}/{1}", this.app.parameters.currentAbode.id, id);
+                ajax.Post({ url: url, data: null }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            manageDays.prototype.saveBlockedPeriod = function (m) {
+                var _this = this;
+                var deferred = $.Deferred();
+                var endsOn = moment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate();
+                var from = str.toDateString(m.newPeriodFrom);
+                var to = str.toDateString(endsOn);
+                var abodeId = this.app.parameters.currentAbode.id;
+                var url = str.format("bookingadmin/create/blockedperiod/{0}", abodeId);
+                ajax.Post({ url: url, data: { from: from, to: to, remarks: m.newPeriodRemarks } }).then(function (r) {
+                    if (r.success) {
+                        _this.reloadCalendar().then(function () {
+                            deferred.resolve({ success: true, message: null });
+                        });
+                    }
+                    else {
+                        deferred.resolve({ success: false, message: r.error });
+                    }
+                });
+                return deferred.promise();
+            };
+            manageDays.prototype.setOnlineBooking = function (open) {
+                var deferred = $.Deferred();
+                var url = str.format("bookingadmin/onlinebooking/set/{0}", open);
+                ajax.Post({ url: url, data: null }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            return manageDays;
         })(adminSubapp);
         var editBookingResult = (function () {
             function editBookingResult() {
@@ -456,6 +706,7 @@ var fastnet;
                     var spf = new forms.form(_this, {
                         initialWidth: 600,
                         modal: true,
+                        styleClasses: configuration.getFormStyleClasses(),
                         title: str.format("Booking: {0}", booking.reference),
                         okButtonText: makeUnpaid ? "Set Not Paid" : "Set Paid"
                     }, bm);
@@ -491,6 +742,7 @@ var fastnet;
                     var options = {
                         initialWidth: 600,
                         modal: true,
+                        styleClasses: configuration.getFormStyleClasses(),
                         title: str.format("Booking: {0}", booking.reference),
                         okButtonText: "Save Changes",
                     };

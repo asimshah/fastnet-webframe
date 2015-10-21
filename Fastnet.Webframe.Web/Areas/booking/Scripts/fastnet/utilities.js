@@ -101,7 +101,13 @@ var fastnet;
                 return fmt;
             };
             str.toMoment = function (dateString) {
-                return moment(dateString, "DDMMMYYYY");
+                if (dateString.length === 19 && dateString.indexOf('T') === 10) {
+                    // is an isoDate?
+                    return moment(dateString);
+                }
+                else {
+                    return moment(dateString, "DDMMMYYYY");
+                }
             };
             str.toDateString = function (d) {
                 var md;

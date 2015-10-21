@@ -1,0 +1,103 @@
+﻿<div class="manage-days">
+    <div class="row">
+        <div class="online-booking-subform">
+            <div class="booking-open" data-bind="visible: canOpen() === false">
+                <div class="col-xs-3">
+                    <div class="caption">Online Booking is open</div>
+                </div>
+                <div class="col-xs-9">
+                    <button class="btn btn-primary" data-cmd="close-online-booking">Close Online Booking</button>
+                </div>
+            </div>
+            <div class="booking-closed" data-bind="visible: canOpen() === true">
+                <div class="col-xs-3">
+                    <div class="caption">Online Booking is closed</div>
+                </div>
+                <div class="col-xs-9">
+                    <button class="btn btn-primary" data-cmd="open-online-booking">Open Online Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="bookingCalendar"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="blocked-periods-panel">
+            <div class="col-xs-12">
+                <div class="heading">Blocked Periods</div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Remarks</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: blockedPeriods">
+                        <tr data-bind="attr: {'data-id': availabilityId}">
+                            <td><div data-bind="stdDateFormat: startsOn"></div></td>
+                            <td><div data-bind="stdDateFormat: endsOn"></div></td>
+                            <td><div data-bind="text: remarks"></div></td>
+                            <td><button class="btn btn-sm btn-primary" data-cmd="remove-blocked-period">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="new-period-button pull-right">
+                    <button class="btn btn-link" data-cmd="open-new-period-form">Add new blocked period</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<div class="row">
+        <div class="col-xs-12">
+
+        </div>
+    </div>-->
+    <div class="row">
+        <div class="col-xs-offset-1 col-xs-10 col-xs-offset-1">
+            <div class="new-period-subform hidden">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="heading">New Blocked Period</div>
+                        <div class="form-group">
+                            <label>Starting</label>
+                            <input type="text" data-input="date" class="form-control input-sm" data-bind="value: newPeriodFrom, strDateFormat: newPeriodFrom">
+                            <span class="validationMessage" data-bind="validationMessage: newPeriodFrom"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>No of days</label>
+                            <input type="number" class="form-control input-sm" data-bind="value: newPeriodDuration">
+                            <span class="validationMessage" data-bind="validationMessage: newPeriodDuration"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Remarks</label>
+                            <input type="text" class="form-control input-sm" data-bind="textInput: newPeriodRemarks">
+                            <span class="validationMessage" data-bind="validationMessage: newPeriodRemarks"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="button-panel">
+                        <div class="col-xs-6">
+                            <span class="validationMessage pull-left" data-bind="text: message"></span>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="form-group pull-right">
+                                <button class="btn btn-primary" data-cmd="close-new-period-form">Close</button>
+                            </div>
+                            <div class="form-group pull-right">
+                                <button class="btn btn-primary" data-cmd="save-new-period">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>

@@ -71,6 +71,9 @@ var fastnet;
             viewModel.prototype.fromJSObject = function (data) {
                 $.extend(this, data);
             };
+            viewModel.prototype.formatDate = function (d) {
+                return str.toDateString(d);
+            };
             return viewModel;
         })();
         forms.viewModel = viewModel;
@@ -271,6 +274,23 @@ var fastnet;
                         }
                     }
                 };
+                //ko.extenders["isoDate"] = function (target, formatString) {
+                //    target.formattedDate = ko.computed({
+                //        read: function () {
+                //            if (!target()) {
+                //                return;
+                //            }
+                //            return str.toDateString(target());
+                //        },
+                //        write: function (value) {
+                //            if (value) {
+                //                target(str.toMoment(value).toISOString());
+                //            }
+                //        }
+                //    });
+                //    target.formattedDate(target());
+                //    return target;
+                //}
             };
             form.incrementAsyncValidatorCount = function () {
                 form.asyncValCounter++;

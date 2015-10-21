@@ -87,8 +87,10 @@ module fastnet {
              * like { alpha: "hello", beta: "world" }
              */
             public fromJSObject(data: any): void {
-
                 $.extend(this, data);
+            }
+            public formatDate(d: any): string {
+                return str.toDateString(d);
             }
         }
         export class models {
@@ -344,6 +346,23 @@ module fastnet {
 
                     }
                 };
+                //ko.extenders["isoDate"] = function (target, formatString) {
+                //    target.formattedDate = ko.computed({
+                //        read: function () {
+                //            if (!target()) {
+                //                return;
+                //            }
+                //            return str.toDateString(target());
+                //        },
+                //        write: function (value) {
+                //            if (value) {
+                //                target(str.toMoment(value).toISOString());
+                //            }
+                //        }
+                //    });
+                //    target.formattedDate(target());
+                //    return target;
+                //}
             }
             private static incrementAsyncValidatorCount(): void {
                 form.asyncValCounter++;

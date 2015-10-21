@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fastnet.Webframe.CoreData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,7 +10,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
     {
         public static bool BookingIsOpen()
         {
-            return true; 
+            return !BookingSettings.Get(BookingSettingKeys.OnlineBookingClosed, true);// SiteSetting.Get("OnlineBookingClosed", true);
+            //return true; 
         }
         public static string GetBookingSecretaryEmailAddress()
         {

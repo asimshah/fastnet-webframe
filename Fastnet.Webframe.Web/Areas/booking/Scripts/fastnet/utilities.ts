@@ -86,7 +86,12 @@ module fastnet {
                 return fmt;
             }
             public static toMoment(dateString: string): moment.Moment {
-                return moment(dateString, "DDMMMYYYY");
+                if (dateString.length === 19 && dateString.indexOf('T') === 10) {
+                    // is an isoDate?
+                    return moment(dateString);
+                } else {
+                    return moment(dateString, "DDMMMYYYY");
+                }
             }
             public static toDateString(d: Date | moment.Moment | string): string {
                 var md: moment.Moment;

@@ -45,6 +45,7 @@ namespace Fastnet.Webframe.BookingData
         Friday = 32,
         Saturday = 64
     }
+
     //public enum AccomodationStatus
     //{
     //    AllFree,

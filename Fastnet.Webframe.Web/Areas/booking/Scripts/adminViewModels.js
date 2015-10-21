@@ -57,6 +57,77 @@ var fastnet;
             return bookingModels;
         })(forms.models);
         booking.bookingModels = bookingModels;
+        var manageDaysModels = (function (_super) {
+            __extends(manageDaysModels, _super);
+            function manageDaysModels() {
+                _super.apply(this, arguments);
+            }
+            return manageDaysModels;
+        })(forms.models);
+        booking.manageDaysModels = manageDaysModels;
+        var manageDaysModel = (function (_super) {
+            __extends(manageDaysModel, _super);
+            function manageDaysModel(d) {
+                _super.call(this);
+                //this.data = d;
+                this.isOpen = d.bookingOpen;
+                this.blockedPeriods = d.blockedPeriods;
+            }
+            return manageDaysModel;
+        })(forms.model);
+        booking.manageDaysModel = manageDaysModel;
+        var observableBlockedPeriod = (function () {
+            function observableBlockedPeriod(bp) {
+                this.availabilityId = bp.availabilityId;
+                this.startsOn = bp.startsOn;
+                this.endsOn = bp.endsOn;
+                this.remarks = bp.remarks;
+            }
+            return observableBlockedPeriod;
+        })();
+        var observableManageDaysModel = (function (_super) {
+            __extends(observableManageDaysModel, _super);
+            function observableManageDaysModel(m) {
+                var _this = this;
+                _super.call(this);
+                this.isOpen = ko.observable(m.isOpen);
+                this.blockedPeriods = [];
+                m.blockedPeriods.forEach(function (bp, index, list) {
+                    _this.blockedPeriods.push(new observableBlockedPeriod(bp));
+                });
+                this.newPeriodFrom = ko.observable()
+                    .extend({
+                    required: { message: "A starting date is required." }
+                });
+                this.newPeriodRemarks = ko.observable();
+                this.newPeriodDuration = ko.observable().extend({
+                    required: { message: "Please provide a duration (in days) for the new blocked period" },
+                    min: { params: 1, message: "The minumum duration is one day" }
+                });
+                //this.proposedPeriod = ko.computed<server.blockedPeriod>(() => {
+                //    if (this.newPeriodDuration.isValid() && this.newPeriodDuration.isValid()) {
+                //        var endsOn = moment(this.newPeriodFrom()).add(this.newPeriodDuration() - 1, 'd').toDate()
+                //        var pp: server.blockedPeriod = {
+                //            availabilityId: 0,
+                //            startsOn: this.newPeriodFrom(),
+                //            endsOn: endsOn,
+                //            remarks: null
+                //        }
+                //        return pp;
+                //    } else {
+                //        return null;
+                //    }
+                //}).extend({ notOverlapped: { message: "hello" } });
+                //this.dummy = ko.computed<observableManageDaysModel>(() => {
+                //    return this;
+                //}).extend({ notOverlapped: { message: "hello" } });
+            }
+            observableManageDaysModel.prototype.canOpen = function () {
+                return !this.isOpen();
+            };
+            return observableManageDaysModel;
+        })(forms.viewModel);
+        booking.observableManageDaysModel = observableManageDaysModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=adminViewModels.js.map

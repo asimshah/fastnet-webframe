@@ -318,34 +318,6 @@ button.side-button {
   margin: 0;
   padding: 0;
 }
-.booking-forms .edit-booking-form .booking-history {
-  border: 1px solid #555555;
-  border-radius: 3px;
-  padding: 4px;
-  min-height: 100px;
-  font-size: 0.8em;
-  overflow-y: scroll;
-}
-.booking-forms .edit-booking-form .booking-history .system-note .notes-timestamp {
-  color: #1e7145;
-}
-.booking-forms .edit-booking-form .booking-history .system-note .notes-by {
-  color: #373737;
-}
-.booking-forms .edit-booking-form .booking-history .system-note .notes-text {
-  color: #373737;
-  font-style: italic;
-}
-.booking-forms .parameters-form .inner-panel {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-.booking-forms .parameters-form .inner-panel .row:not(:first-child):not(:last-child) {
-  border-top: 1px solid #8cbef6;
-}
-.booking-forms .parameters-form .help-block {
-  margin-top: 0;
-}
 .booking-disallowed {
   font-weight: bold;
 }
@@ -551,6 +523,101 @@ button.side-button {
   cursor: not-allowed !important;
   color: #ffffff !important;
 }
+.report-forms .ui-form-button[data-cmd='cancel-booking'] {
+  background-color: #ee1111 !important;
+  border: 1px solid #8f0a0a !important;
+}
+.report-forms .manage-days #bookingCalendar {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.report-forms .manage-days .heading {
+  font-weight: bold;
+  font-size: larger;
+}
+.report-forms .manage-days .blocked-periods-panel {
+  /*border-top: 1px solid @grey;
+            border-bottom: 1px solid @grey;*/
+  padding: 8px 0 8px 0;
+}
+.report-forms .manage-days .new-period-button .btn-link {
+  font-size: 0.75em;
+}
+.report-forms .manage-days .new-period-subform .heading {
+  font-size: smaller;
+}
+.report-forms .manage-days .new-period-subform label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
+}
+.report-forms .manage-days .new-period-subform .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.report-forms .manage-days .new-period-subform .validation-error {
+  border: 1px solid red;
+}
+.report-forms .manage-days .new-period-subform .form-group {
+  margin-bottom: 0;
+}
+.report-forms .manage-days .new-period-subform .button-panel {
+  margin-top: 8px;
+}
+.report-forms .manage-days .new-period-subform .button-panel button {
+  min-width: 100px;
+}
+.report-forms .manage-days .new-period-subform .button-panel button[data-cmd='save-new-period'] {
+  margin-right: 8px;
+}
+.report-forms .manage-days .online-booking-subform {
+  margin-top: 8px;
+}
+.report-forms .manage-days .online-booking-subform .booking-open .caption {
+  height: 32px;
+  background-color: #1e7145;
+  color: white;
+  text-align: center;
+  padding: 5px 4px 4px 4px;
+  border-radius: 3px;
+}
+.report-forms .manage-days .online-booking-subform .booking-closed .caption {
+  min-height: 32px;
+  background-color: #b91d47;
+  color: white;
+  text-align: center;
+  padding: 4px;
+  border-radius: 3px;
+}
+.report-forms .edit-booking-form .booking-history {
+  border: 1px solid #555555;
+  border-radius: 3px;
+  padding: 4px;
+  min-height: 100px;
+  font-size: 0.8em;
+  overflow-y: scroll;
+}
+.report-forms .edit-booking-form .booking-history .system-note .notes-timestamp {
+  color: #1e7145;
+}
+.report-forms .edit-booking-form .booking-history .system-note .notes-by {
+  color: #373737;
+}
+.report-forms .edit-booking-form .booking-history .system-note .notes-text {
+  color: #373737;
+  font-style: italic;
+}
+.report-forms .parameters-form .inner-panel {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.report-forms .parameters-form .inner-panel .row:not(:first-child):not(:last-child) {
+  border-top: 1px solid #8cbef6;
+}
+.report-forms .parameters-form .help-block {
+  margin-top: 0;
+}
 .admin-reports {
   margin-top: 8px;
   margin-bottom: 8px;
@@ -729,15 +796,15 @@ button.side-button {
 .admin-reports.entry-codes .add-entry-form input {
   width: 50%;
 }
-.ui-form-button[data-cmd='cancel-booking'] {
-  background-image: none;
-  background-color: #ee1111;
-  color: #ffffff;
-  border: 1px solid #8f0a0a;
-  min-width: 80px;
-  font-size: 0.8em;
-  outline: none;
-}
+/*.ui-form-button[data-cmd='cancel-booking'] {
+    background-image: none;
+    background-color: @red;
+    color: @white;
+    border: 1px solid darken(@red, 20%);
+    min-width: 80px;
+    font-size: 0.8em;
+    outline: none;
+}*/
 .test-form label {
   font-size: x-small;
   color: #2d89ef;
