@@ -673,10 +673,12 @@ var fastnet;
                         title: "Terms and Conditions",
                         styleClasses: configuration.getFormStyleClasses(),
                         datepickerOptions: _this.dpOptions,
-                        cancelButton: null
+                        cancelButton: null,
+                        okButtonText: "Close",
                     }, null);
                     tcf.setContentHtml(r.HtmlText);
                     tcf.open(function (ctx, f, cmd, data) {
+                        f.close();
                     });
                 });
             };
@@ -684,4 +686,3 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=booking.js.map

@@ -130,4 +130,3 @@ var fastnet;
         booking.observableManageDaysModel = observableManageDaysModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=adminViewModels.js.map

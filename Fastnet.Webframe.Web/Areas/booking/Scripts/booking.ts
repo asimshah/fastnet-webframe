@@ -686,10 +686,12 @@ module fastnet {
                         title: "Terms and Conditions",
                         styleClasses: configuration.getFormStyleClasses(),
                         datepickerOptions: this.dpOptions,
-                        cancelButton: null
+                        cancelButton: null,
+                        okButtonText: "Close",
                     }, null);
                     tcf.setContentHtml(r.HtmlText);
                     tcf.open((ctx: bookDates, f: forms.form, cmd: string, data: any) => {
+                        f.close();
                     });
                 });
             }

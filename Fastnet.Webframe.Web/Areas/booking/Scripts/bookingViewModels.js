@@ -249,4 +249,3 @@ var fastnet;
         booking.observableRequest_step3 = observableRequest_step3;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingViewModels.js.map
