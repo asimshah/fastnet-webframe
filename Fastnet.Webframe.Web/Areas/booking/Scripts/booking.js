@@ -23,51 +23,6 @@ var fastnet;
             };
             return configuration;
         })();
-        var bookingAppValidations = (function () {
-            function bookingAppValidations() {
-            }
-            //public static validateBookingEndDate2: forms.knockoutAsyncValidator = function (val, params, callback): void {
-            //    var startDate: Date = params;
-            //    var startMoment = moment(startDate);
-            //    var endMoment = moment(val);
-            //    debugger;
-            //    callback({ isValid: false, message: "some message or other" });
-            //}
-            bookingAppValidations.GetValidators = function () {
-                var rules = [];
-                rules.push({ name: "bookingEndDate", async: false, validator: bookingAppValidations.validateBookingEndDate, message: "This end date is not valid" });
-                rules.push({ name: "dateGreaterThan", async: false, validator: bookingAppValidations.validateDateGreaterThan, message: "This date is not valid" });
-                //rules.push({ name: "bookingEndDate2", async: true, validator: bookingAppValidations.validateBookingEndDate2, message: "This end date is not valid" });
-                return rules;
-            };
-            bookingAppValidations.validateDateGreaterThan = function (val, params) {
-                var refDate = str.toMoment(params);
-                var thisDate = str.toMoment(val);
-                var diff = thisDate.diff(refDate, 'd');
-                return diff >= 0;
-            };
-            bookingAppValidations.validateBookingEndDate = function (val, params) {
-                if (h$.isNullOrUndefined(val)) {
-                    return true;
-                }
-                var startDate = ko.unwrap(params.startDate);
-                if (h$.isNullOrUndefined(startDate)) {
-                    this.message = "No end date is valid without a start date";
-                    return false;
-                }
-                var startMoment = moment(startDate);
-                var endMoment = moment(val);
-                var d = endMoment.diff(startMoment, 'd');
-                if (d > 0) {
-                    return true;
-                }
-                else {
-                    this.message = "End date must be after start date";
-                    return false;
-                }
-            };
-            return bookingAppValidations;
-        })();
         var bookingApp = (function () {
             function bookingApp() {
             }
@@ -75,7 +30,7 @@ var fastnet;
                 var _this = this;
                 var config = {
                     modelessContainer: "booking-interaction",
-                    additionalValidations: bookingAppValidations.GetValidators()
+                    additionalValidations: booking.bookingAppValidations.GetValidators()
                 };
                 this.today = new Date();
                 forms.form.initialise(config);

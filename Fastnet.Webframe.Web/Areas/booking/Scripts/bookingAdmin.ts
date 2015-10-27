@@ -36,8 +36,8 @@ module fastnet {
                 var config: forms.configuration = {
                     modelessContainer: "admin-interaction",
                     enableRichText: true,
-                    richTextCssUrl: "../areas/booking/content/richtext.css"//,
-                    //additionalValidations: blockedPeriodValidations.GetValidators()
+                    richTextCssUrl: "../areas/booking/content/richtext.css",
+                    additionalValidations: bookingAppValidations.GetValidators()
                 };
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
@@ -118,6 +118,11 @@ module fastnet {
                                 f.close();
                                 var md = new manageDays(this.app);
                                 md.start();
+                                break;
+                            case "edit-pricing":
+                                f.close();
+                                var mp = new managePricing(this.app);
+                                mp.start();
                                 break;
                             default:
                                 var ch = factory.getCustomAdminIndex();
@@ -253,6 +258,49 @@ module fastnet {
         interface blockerPeriodSaveResult {
             success: boolean;
             message: string;
+        }
+        class managePricing extends adminSubapp {
+            constructor(app: adminApp) {
+                super(app);
+            }
+            public start(): void {
+                this.showForm();
+            }
+            private showForm(): void {
+                var url = str.format("bookingadmin/get/pricing/{0}", this.app.parameters.currentAbode.id);
+                ajax.Get({ url: url }, false).then((r: server.pricing[]) => {
+                    var today = str.toMoment(this.app.parameters.today);
+                    var model = new pricingModel(today, r);
+                    var vm = new observablePricingModel(model);
+                    var templateUrl = "booking/pricing";
+                    wt.getTemplate({ ctx: this, templateUrl: templateUrl }).then((r) => {
+                        var f = new forms.form(this, {
+                            modal: false,
+                            title: "Manage Pricing",
+                            styleClasses: ["report-forms"],
+                            okButton: null,
+                            cancelButtonText: "Administration page",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
+                            ]
+                        }, vm);
+                        f.setContentHtml(r.template);
+                        f.open((ctx: managePricing, f: forms.form, cmd: string, data: any, ct: EventTarget) => {
+                            switch (cmd) {
+                                case "cancel-command":
+                                    f.close();
+                                    var index = new adminIndex(this.app);
+                                    index.start();
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        });
+                    });
+                });
+            }
         }
         class manageDays extends adminSubapp {
             //private abodeId: number;

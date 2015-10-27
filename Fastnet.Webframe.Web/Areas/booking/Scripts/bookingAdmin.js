@@ -45,7 +45,8 @@ var fastnet;
                 var config = {
                     modelessContainer: "admin-interaction",
                     enableRichText: true,
-                    richTextCssUrl: "../areas/booking/content/richtext.css" //,
+                    richTextCssUrl: "../areas/booking/content/richtext.css",
+                    additionalValidations: booking_1.bookingAppValidations.GetValidators()
                 };
                 forms.form.initialise(config);
                 var parametersUrl = "bookingapi/parameters";
@@ -134,6 +135,11 @@ var fastnet;
                                 f.close();
                                 var md = new manageDays(_this.app);
                                 md.start();
+                                break;
+                            case "edit-pricing":
+                                f.close();
+                                var mp = new managePricing(_this.app);
+                                mp.start();
                                 break;
                             default:
                                 var ch = booking_1.factory.getCustomAdminIndex();
@@ -258,6 +264,52 @@ var fastnet;
                 });
             };
             return parametersApp;
+        })(adminSubapp);
+        var managePricing = (function (_super) {
+            __extends(managePricing, _super);
+            function managePricing(app) {
+                _super.call(this, app);
+            }
+            managePricing.prototype.start = function () {
+                this.showForm();
+            };
+            managePricing.prototype.showForm = function () {
+                var _this = this;
+                var url = str.format("bookingadmin/get/pricing/{0}", this.app.parameters.currentAbode.id);
+                ajax.Get({ url: url }, false).then(function (r) {
+                    var today = str.toMoment(_this.app.parameters.today);
+                    var model = new booking_1.pricingModel(today, r);
+                    var vm = new booking_1.observablePricingModel(model);
+                    var templateUrl = "booking/pricing";
+                    wt.getTemplate({ ctx: _this, templateUrl: templateUrl }).then(function (r) {
+                        var f = new forms.form(_this, {
+                            modal: false,
+                            title: "Manage Pricing",
+                            styleClasses: ["report-forms"],
+                            okButton: null,
+                            cancelButtonText: "Administration page",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: 1 /* left */ }
+                            ]
+                        }, vm);
+                        f.setContentHtml(r.template);
+                        f.open(function (ctx, f, cmd, data, ct) {
+                            switch (cmd) {
+                                case "cancel-command":
+                                    f.close();
+                                    var index = new adminIndex(_this.app);
+                                    index.start();
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        });
+                    });
+                });
+            };
+            return managePricing;
         })(adminSubapp);
         var manageDays = (function (_super) {
             __extends(manageDays, _super);

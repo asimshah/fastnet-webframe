@@ -263,6 +263,7 @@
     <Compile Include="Areas\booking\TransferObjects\entryCode.cs" />
     <Compile Include="Areas\booking\TransferObjects\MemberInfo.cs" />
     <Compile Include="Areas\booking\TransferObjects\bookingParameters.cs" />
+    <Compile Include="Areas\booking\TransferObjects\pricing.cs" />
     <Compile Include="Areas\cms\cmsAreaRegistration.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -377,6 +378,7 @@
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />
     <Content Include="Areas\booking\Templates\OccupancyReportDay.html" />
     <Content Include="Areas\booking\Templates\Parameters.html" />
+    <Content Include="Areas\booking\Templates\pricing.html" />
     <Content Include="Areas\booking\Templates\request-step1.html" />
     <Content Include="Areas\booking\Templates\Login.html" />
     <Content Include="Areas\booking\Templates\request-step2.html" />
@@ -1702,6 +1704,9 @@
       <DependentUpon>MemberInfo.cs</DependentUpon>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Areas\booking\Scripts\collections\collections.ts" />
+    <TypeScriptCompile Include="Areas\booking\TransferObjects\pricing.cs.d.ts">
+      <DependentUpon>pricing.cs</DependentUpon>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="Scripts\typings\accounting\accounting.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.dataTables\jquery.dataTables.d.ts" />
@@ -1760,7 +1765,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

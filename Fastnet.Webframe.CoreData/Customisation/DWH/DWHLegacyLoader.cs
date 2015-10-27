@@ -671,8 +671,8 @@ namespace Fastnet.Webframe.CoreData
         {
             Period pp = new Period
             {
-                Name = "Rolling period",
-                Description = "Range is from today to one year ahead",
+                //Name = "Rolling period",
+                //Description = "Range is from today to one year ahead",
                 PeriodType = PeriodType.Rolling,
                 Interval = new LongSpan { Years = 1 }
             };
@@ -699,8 +699,8 @@ namespace Fastnet.Webframe.CoreData
                 DateTime end = set.Last();
                 Period p = new Period
                 {
-                    Name = string.Format("Fixed Period"),
-                    Description = string.Format("Range is from from {0} to {1}", start.ToDefault(), end.ToDefault()),
+                    //Name = string.Format("Fixed Period"),
+                    //Description = string.Format("Range is from from {0} to {1}", start.ToDefault(), end.ToDefault()),
                     PeriodType = PeriodType.Fixed,
                     StartDate = start,
                     EndDate = end
@@ -864,9 +864,9 @@ namespace Fastnet.Webframe.CoreData
             };
             Period pp = new Period
             {
-                Name = "Rolling Period",
-                Description = "Range is from 1Jan2014 onwards",
-                PeriodType = PeriodType.Fixed,
+                //Name = "Rolling Period",
+                //Description = "Range is from 1Jan2014 onwards",
+                PeriodType = PeriodType.Rolling,
                 StartDate = DateTime.Parse("1/1/2014"),
                 EndDate = null // i.e. forever
             };

@@ -1,0 +1,26 @@
+﻿<div class="pricing-form">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="pricing-panel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Starting From</th>
+                            <th>Until</th>
+                            <th>Price per Bed</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: prices">
+                        <tr data-bind="attr: {'data-id': priceId}">
+                            <td><div data-bind="stdDateString: from"></div></td>
+                            <td><div data-bind="stdDateString: to"></div></td>
+                            <td><div class="pull-right" data-bind="text: amount"></div></td>
+                            <td><button class="btn btn-xs btn-primay" data-cmd="remove-price">Remove</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

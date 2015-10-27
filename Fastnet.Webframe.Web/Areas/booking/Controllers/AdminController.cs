@@ -33,7 +33,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             using (var ctx = new BookingDataContext())
             {
-                var today = BookingGlobals.GetToday();                
+                var today = BookingGlobals.GetToday();
                 var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
                     .Where(x => unpaidOnly == false || x.IsPaid == false)
                     .OrderBy(x => x.Reference).ToArrayAsync();
@@ -101,7 +101,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 var booking = ctx.Bookings.Find(id);
                 var today = BookingGlobals.GetToday();
 
-                if(booking != null)
+                if (booking != null)
                 {
                     booking.IsPaid = paid;
                     booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
@@ -138,7 +138,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         DataContext.SaveChanges();
                         tran.Complete();
                     }
-                } 
+                }
             }
         }
         [HttpPost]
@@ -151,7 +151,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 var name = m.Fullname;
                 var booking = ctx.Bookings.Find(id);
                 var today = BookingGlobals.GetToday();
-                if(booking.Status != status)
+                if (booking.Status != status)
                 {
                     bookingStatus old = booking.Status;
                     booking.Status = status;
@@ -189,7 +189,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
                 catch (Exception)
                 {
-                    
+
                     throw;
                 }
             }
@@ -204,7 +204,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 EntryCode ec = ctx.EntryCodes.SingleOrDefault(x => x.ApplicableFrom == from);
-                if(ec == null)
+                if (ec == null)
                 {
                     ec = new EntryCode();
                     ec.ApplicableFrom = from;
@@ -248,7 +248,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     for (DateTime day = starts; day <= ends; day = day.AddDays(1))
                     {
                         DayInformation di = Factory.GetDayInformationInstance(ctx, abodeId, day);
-                        if(di.Status != DayStatus.IsFree && di.Status != DayStatus.IsNotBookable)
+                        if (di.Status != DayStatus.IsFree && di.Status != DayStatus.IsNotBookable)
                         {
                             hasBooking = true;
                             break;
@@ -265,8 +265,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             Period = new Period
                             {
                                 PeriodType = PeriodType.Fixed,
-                                Name = "Fixed period",
-                                Description = string.Format("Range is from {0} to {1}", from, to),
+                                //Name = "Fixed period",
+                                //Description = string.Format("Range is from {0} to {1}", from, to),
                                 StartDate = starts,
                                 EndDate = ends
                             }
@@ -294,7 +294,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 Availability availability = ctx.Availablities.Find(availabilityId);
-                if(availability != null)
+                if (availability != null)
                 {
                     ctx.Periods.Remove(availability.Period);
                     ctx.Availablities.Remove(availability);
@@ -333,20 +333,133 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             }
 
         }
-
-        private static IEnumerable<Availability> GetBlockedItems(BookingDataContext ctx)
+        [HttpGet]
+        [Route("get/pricing/{abodeId}")]
+        public IEnumerable<pricing> GetPricing(long abodeId)
         {
-            DateTime today = BookingGlobals.GetToday();
-            var blockedItems = ctx.Availablities.ToArray().Where(x => x.Blocked && x.Period.PeriodType == PeriodType.Fixed && (x.Period.GetStartDate() >= today || x.Period.Includes(today)));
-            return blockedItems;
+            using (var ctx = new BookingDataContext())
+            {
+                try
+                {
+                    var backDate = BookingGlobals.GetToday().AddMonths(-1);
+                    var bedPrices = ctx.Prices//.Include(x => x.Period).ToArray();
+                    .Where(x => x.Type == AccomodationType.Bed && x.Class == AccomodationClass.Standard &&
+                         (x.Period.PeriodType == PeriodType.Rolling || x.Period.PeriodType == PeriodType.Fixed && x.Period.EndDate >= backDate))//;
+                    .OrderBy(x => x.Period.StartDate);
+                    //var temp = bedPrices.ToArray();
+                    return bedPrices.ToArray().Select(x => new pricing(x));
+                }
+                catch (Exception xe)
+                {
+                    Debugger.Break();
+                    throw;
+                }
+            }
         }
+        [HttpPost]
+        [Route("add/pricing/{abodeId}")]
+        public void AddPricing(long abodeId, dynamic data)
+        {
+            // I only support a limited basic pricing:
+            // a) only standard bed pricing is allowed
+            // b) all prices belong to default price structure
+            // c) the last price period is always rolling and this is the only rolling one
+            // d) all previous price periods are fixed
+            string from = data.from;
+            int amount = data.amount;
+            DateTime starts = DateTime.Parse(from);
+            using (var ctx = new BookingDataContext())
+            {
+                var lastPrice = ctx.Prices.Single(x => x.Period.PeriodType == PeriodType.Rolling);
+                DateTime rollsFrom = lastPrice.Period.GetStartDate();
+                if (starts == rollsFrom)
+                {
+                    // replace the amount
+                    lastPrice.Amount = amount;
+                }
+                else if (starts > rollsFrom)
+                {
+                    // make this the new last price
+                    DateTime ends = starts.AddDays(-1);
+                    lastPrice.Period.PeriodType = PeriodType.Fixed;
+                    lastPrice.Period.EndDate = ends;
+                    //lastPrice.Period.Name = "Fixed Period";
+                    //lastPrice.Period.Description = string.Format("Range is from {0} to {1}", lastPrice.Period.StartDate.Value.ToDefault(), lastPrice.Period.EndDate.Value.ToDefault());
+                    Period np = new Period
+                    {
+                        //Description = string.Format("Range is from {0} onwards", starts.ToDefault()),
+                        //Name = "Rolling Period",
+                        StartDate = starts,
+                        PeriodType = PeriodType.Rolling
+                    };
+                    Price newPrice = new Price
+                    {
+                        Amount = amount,
+                        Capacity = 1,
+                        Class = AccomodationClass.Standard,
+                        Type = AccomodationType.Bed,
+                        Period = np
+                    };
+                    ctx.Periods.Add(np);
+                    ctx.Prices.Add(newPrice);
+                }
+                else
+                {
 
+                }
+                ctx.SaveChanges();
+            }
+        }
+        [HttpPost]
+        [Route("remove/pricing/{abodeId}/{id}")]
+        public void RemovePricing(long abodeId, long id)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                var prices = ctx.Prices.OrderBy(x => x.Period.StartDate.Value).ToList();
+                if (prices.Count() > 1)
+                {
+                    var priceToDelete = ctx.Prices.Find(id);
+                    var index = prices.IndexOf(priceToDelete);
+                    if (index == 0)
+                    {
+                        // first one
+                        var np = prices[1];
+                        np.Period.StartDate = priceToDelete.Period.StartDate;
+                    }
+                    else if (index == prices.Count() - 1)
+                    {
+                        // last one
+                        var pp = prices[index - 1];
+                        pp.Period.PeriodType = PeriodType.Rolling;
+                        pp.Period.EndDate = null;
+                        //pp.Period.Description = string.Format("Range is from {0} onwards", pp.Period.StartDate.Value.ToDefault());
+                        //pp.Period.Name = "Rolling Period";
+                    }
+                    else
+                    {
+                        var np2 = prices[index - 1];
+                        np2.Period.EndDate = priceToDelete.Period.EndDate;
+                    }
+
+                    ctx.Prices.Remove(priceToDelete);
+                    ctx.Periods.Remove(priceToDelete.Period);
+                    ctx.SaveChanges();
+                }
+            }
+        }
         [HttpPost]
         [Route("onlinebooking/set/{open}")]
         public void SetOnlineBooking(bool open)
         {
             BookingSettings.Set(BookingSettingKeys.OnlineBookingClosed, !open);
             DataContext.SaveChanges();
+        }
+        private static IEnumerable<Availability> GetBlockedItems(BookingDataContext ctx)
+        {
+            DateTime today = BookingGlobals.GetToday();
+            var blockedItems = ctx.Availablities.ToArray().Where(x => x.Blocked && x.Period.PeriodType == PeriodType.Fixed && (x.Period.GetStartDate() >= today || x.Period.Includes(today)));
+            return blockedItems;
         }
     }
 }

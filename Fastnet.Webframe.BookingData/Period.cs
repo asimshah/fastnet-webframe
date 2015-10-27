@@ -22,9 +22,9 @@ namespace Fastnet.Webframe.BookingData
         }
         public long PeriodId { get; set; }
         public Period ParentPeriod { get; set; }
-        [MaxLength(64)]
-        public string Name { get; set; }
-        public string Description { get; set; }
+        //[MaxLength(64)]
+        //public string Name { get; set; }
+        //public string Description { get; set; }
         public PeriodType PeriodType { get; set; }
         public DateTime? StartDate { get; set; } // must be non-null if PeriodType == Fixed
         public DateTime? EndDate { get; set; } // endless if null, if PeriodType == fixed

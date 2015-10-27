@@ -128,6 +128,34 @@ var fastnet;
             return observableManageDaysModel;
         })(forms.viewModel);
         booking.observableManageDaysModel = observableManageDaysModel;
+        var pricingModel = (function (_super) {
+            __extends(pricingModel, _super);
+            function pricingModel(minDate, prices) {
+                _super.call(this);
+                this.minDate = minDate;
+                this.prices = prices;
+            }
+            return pricingModel;
+        })(forms.model);
+        booking.pricingModel = pricingModel;
+        var observablePricingModel = (function (_super) {
+            __extends(observablePricingModel, _super);
+            function observablePricingModel(m) {
+                _super.call(this);
+                this.prices = m.prices;
+                this.minDate = m.minDate.add(-1, 'd');
+                this.newFrom = ko.observable().extend({
+                    required: { message: "A new price requires a date from which it applies" },
+                    dateGreaterThan: { params: this.minDate, message: "Prices cannot be back dated" }
+                });
+                this.newAmount = ko.observable().extend({
+                    required: { message: "The price (in pounds) must be whole number and not start with 0" },
+                    pattern: { params: /^[1-9][0-9]+$/ }
+                });
+            }
+            return observablePricingModel;
+        })(forms.viewModel);
+        booking.observablePricingModel = observablePricingModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=adminViewModels.js.map

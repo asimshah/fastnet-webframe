@@ -4,7 +4,7 @@ module fastnet {
         import forms = fastnet.forms;
         import str = fastnet.util.str;
         import h$ = fastnet.util.helper;
-        export class bookingModel extends forms.model implements server.booking  {
+        export class bookingModel extends forms.model implements server.booking {
             bookingId: number;
             reference: string;
             status: server.bookingStatus;
@@ -71,7 +71,7 @@ module fastnet {
                 this.isPaid = b.isPaid;// ko.observable(b.isPaid);
                 this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);
                 this.history = b.history;
-                this.duration = str.format("{0} for {1} night{2}", b.to, b.numberOfNights, b.numberOfNights > 1? "s" : "");
+                this.duration = str.format("{0} for {1} night{2}", b.to, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
             }
         }
         export class bookingModels extends forms.models {
@@ -135,7 +135,7 @@ module fastnet {
                 this.newPeriodRemarks = ko.observable<string>();
                 this.newPeriodDuration = ko.observable<number>().extend({
                     required: { message: "Please provide a duration (in days) for the new blocked period" },
-                    min: { params: 1, message: "The minumum duration is one day"}
+                    min: { params: 1, message: "The minumum duration is one day" }
                 });
                 //this.proposedPeriod = ko.computed<server.blockedPeriod>(() => {
                 //    if (this.newPeriodDuration.isValid() && this.newPeriodDuration.isValid()) {
@@ -157,6 +157,34 @@ module fastnet {
             }
             public canOpen(): boolean {
                 return !this.isOpen();
+            }
+        }
+        export class pricingModel extends forms.model {
+            public prices: server.pricing[];
+            public minDate: moment.Moment;
+            constructor(minDate: moment.Moment, prices: server.pricing[]) {
+                super();
+                this.minDate = minDate;
+                this.prices = prices;
+            }
+        }
+        export class observablePricingModel extends forms.viewModel {
+            public prices: server.pricing[];
+            public newFrom: KnockoutObservable<Date>;
+            public newAmount: KnockoutObservable<number>;
+            public minDate: moment.Moment;
+            constructor(m: pricingModel) {
+                super();
+                this.prices = m.prices;
+                this.minDate = m.minDate.add(-1, 'd');
+                this.newFrom = ko.observable<Date>().extend({
+                    required: { message: "A new price requires a date from which it applies" },
+                    dateGreaterThan: { params: this.minDate, message: "Prices cannot be back dated"}
+                });
+                this.newAmount = ko.observable<number>().extend({
+                    required: { message: "The price (in pounds) must be whole number and not start with 0" },
+                    pattern: { params: /^[1-9][0-9]+$/}
+                });
             }
         }
     }
