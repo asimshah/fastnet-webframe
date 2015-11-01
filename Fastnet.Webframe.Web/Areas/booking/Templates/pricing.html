@@ -2,24 +2,55 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="pricing-panel">
-                <table class="table">
+                <table class="table table-condensed">
                     <thead>
                         <tr>
                             <th>Starting From</th>
                             <th>Until</th>
-                            <th>Price per Bed</th>
+                            <th class="pull-right">Price per Bed</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: prices">
                         <tr data-bind="attr: {'data-id': priceId}">
-                            <td><div data-bind="stdDateString: from"></div></td>
-                            <td><div data-bind="stdDateString: to"></div></td>
-                            <td><div class="pull-right" data-bind="text: amount"></div></td>
-                            <td><button class="btn btn-xs btn-primay" data-cmd="remove-price">Remove</button></td>
+                            <td class="date-from"><div data-bind="stdDateFormat: from"></div></td>
+                            <td class="date-to">
+                                <div data-bind="if: isRolling">
+                                    <div>indefinitely</div>
+                                </div>
+                                <div data-bind="ifnot: isRolling">
+                                    <div data-bind="stdDateFormat: to"></div>
+                                </div>
+                            </td>
+                            <td class="price"><div class="pull-right" data-bind="text: amount"></div></td>
+                            <td>
+                                <div data-bind="if: canRemove">
+                                    <button class="btn btn-sm btn-primay" data-cmd="remove-price">Remove</button>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-offset-1 col-xs-10 col-xs-offset-1">
+            <div class="new-price-subform">
+                <div class="heading">Add New Pricing</div>
+                <div class="form-group">
+                    <label>Starting</label>
+                    <input type="text" data-input="date" class="form-control input-sm" data-bind="value: newFrom, strDateFormat: newPeriodFrom">
+                    <span class="validationMessage" data-bind="validationMessage: newFrom"></span>
+                </div>
+                <div class="form-group">
+                    <label>Price per bed</label>
+                    <input type="number" class="form-control input-sm" data-bind="value: newAmount">
+                    <span class="validationMessage" data-bind="validationMessage: newAmount"></span>
+                </div>
+                <div class="form-group pull-right">
+                    <button class="btn btn-primary" data-cmd="add-new-price">Save</button>
+                </div>
             </div>
         </div>
     </div>

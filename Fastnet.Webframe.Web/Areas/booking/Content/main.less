@@ -412,6 +412,52 @@ button.side-button {
         //outline: none;
     }
 
+    .pricing-form {
+                .heading {
+            font-weight: bold;
+            font-size: larger;
+        }
+        table {
+            table-layout: fixed;
+        }
+
+        th {
+            //width: 100%;
+        }
+
+        td.date-from {
+            max-width: 300px;
+        }
+
+        td.price {
+            > div {
+                text-align: right;
+                //min-width: 200px;
+            }
+        }
+        .new-price-subform {
+            .heading {
+                font-size: smaller;
+            }
+
+            label {
+                font-size: x-small;
+                color: @blue;
+                font-weight: normal;
+            }
+
+            .validationMessage {
+                font-size: x-small;
+                color: @dark-red;
+                font-style: italic;
+            }
+
+            .validation-error {
+                border: 1px solid red;
+            }
+        }
+    }
+
     .manage-days {
         #bookingCalendar {
             padding-top: 8px;
@@ -462,6 +508,7 @@ button.side-button {
 
             .button-panel {
                 margin-top: 8px;
+
                 button {
                     min-width: 100px;
 
@@ -635,7 +682,6 @@ button.side-button {
                 -ms-user-select: none;
                 user-select: none;
                 color: #fff !important;
-                background-image: none;
                 background-color: #337ab7;
                 border-color: #2e6da4;
 

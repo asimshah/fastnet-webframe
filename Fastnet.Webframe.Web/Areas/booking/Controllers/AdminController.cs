@@ -342,7 +342,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 try
                 {
                     var backDate = BookingGlobals.GetToday().AddMonths(-1);
-                    var bedPrices = ctx.Prices//.Include(x => x.Period).ToArray();
+                    var bedPrices = ctx.Prices.Include(x => x.Period).ToArray()
                     .Where(x => x.Type == AccomodationType.Bed && x.Class == AccomodationClass.Standard &&
                          (x.Period.PeriodType == PeriodType.Rolling || x.Period.PeriodType == PeriodType.Fixed && x.Period.EndDate >= backDate))//;
                     .OrderBy(x => x.Period.StartDate);
@@ -383,14 +383,11 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     DateTime ends = starts.AddDays(-1);
                     lastPrice.Period.PeriodType = PeriodType.Fixed;
                     lastPrice.Period.EndDate = ends;
-                    //lastPrice.Period.Name = "Fixed Period";
-                    //lastPrice.Period.Description = string.Format("Range is from {0} to {1}", lastPrice.Period.StartDate.Value.ToDefault(), lastPrice.Period.EndDate.Value.ToDefault());
                     Period np = new Period
                     {
-                        //Description = string.Format("Range is from {0} onwards", starts.ToDefault()),
-                        //Name = "Rolling Period",
                         StartDate = starts,
-                        PeriodType = PeriodType.Rolling
+                        PeriodType = PeriodType.Rolling,
+                        EndDate = null
                     };
                     Price newPrice = new Price
                     {
@@ -405,7 +402,38 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
                 else
                 {
+                    var prices = ctx.Prices.OrderBy(x => x.Period.StartDate.Value).ToList();
+                    if (prices.Any(p => p.Period.StartDate.Value == starts))
+                    {
+                        var mp = prices.First(p => p.Period.StartDate.Value == starts);
+                        mp.Amount = amount;
+                    }
+                    else
+                    {
+                        var flp = prices.SkipWhile(p => p.Period.StartDate.Value < starts).First();
 
+                        Price newPrice = new Price
+                        {
+                            Amount = amount,
+                            Capacity = 1,
+                            Class = AccomodationClass.Standard,
+                            Type = AccomodationType.Bed,
+                            Period = new Period
+                            {
+                                StartDate = starts,
+                                PeriodType = PeriodType.Fixed,
+                                EndDate = flp.Period.StartDate.Value.AddDays(-1)
+                            }
+                        };
+                        ctx.Periods.Add(newPrice.Period);
+                        ctx.Prices.Add(newPrice);
+                        var index = prices.IndexOf(flp);
+                        if (index != 0)
+                        {
+                            var pp = prices[index - 1];
+                            pp.Period.EndDate = starts.AddDays(-1);
+                        }
+                    }
                 }
                 ctx.SaveChanges();
             }
@@ -441,9 +469,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         var np2 = prices[index - 1];
                         np2.Period.EndDate = priceToDelete.Period.EndDate;
                     }
-
-                    ctx.Prices.Remove(priceToDelete);
                     ctx.Periods.Remove(priceToDelete.Period);
+                    ctx.Prices.Remove(priceToDelete);
                     ctx.SaveChanges();
                 }
             }

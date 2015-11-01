@@ -295,6 +295,23 @@ var fastnet;
                         f.setContentHtml(r.template);
                         f.open(function (ctx, f, cmd, data, ct) {
                             switch (cmd) {
+                                case "remove-price":
+                                    var id = parseInt($(ct).closest("tr").attr("data-id"));
+                                    _this.removePrice(id).then(function () {
+                                        f.close();
+                                        var mp = new managePricing(_this.app);
+                                        mp.start();
+                                    });
+                                    break;
+                                case "add-new-price":
+                                    if (f.isValid()) {
+                                        _this.addNewPrice(data.current).then(function () {
+                                            f.close();
+                                            var mp = new managePricing(_this.app);
+                                            mp.start();
+                                        });
+                                    }
+                                    break;
                                 case "cancel-command":
                                     f.close();
                                     var index = new adminIndex(_this.app);
@@ -308,6 +325,26 @@ var fastnet;
                         });
                     });
                 });
+            };
+            managePricing.prototype.removePrice = function (id) {
+                var deferred = $.Deferred();
+                var abodeId = this.app.parameters.currentAbode.id;
+                var url = str.format("bookingadmin/remove/pricing/{0}/{1}", abodeId, id);
+                ajax.Post({ url: url, data: null }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            managePricing.prototype.addNewPrice = function (m) {
+                var deferred = $.Deferred();
+                var from = str.toDateString(m.newFrom);
+                var amount = m.newAmount;
+                var abodeId = this.app.parameters.currentAbode.id;
+                var url = str.format("bookingadmin/add/pricing/{0}", abodeId);
+                ajax.Post({ url: url, data: { from: from, amount: amount } }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
             };
             return managePricing;
         })(adminSubapp);

@@ -100,13 +100,33 @@ var fastnet;
                 }
                 return fmt;
             };
-            str.toMoment = function (dateString) {
-                if (dateString.length === 19 && dateString.indexOf('T') === 10) {
-                    // is an isoDate?
-                    return moment(dateString);
+            str.toMoment = function (d) {
+                if (typeof d === "string") {
+                    if (d.length === 19 && d.indexOf('T') === 10) {
+                        // is an isoDate?
+                        return moment(d);
+                    }
+                    else {
+                        return moment(d, "DDMMMYYYY");
+                    }
                 }
                 else {
-                    return moment(dateString, "DDMMMYYYY");
+                    return moment(d);
+                }
+            };
+            str.toDate = function (d) {
+                if (d instanceof Date) {
+                    return d;
+                }
+                else {
+                    var md;
+                    if (typeof d === "string") {
+                        md = this.toMoment(d);
+                    }
+                    else {
+                        md = d;
+                    }
+                    return md.toDate();
                 }
             };
             str.toDateString = function (d) {

@@ -24,13 +24,13 @@ namespace Fastnet.Webframe.BookingData
     {
         [Key]
         public long PriceId { get; set; }
-        [Index("ptcc",  IsUnique = true, Order = 1)]
+        //[Index("ptcc",  IsUnique = true, Order = 1)]
         public virtual Period Period { get; set; }
-        [Index("ptcc", IsUnique = true, Order = 2)]
+        //[Index("ptcc", IsUnique = true, Order = 2)]
         public AccomodationType Type { get; set; }
-        [Index("ptcc", IsUnique = true, Order = 3)]
+        //[Index("ptcc", IsUnique = true, Order = 3)]
         public AccomodationClass Class { get; set; }
-        [Index("ptcc", IsUnique = true, Order = 4)]
+        //[Index("ptcc", IsUnique = true, Order = 4)]
         public int Capacity { get; set; }
         [Required]
         public Decimal Amount { get; set; }

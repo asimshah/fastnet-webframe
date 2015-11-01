@@ -1,6 +1,7 @@
 ﻿using Fastnet.Webframe.BookingData;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -19,7 +20,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.amount = p.Amount;
             this.isRolling = p.Period.PeriodType == PeriodType.Rolling;
             this.from = p.Period.GetStartDate();
-            if(!isRolling)
+            if (!isRolling)
             {
                 this.to = p.Period.GetEndDate();
             }

@@ -104,23 +104,6 @@ var fastnet;
                     required: { message: "Please provide a duration (in days) for the new blocked period" },
                     min: { params: 1, message: "The minumum duration is one day" }
                 });
-                //this.proposedPeriod = ko.computed<server.blockedPeriod>(() => {
-                //    if (this.newPeriodDuration.isValid() && this.newPeriodDuration.isValid()) {
-                //        var endsOn = moment(this.newPeriodFrom()).add(this.newPeriodDuration() - 1, 'd').toDate()
-                //        var pp: server.blockedPeriod = {
-                //            availabilityId: 0,
-                //            startsOn: this.newPeriodFrom(),
-                //            endsOn: endsOn,
-                //            remarks: null
-                //        }
-                //        return pp;
-                //    } else {
-                //        return null;
-                //    }
-                //}).extend({ notOverlapped: { message: "hello" } });
-                //this.dummy = ko.computed<observableManageDaysModel>(() => {
-                //    return this;
-                //}).extend({ notOverlapped: { message: "hello" } });
             }
             observableManageDaysModel.prototype.canOpen = function () {
                 return !this.isOpen();
@@ -128,29 +111,69 @@ var fastnet;
             return observableManageDaysModel;
         })(forms.viewModel);
         booking.observableManageDaysModel = observableManageDaysModel;
+        var pricingModels = (function (_super) {
+            __extends(pricingModels, _super);
+            function pricingModels() {
+                _super.apply(this, arguments);
+            }
+            return pricingModels;
+        })(forms.models);
+        booking.pricingModels = pricingModels;
         var pricingModel = (function (_super) {
             __extends(pricingModel, _super);
             function pricingModel(minDate, prices) {
+                var _this = this;
                 _super.call(this);
                 this.minDate = minDate;
-                this.prices = prices;
+                this.prices = [];
+                prices.forEach(function (item, index, list) {
+                    var p = {
+                        priceId: item.priceId,
+                        amount: item.amount,
+                        from: str.toDate(item.from),
+                        isRolling: item.isRolling,
+                        to: item.isRolling ? null : str.toDate(item.to)
+                    };
+                    _this.prices.push(p);
+                });
+                //this.prices = prices;
             }
             return pricingModel;
         })(forms.model);
         booking.pricingModel = pricingModel;
+        var observablePrice = (function () {
+            function observablePrice() {
+            }
+            return observablePrice;
+        })();
         var observablePricingModel = (function (_super) {
             __extends(observablePricingModel, _super);
             function observablePricingModel(m) {
+                var _this = this;
                 _super.call(this);
-                this.prices = m.prices;
+                this.prices = [];
+                m.prices.forEach(function (item, index, list) {
+                    var p = new observablePrice();
+                    p.priceId = item.priceId;
+                    p.amount = item.amount;
+                    p.from = item.from;
+                    p.to = item.to;
+                    p.isRolling = item.isRolling;
+                    p.canRemove = false;
+                    if (index !== list.length - 1) {
+                        p.canRemove = true;
+                    }
+                    _this.prices.push(p);
+                });
+                //this.prices = m.prices;
                 this.minDate = m.minDate.add(-1, 'd');
                 this.newFrom = ko.observable().extend({
                     required: { message: "A new price requires a date from which it applies" },
                     dateGreaterThan: { params: this.minDate, message: "Prices cannot be back dated" }
                 });
                 this.newAmount = ko.observable().extend({
-                    required: { message: "The price (in pounds) must be whole number and not start with 0" },
-                    pattern: { params: /^[1-9][0-9]+$/ }
+                    required: { message: "Enter a price (in pounds)" },
+                    pattern: { params: /^[1-9][0-9]+$/, message: "The price (in pounds) must be a whole number and not start with 0" }
                 });
             }
             return observablePricingModel;

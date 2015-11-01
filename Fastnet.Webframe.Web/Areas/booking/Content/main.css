@@ -527,6 +527,35 @@ button.side-button {
   background-color: #ee1111 !important;
   border: 1px solid #8f0a0a !important;
 }
+.report-forms .pricing-form .heading {
+  font-weight: bold;
+  font-size: larger;
+}
+.report-forms .pricing-form table {
+  table-layout: fixed;
+}
+.report-forms .pricing-form td.date-from {
+  max-width: 300px;
+}
+.report-forms .pricing-form td.price > div {
+  text-align: right;
+}
+.report-forms .pricing-form .new-price-subform .heading {
+  font-size: smaller;
+}
+.report-forms .pricing-form .new-price-subform label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
+}
+.report-forms .pricing-form .new-price-subform .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.report-forms .pricing-form .new-price-subform .validation-error {
+  border: 1px solid red;
+}
 .report-forms .manage-days #bookingCalendar {
   padding-top: 8px;
   padding-bottom: 8px;
@@ -679,6 +708,7 @@ button.side-button {
   -ms-touch-action: manipulation;
   touch-action: manipulation;
   cursor: pointer;
+  background-image: none;
   border: 1px solid transparent;
   white-space: nowrap;
   padding: 3px 6px;
@@ -690,7 +720,6 @@ button.side-button {
   -ms-user-select: none;
   user-select: none;
   color: #fff !important;
-  background-image: none;
   background-color: #337ab7;
   border-color: #2e6da4;
 }

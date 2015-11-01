@@ -137,53 +137,76 @@ module fastnet {
                     required: { message: "Please provide a duration (in days) for the new blocked period" },
                     min: { params: 1, message: "The minumum duration is one day" }
                 });
-                //this.proposedPeriod = ko.computed<server.blockedPeriod>(() => {
-                //    if (this.newPeriodDuration.isValid() && this.newPeriodDuration.isValid()) {
-                //        var endsOn = moment(this.newPeriodFrom()).add(this.newPeriodDuration() - 1, 'd').toDate()
-                //        var pp: server.blockedPeriod = {
-                //            availabilityId: 0,
-                //            startsOn: this.newPeriodFrom(),
-                //            endsOn: endsOn,
-                //            remarks: null
-                //        }
-                //        return pp;
-                //    } else {
-                //        return null;
-                //    }
-                //}).extend({ notOverlapped: { message: "hello" } });
-                //this.dummy = ko.computed<observableManageDaysModel>(() => {
-                //    return this;
-                //}).extend({ notOverlapped: { message: "hello" } });
             }
             public canOpen(): boolean {
                 return !this.isOpen();
             }
         }
+        export class pricingModels extends forms.models {
+            current: pricingModel;
+            original: pricingModel;
+        }
         export class pricingModel extends forms.model {
             public prices: server.pricing[];
             public minDate: moment.Moment;
+            public newFrom: Date;
+            public newAmount: number;
             constructor(minDate: moment.Moment, prices: server.pricing[]) {
                 super();
                 this.minDate = minDate;
-                this.prices = prices;
+                this.prices = [];
+                prices.forEach((item, index, list) => {
+                    var p: server.pricing = {
+                        priceId: item.priceId,
+                        amount: item.amount,
+                        from: str.toDate(item.from),
+                        isRolling: item.isRolling,
+                        to: item.isRolling ? null : str.toDate(item.to)
+                    };
+                    this.prices.push(p);
+                });
+                //this.prices = prices;
             }
         }
+        class observablePrice {
+            priceId: number;
+            amount: number;
+            isRolling: boolean;
+            from: Date;
+            to: Date;
+            canRemove: boolean;
+        }
         export class observablePricingModel extends forms.viewModel {
-            public prices: server.pricing[];
+            //public prices: server.pricing[];
+            public prices: observablePrice[];
             public newFrom: KnockoutObservable<Date>;
             public newAmount: KnockoutObservable<number>;
             public minDate: moment.Moment;
             constructor(m: pricingModel) {
                 super();
-                this.prices = m.prices;
+                this.prices = [];
+                m.prices.forEach((item, index, list) => {
+                    var p = new observablePrice();
+                    p.priceId = item.priceId;
+                    p.amount = item.amount;
+                    p.from = item.from;
+                    p.to = item.to;
+                    p.isRolling = item.isRolling;
+                    p.canRemove = false;
+                    if (index !== list.length - 1) {
+                        p.canRemove = true;
+                    }
+                    this.prices.push(p);
+                });
+                //this.prices = m.prices;
                 this.minDate = m.minDate.add(-1, 'd');
                 this.newFrom = ko.observable<Date>().extend({
                     required: { message: "A new price requires a date from which it applies" },
                     dateGreaterThan: { params: this.minDate, message: "Prices cannot be back dated"}
                 });
                 this.newAmount = ko.observable<number>().extend({
-                    required: { message: "The price (in pounds) must be whole number and not start with 0" },
-                    pattern: { params: /^[1-9][0-9]+$/}
+                    required: { message: "Enter a price (in pounds)" },
+                    pattern: { params: /^[1-9][0-9]+$/, message: "The price (in pounds) must be a whole number and not start with 0"}
                 });
             }
         }

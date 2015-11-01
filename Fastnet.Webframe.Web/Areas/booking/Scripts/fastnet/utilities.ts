@@ -85,12 +85,30 @@ module fastnet {
                 }
                 return fmt;
             }
-            public static toMoment(dateString: string): moment.Moment {
-                if (dateString.length === 19 && dateString.indexOf('T') === 10) {
-                    // is an isoDate?
-                    return moment(dateString);
+            public static toMoment(d: string | Date): moment.Moment {
+                if (typeof d === "string") {
+                    if (d.length === 19 && d.indexOf('T') === 10) {
+                        // is an isoDate?
+                        return moment(d);
+                    } else {
+                        return moment(d, "DDMMMYYYY");
+                    }
                 } else {
-                    return moment(dateString, "DDMMMYYYY");
+                    return moment(d);
+                }
+            }
+            public static toDate(d: Date | moment.Moment | string): Date {
+                if (d instanceof Date) {
+                    return d;
+                } else {
+                    var md: moment.Moment;
+                    if (typeof d === "string") {
+                        md = this.toMoment(d);
+                    } else {
+                        md = <moment.Moment>d;
+                        
+                    }
+                    return md.toDate();
                 }
             }
             public static toDateString(d: Date | moment.Moment | string): string {

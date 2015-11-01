@@ -285,8 +285,25 @@ module fastnet {
                             ]
                         }, vm);
                         f.setContentHtml(r.template);
-                        f.open((ctx: managePricing, f: forms.form, cmd: string, data: any, ct: EventTarget) => {
+                        f.open((ctx: managePricing, f: forms.form, cmd: string, data: pricingModels, ct: EventTarget) => {
                             switch (cmd) {
+                                case "remove-price":
+                                    var id = parseInt($(ct).closest("tr").attr("data-id"));
+                                    this.removePrice(id).then(() => {
+                                        f.close();
+                                        var mp = new managePricing(this.app);
+                                        mp.start();
+                                    });
+                                    break;
+                                case "add-new-price":
+                                    if (f.isValid()) {
+                                        this.addNewPrice(data.current).then(() => {
+                                            f.close();
+                                            var mp = new managePricing(this.app);
+                                            mp.start();
+                                        });
+                                    }
+                                    break;
                                 case "cancel-command":
                                     f.close();
                                     var index = new adminIndex(this.app);
@@ -300,6 +317,26 @@ module fastnet {
                         });
                     });
                 });
+            }
+            private removePrice(id: number): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var abodeId = this.app.parameters.currentAbode.id;
+                var url = str.format("bookingadmin/remove/pricing/{0}/{1}", abodeId, id);
+                ajax.Post({ url: url, data: null }).then(() => {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            }
+            private addNewPrice(m: pricingModel): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var from = str.toDateString(m.newFrom);
+                var amount = m.newAmount;
+                var abodeId = this.app.parameters.currentAbode.id;
+                var url = str.format("bookingadmin/add/pricing/{0}", abodeId);
+                ajax.Post({ url: url, data: { from: from, amount: amount } }).then(() => {
+                    deferred.resolve();
+                });
+                return deferred.promise();
             }
         }
         class manageDays extends adminSubapp {
