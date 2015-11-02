@@ -177,7 +177,7 @@ namespace Fastnet.Webframe.Web.Models
     {
         public OptionsModel Options { get; set; }
         public bool ClientSideLog { get; set; }
-        //public bool CanEditPages { get; set; }
+        public string ReturnUrl { get; set; }
         public string StartPage { get; set; }
         public bool ShowDialog
         {

@@ -21,5 +21,11 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             return View();
         }
+        [Authorize]
+        [Route("my")]
+        public ActionResult MyBooking()
+        {
+            return View();
+        }
     }
 }

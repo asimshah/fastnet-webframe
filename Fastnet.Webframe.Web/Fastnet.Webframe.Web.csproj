@@ -1199,6 +1199,7 @@
     <Content Include="Areas\booking\Content\fastnet\forms.less" />
     <Content Include="Areas\booking\Views\Management\Index.cshtml" />
     <Content Include="Areas\booking\Content\richtext.less" />
+    <Content Include="Areas\booking\Views\Home\MyBooking.cshtml" />
     <None Include="compilerconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
@@ -1765,7 +1766,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

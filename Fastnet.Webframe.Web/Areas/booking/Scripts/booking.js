@@ -208,11 +208,6 @@ var fastnet;
                         case 1 /* WithoutConfirmation */:
                         default:
                             this.startBooking();
-                            //$(".booking-interaction").empty();
-                            //var bd = new bookDates();
-                            //bd.start(this).then((cb: completedBooking) => {
-                            //    this.onBookingCompleted(cb);
-                            //});
                             break;
                     }
                 }

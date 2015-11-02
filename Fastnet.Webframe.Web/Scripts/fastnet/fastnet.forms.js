@@ -1,5 +1,5 @@
 ﻿(function ($) {
-    // Version 1.1.2
+    // Version 1.1.3
     var $T;
     var $U;
     var modelessTemplate =
@@ -243,8 +243,22 @@
             }
             setTimeout(function () {
                 var f_elements = $(container).find("[data-focus]");
+                //if (f_elements.length > 0) {
+                //    f_elements[0].focus();
+                //}
                 if (f_elements.length > 0) {
-                    f_elements[0].focus();
+                    if (f_elements.length === 1) {
+                        f_elements[0].focus();
+                    } else {
+                        // we have more than one data-focus element
+                        f_elements.each(function (i, item) {
+                            var content = $(item).val();
+                            if (content === null || content === '') {
+                                $(item).focus();
+                                return false;
+                            }
+                        });
+                    }
                 }
                 if (!Modernizr.inputtypes.date) {
                     var zIndex = me.options.BaseZIndex + (formCount * 10);

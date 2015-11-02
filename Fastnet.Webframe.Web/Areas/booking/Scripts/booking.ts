@@ -227,11 +227,6 @@ module fastnet {
                         case server.BookingPermissions.WithoutConfirmation:
                         default:
                             this.startBooking();
-                            //$(".booking-interaction").empty();
-                            //var bd = new bookDates();
-                            //bd.start(this).then((cb: completedBooking) => {
-                            //    this.onBookingCompleted(cb);
-                            //});
                             break;
                     }
                 }

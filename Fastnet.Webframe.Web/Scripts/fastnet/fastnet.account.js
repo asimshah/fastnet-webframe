@@ -1,27 +1,16 @@
 ﻿(function ($) {
-    // Version 1.0.0
+    // Version 1.0.2
     var $T;
     var $U;
     function updateCurrentUserDisplay() {
-        //setTimeout(function () {
-        //    $.when(
-        //    $U.AjaxGet({ url: "account/currentuser" }, true)
-        //    ).then(function (r) {
-        //        if (r.Authenticated) {
-        //            var userEmailAddress = r.EmailAddress;
-        //            var userName = r.Name;
-        //            $(".login-name").html(userName).removeClass('hide');
-        //        } else {
-        //            $(".login-name").addClass('hide').html("");
-        //        }
-        //    });
-        //}, 0);
         $.when(
         $U.AjaxGet({ url: "account/currentuser" }, true)
         ).then(function (r) {
             if (r.Authenticated) {
                 var userEmailAddress = r.EmailAddress;
                 var userName = r.Name;
+                var lastUserKey = "last-successful-user";
+                $U.SetData(lastUserKey, userEmailAddress);
                 $(".login-name").html(userName).removeClass('hide');
             } else {
                 $(".login-name").addClass('hide').html("");
@@ -269,6 +258,7 @@
         },
         Login: {
             Start: function () {
+                
                 function login(lf) {
                     var data = lf.getData();
                     var emailAddress = data.email;
@@ -281,17 +271,26 @@
                             var success = result.Success;
                             if (success) {
                                 lf.close();
-                                location.reload(true);
-                                updateCurrentUserDisplay();
-                                //if ($.isFunction($T.onComplete)) {
-                                //    $T.onComplete();
-                                //}
+                                if ($T.options.ReturnUrl !== null) {
+                                    var href = $U.Format("{0}//{1}{2}", location.protocol, location.host, $T.options.ReturnUrl);
+                                    location.href = href;// $T.options.ReturnUrl;
+                                } else {
+                                    location.reload(true);
+                                    //updateCurrentUserDisplay();
+                                }
                             } else {
                                 lf.find(".error").html(result.Error);
                             }
                         });
                 };
                 //var lf = new $.fastnet$forms.CreateForm("template/form/login", {
+                var m = {};
+                var lastUserKey = "last-successful-user";
+                var lu = $U.GetData(lastUserKey);
+                if (lu !== null) {
+                    m = { username: lu };
+                }
+                // { username: 'ashah@hotmail.com', hasname: true}
                 var lf = new $.fastnet$forms.CreateForm("template/get/main-forms-account/login", {
                     Title: "Login",
                     OnChange: function (f, dataItem) {
@@ -325,7 +324,7 @@
                             lf.disableCommand("login");
                         }
                     }
-                }, {});
+                }, m);
                 var validator = new $.fastnet$validators.Create(lf);
                 validator.AddIsRequired("email", "An email address is required");
                 validator.AddIsRequired("password", "A password is required");

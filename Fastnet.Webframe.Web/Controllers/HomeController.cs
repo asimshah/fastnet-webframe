@@ -147,7 +147,12 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("logon")]
         public ActionResult Login()
         {
+            var returnUrl = this.Request.QueryString.Get("ReturnUrl");
             PageModel pm = GetPageModel(ClientSideActions.login);// new PageModel(id);
+            if (returnUrl != null)
+            {
+                pm.ReturnUrl = returnUrl;
+            }
             return View("Index", pm);
         }
         [AllowAnonymous]
