@@ -114,6 +114,7 @@ module fastnet {
             classList?: string[];
             position: buttonPosition;
             dataBinding?: string;
+            isDefault?: boolean;
         }
         export interface formOptions {
             /**
@@ -403,7 +404,7 @@ module fastnet {
                     title: "title required",
                     modelessContainer: null,
                     hideSystemCloseButton: false,
-                    okButton: { text: "OK", command: "ok-command", position: buttonPosition.right, dataBinding: "enable: okEnabled" },
+                    okButton: { text: "OK", command: "ok-command", position: buttonPosition.right, dataBinding: "enable: okEnabled", isDefault: true },
                     cancelButton: { text: "Close", command: "cancel-command", position: buttonPosition.right, dataBinding: "enable: cancelEnabled" },
                     messageClass: "message-block"
                 }
@@ -556,7 +557,7 @@ module fastnet {
                             e.preventDefault();
                             this.onCommand(cmd, null);
                         },
-                        "class": ""
+                        "class": item.isDefault? "is-default" : ""
                     };
                     if (!h$.isNullOrUndefined(item.dataBinding)) {
                         b["data-bind"] = item.dataBinding;
@@ -576,6 +577,7 @@ module fastnet {
             }
             private prepareFormRoot(): JQuery {
                 return $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
+                //return $("<form></form>").attr("id", this.formId).append($(this.contentHtml));
             }
             private finalise(): void {
                 this.rootElement = this.getRoot().get(0);
@@ -604,6 +606,19 @@ module fastnet {
 
                     this.notifyChange(propertyName);
                 });
+                //**NB** the code below was an attempt to get default buttons working but it failed!
+                // on the login form the result was an error saying a password is requied when in fact a password was provided !??
+                // commented this out for now...
+                //var targets = $(this.rootElement).find("button[data-cmd].is-default");
+                //if (targets.length > 0) {
+                //    $(this.rootElement).keyup((e) => {
+                //        if (e.keyCode == 13) {
+                //            var defaultButton = targets[0];
+                //            $(defaultButton).trigger("click");
+                //            //$(this.rootElement).find("button[data-cmd].is-default").trigger("click");
+                //        }
+                //    });
+                //}
             }
             private openModal(): void {
                 var buttons = this.prepareButtons();

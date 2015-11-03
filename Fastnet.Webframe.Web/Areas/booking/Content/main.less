@@ -127,6 +127,22 @@ button.side-button {
     font-size: 0.75em;
 }
 
+.my-bookings {
+    /*@media only screen and (max-width: @very-wide) {
+        font-size: 1.25em;
+    }*/
+
+    @media only screen and (max-width: @wide) {
+        font-size: 0.8em;
+    }
+
+    @media only screen and (max-width: @narrow) {
+        font-size: 0.6em;
+    }
+    .make-payment-button {
+        display: none;
+    }
+}
 
 
 .booking-confirmation {
@@ -413,10 +429,11 @@ button.side-button {
     }
 
     .pricing-form {
-                .heading {
+        .heading {
             font-weight: bold;
             font-size: larger;
         }
+
         table {
             table-layout: fixed;
         }
@@ -435,6 +452,7 @@ button.side-button {
                 //min-width: 200px;
             }
         }
+
         .new-price-subform {
             .heading {
                 font-size: smaller;

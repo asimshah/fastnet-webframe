@@ -175,6 +175,24 @@ button.side-button {
   margin-top: 2.35em;
   font-size: 0.75em;
 }
+.my-bookings {
+  /*@media only screen and (max-width: @very-wide) {
+        font-size: 1.25em;
+    }*/
+}
+@media only screen and (max-width: 480px) {
+  .my-bookings {
+    font-size: 0.8em;
+  }
+}
+@media only screen and (max-width: 320px) {
+  .my-bookings {
+    font-size: 0.6em;
+  }
+}
+.my-bookings .make-payment-button {
+  display: none;
+}
 .booking-confirmation {
   margin-left: 5px;
   margin-right: 5px;

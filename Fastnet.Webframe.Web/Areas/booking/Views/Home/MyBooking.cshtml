@@ -1,12 +1,26 @@
-﻿<div class="my-booking-view">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="heading">Your Booking(s)</div>
-        </div>
-    </div>
+﻿@using Fastnet.Webframe.BookingData
+@{
+    ViewBag.Title = "My Bookings";
+    ViewBag.AppName = BookingGlobals.GetAbodeName() + " Booking System";
+}
+<div class="my-booking-view">
     <div class="row">
         <div class="col-xs-12">
             <div class="booking-interaction"></div>
         </div>
     </div>
 </div>
+@section styles {
+    @Styles.Render("~/Content/booking/datatables/css")
+    }
+@section scripts {
+    @Scripts.Render("~/bundles/booking")
+    @Scripts.Render("~/bundles/booking/datatables")
+    <script>
+        var bookingApp = null;
+        (function ($) {
+            var myBooking = new fastnet.booking.myBooking();
+            myBooking.start();
+        })(jQuery);
+    </script>
+}

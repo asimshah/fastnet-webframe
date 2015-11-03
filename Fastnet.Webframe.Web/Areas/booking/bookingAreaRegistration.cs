@@ -42,6 +42,13 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 //"~/Content/datatables/css/datatables.bootstrap.css",
                 "~/Content/datatables/css/datatables.responsive.css"
                 ));
+
+            bundles.Add(new StyleBundle("~/Content/booking/datatables/css")
+                .Include(
+                "~/Content/datatables/css/jquery.datatables.css",
+                "~/Content/datatables/css/datatables.responsive.css"
+                ));
+
             bundles.Add(new ScriptBundle("~/bundles/fastnet/vnext").Include(
                 "~/Scripts/mustache.js",
                 "~/Scripts/moment.js",
@@ -53,6 +60,12 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Areas/booking/Scripts/collections/collections.js",
                 "~/Areas/booking/Scripts/fastnet/utilities.js",
                 "~/Areas/booking/Scripts/fastnet/forms.js"
+                ));
+
+            bundles.Add(new ScriptBundle("~/bundles/booking/datatables").Include(
+                "~/Scripts/datatables/jquery.dataTables.js",
+                "~/Scripts/datatables/datetime-moment.js",
+                "~/Scripts/datatables/dataTables.responsive.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/booking").Include(

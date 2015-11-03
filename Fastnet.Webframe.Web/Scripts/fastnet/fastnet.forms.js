@@ -27,10 +27,10 @@
 "                </div>" +
 "            </div>" +
 "            <div class='modal-section sb'>" +
-"            <div class='modal-body'><div class='body-content'>{{{BodyHtml}}}</div></div>" +
+"                <div class='modal-body'><div class='body-content'>{{{BodyHtml}}}</div></div>" +
 "            </div>" +
 "            <div class='modal-section sf'>" +
-"            <div class='modal-footer'>{{{FooterHtml}}}</div>" +
+"                <div class='modal-footer'>{{{FooterHtml}}}</div>" +
 "            </div>" +
 "            <span class='resize-grip hidden'></span>" +
 "        </div>" +

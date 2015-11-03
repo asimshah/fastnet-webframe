@@ -298,6 +298,24 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress()
             };
         }
+        [HttpGet]
+        [Route("get/my/bookings")]
+        public dynamic GetMyBookings()
+        {
+            var member = this.GetCurrentMember();
+            if (!member.IsAnonymous)
+            {
+                using (var ctx = new BookingDataContext())
+                {
+                    var today = BookingGlobals.GetToday();
+                    var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.MemberId == member.Id && (x.To >= today))
+                        .OrderBy(x => x.Reference).ToArray();
+                    var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                    return new { member = member.Fullname, bookings = data };
+                }
+            }
+            return new { member = member.Fullname, bookings = new List<booking>() };
+        }
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
         {
             bookingChoice result = null;

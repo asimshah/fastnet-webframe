@@ -23,6 +23,79 @@ var fastnet;
             };
             return configuration;
         })();
+        var myBooking = (function () {
+            function myBooking() {
+            }
+            myBooking.prototype.start = function () {
+                var _this = this;
+                $.fn.dataTable.moment('DDMMMYYYY');
+                var config = {
+                    modelessContainer: "booking-interaction",
+                };
+                this.today = new Date();
+                forms.form.initialise(config);
+                var templateUrl = "booking/mybookings";
+                var dataurl = str.format("bookingapi/get/my/bookings");
+                ajax.Get({ url: dataurl }, false).then(function (result) {
+                    var model = new booking.observableMyBookingsModel(result.bookings);
+                    wt.getTemplate({ ctx: _this, templateUrl: templateUrl }).then(function (r) {
+                        var f = new forms.form(_this, {
+                            modal: false,
+                            title: str.format("Booking(s) for {0}", result.member),
+                            //okButton: null,
+                            cancelButton: null,
+                            okButtonText: "New Booking",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: 1 /* left */, isDefault: false }
+                            ]
+                        }, model);
+                        var html = Mustache.render(r.template, result);
+                        f.setContentHtml(html);
+                        f.open(function (ctx, f, cmd) {
+                            switch (cmd) {
+                                case "ok-command":
+                                    f.close();
+                                    location.href = "/booking";
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        }).then(function () {
+                            f.find("#my-bookings button[data-table-cmd]").on("click", function (e) {
+                                _this.embeddedButtonHandler(result.bookings, e);
+                            });
+                            f.find("#my-bookings").DataTable({
+                                paging: false,
+                                searching: false,
+                                info: false,
+                                ordering: false,
+                                //pagingType: "simple",
+                                order: [[0, 'asc']]
+                            });
+                            $("#my-bookings").css("width", "100%");
+                            $(window).on("resize", function (e) {
+                                $("#my-bookings").css("width", "100%");
+                            });
+                        });
+                    });
+                });
+            };
+            myBooking.prototype.embeddedButtonHandler = function (list, e) {
+                e.stopPropagation();
+                var ct = e.target;
+                var cmd = $(ct).attr("data-table-cmd");
+                var id = parseInt($(ct).closest("tr").attr("data-id"));
+                switch (cmd) {
+                    case "make-payment":
+                        debug.print("make payment for booking {0}", id);
+                        break;
+                }
+            };
+            return myBooking;
+        })();
+        booking.myBooking = myBooking;
         var bookingApp = (function () {
             function bookingApp() {
             }

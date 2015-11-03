@@ -107,7 +107,7 @@ var fastnet;
                     title: "title required",
                     modelessContainer: null,
                     hideSystemCloseButton: false,
-                    okButton: { text: "OK", command: "ok-command", position: 0 /* right */, dataBinding: "enable: okEnabled" },
+                    okButton: { text: "OK", command: "ok-command", position: 0 /* right */, dataBinding: "enable: okEnabled", isDefault: true },
                     cancelButton: { text: "Close", command: "cancel-command", position: 0 /* right */, dataBinding: "enable: cancelEnabled" },
                     messageClass: "message-block"
                 };
@@ -438,7 +438,7 @@ var fastnet;
                             e.preventDefault();
                             _this.onCommand(cmd, null);
                         },
-                        "class": ""
+                        "class": item.isDefault ? "is-default" : ""
                     };
                     if (!h$.isNullOrUndefined(item.dataBinding)) {
                         b["data-bind"] = item.dataBinding;
@@ -458,6 +458,7 @@ var fastnet;
             };
             form.prototype.prepareFormRoot = function () {
                 return $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
+                //return $("<form></form>").attr("id", this.formId).append($(this.contentHtml));
             };
             form.prototype.finalise = function () {
                 var _this = this;
@@ -485,6 +486,19 @@ var fastnet;
                     var propertyName = $(element).attr("data-property");
                     _this.notifyChange(propertyName);
                 });
+                //**NB** the code below was an attempt to get default buttons working but it failed!
+                // on the login form the result was an error saying a password is requied when in fact a password was provided !??
+                // commented this out for now...
+                //var targets = $(this.rootElement).find("button[data-cmd].is-default");
+                //if (targets.length > 0) {
+                //    $(this.rootElement).keyup((e) => {
+                //        if (e.keyCode == 13) {
+                //            var defaultButton = targets[0];
+                //            $(defaultButton).trigger("click");
+                //            //$(this.rootElement).find("button[data-cmd].is-default").trigger("click");
+                //        }
+                //    });
+                //}
             };
             form.prototype.openModal = function () {
                 var _this = this;

@@ -39,7 +39,76 @@ module fastnet {
                 return ["booking-forms"];
             }
         }
-
+        export class myBooking {
+            public today: Date;
+            public start(): void {
+                $.fn.dataTable.moment('DDMMMYYYY');
+                var config: forms.configuration = {
+                    modelessContainer: "booking-interaction",
+                    //additionalValidations: bookingAppValidations.GetValidators()
+                };
+                this.today = new Date();
+                forms.form.initialise(config);
+                var templateUrl = "booking/mybookings";
+                var dataurl = str.format("bookingapi/get/my/bookings");
+                ajax.Get({ url: dataurl }, false).then((result: { member: string, bookings: server.booking[] }) => {
+                    var model = new observableMyBookingsModel(result.bookings);
+                    wt.getTemplate({ ctx: this, templateUrl: templateUrl }).then((r) => {
+                        var f = new forms.form(this, {
+                            modal: false,
+                            title: str.format("Booking(s) for {0}", result.member),
+                            //okButton: null,
+                            cancelButton: null,
+                            okButtonText: "New Booking",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left, isDefault: false }
+                            ]
+                        }, model);
+                        var html = Mustache.render(r.template, result);
+                        f.setContentHtml(html);
+                        f.open((ctx: any, f: forms.form, cmd: string) => {
+                            switch (cmd) {
+                                case "ok-command":
+                                    f.close();
+                                    location.href = "/booking";
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        }).then(() => {
+                            f.find("#my-bookings button[data-table-cmd]").on("click", (e) => {
+                                this.embeddedButtonHandler(result.bookings, e);
+                            });
+                            f.find("#my-bookings").DataTable({
+                                paging: false,
+                                searching: false,
+                                info: false,
+                                ordering: false,
+                                //pagingType: "simple",
+                                order: [[0, 'asc']]
+                            });
+                            $("#my-bookings").css("width", "100%");
+                            $(window).on("resize", (e) => {
+                                $("#my-bookings").css("width", "100%");
+                            });
+                        });
+                    });
+                });
+            }
+            private embeddedButtonHandler(list: server.booking[], e: JQueryEventObject): void {
+                e.stopPropagation();
+                var ct = e.target;
+                var cmd = $(ct).attr("data-table-cmd");
+                var id = parseInt($(ct).closest("tr").attr("data-id"));
+                switch (cmd) {
+                    case "make-payment":
+                        debug.print("make payment for booking {0}", id);
+                        break;
+                }
+            }
+        }
         export class bookingApp {
             private dayDictionary: collections.Dictionary<string, server.dayInformation>;
             private dayDictionaryMonthsLoaded: collections.Dictionary<string, boolean>;
@@ -373,7 +442,7 @@ module fastnet {
                 this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
                 this.step1_model.mobileNumber = app.currentMember.MobileNumber;
                 this.step1_vm = new bookingModels.observableRequest_step1(this.step1_model, { maximumNumberOfPeople: this.bookingApp.bookingParameters.maximumOccupants });
-                this.step1();                
+                this.step1();
                 return this.makeBooking.promise();
             }
             private subscribeToAppEvents() {
@@ -543,7 +612,7 @@ module fastnet {
                                   <div>An internal error has occurred.</div>`;
                 var request: server.bookingRequest = {
                     choice: model.choice,
-                    fromDate: str.toDateString( model.fromDate),
+                    fromDate: str.toDateString(model.fromDate),
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present
                 };

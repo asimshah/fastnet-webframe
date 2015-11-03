@@ -250,5 +250,14 @@
                 this.showPaymentRequiredMessage = m.paymentGatewayAvailable === true && m.isShortTermBooking;
             }
         }
+        export class observableMyBookingsModel extends forms.viewModel {
+            public bookings: server.booking[];
+            public hasBookings: boolean;
+            constructor(bookings: server.booking[]) {
+                super();
+                this.bookings = bookings;
+                this.hasBookings = bookings.length > 0;
+            }
+        }
     }
 }

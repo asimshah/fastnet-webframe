@@ -375,6 +375,7 @@
     <Content Include="Areas\booking\Templates\BookingReportForm.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
     <Content Include="Areas\booking\Templates\managedays.html" />
+    <Content Include="Areas\booking\Templates\myBookings.html" />
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />
     <Content Include="Areas\booking\Templates\OccupancyReportDay.html" />
     <Content Include="Areas\booking\Templates\Parameters.html" />

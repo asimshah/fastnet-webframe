@@ -247,6 +247,16 @@ var fastnet;
             return observableRequest_step3;
         })(forms.viewModel);
         booking.observableRequest_step3 = observableRequest_step3;
+        var observableMyBookingsModel = (function (_super) {
+            __extends(observableMyBookingsModel, _super);
+            function observableMyBookingsModel(bookings) {
+                _super.call(this);
+                this.bookings = bookings;
+                this.hasBookings = bookings.length > 0;
+            }
+            return observableMyBookingsModel;
+        })(forms.viewModel);
+        booking.observableMyBookingsModel = observableMyBookingsModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=bookingViewModels.js.map
