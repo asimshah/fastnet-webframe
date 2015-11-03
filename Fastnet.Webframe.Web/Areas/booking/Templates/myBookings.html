@@ -1,0 +1,44 @@
+﻿<div class="my-bookings">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <table id="my-bookings" class="table table-condensed dt-responsive">
+                <thead>
+                    <tr>
+                        <th class="all">Reference</th>
+                        <th class="all">From</th>
+                        <th class="none">Nights</th>
+                        <th class="none">Status</th>
+                        <th class="all">Cost</th>
+                        <th>Paid</th>
+                        <th>Entry Code</th>
+                        <th class="all"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#bookings}}
+                    <tr data-id="{{bookingId}}">
+                        <td><div>{{reference}}</div></td>
+                        <td><div>{{from}}</div></td>
+                        <td><div>{{numberOfNights}}</div></td>
+                        <td><div>{{statusName}}</div></td>
+                        <td><div>{{formattedCost}}</div></td>
+                        <td>
+                            {{#isPaid}}
+                            <span class="fa fa-check"></span>
+                            {{/isPaid}}
+
+                        </td>
+                        <td><div>{{entryInformation}}</div></td>
+                        <td>
+                            {{^isPaid}}
+                            <button class="btn btn-xs btn-primary make-payment-button" data-table-cmd="make-payment">Make Payment</button>
+                            {{/isPaid}}
+                        </td>
+                    </tr>
+                    {{/bookings}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
