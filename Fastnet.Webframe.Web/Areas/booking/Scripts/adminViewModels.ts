@@ -1,4 +1,5 @@
 ﻿/// <reference path="../../../../fastnet.webframe.bookingdata/classes with typings/bookingStatus.cs.d.ts" />
+
 module fastnet {
     export module booking {
         import forms = fastnet.forms;
@@ -26,6 +27,7 @@ module fastnet {
             under18sInParty: boolean;
             numberOfNights: number;
             hasMultipleDays: boolean;
+            description: string;
         }
         export class observableBookingModel extends forms.viewModel {
             public bookingId: number;
@@ -49,6 +51,7 @@ module fastnet {
             under18sInParty: boolean;
             //numberOfNights: number;
             //hasMultipleDays: boolean;
+
             constructor(b: bookingModel) {
                 super();
                 this.bookingId = b.bookingId;
@@ -208,6 +211,33 @@ module fastnet {
                     required: { message: "Enter a price (in pounds)" },
                     pattern: { params: /^[1-9][0-9]+$/, message: "The price (in pounds) must be a whole number and not start with 0"}
                 });
+            }
+        }
+        export class editTemplateModel extends forms.model {
+            public availableTemplates: string[];
+            public subjectText: string;
+            public bodyHtml: string; 
+            constructor(templateList: string[]) {
+                super();
+                this.availableTemplates = templateList
+                this.subjectText = "";
+                this.bodyHtml = "";
+            }
+        }
+        export class observableEditTemplateModel extends forms.viewModel {
+            public availableTemplates: string[];
+            public selectedTemplate: KnockoutObservable<string>;;
+            public subjectText: KnockoutObservable<string>;
+            public bodyHtml: KnockoutObservable<string>;
+            constructor(m: editTemplateModel) {
+                super();
+                this.availableTemplates = m.availableTemplates;
+                this.subjectText = ko.observable(m.subjectText);
+                this.bodyHtml = ko.observable(m.bodyHtml);
+                this.selectedTemplate = ko.observable<string>();
+            }
+            public selectionChanged() {
+                debugger;
             }
         }
     }

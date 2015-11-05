@@ -482,6 +482,12 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             BookingSettings.Set(BookingSettingKeys.OnlineBookingClosed, !open);
             DataContext.SaveChanges();
         }
+        [HttpGet]
+        [Route("get/emailtemplatelist")]
+        public string[] GetEmailTemplateList()
+        {
+            return Enum.GetNames(typeof(BookingEmailTemplates));
+        }
         private static IEnumerable<Availability> GetBlockedItems(BookingDataContext ctx)
         {
             DateTime today = BookingGlobals.GetToday();

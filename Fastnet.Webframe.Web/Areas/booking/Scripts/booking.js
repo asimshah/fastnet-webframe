@@ -598,7 +598,8 @@ var fastnet;
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present
                 };
-                var createBookingUrl = "bookingapi/create";
+                var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
+                var createBookingUrl = str.format("bookingapi/{0}/create", abodeId);
                 ajax.Post({ url: createBookingUrl, data: request }).then(function (r) {
                     if (!r.Success && r.Code === "SystemError") {
                         var cf = new forms.form(_this, {

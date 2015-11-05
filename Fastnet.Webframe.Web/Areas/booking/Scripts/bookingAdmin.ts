@@ -124,6 +124,11 @@ module fastnet {
                                 var mp = new managePricing(this.app);
                                 mp.start();
                                 break;
+                            case "email-templates":
+                                f.close();
+                                var et = new emailTemplates(this.app);
+                                et.start();
+                                break;
                             default:
                                 var ch = factory.getCustomAdminIndex();
                                 if (ch != null && ch.handleCommand(f, this.app, cmd)) {
@@ -1004,6 +1009,34 @@ module fastnet {
                 ajax.Get({ url: reportUrl }, false).then((r: server.dayInformation[]) => {
                     var html = $(Mustache.render(this.dayTemplate, { data: r }));
                     $(".report-content").empty().append($(html));
+                });
+            }
+        }
+        class emailTemplates extends adminSubapp {
+            constructor(app: adminApp) {
+                super(app);
+            }
+            public start(): void {
+                var templateListUrl = "bookingadmin/get/emailtemplatelist";
+                ajax.Get({ url: templateListUrl }).then((tl: string[]) => {
+                    var templateUrl = "booking/emailTemplate";
+                    wt.getTemplate({ ctx: this, templateUrl: templateUrl }).then((r) => {
+                        var etm = new editTemplateModel(tl);
+                        var vetm = new observableEditTemplateModel(etm);
+                        var f = new forms.form(this, {
+                            modal: false,
+                            title: "Email Template Editor",
+                            styleClasses: ["report-forms"],
+                            cancelButtonText: "Administration page",
+                            okButtonText: "Save Changes",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
+                            ]
+                        }, vetm);
+                        f.setContentHtml(r.template);
+                        f.open((ctx: any, f: forms.form, cmd: string, data: any) => {
+                        });
+                    });
                 });
             }
         }

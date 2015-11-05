@@ -79,6 +79,10 @@
       <HintPath>..\packages\Fastnet.Web.Common.1.0.5710.19483\lib\net45\Fastnet.Web.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Handlebars, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Handlebars.Net.1.4.5\lib\Handlebars.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
@@ -244,6 +248,7 @@
     <Compile Include="Areas\booking\Common\ChoiceFilterBase.cs" />
     <Compile Include="Areas\booking\Common\dailyAccomodation.cs" />
     <Compile Include="Areas\booking\Common\dayInformation.cs" />
+    <Compile Include="Areas\booking\Common\EmailHelper.cs" />
     <Compile Include="Areas\booking\Common\Factory.cs" />
     <Compile Include="Areas\booking\Common\Globals.cs" />
     <Compile Include="Areas\booking\Common\DayInformationClasses.cs" />
@@ -374,6 +379,7 @@
     <Content Include="Areas\booking\Templates\BookingReport.html" />
     <Content Include="Areas\booking\Templates\BookingReportForm.html" />
     <Content Include="Areas\booking\Templates\configurationIndex.html" />
+    <Content Include="Areas\booking\Templates\emailTemplate.html" />
     <Content Include="Areas\booking\Templates\managedays.html" />
     <Content Include="Areas\booking\Templates\myBookings.html" />
     <Content Include="Areas\booking\Templates\OccupancyReport.html" />

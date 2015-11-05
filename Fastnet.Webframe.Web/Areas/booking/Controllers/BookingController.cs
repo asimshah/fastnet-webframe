@@ -213,8 +213,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             }
         }
         [HttpPost]
-        [Route("create")]
-        public async Task<dynamic> MakeBooking(bookingRequest request)
+        [Route("create/{abodeId}")]
+        public async Task<dynamic> MakeBooking(long abodeId, bookingRequest request)
         {
             // default isolation level is Serializable, meaning no one else can do anything
             string reference = null;
@@ -276,6 +276,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         }
                         ctx.Bookings.Add(b);
                         await ctx.SaveChangesAsync();
+                        EmailHelper.QueueEmail(DataContext, ctx, abodeId, b);
                         tran.Complete();
                         //
                         reference = b.Reference;
@@ -315,6 +316,13 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
             }
             return new { member = member.Fullname, bookings = new List<booking>() };
+        }
+        [HttpGet]
+        [Route("poll")]
+        public void Poll()
+        {
+            DateTime time = DateTime.Now;
+            Log.Write("Polled received");
         }
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
         {

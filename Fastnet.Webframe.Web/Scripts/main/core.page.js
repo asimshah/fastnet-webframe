@@ -316,6 +316,8 @@
                     if (r.Authenticated) {
                         var userEmailAddress = r.EmailAddress;
                         var userName = r.Name;
+                        var lastUserKey = "last-successful-user";
+                        $U.SetData(lastUserKey, userEmailAddress);
                         $(".login-name").html(userName).removeClass('hide');
                     } else {
                         $(".login-name").addClass('hide').html("");

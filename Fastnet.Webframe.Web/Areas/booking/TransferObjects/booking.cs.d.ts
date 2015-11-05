@@ -10,6 +10,7 @@
 		memberPhoneNumber: string;
 		from: string;
 		to: string;
+		description: string;
 		createdOn: string;
 		partySize: number;
 		totalCost: number;

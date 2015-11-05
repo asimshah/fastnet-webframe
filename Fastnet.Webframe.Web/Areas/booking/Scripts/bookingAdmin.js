@@ -141,6 +141,11 @@ var fastnet;
                                 var mp = new managePricing(_this.app);
                                 mp.start();
                                 break;
+                            case "email-templates":
+                                f.close();
+                                var et = new emailTemplates(_this.app);
+                                et.start();
+                                break;
                             default:
                                 var ch = booking_1.factory.getCustomAdminIndex();
                                 if (ch != null && ch.handleCommand(f, _this.app, cmd)) {
@@ -1022,6 +1027,37 @@ var fastnet;
                 });
             };
             return occupancyReport;
+        })(adminSubapp);
+        var emailTemplates = (function (_super) {
+            __extends(emailTemplates, _super);
+            function emailTemplates(app) {
+                _super.call(this, app);
+            }
+            emailTemplates.prototype.start = function () {
+                var _this = this;
+                var templateListUrl = "bookingadmin/get/emailtemplatelist";
+                ajax.Get({ url: templateListUrl }).then(function (tl) {
+                    var templateUrl = "booking/emailTemplate";
+                    wt.getTemplate({ ctx: _this, templateUrl: templateUrl }).then(function (r) {
+                        var etm = new booking_1.editTemplateModel(tl);
+                        var vetm = new booking_1.observableEditTemplateModel(etm);
+                        var f = new forms.form(_this, {
+                            modal: false,
+                            title: "Email Template Editor",
+                            styleClasses: ["report-forms"],
+                            cancelButtonText: "Administration page",
+                            okButtonText: "Save Changes",
+                            additionalButtons: [
+                                { text: "Home page", command: "back-to-site", position: 1 /* left */ }
+                            ]
+                        }, vetm);
+                        f.setContentHtml(r.template);
+                        f.open(function (ctx, f, cmd, data) {
+                        });
+                    });
+                });
+            };
+            return emailTemplates;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

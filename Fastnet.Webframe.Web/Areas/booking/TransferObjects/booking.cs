@@ -20,6 +20,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public string memberPhoneNumber { get; set; }
         public string from { get; set; }
         public string to { get; set; }
+        public string description { get; set; }
         public string createdOn { get; set; }
         public int partySize { get; set; }
         public Decimal totalCost { get; set; }
@@ -51,6 +52,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.entryInformation = b.EntryInformation;
             this.under18sInParty = b.Under18sInParty;
             this.memberId = b.MemberId;
+            this.description = GetAccomodationDescription(b);
             MemberBase m = ctx.Members.Find(b.MemberId);
             SetMemberInformation(m);
         }
@@ -58,7 +60,27 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
             this.memberName = m.Fullname;
             this.memberEmailAddress = m.EmailAddress;
-            this.memberPhoneNumber = m.PhoneNumber;
+            this.memberPhoneNumber = m.PhoneNumber;           
+        }
+        private string GetAccomodationDescription(Booking b)
+        {
+            var byGroup = b.AccomodationCollection.GroupBy(x => x.Type, x => x, (k, g) => new { type = k, list = g });
+            List<string> lines = new List<string>();
+            foreach (var typeItem in byGroup)
+            {
+                int count = typeItem.list.Count();
+                //int itemCapacity = typeItem.list.Select(x => x.c).Sum();
+                if (typeItem.type == AccomodationType.Bed)
+                {
+                    lines.Add(string.Format("{0} {1}{2}", count, typeItem.type, count > 1 ? "s" : ""));
+                }
+                else
+                {
+                    int capacity = typeItem.list.SelectMany(x => x.Descendants).Count(x => x.Type == AccomodationType.Bed);
+                    lines.Add(string.Format("{0} {1}{2} for {3}", count, typeItem.type, count > 1 ? "s" : "", capacity));
+                }
+            }
+            return string.Join(" plus ", lines);
         }
     }
 }

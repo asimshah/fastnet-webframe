@@ -1,9 +1,9 @@
+/// <reference path="../../../../fastnet.webframe.bookingdata/classes with typings/bookingStatus.cs.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-/// <reference path="../../../../fastnet.webframe.bookingdata/classes with typings/bookingStatus.cs.d.ts" />
 var fastnet;
 (function (fastnet) {
     var booking;
@@ -179,6 +179,33 @@ var fastnet;
             return observablePricingModel;
         })(forms.viewModel);
         booking.observablePricingModel = observablePricingModel;
+        var editTemplateModel = (function (_super) {
+            __extends(editTemplateModel, _super);
+            function editTemplateModel(templateList) {
+                _super.call(this);
+                this.availableTemplates = templateList;
+                this.subjectText = "";
+                this.bodyHtml = "";
+            }
+            return editTemplateModel;
+        })(forms.model);
+        booking.editTemplateModel = editTemplateModel;
+        var observableEditTemplateModel = (function (_super) {
+            __extends(observableEditTemplateModel, _super);
+            function observableEditTemplateModel(m) {
+                _super.call(this);
+                this.availableTemplates = m.availableTemplates;
+                this.subjectText = ko.observable(m.subjectText);
+                this.bodyHtml = ko.observable(m.bodyHtml);
+                this.selectedTemplate = ko.observable();
+            }
+            ;
+            observableEditTemplateModel.prototype.selectionChanged = function () {
+                debugger;
+            };
+            return observableEditTemplateModel;
+        })(forms.viewModel);
+        booking.observableEditTemplateModel = observableEditTemplateModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=adminViewModels.js.map

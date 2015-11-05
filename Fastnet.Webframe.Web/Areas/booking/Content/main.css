@@ -665,6 +665,11 @@ button.side-button {
 .report-forms .parameters-form .help-block {
   margin-top: 0;
 }
+.report-forms .edit-email-template label {
+  font-size: x-small;
+  color: #2d89ef;
+  font-weight: normal;
+}
 .admin-reports {
   margin-top: 8px;
   margin-bottom: 8px;

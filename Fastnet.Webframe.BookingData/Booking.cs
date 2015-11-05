@@ -12,6 +12,7 @@ namespace Fastnet.Webframe.BookingData
     public class Booking
     {
         private ICollection<Accomodation> accomodationSet;
+        private ICollection<BookingEmail> emails;
         public long BookingId { get; set; }
         public bookingStatus Status { get; set; }
         [MaxLength(32)]
@@ -33,6 +34,11 @@ namespace Fastnet.Webframe.BookingData
         {
             get { return accomodationSet ?? (accomodationSet = new HashSet<Accomodation>()); }
             set { accomodationSet = value; }
+        }
+        public virtual ICollection<BookingEmail> Emails
+        {
+            get { return emails ?? (emails = new HashSet<BookingEmail>()); }
+            set { emails = value; }
         }
         public void AddHistory(string name, string text)
         {
