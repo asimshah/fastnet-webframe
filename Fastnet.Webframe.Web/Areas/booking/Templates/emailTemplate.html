@@ -3,20 +3,29 @@
         <div class="col-xs-4">
             <div class="form-group-sm">
                 <label for="templateList">Email template</label>
-                <select id="templateList" class="selectpicker form-control" data-bind="options: availableTemplates, value: selectedTemplate, optionsCaption: 'Choose a template ...', event: { change: selectionChanged}"></select>
+                <select id="templateList" class="selectpicker form-control" data-bind="options: availableTemplates, value: selectedTemplate, optionsCaption: 'Choose a template ...'"></select>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <label>Email Subject</label>
-            <input type="text" class="form-control" data-bind="textInput: subjectText" />
+    <div class="template-editor hidden">
+        <div class="row">
+            <div class="col-xs-12">
+                <label>Email Subject</label>
+                <input type="text" class="form-control" data-bind="textInput: subjectText" />
+                <span class="validationMessage" data-bind="validationMessage: subjectText"></span>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <label>Email Body</label>
-            <div class="form-control rich-text" data-bind="richtext: bodyHtml"></div>
+        <div class="row">
+            <div class="col-xs-12">
+                <label>Email Body</label>
+                <div class="form-control rich-text" data-bind="richtext: bodyHtml"></div>
+                <span class="validationMessage" data-bind="validationMessage: bodyHtml"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <span class="message-block" data-bind="text: message"></span>
+            </div>
         </div>
     </div>
 </div>

@@ -217,6 +217,7 @@ module fastnet {
             public availableTemplates: string[];
             public subjectText: string;
             public bodyHtml: string; 
+            public selectedTemplate: string;
             constructor(templateList: string[]) {
                 super();
                 this.availableTemplates = templateList
@@ -226,19 +227,33 @@ module fastnet {
         }
         export class observableEditTemplateModel extends forms.viewModel {
             public availableTemplates: string[];
-            public selectedTemplate: KnockoutObservable<string>;;
+            public selectedTemplate: KnockoutObservable<string>;
             public subjectText: KnockoutObservable<string>;
             public bodyHtml: KnockoutObservable<string>;
+            private currentTemplate: string = null;
             constructor(m: editTemplateModel) {
                 super();
                 this.availableTemplates = m.availableTemplates;
-                this.subjectText = ko.observable(m.subjectText);
-                this.bodyHtml = ko.observable(m.bodyHtml);
+                this.subjectText = ko.observable(m.subjectText).extend({
+                    required: {message: "some subject text is required"}
+                });
+                this.bodyHtml = ko.observable(m.bodyHtml).extend({
+                    required: { message: "some email text is required" }
+                });
                 this.selectedTemplate = ko.observable<string>();
             }
-            public selectionChanged() {
-                debugger;
-            }
+            //public selectionChanged(element: HTMLElement) {
+            //    if (this.selectedTemplate() !== undefined) {
+            //        $(element).closest(".edit-email-template").find(".template-editor").removeClass("hidden");
+            //    } else {
+            //        $(element).closest(".edit-email-template").find(".template-editor").addClass("hidden");
+            //    }
+            //    //debugger;
+            //}
+        }
+        export class editTemplateModels extends forms.models {
+            current: editTemplateModel;
+            original: editTemplateModel;
         }
     }
 }

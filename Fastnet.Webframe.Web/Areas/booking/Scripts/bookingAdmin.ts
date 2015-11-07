@@ -1031,13 +1031,64 @@ module fastnet {
                             okButtonText: "Save Changes",
                             additionalButtons: [
                                 { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
-                            ]
+                            ],
+                            
                         }, vetm);
-                        f.setContentHtml(r.template);
-                        f.open((ctx: any, f: forms.form, cmd: string, data: any) => {
-                        });
+                        f.setContentHtml(r.template);                        
+                        f.open((ctx: any, f: forms.form, cmd: string, data: editTemplateModels) => {
+                            switch (cmd) {
+                                case "ok-command":
+                                    if (f.isValid()) {
+                                        this.saveEmailTemplate(data.current.selectedTemplate, data.current.subjectText, data.current.bodyHtml).then(() => {
+                                            f.setMessage("Changes saved");
+                                        });
+                                    }
+                                    break;
+                                case "cancel-command":
+                                    f.close();
+                                    var index = new adminIndex(this.app);
+                                    index.start();
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        }, (f, pn) => {
+                            if (pn === "selectedTemplate") {
+                                f.setMessage('');
+                                var emailTemplateName = vetm.selectedTemplate();
+                                if (emailTemplateName !== undefined) {
+                                    //debug.print("template {0} selected", vetm.selectedTemplate());
+                                    f.find(".template-editor").removeClass("hidden");
+                                    var url = str.format("bookingadmin/get/emailtemplate/{0}", encodeURIComponent(vetm.selectedTemplate()));
+                                    ajax.Get({ url: url }, false).then((r) => {
+                                        vetm.subjectText(r.subjectText);
+                                        var editor = f.findRichTextEditor("bodyHtml");
+                                        editor.setContent(r.bodyText);
+                                        f.enableCommand("ok-command");
+                                    });                                   
+                                } else {
+                                    f.find(".template-editor").addClass("hidden");
+                                    f.disableCommand("ok-command");
+                                }
+                            } else {
+                                debug.print("property {0} changed", pn);
+                            }
+                            }).then(() => {
+                                f.disableCommand("ok-command");
+                            });
                     });
                 });
+            }
+            private saveEmailTemplate(template: string, subjectText: string, bodyHtml: string): JQueryPromise<void>  {
+                var deferred = $.Deferred<void>();
+                var url = "bookingadmin/update/emailTemplate";
+                var data = { template: template, subjectText: subjectText, bodyText: bodyHtml };
+                ajax.Post({ url: url, data: data }).then(() => {
+                    deferred.resolve();
+                });
+                return deferred.promise();
             }
         }
     }

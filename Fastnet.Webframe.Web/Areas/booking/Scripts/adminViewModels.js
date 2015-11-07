@@ -194,18 +194,26 @@ var fastnet;
             __extends(observableEditTemplateModel, _super);
             function observableEditTemplateModel(m) {
                 _super.call(this);
+                this.currentTemplate = null;
                 this.availableTemplates = m.availableTemplates;
-                this.subjectText = ko.observable(m.subjectText);
-                this.bodyHtml = ko.observable(m.bodyHtml);
+                this.subjectText = ko.observable(m.subjectText).extend({
+                    required: { message: "some subject text is required" }
+                });
+                this.bodyHtml = ko.observable(m.bodyHtml).extend({
+                    required: { message: "some email text is required" }
+                });
                 this.selectedTemplate = ko.observable();
             }
-            ;
-            observableEditTemplateModel.prototype.selectionChanged = function () {
-                debugger;
-            };
             return observableEditTemplateModel;
         })(forms.viewModel);
         booking.observableEditTemplateModel = observableEditTemplateModel;
+        var editTemplateModels = (function (_super) {
+            __extends(editTemplateModels, _super);
+            function editTemplateModels() {
+                _super.apply(this, arguments);
+            }
+            return editTemplateModels;
+        })(forms.models);
+        booking.editTemplateModels = editTemplateModels;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=adminViewModels.js.map

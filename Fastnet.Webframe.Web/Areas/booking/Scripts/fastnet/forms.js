@@ -234,7 +234,7 @@ var fastnet;
                                 content_css: form.config.richTextCssUrl,
                                 //inline: true,
                                 //toolbar_items_size: 'small',
-                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist",
+                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect",
                                 setup: function (editor) {
                                     var vm = viewModel;
                                     //var html = valueAccessor();
@@ -246,6 +246,7 @@ var fastnet;
                                         var propertyName = $(e.target.targetElm).attr("data-property");
                                         var f = form.getForm(vm.__$formId);
                                         f.notifyChange(propertyName);
+                                        f.setMessage('');
                                     });
                                 }
                             });
@@ -344,12 +345,13 @@ var fastnet;
                 return deferred.promise(this);
             };
             form.prototype.disableCommand = function (cmd) {
-                var f = this.getRoot(); // this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);
+                var f = this.options.modal ? this.getRoot() : this.getRoot().closest(".ui-form");
                 var buttons = "button[data-cmd='" + cmd + "'], input[type=button][data-cmd='" + cmd + "']";
                 $(f).find(buttons).prop("disabled", true);
             };
             form.prototype.enableCommand = function (cmd) {
-                var f = this.getRoot();
+                //var f = this.getRoot();
+                var f = this.options.modal ? this.getRoot() : this.getRoot().closest(".ui-form");
                 var buttons = "button[data-cmd='" + cmd + "'], input[type=button][data-cmd='" + cmd + "']";
                 $(f).find(buttons).prop("disabled", false);
             };
@@ -374,6 +376,9 @@ var fastnet;
                 }
                 //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             };
+            form.prototype.findRichTextEditor = function (propertyName) {
+                return this.editors.getValue(propertyName);
+            };
             form.prototype.registorEditor = function (propertyName, editor) {
                 if (this.editors == null) {
                     this.editors = new collections.Dictionary();
@@ -381,12 +386,13 @@ var fastnet;
                 this.editors.setValue(propertyName, editor);
             };
             form.prototype.notifyChange = function (propertyName) {
-                debug.print("property {0}: value changed", propertyName);
+                //debug.print("property {0}: value changed", propertyName);
                 if (this.changeCallback != null) {
                     this.changeCallback(this, propertyName);
                 }
             };
             form.prototype.getBlockRoot = function () {
+                //**NB** only called on modal forms?? needs looking at
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent(); //.parent();
             };
             form.prototype.block = function () {
@@ -482,6 +488,11 @@ var fastnet;
                 });
                 var changeDetectElements = "input";
                 $(this.rootElement).find(changeDetectElements).on("input", function (e) {
+                    var element = e.currentTarget;
+                    var propertyName = $(element).attr("data-property");
+                    _this.notifyChange(propertyName);
+                });
+                $(this.rootElement).find("select").on("change", function (e) {
                     var element = e.currentTarget;
                     var propertyName = $(element).attr("data-property");
                     _this.notifyChange(propertyName);
@@ -686,7 +697,7 @@ var fastnet;
                 });
             };
             form.prototype.updateElementAttributes = function () {
-                $(this.rootElement).find("input[data-bind]").each(function (index, element) {
+                $(this.rootElement).find("input[data-bind], select[data-bind]").each(function (index, element) {
                     var bindString = $(element).attr("data-bind");
                     var propertyName = null;
                     var bindings = bindString.split(",");
@@ -742,4 +753,3 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=forms.js.map

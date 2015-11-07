@@ -670,6 +670,22 @@ button.side-button {
   color: #2d89ef;
   font-weight: normal;
 }
+.report-forms .edit-email-template .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.report-forms .edit-email-template .validation-error {
+  border: 1px solid red;
+}
+.report-forms .edit-email-template .message-block {
+  font-size: small;
+  color: #1e7145;
+  font-style: italic;
+}
+.report-forms .edit-email-template .template-editor {
+  margin-top: 12px;
+}
 .admin-reports {
   margin-top: 8px;
   margin-bottom: 8px;

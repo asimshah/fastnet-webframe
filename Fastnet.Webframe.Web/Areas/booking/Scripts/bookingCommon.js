@@ -89,4 +89,3 @@ var fastnet;
         booking.bookingAppValidations = bookingAppValidations;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingCommon.js.map

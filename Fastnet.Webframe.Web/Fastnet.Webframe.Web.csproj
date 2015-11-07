@@ -1773,7 +1773,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
@@ -1782,9 +1782,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets'))" />
+    <Error Condition="!Exists('..\packages\BuildWebCompiler.1.8.270\build\BuildWebCompiler.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\BuildWebCompiler.1.8.270\build\BuildWebCompiler.targets'))" />
   </Target>
-  <Import Project="..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets" Condition="Exists('..\packages\BuildWebCompiler.1.6.217\build\BuildWebCompiler.targets')" />
+  <Import Project="..\packages\BuildWebCompiler.1.8.270\build\BuildWebCompiler.targets" Condition="Exists('..\packages\BuildWebCompiler.1.8.270\build\BuildWebCompiler.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

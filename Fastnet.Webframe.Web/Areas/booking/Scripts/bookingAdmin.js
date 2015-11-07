@@ -1049,16 +1049,67 @@ var fastnet;
                             okButtonText: "Save Changes",
                             additionalButtons: [
                                 { text: "Home page", command: "back-to-site", position: 1 /* left */ }
-                            ]
+                            ],
                         }, vetm);
                         f.setContentHtml(r.template);
                         f.open(function (ctx, f, cmd, data) {
+                            switch (cmd) {
+                                case "ok-command":
+                                    if (f.isValid()) {
+                                        _this.saveEmailTemplate(data.current.selectedTemplate, data.current.subjectText, data.current.bodyHtml).then(function () {
+                                            f.setMessage("Changes saved");
+                                        });
+                                    }
+                                    break;
+                                case "cancel-command":
+                                    f.close();
+                                    var index = new adminIndex(_this.app);
+                                    index.start();
+                                    break;
+                                case "back-to-site":
+                                    f.close();
+                                    location.href = "/home";
+                                    break;
+                            }
+                        }, function (f, pn) {
+                            if (pn === "selectedTemplate") {
+                                f.setMessage('');
+                                var emailTemplateName = vetm.selectedTemplate();
+                                if (emailTemplateName !== undefined) {
+                                    //debug.print("template {0} selected", vetm.selectedTemplate());
+                                    f.find(".template-editor").removeClass("hidden");
+                                    var url = str.format("bookingadmin/get/emailtemplate/{0}", encodeURIComponent(vetm.selectedTemplate()));
+                                    ajax.Get({ url: url }, false).then(function (r) {
+                                        vetm.subjectText(r.subjectText);
+                                        var editor = f.findRichTextEditor("bodyHtml");
+                                        editor.setContent(r.bodyText);
+                                        f.enableCommand("ok-command");
+                                    });
+                                }
+                                else {
+                                    f.find(".template-editor").addClass("hidden");
+                                    f.disableCommand("ok-command");
+                                }
+                            }
+                            else {
+                                debug.print("property {0} changed", pn);
+                            }
+                        }).then(function () {
+                            f.disableCommand("ok-command");
                         });
                     });
                 });
+            };
+            emailTemplates.prototype.saveEmailTemplate = function (template, subjectText, bodyHtml) {
+                var deferred = $.Deferred();
+                var url = "bookingadmin/update/emailTemplate";
+                var data = { template: template, subjectText: subjectText, bodyText: bodyHtml };
+                ajax.Post({ url: url, data: data }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
             };
             return emailTemplates;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingAdmin.js.map

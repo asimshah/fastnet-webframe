@@ -68,4 +68,3 @@ var fastnet;
         booking.factory = factory;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=factory.js.map

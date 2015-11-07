@@ -488,6 +488,33 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             return Enum.GetNames(typeof(BookingEmailTemplates));
         }
+        [HttpGet]
+        [Route("get/emailtemplate/{template}")]
+        public dynamic GetEmailTemplate(string template)
+        {
+            using (var ctx = new BookingDataContext())
+            {
+                BookingEmailTemplates t = (BookingEmailTemplates)Enum.Parse(typeof(BookingEmailTemplates), template);
+                string subjectText;
+                string bodyText;
+                ctx.GetEmailTemplates(t, out subjectText, out bodyText);
+                return new { subjectText = subjectText, bodyText = bodyText };
+            }
+        }
+        [HttpPost]
+        [Route("update/emailtemplate")]
+        public void UpdateEmailtemplate(dynamic data)
+        {
+            string template = data.template;
+            string subjectText = data.subjectText;
+            string bodyText = data.bodyText;
+            using (var ctx = new BookingDataContext())
+            {
+                BookingEmailTemplates t = (BookingEmailTemplates)Enum.Parse(typeof(BookingEmailTemplates), template);
+                ctx.SaveEmailTemplate(t, subjectText, bodyText);
+                ctx.SaveChanges();
+            }
+        }            
         private static IEnumerable<Availability> GetBlockedItems(BookingDataContext ctx)
         {
             DateTime today = BookingGlobals.GetToday();

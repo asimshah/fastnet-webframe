@@ -299,14 +299,14 @@ module fastnet {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                         if (enable) {
                             debug.print("richtext update()");
-
+                            
                             var editor = $(element).tinymce({
                                 menubar: false,
                                 statusbar: false,
                                 content_css: form.config.richTextCssUrl,
                                 //inline: true,
                                 //toolbar_items_size: 'small',
-                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist",
+                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect",
                                 setup: function (editor) {
                                     var vm: viewModel = viewModel;
                                     //var html = valueAccessor();
@@ -318,6 +318,7 @@ module fastnet {
                                         var propertyName = $(e.target.targetElm).attr("data-property");
                                         var f = form.getForm(vm.__$formId);
                                         f.notifyChange(propertyName);
+                                        f.setMessage('');
                                     });
                                 }
                             });
@@ -464,12 +465,14 @@ module fastnet {
                 return deferred.promise(this);
             }
             public disableCommand(cmd: string): void {
-                var f = this.getRoot();// this.options.modal ? $(`#${this.formId}`).closest(".ui-dialog") : $(`#${this.formId}`);
+                var f = this.options.modal ? this.getRoot() : this.getRoot().closest(".ui-form");
+                
                 let buttons = `button[data-cmd='${cmd}'], input[type=button][data-cmd='${cmd}']`;
                 $(f).find(buttons).prop("disabled", true);
             }
             public enableCommand(cmd: string): void {
-                var f = this.getRoot();
+                //var f = this.getRoot();
+                var f = this.options.modal ? this.getRoot() : this.getRoot().closest(".ui-form");
                 let buttons = `button[data-cmd='${cmd}'], input[type=button][data-cmd='${cmd}']`;
                 $(f).find(buttons).prop("disabled", false);
             }
@@ -493,6 +496,9 @@ module fastnet {
                 }
                 //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             }
+            public findRichTextEditor(propertyName: string): any {
+                return this.editors.getValue(propertyName);
+            }
             private registorEditor(propertyName: string, editor: any): void {
                 if (this.editors == null) {
                     this.editors = new collections.Dictionary<string, any>();
@@ -500,12 +506,13 @@ module fastnet {
                 this.editors.setValue(propertyName, editor);
             }
             private notifyChange(propertyName: string) {
-                debug.print("property {0}: value changed", propertyName);
+                //debug.print("property {0}: value changed", propertyName);
                 if (this.changeCallback != null) {
                     this.changeCallback(this, propertyName);
                 }
             }
             private getBlockRoot(): JQuery {
+                //**NB** only called on modal forms?? needs looking at
                 return this.options.modal ? $(this.rootElement) : $(this.rootElement).closest(".ui-form").parent();//.parent();
             }
             private block(): void {
@@ -604,6 +611,11 @@ module fastnet {
                     var element = <HTMLElement>e.currentTarget;
                     var propertyName = $(element).attr("data-property");
 
+                    this.notifyChange(propertyName);
+                });
+                $(this.rootElement).find("select").on("change", (e) => {
+                    var element = <HTMLElement>e.currentTarget;
+                    var propertyName = $(element).attr("data-property");                
                     this.notifyChange(propertyName);
                 });
                 //**NB** the code below was an attempt to get default buttons working but it failed!
@@ -802,7 +814,7 @@ module fastnet {
                 });
             }
             private updateElementAttributes(): void {
-                $(this.rootElement).find("input[data-bind]").each((index, element) => {
+                $(this.rootElement).find("input[data-bind], select[data-bind]").each((index, element) => {
 
                     var bindString = $(element).attr("data-bind");
                     var propertyName: string = null;

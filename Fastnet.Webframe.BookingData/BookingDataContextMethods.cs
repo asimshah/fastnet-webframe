@@ -52,7 +52,7 @@ namespace Fastnet.Webframe.BookingData
             if (t == null)
             {
                 bodyText = string.Format(@"<div>No {0} email template defined<div>", template.ToString());
-                subjectText = bodyText;
+                subjectText = "fred";
             }
             else
             {
@@ -68,6 +68,7 @@ namespace Fastnet.Webframe.BookingData
                 t = new EmailTemplate { Template = template };
                 this.EmailTemplates.Add(t);
             }
+            t.SubjectText = subjextText;
             t.BodyText = bodyText;
         }
         public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime dueAt, string emailAddress, string subject, string body)
