@@ -1048,7 +1048,8 @@ var fastnet;
                             cancelButtonText: "Administration page",
                             okButtonText: "Save Changes",
                             additionalButtons: [
-                                { text: "Home page", command: "back-to-site", position: 1 /* left */ }
+                                { text: "Home page", command: "back-to-site", position: 1 /* left */ },
+                                { text: "Help with templates ...", command: "template-key-words", position: 1 /* left */ }
                             ],
                         }, vetm);
                         f.setContentHtml(r.template);
@@ -1069,6 +1070,9 @@ var fastnet;
                                 case "back-to-site":
                                     f.close();
                                     location.href = "/home";
+                                    break;
+                                case "template-key-words":
+                                    _this.showKeyWords();
                                     break;
                             }
                         }, function (f, pn) {
@@ -1100,6 +1104,25 @@ var fastnet;
                     });
                 });
             };
+            emailTemplates.prototype.showKeyWords = function () {
+                var _this = this;
+                var templateurl = "booking/emailkeywords";
+                wt.getTemplate({ ctx: this, templateUrl: templateurl }).then(function (r) {
+                    var f = new forms.form(_this, {
+                        modal: true,
+                        title: "Email Template Keywords",
+                        styleClasses: ["report-forms"],
+                        okButtonText: "Close",
+                        cancelButton: null,
+                        initialHeight: 560,
+                        initialWidth: 750
+                    }, null);
+                    f.setContentHtml(r.template);
+                    f.open(function (ctx, f, cmd, data) {
+                        f.close();
+                    });
+                });
+            };
             emailTemplates.prototype.saveEmailTemplate = function (template, subjectText, bodyHtml) {
                 var deferred = $.Deferred();
                 var url = "bookingadmin/update/emailTemplate";
@@ -1113,3 +1136,4 @@ var fastnet;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=bookingAdmin.js.map

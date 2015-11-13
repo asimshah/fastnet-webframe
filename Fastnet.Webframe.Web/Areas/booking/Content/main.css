@@ -686,6 +686,12 @@ button.side-button {
 .report-forms .edit-email-template .template-editor {
   margin-top: 12px;
 }
+.report-forms .email-keywords table {
+  font-size: 0.75em;
+}
+.report-forms .email-keywords .help-block {
+  font-size: 0.75em;
+}
 .admin-reports {
   margin-top: 8px;
   margin-bottom: 8px;

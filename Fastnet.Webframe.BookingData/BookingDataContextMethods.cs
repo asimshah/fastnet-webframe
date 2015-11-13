@@ -71,13 +71,13 @@ namespace Fastnet.Webframe.BookingData
             t.SubjectText = subjextText;
             t.BodyText = bodyText;
         }
-        public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime dueAt, string emailAddress, string subject, string body)
+        public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
         {
             var bem = new BookingEmail
             {
                 Booking = booking,
                 Template = template,
-                DueAt = dueAt,
+                UtcDueAt = utcDueAt,
                 EmailAddress = emailAddress,
                 Subject = subject,
                 Body = body,

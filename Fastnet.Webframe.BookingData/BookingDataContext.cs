@@ -33,6 +33,7 @@ namespace Fastnet.Webframe.BookingData
         public DbSet<ParameterBase> Parameters { get; set; }
         public DbSet<BookingEmail> Emails { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<Tasklog> Tasklogs { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("book");

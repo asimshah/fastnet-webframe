@@ -29,7 +29,7 @@ namespace Fastnet.Webframe.BookingData
         public DateTime? StartDate { get; set; } // must be non-null if PeriodType == Fixed
         public DateTime? EndDate { get; set; } // endless if null, if PeriodType == fixed
         public DaysOfTheWeek DaysOfTheWeek { get; set; } // if PeriodType == DaysInWeek
-        public LongSpan Interval { get; set; } // if PeriodType == Rolling
+        public LongSpan Interval { get; set; } // if PeriodType == Rolling, if LongSpan is all zeroes then thsi is an indefinite period
         public bool Includes(DateTime day)
         {
             bool result = false;
@@ -79,6 +79,10 @@ namespace Fastnet.Webframe.BookingData
         public DateTime GetRollingEndDate(DateTime relativeTo)
         {
             Debug.Assert(PeriodType == PeriodType.Rolling);
+            if(Interval.Years == 0 && Interval.Months == 0 && Interval.Days == 0)
+            {
+                return DateTime.MaxValue;
+            }
             DateTime endDate = relativeTo.AddYears(Interval.Years).AddMonths(Interval.Months).AddDays(Interval.Days).AddDays(-1);
             return endDate;
         }

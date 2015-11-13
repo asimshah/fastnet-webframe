@@ -135,6 +135,7 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<ActionBase> Actions { get; set; }
         public DbSet<Recorder> Recorders { get; set; }
         public DbSet<Record> Records { get; set; }
+        public DbSet<Webtask> Webtasks { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

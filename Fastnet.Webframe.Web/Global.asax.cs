@@ -61,6 +61,7 @@ namespace Fastnet.Webframe.Web
                     Remark = string.Format("Process {0} on machine {1}", version.ProcessId, version.Machine)
                 };
                 core.Actions.Add(aa);
+                core.ResetAllTasks();
                 core.SaveChanges();
             }
             BookingData.BookingGlobals.Startup();

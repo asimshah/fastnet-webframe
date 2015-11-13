@@ -79,7 +79,7 @@ namespace Fastnet.Webframe.Web.Controllers
                             member.RecordChanges(null, MemberAction.MemberActionTypes.New);
                             await DataContext.SaveChangesAsync();
                             MailHelper mh = new MailHelper();
-                            await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
+                            mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
                             tran.Complete();
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
                         }

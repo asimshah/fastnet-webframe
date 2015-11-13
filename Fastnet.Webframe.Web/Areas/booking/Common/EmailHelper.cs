@@ -14,7 +14,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         internal static void QueueEmail(CoreDataContext dataContext, BookingDataContext ctx, long abodeId, Booking b)
         {
             BookingEmailTemplates template = BookingEmailTemplates.Provisional;
-            DateTime dueAt = DateTime.Now;
+            DateTime utcDueAt = DateTime.UtcNow;
             switch (b.Status)
             {
                 case bookingStatus.Provisional:
@@ -28,7 +28,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             string subjectHtml;
             string bodyHtml;
             Render(ctx, template, bookingInfo, out subjectHtml, out bodyHtml);
-            ctx.QueueEmail(b, template, dueAt, booking.memberEmailAddress, subjectHtml, bodyHtml);
+            ctx.QueueEmail(b, template, utcDueAt, booking.memberEmailAddress, subjectHtml, bodyHtml);
         }
         public static void ClearEmailTemplateCache()
         {

@@ -275,10 +275,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             b.AccomodationCollection.Add(a);
                         }
                         ctx.Bookings.Add(b);
-                        await ctx.SaveChangesAsync();
                         EmailHelper.QueueEmail(DataContext, ctx, abodeId, b);
+                        await ctx.SaveChangesAsync();
                         tran.Complete();
-                        //
                         reference = b.Reference;
 
                     }
@@ -290,6 +289,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     return new { Success = false, Error = xe.Message, Code = "SystemError" };
                 }
             }
+            //MailSender ms = new MailSender();
+            //ms.Start();
             return new
             {
                 Success = true,
@@ -319,10 +320,22 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("poll")]
-        public void Poll()
+        public async Task Poll()
         {
             DateTime time = DateTime.Now;
             Log.Write("Polled received");
+            TestTask tt = new TestTask();
+            await tt.Start();
+            //int pendingMailCount = 0;
+            //using (var ctx = new BookingDataContext())
+            //{
+            //    pendingMailCount = ctx.CollectPendingMail().Count();
+            //}
+            //if(pendingMailCount > 0)
+            //{
+            //    MailSender ms = new MailSender();
+            //    ms.Start();
+            //}
         }
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
         {

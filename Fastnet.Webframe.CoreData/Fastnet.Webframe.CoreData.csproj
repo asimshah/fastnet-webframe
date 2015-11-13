@@ -202,6 +202,7 @@
     <Compile Include="UploadFile.cs" />
     <Compile Include="UserClaim.cs" />
     <Compile Include="UserLogin.cs" />
+    <Compile Include="Webtask.cs" />
     <Compile Include="Win32\IO.cs" />
   </ItemGroup>
   <ItemGroup>

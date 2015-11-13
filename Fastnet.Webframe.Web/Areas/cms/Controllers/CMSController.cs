@@ -1,4 +1,5 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.EventSystem;
+using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Common;
 using Fastnet.Webframe.WebApi;
 using System;
@@ -238,13 +239,16 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         }
         [HttpPost]
         [Route("sendmail")]
-        public async Task<HttpResponseMessage> SendEmail(dynamic data)
+        public HttpResponseMessage SendEmail(dynamic data)
         {
             string to = data.to;
             string subject = data.subject;
             string body = data.body;
+            //MailHelper mh = new MailHelper();
+            //await mh.SendMailAsync(to, subject, body, "TestMail");
             MailHelper mh = new MailHelper();
-            await mh.SendMailAsync(to, subject, body);
+            mh.SendTestMailAsync(to, subject, body);
+            Log.Write("cmscontroller(): mailhelper called for testmail");
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         private IEnumerable<Directory> GetFlattenedDirectories()

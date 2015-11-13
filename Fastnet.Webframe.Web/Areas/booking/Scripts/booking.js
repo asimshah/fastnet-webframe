@@ -599,7 +599,7 @@ var fastnet;
                     under18spresent: model.under18Present
                 };
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
-                var createBookingUrl = str.format("bookingapi/{0}/create", abodeId);
+                var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);
                 ajax.Post({ url: createBookingUrl, data: request }).then(function (r) {
                     if (!r.Success && r.Code === "SystemError") {
                         var cf = new forms.form(_this, {
@@ -710,3 +710,4 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=booking.js.map

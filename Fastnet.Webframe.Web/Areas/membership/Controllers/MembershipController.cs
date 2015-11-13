@@ -336,7 +336,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
                             await DataContext.SaveChangesAsync();
                             MailHelper mh = new MailHelper();
-                            await mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
+                            mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
                             tran.Complete();
                             Log.Write("Member {0} created", member.EmailAddress);
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
@@ -440,7 +440,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             {
                                 MailHelper mh = new MailHelper();
                                 var request = HttpContext.Current.Request;
-                                await mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
+                                mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
                                 m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
                                 await DataContext.SaveChangesAsync();
                             }
@@ -485,7 +485,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             }
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();
-            await mh.SendAccountActivationAsync(m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
+            mh.SendAccountActivationAsync(m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
             var r = (object)m.GetMinimumDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
@@ -500,7 +500,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.PasswordResetRequest);
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();
-            await mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
+            mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         [HttpGet]

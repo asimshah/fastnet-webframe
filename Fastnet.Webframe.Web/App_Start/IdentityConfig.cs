@@ -92,12 +92,12 @@ namespace Fastnet.Webframe.Web
             }
             return manager;
         }
-        public async Task SendEmailAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
+        public void SendEmailAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
         {
             // I don't use the EmailService above as I need more control over the parameters than available using
             // IdentityMessage
             MailHelper mh = new MailHelper();
-            await mh.SendAccountActivationAsync(destination, UrlScheme, UrlAuthority, userId, activationCode);
+            mh.SendAccountActivationAsync(destination, UrlScheme, UrlAuthority, userId, activationCode);
         }
     }
 

@@ -1030,7 +1030,8 @@ module fastnet {
                             cancelButtonText: "Administration page",
                             okButtonText: "Save Changes",
                             additionalButtons: [
-                                { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left }
+                                { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left },
+                                { text: "Help with templates ...", command: "template-key-words", position: forms.buttonPosition.left }
                             ],
                             
                         }, vetm);
@@ -1052,6 +1053,9 @@ module fastnet {
                                 case "back-to-site":
                                     f.close();
                                     location.href = "/home";
+                                    break;
+                                case "template-key-words":
+                                    this.showKeyWords();
                                     break;
                             }
                         }, (f, pn) => {
@@ -1078,6 +1082,24 @@ module fastnet {
                             }).then(() => {
                                 f.disableCommand("ok-command");
                             });
+                    });
+                });
+            }
+            private showKeyWords(): void {
+                var templateurl = "booking/emailkeywords";
+                wt.getTemplate({ ctx: this, templateUrl: templateurl }).then((r) => {
+                    var f = new forms.form(this, {
+                        modal: true,
+                        title: "Email Template Keywords",
+                        styleClasses: ["report-forms"],
+                        okButtonText: "Close",
+                        cancelButton: null,
+                        initialHeight: 560,
+                        initialWidth: 750
+                    }, null);
+                    f.setContentHtml(r.template);
+                    f.open((ctx: any, f: forms.form, cmd: string, data: any) => {
+                        f.close();
                     });
                 });
             }
