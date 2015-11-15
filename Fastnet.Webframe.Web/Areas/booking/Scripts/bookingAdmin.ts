@@ -747,12 +747,16 @@ module fastnet {
                             } else if (r.statusChanged) {
                                 function bookingStatusToString(s: server.bookingStatus): string {
                                     switch (s) {
-                                        case server.bookingStatus.Provisional:
-                                            return "Provisional";
+                                        case server.bookingStatus.WaitingApproval:
+                                            return "WaitingApproval";
                                         case server.bookingStatus.Cancelled:
                                             return "Cancelled";
+                                        case server.bookingStatus.AutoCancelled:
+                                            return "AutoCancelled";
                                         case server.bookingStatus.Confirmed:
                                             return "Confirmed";
+                                        case server.bookingStatus.WaitingPayment:
+                                            return "WaitingPayment";
                                     }
                                 }
                                 booking.status = r.booking.status;
@@ -826,10 +830,17 @@ module fastnet {
                         okButtonText: "Save Changes",
                     };
                     switch (booking.status) {
-                        case server.bookingStatus.Provisional:
+                        case server.bookingStatus.WaitingApproval:
                             options.additionalButtons = [
                                 { text: "Cancel Booking", command: "cancel-booking", position: forms.buttonPosition.left },
-                                { text: "Confirm Booking", command: "confirm-booking", position: forms.buttonPosition.left }
+                                { text: "Approve Booking", command: "approve-booking", position: forms.buttonPosition.left },
+                                //{ text: "Confirm Booking", command: "confirm-booking", position: forms.buttonPosition.left }
+                            ];
+                            break;
+                        case server.bookingStatus.WaitingPayment:
+                            options.additionalButtons = [
+                                { text: "Cancel Booking", command: "cancel-booking", position: forms.buttonPosition.left },
+                                //{ text: "Confirm Booking", command: "confirm-booking", position: forms.buttonPosition.left }
                             ];
                             break;
                         case server.bookingStatus.Confirmed:
@@ -855,23 +866,32 @@ module fastnet {
                                     f.setMessage("Changes saved");
                                 });
                                 break;
-                            case "confirm-booking":
-                                f.disableCommand("confirm-booking");
-                                data.current.status = server.bookingStatus.Confirmed;
-                                this.changeStatus(data.current).then(() => {
-                                    result.statusChanged = true;
-                                    result.booking = data.current;
-                                    f.setMessage("Booking confirmed");
-                                });
-                                break;
+                            //case "confirm-booking":
+                            //    f.disableCommand("confirm-booking");
+                            //    data.current.status = server.bookingStatus.Confirmed;
+                            //    this.changeStatus(data.current).then(() => {
+                            //        result.statusChanged = true;
+                            //        result.booking = data.current;
+                            //        f.setMessage("Booking confirmed");
+                            //    });
+                            //    break;
                             case "cancel-booking":
                                 f.disableCommand("confirm-booking");
                                 f.disableCommand("cancel-booking");
-                                data.current.status = server.bookingStatus.Cancelled;
-                                this.changeStatus(data.current).then(() => {
+                                //data.current.status = server.bookingStatus.Cancelled;
+                                this.cancelBooking(data.current).then(() => {
                                     result.statusChanged = true;
                                     result.booking = data.current;
                                     f.setMessage("Booking cancelled");
+                                });
+                                break;
+                            case "approve-booking":
+                                f.disableCommand("approve-booking");
+                                //data.current.status = server.bookingStatus.WaitingPayment;
+                                this.approveBooking(data.current).then(() => {
+                                    result.statusChanged = true;
+                                    result.booking = data.current;
+                                    f.setMessage("Booking approved");
                                 });
                                 break;
                             case "cancel-command":
@@ -884,19 +904,35 @@ module fastnet {
                     }, (f: forms.form, property: string) => {
                         f.setMessage("");
                         f.disableCommand("cancel-booking");
-                        f.disableCommand("confirm-booking");
+                        f.disableCommand("approve-booking");
                     });
                 });
                 return deferred.promise();
             }
-            private changeStatus(booking: bookingModel): JQueryPromise<void> {
+            private cancelBooking(booking: bookingModel): JQueryPromise<void> {
                 var deferred = $.Deferred<void>();
-                var url = str.format("bookingadmin/update/booking/{0}/status/{1}", booking.bookingId, booking.status);
+                var url = str.format("bookingadmin/cancel/booking/{0}", booking.bookingId);
                 ajax.Post({ url: url, data: null }).then(() => {
                     deferred.resolve();
                 });
                 return deferred.promise();
             }
+            private approveBooking(booking: bookingModel): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var url = str.format("bookingadmin/approve/booking/{0}", booking.bookingId);
+                ajax.Post({ url: url, data: null }).then(() => {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            }
+            //private changeStatus(booking: bookingModel): JQueryPromise<void> {
+            //    var deferred = $.Deferred<void>();
+            //    var url = str.format("bookingadmin/update/booking/{0}/status/{1}", booking.bookingId, booking.status);
+            //    ajax.Post({ url: url, data: null }).then(() => {
+            //        deferred.resolve();
+            //    });
+            //    return deferred.promise();
+            //}
             private updateBooking(booking: bookingModel): JQueryPromise<void> {
                 var deferred = $.Deferred<void>();
                 var url = str.format("bookingadmin/update/booking");
@@ -1025,6 +1061,7 @@ module fastnet {
                         var vetm = new observableEditTemplateModel(etm);
                         var f = new forms.form(this, {
                             modal: false,
+                            initialHeight: 500,
                             title: "Email Template Editor",
                             styleClasses: ["report-forms"],
                             cancelButtonText: "Administration page",
@@ -1065,6 +1102,7 @@ module fastnet {
                                 if (emailTemplateName !== undefined) {
                                     //debug.print("template {0} selected", vetm.selectedTemplate());
                                     f.find(".template-editor").removeClass("hidden");
+                                    //f.find(".template-editor iframe").css("height", 320); // make this work dynamically!!!!
                                     var url = str.format("bookingadmin/get/emailtemplate/{0}", encodeURIComponent(vetm.selectedTemplate()));
                                     ajax.Get({ url: url }, false).then((r) => {
                                         vetm.subjectText(r.subjectText);

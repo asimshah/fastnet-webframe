@@ -22,16 +22,19 @@ namespace Fastnet.Webframe.Web.Areas.booking
             }
             throw new ApplicationException("Unable to create a MemberInfo instance");
         }
-        public static booking GetBooking(CoreDataContext ctx, Booking booking)
+        //public static booking GetBooking(CoreDataContext ctx, Booking booking)
+        public static booking GetBooking(Booking booking)
         {
             booking b = null;
             switch (FactoryName)
             {
                 case FactoryName.DonWhillansHut:
-                    b = new dwhBooking(ctx, booking);
+                    //b = new dwhBooking(ctx, booking);
+                    b = new dwhBooking(booking);
                     break;
                 default:
-                    b = new booking(ctx, booking);
+                    //b = new booking(ctx, booking);
+                    b = new booking(booking);
                     break;
             }
             return b;
@@ -74,6 +77,16 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     return new DWHChoiceFilter();
                 default:
                     throw new ApplicationException(string.Format("No ChoiceFilter type is available for factory", FactoryName));
+            }
+        }
+        public static BookingStateTransitionBase GetBookingStateTransition(BookingDataContext ctx, long abodeId)
+        {
+            switch (FactoryName)
+            {
+                case FactoryName.DonWhillansHut:
+                    return new DWHBookingStateTransition(ctx, abodeId);
+                default:
+                    throw new ApplicationException(string.Format("No BookingStateTransitionBase type is available for factory", FactoryName));
             }
         }
     }

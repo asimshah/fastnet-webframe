@@ -23,5 +23,6 @@ declare module server {
 		toDate: string;
 		choice: server.bookingChoice;
 		under18spresent: boolean;
+		isPaid: boolean;
 	}
 }

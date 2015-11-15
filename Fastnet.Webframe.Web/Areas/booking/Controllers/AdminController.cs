@@ -12,6 +12,7 @@ using System.Transactions;
 using Fastnet.Common;
 using System.Dynamic;
 using Fastnet.Webframe.Web.Areas.bookings;
+using Fastnet.EventSystem;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 {
@@ -33,12 +34,21 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             using (var ctx = new BookingDataContext())
             {
-                var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
-                    .Where(x => unpaidOnly == false || x.IsPaid == false)
-                    .OrderBy(x => x.Reference).ToArrayAsync();
-                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
-                return data;
+                try
+                {
+                    var today = BookingGlobals.GetToday();
+                    var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && (x.To >= today || x.IsPaid == false))
+                        .Where(x => unpaidOnly == false || x.IsPaid == false)
+                        .OrderBy(x => x.Reference).ToArrayAsync();
+                    //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                    var data = bookings.Select(x => Factory.GetBooking(x));
+                    return data.ToArray();
+                }
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
+                    throw;
+                }
             }
         }
         [HttpGet]
@@ -48,8 +58,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
-                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
+                //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                var data = bookings.Select(x => Factory.GetBooking( x));
                 return data;
             }
         }
@@ -60,8 +71,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
-                var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled || x.Status == bookingStatus.AutoCancelled).OrderBy(x => x.Reference).ToArrayAsync();
+                //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                var data = bookings.Select(x => Factory.GetBooking( x));
                 return data;
             }
         }
@@ -94,6 +106,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("update/booking/{id}/paidstate/{paid}")]
         public void UpdateBooking(long id, bool paid)
         {
+            long abodeId = 1;
             using (var ctx = new BookingDataContext())
             {
                 var m = this.GetCurrentMember();
@@ -103,8 +116,15 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 
                 if (booking != null)
                 {
+                    bookingStatus oldStatus = booking.Status;
+                    booking.Status = bookingStatus.Confirmed;
                     booking.IsPaid = paid;
                     booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
+                    var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+                    if (booking.Status != oldStatus)
+                    {
+                        bst.ChangeState(booking, oldStatus);
+                    }
                     ctx.SaveChanges();
                 }
 
@@ -141,24 +161,80 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
             }
         }
+        //[HttpPost]
+        //[Route("update/booking/{id}/status/{status}")]
+        //public void UpdateBooking(long id, bookingStatus status)
+        //{
+        //    long abodeId = 1;
+        //    using (var ctx = new BookingDataContext())
+        //    {
+        //        var m = this.GetCurrentMember();
+        //        var name = m.Fullname;
+        //        var booking = ctx.Bookings.Find(id);
+        //        var today = BookingGlobals.GetToday();
+        //        if (booking.Status != status)
+        //        {
+        //            bookingStatus old = booking.Status;
+        //            booking.Status = status;
+        //            booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+        //            var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+        //            bst.ChangeState(booking, old);
+        //            ctx.SaveChanges();
+        //        }
+        //    }
+        //}
         [HttpPost]
-        [Route("update/booking/{id}/status/{status}")]
-        public void UpdateBooking(long id, bookingStatus status)
+        [Route("approve/booking/{id}")]
+        public void ApproveBooking(long id)
         {
+            long abodeId = 1;
+            using (var ctx = new BookingDataContext())
+            {
+                var m = this.GetCurrentMember();
+                var name = m.Fullname;
+                var booking = ctx.Bookings.Find(id);
+                var bookingMember = DataContext.Members.Find(booking.MemberId);
+                var today = BookingGlobals.GetToday();
+                if (booking.Status == bookingStatus.WaitingApproval)
+                {
+                    var pars = Factory.GetBookingParameters() as dwhBookingParameters;
+                    pars.Load(DataContext);
+                    Group privileged = DataContext.Groups.Find(pars.privilegedMembers.Id);
+                    bool isPrivileged = bookingMember.IsMemberOf(privileged);
+                    bookingStatus old = booking.Status;
+                    booking.Status = isPrivileged ? bookingStatus.Confirmed : bookingStatus.WaitingPayment;
+                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+                    bst.ChangeState(booking, old);
+                    ctx.SaveChanges();
+                }
+            }
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
+        }
+        [HttpPost]
+        [Route("cancel/booking/{id}")]
+        public void CancelBooking(long id)
+        {
+            long abodeId = 1;
             using (var ctx = new BookingDataContext())
             {
                 var m = this.GetCurrentMember();
                 var name = m.Fullname;
                 var booking = ctx.Bookings.Find(id);
                 var today = BookingGlobals.GetToday();
-                if (booking.Status != status)
+                if (booking.Status != bookingStatus.Cancelled && booking.Status != bookingStatus.AutoCancelled)
                 {
                     bookingStatus old = booking.Status;
-                    booking.Status = status;
+                    booking.Status = bookingStatus.Cancelled;
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+                    bst.ChangeState(booking, old);
                     ctx.SaveChanges();
                 }
             }
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
         }
         [HttpGet]
         [Route("get/entrycodes")]

@@ -514,7 +514,7 @@
                 var url = "membershipapi/add/groupmembers";
                 var postData = { groupId: groupId, members: members };
                 $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
-                    loadGroupDetails(groupId);
+                    _loadGroupDetails(groupId);
                 });
             }
             var url = $U.Format("membershipapi/get/candidatemembers/{0}", groupId);

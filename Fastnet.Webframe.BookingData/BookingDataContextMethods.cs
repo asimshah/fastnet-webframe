@@ -12,9 +12,9 @@ namespace Fastnet.Webframe.BookingData
 
     public partial class BookingDataContext
     {
-        public async Task<List<Accomodation>> GetTotalAccomodation()
+        public List<Accomodation> GetTotalAccomodation()
         {
-            return await AccomodationSet.Where(x => x.ParentAccomodation == null).ToListAsync();
+            return AccomodationSet.Where(x => x.ParentAccomodation == null).ToList();
             //var rootItems = await AccomodationSet.Where(x => x.ParentAccomodation == null).ToArrayAsync();
             //return Mapper.Map<IEnumerable<Accomodation>, List<AccomodationTO>>(rootItems);
         }
@@ -71,19 +71,19 @@ namespace Fastnet.Webframe.BookingData
             t.SubjectText = subjextText;
             t.BodyText = bodyText;
         }
-        public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
-        {
-            var bem = new BookingEmail
-            {
-                Booking = booking,
-                Template = template,
-                UtcDueAt = utcDueAt,
-                EmailAddress = emailAddress,
-                Subject = subject,
-                Body = body,
-                Status = BookingEmailStatus.NotSent
-            };
-            this.Emails.Add(bem);
-        }
+        //public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
+        //{
+        //    var bem = new BookingEmail
+        //    {
+        //        Booking = booking,
+        //        Template = template,
+        //        UtcDueAt = utcDueAt,
+        //        EmailAddress = emailAddress,
+        //        Subject = subject,
+        //        Body = body,
+        //        Status = BookingEmailStatus.NotSent
+        //    };
+        //    this.Emails.Add(bem);
+        //}
     }
 }

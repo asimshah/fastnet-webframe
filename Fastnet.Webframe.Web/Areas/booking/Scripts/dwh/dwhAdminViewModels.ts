@@ -5,6 +5,7 @@
         export class dwhBookingModel extends bookingModel implements server.dwhBooking {
             bmcMembership: string;
             organisation: string;
+            memberIsPrivileged: boolean;
         }
         export class observableDwhBookingModel extends observableBookingModel {
             bmcMembership: string;

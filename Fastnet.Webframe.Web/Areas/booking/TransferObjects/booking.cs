@@ -4,6 +4,7 @@ using Fastnet.Webframe.CoreData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace Fastnet.Webframe.Web.Areas.booking
@@ -26,13 +27,15 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public Decimal totalCost { get; set; }
         public string formattedCost { get; set; }
         public bool isPaid { get; set; }
+        public bool canPay { get; set; }
         public string notes { get; set; }
         public string history { get; set; }
         public string entryInformation { get; set; }
         public bool under18sInParty { get; set; }
         public int numberOfNights { get; set; }
         public bool hasMultipleDays { get; set; }
-        public booking(CoreDataContext ctx, Booking b)
+        //public booking(CoreDataContext ctx, Booking b)
+        public booking( Booking b)
         {
             this.bookingId = b.BookingId;
             this.reference = b.Reference;
@@ -47,20 +50,24 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.totalCost = b.TotalCost;
             this.formattedCost = string.Format("£{0:#0}", this.totalCost);
             this.isPaid = b.IsPaid;
+            this.canPay = (b.Status != bookingStatus.WaitingApproval && b.Status != bookingStatus.Cancelled && b.Status != bookingStatus.AutoCancelled);
             this.notes = b.Notes;
             this.history = b.History;
             this.entryInformation = b.EntryInformation;
             this.under18sInParty = b.Under18sInParty;
             this.memberId = b.MemberId;
             this.description = GetAccomodationDescription(b);
-            MemberBase m = ctx.Members.Find(b.MemberId);
-            SetMemberInformation(m);
+            using (var ctx = new CoreDataContext())
+            {
+                MemberBase m = ctx.Members.Find(b.MemberId);
+                SetMemberInformation(ctx, m);
+            }
         }
-        protected virtual void SetMemberInformation(MemberBase m)
+        protected virtual void SetMemberInformation(CoreDataContext ctx, MemberBase m)
         {
             this.memberName = m.Fullname;
             this.memberEmailAddress = m.EmailAddress;
-            this.memberPhoneNumber = m.PhoneNumber;           
+            this.memberPhoneNumber = m.PhoneNumber;         
         }
         private string GetAccomodationDescription(Booking b)
         {

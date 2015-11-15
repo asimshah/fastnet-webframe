@@ -73,6 +73,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     tran.Commit();
                     if (mail.Status == BookingEmailStatus.Sending)
                     {
+                        Booking booking = mail.Booking;
                         try
                         {
 
@@ -80,11 +81,15 @@ namespace Fastnet.Webframe.Web.Areas.booking
                             MailSender ms = new MailSender(smo);
                             await ms.Start();
                             mail.Status = BookingEmailStatus.Sent;
+                            mail.UtcSentAt = DateTime.UtcNow;
+                            booking.AddHistory("System", string.Format("Email (using the {0} template) sent", mail.Template.ToString()));
                         }
                         catch (Exception xe)
                         {
                             // mail sending failed
                             mail.FailureDescription = xe.Message;
+                            mail.UtcSentAt = null;
+                            booking.AddHistory("System", string.Format("Email (using the {0} template) failed: {1}", mail.Template.ToString(), mail.FailureDescription));
                             if (mail.RetryCountToDate > ApplicationSettings.Key("Booking:MailRetryCount", 3))
                             {
                                 mail.Status = BookingEmailStatus.Failed;

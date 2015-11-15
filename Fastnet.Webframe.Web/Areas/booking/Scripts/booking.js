@@ -596,7 +596,8 @@ var fastnet;
                     choice: model.choice,
                     fromDate: str.toDateString(model.fromDate),
                     toDate: str.toDateString(model.toDate),
-                    under18spresent: model.under18Present
+                    under18spresent: model.under18Present,
+                    isPaid: false
                 };
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
                 var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);

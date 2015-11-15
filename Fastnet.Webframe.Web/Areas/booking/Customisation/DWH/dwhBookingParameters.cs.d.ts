@@ -2,7 +2,8 @@
 
 declare module server {
 	interface dwhBookingParameters extends bookingParameters {
-		noBMCCheckGroup: server.IGroup;
+		nonBMCMembers: server.IGroup;
+		privilegedMembers: server.IGroup;
 		shortBookingInterval: number;
 	}
 }

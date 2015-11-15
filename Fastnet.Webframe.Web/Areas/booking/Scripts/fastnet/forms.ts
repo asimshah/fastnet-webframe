@@ -210,8 +210,9 @@ module fastnet {
             private model: viewModel = null;
             private observableModel: any;
             private knockoutIsBound: boolean = false;
-            private rootElement: HTMLElement;
+            private rootElement: HTMLElement;            
             private validationResults: collections.Dictionary<string, collections.Bag<validationResult>>;
+            //private static richTextResizerInstalled: boolean = false;
             private static addValidations(rules: any[]): void {
                 $.each(rules, (i, rule) => {
                     if (rule.async) {
@@ -283,7 +284,7 @@ module fastnet {
                             var propertyName = getPropertyName(element);
                             $(element).attr("data-property", propertyName);
                             var html = ko.unwrap(valueAccessor());
-                            $(element).val(html);
+                            $(element).val(html);                            
                             debug.print("richtext init()");
                         }
                         //tinymce.init({
@@ -299,18 +300,26 @@ module fastnet {
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                         if (enable) {
                             debug.print("richtext update()");
-                            
-                            var editor = $(element).tinymce({
+                            var toolbar = "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect | fontselect fontsizeselect";// | link code";
+                            var rtOptions = allBindingsAccessor.get('richtextOptions');
+                            var additionalOptions = {};
+                            if (rtOptions !== undefined) {
+                                if (rtOptions.toolbar !== undefined) {
+                                    toolbar += ' | ' + rtOptions.toolbar;
+                                }
+                                if (rtOptions.height !== undefined) {
+                                    $.extend(additionalOptions, {height: rtOptions.height});
+                                }
+                            }
+                            var mceOptions = {
+                                plugins: "textcolor colorpicker visualblocks link image code",
                                 menubar: false,
                                 statusbar: false,
                                 content_css: form.config.richTextCssUrl,
-                                //inline: true,
-                                //toolbar_items_size: 'small',
-                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect",
+                                toolbar_items_size: 'small',
+                                toolbar: toolbar,
                                 setup: function (editor) {
                                     var vm: viewModel = viewModel;
-                                    //var html = valueAccessor();
-                                    //editor.setContent(html());
                                     var f = form.getForm(vm.__$formId);
                                     f.registorEditor($(element).attr("data-property"), editor);
                                     editor.on('change', function (e) {
@@ -321,8 +330,9 @@ module fastnet {
                                         f.setMessage('');
                                     });
                                 }
-                            });
-
+                            };
+                            $.extend(mceOptions, additionalOptions);
+                            var editor = $(element).tinymce(mceOptions);
                         }
                     }
                 }
@@ -444,6 +454,7 @@ module fastnet {
             public close() {
                 form.formStack.pop();
                 this.unbindKnockout();
+                this.finaliseClose();
                 if (this.options.modal) {
                     $(`#${this.formId}`).off().dialog("close");
                 } else {
@@ -494,7 +505,6 @@ module fastnet {
                 if (!h$.isNullOrUndefined(this.observableModel)) {
                     this.observableModel().message(text);
                 }
-                //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             }
             public findRichTextEditor(propertyName: string): any {
                 return this.editors.getValue(propertyName);
@@ -586,7 +596,13 @@ module fastnet {
                 return $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
                 //return $("<form></form>").attr("id", this.formId).append($(this.contentHtml));
             }
-            private finalise(): void {
+            private finaliseClose(): void {
+                let wns = `resize.forms-${this.formId}`;
+                $(window).off(wns);
+            }
+            private finaliseOpen(): void {
+                let wns = `resize.forms-${this.formId}`;
+                $(window).on(wns, (e) => this.onWindowResize(e));
                 this.rootElement = this.getRoot().get(0);
 
                 if (this.model !== null) {
@@ -657,7 +673,7 @@ module fastnet {
                     }
                 });
                 $(root).dialog("open");
-                this.finalise();
+                this.finaliseOpen();
             }
             private openModeless() {
                 var buttons = this.prepareButtons();
@@ -678,7 +694,7 @@ module fastnet {
                 var formHtml = this.prepareFormRoot();
                 formTemplate.find(".ui-form-content").append(formHtml);
                 $(`.${this.options.modelessContainer}`).empty().append(formTemplate);
-                this.finalise();
+                this.finaliseOpen();
             }
             private validateOptions(): boolean {
                 return true;// this.options.container !== null;
@@ -689,9 +705,10 @@ module fastnet {
                     this.knockoutIsBound = false;
                 }
             }
+
             private onModalClosed(closedUsingSystemButton: boolean): void {
-                let wns = `resize.forms-${this.formId}`;
-                $(window).off(wns);
+                //let wns = `resize.forms-${this.formId}`;
+                //$(window).off(wns);
                 let d = $(`#${this.formId}`).data("ui-dialog");
                 d.destroy();
                 if (closedUsingSystemButton) {
@@ -712,8 +729,8 @@ module fastnet {
                     windowWidth: $(window).width()
                 };
                 let w = Math.min(this.modalPosition.openingWidth, this.modalPosition.windowWidth);
-                let wns = `resize.forms-${this.formId}`;
-                $(window).on(wns, (e) => this.onWindowResize(e));
+                //let wns = `resize.forms-${this.formId}`;
+                //$(window).on(wns, (e) => this.onWindowResize(e));
             }
             // ui_dialog must be the ".ui-dialog" tagged element of a jQuery-ui dialog widget
             // call this method in the create call of a jQuery-ui dialog widget
@@ -754,21 +771,32 @@ module fastnet {
             }
             private onWindowResize(e): void {
                 if (e.target === window) {
-                    let elem = $(`#${this.formId}`);
-                    let ui_dialog = elem.closest(".ui-dialog");
-                    elem.dialog("option", "position", elem.dialog("option", "position"));
-                    let ww = $(window).width();
-                    let fw = ui_dialog.outerWidth();
-                    let delta = ww - this.modalPosition.openingWidth;
-                    if (delta < 0) {
-                        elem.dialog("option", "width", ww);
-                    } else {
-                        if (fw < this.modalPosition.openingWidth) {
-                            elem.dialog("option", "width", this.modalPosition.openingWidth);
+                    //debug.print("window resize");
+                    if (this.options.modal) {
+                        let elem = $(`#${this.formId}`);
+                        let ui_dialog = elem.closest(".ui-dialog");
+                        elem.dialog("option", "position", elem.dialog("option", "position"));
+                        let ww = $(window).width();
+                        let fw = ui_dialog.outerWidth();
+                        let delta = ww - this.modalPosition.openingWidth;
+                        if (delta < 0) {
+                            elem.dialog("option", "width", ww);
+                        } else {
+                            if (fw < this.modalPosition.openingWidth) {
+                                elem.dialog("option", "width", this.modalPosition.openingWidth);
+                            }
                         }
                     }
+                    //this.resizeRichText();
                 }
             }
+            //private resizeRichText(): void {
+            //    let formRoot = $(`#${this.formId}`);
+            //    var rtdivs = formRoot.find("div.rich-text");
+            //    if (rtdivs.length > 0) {
+            //        debug.print("there are rt divs present");
+            //    }
+            //}
             private onCommand(cmd: string, ct: EventTarget) {
                 if (this.commandCallback === null) {
                     var msg = str.format("No OnCommand handler:\n form id: {0}, title: {1}, command: {2}", this.formId, this.options.title, cmd);

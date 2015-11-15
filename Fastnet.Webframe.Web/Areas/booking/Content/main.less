@@ -632,12 +632,17 @@ button.side-button {
 
         .template-editor {
             margin-top: 12px;
+            iframe {
+                height: 400px;
+            }
         }
     }
+
     .email-keywords {
         table {
             font-size: 0.75em;
         }
+
         .help-block {
             font-size: 0.75em;
         }
@@ -757,7 +762,11 @@ button.side-button {
 
         table {
             width: 100%;
-
+            tr.privileged-member {
+                td.member {
+                    color: @dark-green;
+                }
+            }
             tr.is-paid {
                 td.payment-indicator {
                     span.fa-check {
@@ -799,7 +808,7 @@ button.side-button {
                     }
                 }
 
-                &.status-Provisional {
+                &.status-WaitingApproval {
                     td.status {
                         color: @red;
                     }

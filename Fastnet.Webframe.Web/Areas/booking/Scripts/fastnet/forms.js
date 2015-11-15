@@ -140,6 +140,7 @@ var fastnet;
                     _this.buttons.push(b);
                 });
             }
+            //private static richTextResizerInstalled: boolean = false;
             form.addValidations = function (rules) {
                 $.each(rules, function (i, rule) {
                     if (rule.async) {
@@ -228,17 +229,26 @@ var fastnet;
                     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                         if (enable) {
                             debug.print("richtext update()");
-                            var editor = $(element).tinymce({
+                            var toolbar = "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect | fontselect fontsizeselect"; // | link code";
+                            var rtOptions = allBindingsAccessor.get('richtextOptions');
+                            var additionalOptions = {};
+                            if (rtOptions !== undefined) {
+                                if (rtOptions.toolbar !== undefined) {
+                                    toolbar += ' | ' + rtOptions.toolbar;
+                                }
+                                if (rtOptions.height !== undefined) {
+                                    $.extend(additionalOptions, { height: rtOptions.height });
+                                }
+                            }
+                            var mceOptions = {
+                                plugins: "textcolor colorpicker visualblocks link image code",
                                 menubar: false,
                                 statusbar: false,
                                 content_css: form.config.richTextCssUrl,
-                                //inline: true,
-                                //toolbar_items_size: 'small',
-                                toolbar: "undo redo | cut copy paste | bold italic forecolor backcolor | bullist numlist | styleselect",
+                                toolbar_items_size: 'small',
+                                toolbar: toolbar,
                                 setup: function (editor) {
                                     var vm = viewModel;
-                                    //var html = valueAccessor();
-                                    //editor.setContent(html());
                                     var f = form.getForm(vm.__$formId);
                                     f.registorEditor($(element).attr("data-property"), editor);
                                     editor.on('change', function (e) {
@@ -249,7 +259,9 @@ var fastnet;
                                         f.setMessage('');
                                     });
                                 }
-                            });
+                            };
+                            $.extend(mceOptions, additionalOptions);
+                            var editor = $(element).tinymce(mceOptions);
                         }
                     }
                 };
@@ -323,6 +335,7 @@ var fastnet;
             form.prototype.close = function () {
                 form.formStack.pop();
                 this.unbindKnockout();
+                this.finaliseClose();
                 if (this.options.modal) {
                     $("#" + this.formId).off().dialog("close");
                 }
@@ -374,7 +387,6 @@ var fastnet;
                 if (!h$.isNullOrUndefined(this.observableModel)) {
                     this.observableModel().message(text);
                 }
-                //$(this.rootElement).find(`.${this.options.messageClass}`).html(text);
             };
             form.prototype.findRichTextEditor = function (propertyName) {
                 return this.editors.getValue(propertyName);
@@ -466,8 +478,14 @@ var fastnet;
                 return $("<div></div>").attr("id", this.formId).append($(this.contentHtml));
                 //return $("<form></form>").attr("id", this.formId).append($(this.contentHtml));
             };
-            form.prototype.finalise = function () {
+            form.prototype.finaliseClose = function () {
+                var wns = "resize.forms-" + this.formId;
+                $(window).off(wns);
+            };
+            form.prototype.finaliseOpen = function () {
                 var _this = this;
+                var wns = "resize.forms-" + this.formId;
+                $(window).on(wns, function (e) { return _this.onWindowResize(e); });
                 this.rootElement = this.getRoot().get(0);
                 if (this.model !== null) {
                     this.knockoutIsBound = true;
@@ -537,7 +555,7 @@ var fastnet;
                     }
                 });
                 $(root).dialog("open");
-                this.finalise();
+                this.finaliseOpen();
             };
             form.prototype.openModeless = function () {
                 var _this = this;
@@ -559,7 +577,7 @@ var fastnet;
                 var formHtml = this.prepareFormRoot();
                 formTemplate.find(".ui-form-content").append(formHtml);
                 $("." + this.options.modelessContainer).empty().append(formTemplate);
-                this.finalise();
+                this.finaliseOpen();
             };
             form.prototype.validateOptions = function () {
                 return true; // this.options.container !== null;
@@ -571,8 +589,8 @@ var fastnet;
                 }
             };
             form.prototype.onModalClosed = function (closedUsingSystemButton) {
-                var wns = "resize.forms-" + this.formId;
-                $(window).off(wns);
+                //let wns = `resize.forms-${this.formId}`;
+                //$(window).off(wns);
                 var d = $("#" + this.formId).data("ui-dialog");
                 d.destroy();
                 if (closedUsingSystemButton) {
@@ -584,7 +602,6 @@ var fastnet;
             // ui_dialog must be the ".ui-dialog" tagged element of a jQuery-ui dialog widget
             // call this method in the create call of a jQuery-ui dialog widget
             form.prototype.onModalDialogOpen = function (ui_dialog) {
-                var _this = this;
                 if (this.options.hideSystemCloseButton) {
                     ui_dialog.find(".ui-dialog-titlebar-close").hide();
                 }
@@ -594,8 +611,8 @@ var fastnet;
                     windowWidth: $(window).width()
                 };
                 var w = Math.min(this.modalPosition.openingWidth, this.modalPosition.windowWidth);
-                var wns = "resize.forms-" + this.formId;
-                $(window).on(wns, function (e) { return _this.onWindowResize(e); });
+                //let wns = `resize.forms-${this.formId}`;
+                //$(window).on(wns, (e) => this.onWindowResize(e));
             };
             // ui_dialog must be the ".ui-dialog" tagged element of a jQuery-ui dialog widget
             // call this method in the create call of a jQuery-ui dialog widget
@@ -634,22 +651,32 @@ var fastnet;
             };
             form.prototype.onWindowResize = function (e) {
                 if (e.target === window) {
-                    var elem = $("#" + this.formId);
-                    var ui_dialog = elem.closest(".ui-dialog");
-                    elem.dialog("option", "position", elem.dialog("option", "position"));
-                    var ww = $(window).width();
-                    var fw = ui_dialog.outerWidth();
-                    var delta = ww - this.modalPosition.openingWidth;
-                    if (delta < 0) {
-                        elem.dialog("option", "width", ww);
-                    }
-                    else {
-                        if (fw < this.modalPosition.openingWidth) {
-                            elem.dialog("option", "width", this.modalPosition.openingWidth);
+                    //debug.print("window resize");
+                    if (this.options.modal) {
+                        var elem = $("#" + this.formId);
+                        var ui_dialog = elem.closest(".ui-dialog");
+                        elem.dialog("option", "position", elem.dialog("option", "position"));
+                        var ww = $(window).width();
+                        var fw = ui_dialog.outerWidth();
+                        var delta = ww - this.modalPosition.openingWidth;
+                        if (delta < 0) {
+                            elem.dialog("option", "width", ww);
+                        }
+                        else {
+                            if (fw < this.modalPosition.openingWidth) {
+                                elem.dialog("option", "width", this.modalPosition.openingWidth);
+                            }
                         }
                     }
                 }
             };
+            //private resizeRichText(): void {
+            //    let formRoot = $(`#${this.formId}`);
+            //    var rtdivs = formRoot.find("div.rich-text");
+            //    if (rtdivs.length > 0) {
+            //        debug.print("there are rt divs present");
+            //    }
+            //}
             form.prototype.onCommand = function (cmd, ct) {
                 if (this.commandCallback === null) {
                     var msg = str.format("No OnCommand handler:\n form id: {0}, title: {1}, command: {2}", this.formId, this.options.title, cmd);

@@ -46,7 +46,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
 
         }
-        public async Task Load(CoreDataContext core)
+        public void Load(CoreDataContext core)
         {
             using (var ctx = new BookingDataContext())
             {
@@ -57,7 +57,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 availableGroups = groups.OrderBy(x => x.Name).Select(x => new IGroup { Id = x.GroupId, Name = x.Name }).ToArray();
                 termsAndConditionsUrl = para.TermsAndConditionsUrl;
                 
-                var allAccomodation = await ctx.GetTotalAccomodation();
+                var allAccomodation = ctx.GetTotalAccomodation();
                 int bedCount = 0;
                 foreach (var accomodation in allAccomodation)
                 {

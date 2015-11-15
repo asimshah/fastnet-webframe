@@ -218,6 +218,11 @@ namespace Fastnet.Webframe.CoreData
             {
                 int weight = parent == null ? 0 : parent.Weight + weightIncrement;
                 Group g = new Group { Name = item.Name, ParentGroup = parent, Description = item.Description, Weight = weight, Type = (GroupTypes)(int)item.Type };
+                if(g.Name == "Priveleged Users")
+                {
+                    g.Name = "Privileged Members"; 
+                    g.Description = "Members whose bookings are confirmed without their necessarily having paid.";
+                }
                 coreDb.Groups.Add(g);
                 foreach (var child in item.Children)
                 {
@@ -243,15 +248,15 @@ namespace Fastnet.Webframe.CoreData
                 Type = GroupTypes.User,
             };
             coreDb.Groups.Add(bmcMembers);
-            Group bypassBMCChecking = new Group
+            Group nonBmcMembers = new Group
             {
-                Name = "No BMC Check",
+                Name = "Non BMC Members",
                 ParentGroup = Group.AllMembers,
-                Description = "Members whose membership of the BMC is never checked online",
+                Description = "Members who do not have BMC membership",
                 Weight = Group.AllMembers.Weight + weightIncrement,
                 Type = GroupTypes.User,
             };
-            coreDb.Groups.Add(bypassBMCChecking);
+            coreDb.Groups.Add(nonBmcMembers);
             coreDb.SaveChanges();
         }
         internal void LoadMembers()
@@ -487,6 +492,7 @@ namespace Fastnet.Webframe.CoreData
         {
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
             Group bmcGroup = coreDb.Groups.Single(x => x.Name == "BMC Members");
+            Group nonBmcGroup = coreDb.Groups.Single(x => x.Name == "Non BMC Members");
             var allMembers = coreDb.Members.OfType<DWHMember>();
             foreach(var member in allMembers)
             {
@@ -507,6 +513,7 @@ namespace Fastnet.Webframe.CoreData
                 {
                     status = BMCMembershipStatus.Missing;
                     Log.Write("Member {1}, email {0} is not a member of the BMC", member.EmailAddress, member.Fullname);
+                    nonBmcGroup.Members.Add(member);
                 }
             }
         }
@@ -679,7 +686,8 @@ namespace Fastnet.Webframe.CoreData
             DWHParameter p = Factory.CreateNewParameter() as DWHParameter;
             p.ForwardBookingPeriod = pp;
             p.BMCMembers = "BMC Members";
-            p.NoBMCCheckGroup = "No BMC Check";
+            p.NonBMCMembers = "Non BMC Members";
+            p.PrivilegedMembers = "Privileged Members";
             p.ShortBookingInterval = 28;
             p.TermsAndConditionsUrl = "page/11";
             bctx.Periods.Add(pp);
@@ -732,11 +740,32 @@ namespace Fastnet.Webframe.CoreData
                         MemberId = member.Id,
                         Notes = lBooking.Notes,
                         Reference = lBooking.Reference,
-                        Status = (BookingData.bookingStatus)(int)lBooking.Status,
+                        //Status = (BookingData.bookingStatus)(int)lBooking.Status,
                         To = to,// lBooking.To,
                         TotalCost = lBooking.TotalCost,
                         Under18sInParty = lBooking.Under18sInParty
                     };
+                    switch (lBooking.Status)
+                    {
+                        case BookingStatus.Cancelled:
+                            b.Status = bookingStatus.Cancelled;
+                            break;
+                        case BookingStatus.Accepted:
+                        case BookingStatus.Confirmed:
+                        case BookingStatus.Provisional:
+                            if(lBooking.IsPaid)
+                            {
+                                b.Status = bookingStatus.Confirmed;
+                            }
+                            else if(lBooking.Under18sInParty)
+                            {
+                                b.Status = bookingStatus.WaitingApproval;
+                            } else
+                            {
+                                b.Status = bookingStatus.WaitingPayment;
+                            }
+                            break;
+                    }
                     b.AddHistory("System", "Created during conversion");
                     CreateBookings(bctx, b, lBooking, member);
                 }

@@ -9,12 +9,23 @@ namespace Fastnet.Webframe.BookingData
 {
     public enum BookingEmailTemplates
     {
-        Provisional,
-        AdminNotificationProvisional,
-        PaymentReminder,
-        Confirmed,
-        EntryCodeNotification,
+        RegistrationFailed,
+        ApprovalRequired,
+        WANotification,
+        BookingConfirmed,
+        WaitingPayment,
+        WPNotification,
+        Reminder,
+        FinalReminder,
+        CANNotification,
+        AutoCancelled,
         Cancelled
+        //Provisional,
+        //AdminNotificationProvisional,
+        //PaymentReminder,
+        //Confirmed,
+        //EntryCodeNotification,
+        //Cancelled
     }
     public enum BookingEmailStatus
     {

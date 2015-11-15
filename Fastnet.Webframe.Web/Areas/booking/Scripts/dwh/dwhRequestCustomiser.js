@@ -17,10 +17,12 @@ var fastnet;
                     var sdm = stepObservable.toMoment(sd);
                     var edm = stepObservable.toMoment(stepObservable.endDate());
                     var duration = (edm === null) ? 0 : edm.diff(sdm, "days");
-                    var dayOfWeek = sdm.day();
-                    if (dayOfWeek === 5 && duration < 2) {
-                        //edChangeFocusBlocked = true;
-                        stepObservable.endDate(sdm.add(2, 'd').toDate());
+                    if (sdm !== null) {
+                        var dayOfWeek = sdm.day();
+                        if (dayOfWeek === 5 && duration < 2) {
+                            //edChangeFocusBlocked = true;
+                            stepObservable.endDate(sdm.add(2, 'd').toDate());
+                        }
                     }
                 });
             };

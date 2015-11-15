@@ -21,6 +21,7 @@ module fastnet {
             totalCost: number;
             formattedCost: string;
             isPaid: boolean;
+            canPay: boolean;
             notes: string;
             history: string;
             entryInformation: string;

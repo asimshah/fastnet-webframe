@@ -8,9 +8,10 @@ namespace Fastnet.Webframe.BookingData
 {
     public enum bookingStatus
     {
-        Provisional,
+        WaitingApproval,
+        WaitingPayment,
         Confirmed,
+        AutoCancelled,
         Cancelled,
-        Accepted
     }
 }

@@ -759,12 +759,16 @@ var fastnet;
                             else if (r.statusChanged) {
                                 function bookingStatusToString(s) {
                                     switch (s) {
-                                        case 0 /* Provisional */:
-                                            return "Provisional";
-                                        case 2 /* Cancelled */:
+                                        case 0 /* WaitingApproval */:
+                                            return "WaitingApproval";
+                                        case 4 /* Cancelled */:
                                             return "Cancelled";
-                                        case 1 /* Confirmed */:
+                                        case 3 /* AutoCancelled */:
+                                            return "AutoCancelled";
+                                        case 2 /* Confirmed */:
                                             return "Confirmed";
+                                        case 1 /* WaitingPayment */:
+                                            return "WaitingPayment";
                                     }
                                 }
                                 booking.status = r.booking.status;
@@ -841,13 +845,18 @@ var fastnet;
                         okButtonText: "Save Changes",
                     };
                     switch (booking.status) {
-                        case 0 /* Provisional */:
+                        case 0 /* WaitingApproval */:
                             options.additionalButtons = [
                                 { text: "Cancel Booking", command: "cancel-booking", position: 1 /* left */ },
-                                { text: "Confirm Booking", command: "confirm-booking", position: 1 /* left */ }
+                                { text: "Approve Booking", command: "approve-booking", position: 1 /* left */ },
                             ];
                             break;
-                        case 1 /* Confirmed */:
+                        case 1 /* WaitingPayment */:
+                            options.additionalButtons = [
+                                { text: "Cancel Booking", command: "cancel-booking", position: 1 /* left */ },
+                            ];
+                            break;
+                        case 2 /* Confirmed */:
                             options.additionalButtons = [
                                 { text: "Cancel Booking", command: "cancel-booking", position: 1 /* left */ },
                             ];
@@ -861,32 +870,41 @@ var fastnet;
                                 _this.updateBooking(data.current).then(function () {
                                     result.dataUpdated = true;
                                     result.booking = data.current;
-                                    if (result.booking.status != 2 /* Cancelled */) {
+                                    if (result.booking.status != 4 /* Cancelled */) {
                                         f.enableCommand("cancel-booking");
-                                        if (result.booking.status != 1 /* Confirmed */) {
+                                        if (result.booking.status != 2 /* Confirmed */) {
                                             f.enableCommand("confirm-booking");
                                         }
                                     }
                                     f.setMessage("Changes saved");
                                 });
                                 break;
-                            case "confirm-booking":
-                                f.disableCommand("confirm-booking");
-                                data.current.status = 1 /* Confirmed */;
-                                _this.changeStatus(data.current).then(function () {
-                                    result.statusChanged = true;
-                                    result.booking = data.current;
-                                    f.setMessage("Booking confirmed");
-                                });
-                                break;
+                            //case "confirm-booking":
+                            //    f.disableCommand("confirm-booking");
+                            //    data.current.status = server.bookingStatus.Confirmed;
+                            //    this.changeStatus(data.current).then(() => {
+                            //        result.statusChanged = true;
+                            //        result.booking = data.current;
+                            //        f.setMessage("Booking confirmed");
+                            //    });
+                            //    break;
                             case "cancel-booking":
                                 f.disableCommand("confirm-booking");
                                 f.disableCommand("cancel-booking");
-                                data.current.status = 2 /* Cancelled */;
-                                _this.changeStatus(data.current).then(function () {
+                                //data.current.status = server.bookingStatus.Cancelled;
+                                _this.cancelBooking(data.current).then(function () {
                                     result.statusChanged = true;
                                     result.booking = data.current;
                                     f.setMessage("Booking cancelled");
+                                });
+                                break;
+                            case "approve-booking":
+                                f.disableCommand("approve-booking");
+                                //data.current.status = server.bookingStatus.WaitingPayment;
+                                _this.approveBooking(data.current).then(function () {
+                                    result.statusChanged = true;
+                                    result.booking = data.current;
+                                    f.setMessage("Booking approved");
                                 });
                                 break;
                             case "cancel-command":
@@ -899,19 +917,35 @@ var fastnet;
                     }, function (f, property) {
                         f.setMessage("");
                         f.disableCommand("cancel-booking");
-                        f.disableCommand("confirm-booking");
+                        f.disableCommand("approve-booking");
                     });
                 });
                 return deferred.promise();
             };
-            bookingReport.prototype.changeStatus = function (booking) {
+            bookingReport.prototype.cancelBooking = function (booking) {
                 var deferred = $.Deferred();
-                var url = str.format("bookingadmin/update/booking/{0}/status/{1}", booking.bookingId, booking.status);
+                var url = str.format("bookingadmin/cancel/booking/{0}", booking.bookingId);
                 ajax.Post({ url: url, data: null }).then(function () {
                     deferred.resolve();
                 });
                 return deferred.promise();
             };
+            bookingReport.prototype.approveBooking = function (booking) {
+                var deferred = $.Deferred();
+                var url = str.format("bookingadmin/approve/booking/{0}", booking.bookingId);
+                ajax.Post({ url: url, data: null }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            //private changeStatus(booking: bookingModel): JQueryPromise<void> {
+            //    var deferred = $.Deferred<void>();
+            //    var url = str.format("bookingadmin/update/booking/{0}/status/{1}", booking.bookingId, booking.status);
+            //    ajax.Post({ url: url, data: null }).then(() => {
+            //        deferred.resolve();
+            //    });
+            //    return deferred.promise();
+            //}
             bookingReport.prototype.updateBooking = function (booking) {
                 var deferred = $.Deferred();
                 var url = str.format("bookingadmin/update/booking");
@@ -1043,6 +1077,7 @@ var fastnet;
                         var vetm = new booking_1.observableEditTemplateModel(etm);
                         var f = new forms.form(_this, {
                             modal: false,
+                            initialHeight: 500,
                             title: "Email Template Editor",
                             styleClasses: ["report-forms"],
                             cancelButtonText: "Administration page",
@@ -1082,6 +1117,7 @@ var fastnet;
                                 if (emailTemplateName !== undefined) {
                                     //debug.print("template {0} selected", vetm.selectedTemplate());
                                     f.find(".template-editor").removeClass("hidden");
+                                    //f.find(".template-editor iframe").css("height", 320); // make this work dynamically!!!!
                                     var url = str.format("bookingadmin/get/emailtemplate/{0}", encodeURIComponent(vetm.selectedTemplate()));
                                     ajax.Get({ url: url }, false).then(function (r) {
                                         vetm.subjectText(r.subjectText);

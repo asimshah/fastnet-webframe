@@ -1,8 +1,9 @@
 ﻿declare module server {
 	const enum bookingStatus {
-		Provisional,
+		WaitingApproval,
+		WaitingPayment,
 		Confirmed,
+		AutoCancelled,
 		Cancelled,
-		Accepted,
 	}
 }

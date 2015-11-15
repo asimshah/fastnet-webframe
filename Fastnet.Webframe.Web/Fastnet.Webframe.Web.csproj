@@ -245,6 +245,7 @@
     <Compile Include="Areas\booking\Common\bookingChoice.cs" />
     <Compile Include="Areas\booking\Common\BookingChoiceClasses.cs" />
     <Compile Include="Areas\booking\Common\BookingSettings.cs" />
+    <Compile Include="Areas\booking\Common\BookingStateTransitionBase.cs" />
     <Compile Include="Areas\booking\Common\BookingTasks.cs" />
     <Compile Include="Areas\booking\Common\ChoiceFilterBase.cs" />
     <Compile Include="Areas\booking\Common\dailyAccomodation.cs" />
@@ -260,6 +261,7 @@
     <Compile Include="Areas\booking\Controllers\ManagementController.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\dwhBooking.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\dwhBookingParameters.cs" />
+    <Compile Include="Areas\booking\Customisation\DWH\DWHBookingStateTransition.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHChoiceFilter.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHDayInformation.cs" />
     <Compile Include="Areas\booking\Customisation\DWH\DWHMemberInfo.cs" />
@@ -1776,7 +1778,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

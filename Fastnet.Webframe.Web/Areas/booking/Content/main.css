@@ -228,6 +228,7 @@ button.side-button {
   color: #ffffff !important;
 }
 .booking-forms .ui-form-buttonpane {
+  overflow: auto;
   border-top: 2px solid #2d89ef;
 }
 .booking-forms .ui-form-button {
@@ -518,6 +519,7 @@ button.side-button {
   color: #ffffff !important;
 }
 .report-forms .ui-form-buttonpane {
+  overflow: auto;
   border-top: 2px solid #373737;
 }
 .report-forms .ui-form-button {
@@ -686,6 +688,9 @@ button.side-button {
 .report-forms .edit-email-template .template-editor {
   margin-top: 12px;
 }
+.report-forms .edit-email-template .template-editor iframe {
+  height: 400px;
+}
 .report-forms .email-keywords table {
   font-size: 0.75em;
 }
@@ -784,6 +789,9 @@ button.side-button {
 .admin-reports.booking-report table {
   width: 100%;
 }
+.admin-reports.booking-report table tr.privileged-member td.member {
+  color: #1e7145;
+}
 .admin-reports.booking-report table tr.is-paid td.payment-indicator span.fa-check {
   display: inline;
 }
@@ -802,7 +810,7 @@ button.side-button {
 .admin-reports.booking-report table tr.status-Confirmed td.status {
   color: #1e7145;
 }
-.admin-reports.booking-report table tr.status-Provisional td.status {
+.admin-reports.booking-report table tr.status-WaitingApproval td.status {
   color: #ee1111;
 }
 .admin-reports.booking-report table tr.status-Cancelled td.status {

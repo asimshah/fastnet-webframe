@@ -25,9 +25,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     };
                     Group noCheckGroup = null;
                     Group bmcMembers = null;
-                    if (para.NoBMCCheckGroup != null)
+                    if (para.NonBMCMembers != null)
                     {
-                        noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NoBMCCheckGroup);
+                        noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NonBMCMembers);
                     }
                     if (para.BMCMembers != null)
                     {

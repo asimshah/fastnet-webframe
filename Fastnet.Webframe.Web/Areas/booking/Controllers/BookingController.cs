@@ -62,10 +62,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("parameters")]
-        public async Task<bookingParameters> GetParameters()
+        public bookingParameters GetParameters()
         {
             bookingParameters pars = Factory.GetBookingParameters();
-            await pars.Load(DataContext);
+            pars.Load(DataContext);
             return pars;
         }
         [HttpGet]
@@ -216,8 +216,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("create/{abodeId}")]
         public async Task<dynamic> MakeBooking(long abodeId, bookingRequest request)
         {
+            
             // default isolation level is Serializable, meaning no one else can do anything
             string reference = null;
+            bool paymentGatewayEnabled = new PaymentGateway().Enabled;
             using (var tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
@@ -257,7 +259,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         // we can make this booking
                         Booking b = new Booking
                         {
-                            Status = bookingStatus.Provisional,
+                            //Status = bookingStatus.WaitingPayment,
                             CreatedOn = BookingGlobals.GetToday(),
                             EntryInformation = null,
                             From = from,// request.fromDate,
@@ -275,7 +277,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             b.AccomodationCollection.Add(a);
                         }
                         ctx.Bookings.Add(b);
-                        EmailHelper.QueueEmail(DataContext, ctx, abodeId, b);
+                        await ctx.SaveChangesAsync();
+                        var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+                        bst.ToNew(b);                        
                         await ctx.SaveChangesAsync();
                         tran.Complete();
                         reference = b.Reference;
@@ -289,8 +293,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     return new { Success = false, Error = xe.Message, Code = "SystemError" };
                 }
             }
-            //MailSender ms = new MailSender();
-            //ms.Start();
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
             return new
             {
                 Success = true,
@@ -310,9 +314,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 using (var ctx = new BookingDataContext())
                 {
                     var today = BookingGlobals.GetToday();
-                    var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.MemberId == member.Id && (x.To >= today))
+                    var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && x.MemberId == member.Id && (x.To >= today))
                         .OrderBy(x => x.Reference).ToArray();
-                    var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                    //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
+                    var data = bookings.Select(x => Factory.GetBooking( x));
                     return new { member = member.Fullname, bookings = data };
                 }
             }

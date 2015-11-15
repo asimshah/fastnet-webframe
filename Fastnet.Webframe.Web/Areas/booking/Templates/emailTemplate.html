@@ -18,7 +18,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <label>Email Body</label>
-                <div class="form-control rich-text" data-bind="richtext: bodyHtml"></div>
+                <div class="form-control rich-text" data-bind="richtext: bodyHtml, richtextOptions: {height: 300, toolbar: 'link | visualblocks code'}"></div>
                 <span class="validationMessage" data-bind="validationMessage: bodyHtml"></span>
             </div>
         </div>
