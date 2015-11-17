@@ -19,13 +19,9 @@ namespace Fastnet.Webframe.BookingData
         FinalReminder,
         CANNotification,
         AutoCancelled,
-        Cancelled
-        //Provisional,
-        //AdminNotificationProvisional,
-        //PaymentReminder,
-        //Confirmed,
-        //EntryCodeNotification,
-        //Cancelled
+        Cancelled,
+        EntryCodeNotification
+
     }
     public enum BookingEmailStatus
     {

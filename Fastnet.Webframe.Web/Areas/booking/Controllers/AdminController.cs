@@ -129,6 +129,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
 
             }
+            StartStandardTasks();
         }
         [HttpPost]
         [Route("update/booking")]
@@ -161,28 +162,6 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 }
             }
         }
-        //[HttpPost]
-        //[Route("update/booking/{id}/status/{status}")]
-        //public void UpdateBooking(long id, bookingStatus status)
-        //{
-        //    long abodeId = 1;
-        //    using (var ctx = new BookingDataContext())
-        //    {
-        //        var m = this.GetCurrentMember();
-        //        var name = m.Fullname;
-        //        var booking = ctx.Bookings.Find(id);
-        //        var today = BookingGlobals.GetToday();
-        //        if (booking.Status != status)
-        //        {
-        //            bookingStatus old = booking.Status;
-        //            booking.Status = status;
-        //            booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
-        //            var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-        //            bst.ChangeState(booking, old);
-        //            ctx.SaveChanges();
-        //        }
-        //    }
-        //}
         [HttpPost]
         [Route("approve/booking/{id}")]
         public void ApproveBooking(long id)
@@ -209,8 +188,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     ctx.SaveChanges();
                 }
             }
-            BookingMailer bm = new BookingMailer();
-            bm.StartAndForget();
+            StartStandardTasks();
+            //BookingMailer bm = new BookingMailer();
+            //bm.StartAndForget();
         }
         [HttpPost]
         [Route("cancel/booking/{id}")]
@@ -233,8 +213,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     ctx.SaveChanges();
                 }
             }
-            BookingMailer bm = new BookingMailer();
-            bm.StartAndForget();
+            StartStandardTasks();
+            //BookingMailer bm = new BookingMailer();
+            //bm.StartAndForget();
         }
         [HttpGet]
         [Route("get/entrycodes")]
@@ -560,9 +541,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpGet]
         [Route("get/emailtemplatelist")]
-        public string[] GetEmailTemplateList()
+        public IEnumerable<string> GetEmailTemplateList()
         {
-            return Enum.GetNames(typeof(BookingEmailTemplates));
+            return Enum.GetNames(typeof(BookingEmailTemplates)).OrderBy(x => x);
         }
         [HttpGet]
         [Route("get/emailtemplate/{template}")]
@@ -596,6 +577,17 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             DateTime today = BookingGlobals.GetToday();
             var blockedItems = ctx.Availablities.ToArray().Where(x => x.Blocked && x.Period.PeriodType == PeriodType.Fixed && (x.Period.GetStartDate() >= today || x.Period.Includes(today)));
             return blockedItems;
+        }
+        private void StartStandardTasks()
+        {
+            TaskBase finalreminders = Factory.GetRemindersTask(true);
+            finalreminders.StartAndForget();
+            TaskBase reminders = Factory.GetRemindersTask();
+            reminders.StartAndForget();
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
+            EntryNotificationTask ent = new EntryNotificationTask();
+            ent.StartAndForget();
         }
     }
 }

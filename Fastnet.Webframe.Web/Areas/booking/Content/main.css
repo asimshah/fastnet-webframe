@@ -664,8 +664,16 @@ button.side-button {
 .report-forms .parameters-form .inner-panel .row:not(:first-child):not(:last-child) {
   border-top: 1px solid #8cbef6;
 }
+.report-forms .parameters-form .inner-panel .form-group-sm {
+  margin-top: 8px;
+}
+.report-forms .parameters-form .inner-panel select {
+  margin-bottom: 4px;
+}
 .report-forms .parameters-form .help-block {
   margin-top: 0;
+  font-style: italic;
+  font-size: 0.75em;
 }
 .report-forms .edit-email-template label {
   font-size: x-small;

@@ -141,11 +141,11 @@ var fastnet;
                                 var mp = new managePricing(_this.app);
                                 mp.start();
                                 break;
-                            case "email-templates":
-                                f.close();
-                                var et = new emailTemplates(_this.app);
-                                et.start();
-                                break;
+                            //case "email-templates":
+                            //    f.close();
+                            //    var et = new emailTemplates(this.app);
+                            //    et.start();
+                            //    break;
                             default:
                                 var ch = booking_1.factory.getCustomAdminIndex();
                                 if (ch != null && ch.handleCommand(f, _this.app, cmd)) {
@@ -198,6 +198,11 @@ var fastnet;
                                 f.close();
                                 var pf = new parametersApp(_this.app);
                                 pf.start();
+                                break;
+                            case "edit-email-templates":
+                                f.close();
+                                var et = new emailTemplates(_this.app);
+                                et.start();
                                 break;
                             default:
                                 forms.messageBox.show("This feature not yet implemented").then(function () { });

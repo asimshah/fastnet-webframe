@@ -247,6 +247,12 @@ namespace Fastnet.Webframe.Web.Controllers
             // pm.ClientDialog = new RegistrationDialogue();
             return View("Index", pm);
         }
+        [AllowAnonymous]
+        [Route("paypal/test")]
+        public ActionResult PaypalTest()
+        {
+            return View();
+        }
         //[AllowAnonymous]
         //[HttpPost]
         //[Route("account/register")]

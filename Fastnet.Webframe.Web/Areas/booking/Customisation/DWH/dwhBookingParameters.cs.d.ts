@@ -5,5 +5,7 @@ declare module server {
 		nonBMCMembers: server.IGroup;
 		privilegedMembers: server.IGroup;
 		shortBookingInterval: number;
+		entryCodeNotificationPeriod: number;
+		entryCodeBridgePeriod: number;
 	}
 }

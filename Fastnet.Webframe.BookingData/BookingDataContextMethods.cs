@@ -52,7 +52,7 @@ namespace Fastnet.Webframe.BookingData
             if (t == null)
             {
                 bodyText = string.Format(@"<div>No {0} email template defined<div>", template.ToString());
-                subjectText = "fred";
+                subjectText = "";
             }
             else
             {
@@ -71,19 +71,5 @@ namespace Fastnet.Webframe.BookingData
             t.SubjectText = subjextText;
             t.BodyText = bodyText;
         }
-        //public void QueueEmail(Booking booking, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
-        //{
-        //    var bem = new BookingEmail
-        //    {
-        //        Booking = booking,
-        //        Template = template,
-        //        UtcDueAt = utcDueAt,
-        //        EmailAddress = emailAddress,
-        //        Subject = subject,
-        //        Body = body,
-        //        Status = BookingEmailStatus.NotSent
-        //    };
-        //    this.Emails.Add(bem);
-        //}
     }
 }

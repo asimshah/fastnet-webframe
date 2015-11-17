@@ -293,8 +293,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     return new { Success = false, Error = xe.Message, Code = "SystemError" };
                 }
             }
-            BookingMailer bm = new BookingMailer();
-            bm.StartAndForget();
+            StartStandardTasks();
             return new
             {
                 Success = true,
@@ -331,17 +330,21 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             Log.Write("Polled received");
             TestTask tt = new TestTask();
             await tt.Start();
-            //int pendingMailCount = 0;
-            //using (var ctx = new BookingDataContext())
-            //{
-            //    pendingMailCount = ctx.CollectPendingMail().Count();
-            //}
-            //if(pendingMailCount > 0)
-            //{
-            //    MailSender ms = new MailSender();
-            //    ms.Start();
-            //}
+            StartStandardTasks();
         }
+
+        private void StartStandardTasks()
+        {
+            TaskBase finalreminders = Factory.GetRemindersTask(true);
+            finalreminders.StartAndForget();
+            TaskBase reminders = Factory.GetRemindersTask();
+            reminders.StartAndForget();
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
+            EntryNotificationTask ent = new EntryNotificationTask();
+            ent.StartAndForget();
+        }
+
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
         {
             bookingChoice result = null;

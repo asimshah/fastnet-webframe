@@ -12,5 +12,7 @@ namespace Fastnet.Webframe.BookingData
         public string BMCMembers { get; set; }
         public string PrivilegedMembers { get; set; }
         public int ShortBookingInterval { get; set; }
+        public int EntryCodeNotificationPeriod { get; set; }
+        public int EntryCodeBridgePeriod { get; set; }
     }
 }

@@ -89,5 +89,22 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new ApplicationException(string.Format("No BookingStateTransitionBase type is available for factory", FactoryName));
             }
         }
+        public static TaskBase GetRemindersTask(bool final = false)
+        {
+            switch (FactoryName)
+            {
+                case FactoryName.DonWhillansHut:
+                    if (final)
+                    {
+                        return new DWHFinalReminders();
+                    }
+                    else
+                    {
+                        return new DWHReminders();
+                    }
+                default:
+                    throw new ApplicationException(string.Format("No Reminder Task is available for factory", FactoryName));
+            }
+        }
     }
 }

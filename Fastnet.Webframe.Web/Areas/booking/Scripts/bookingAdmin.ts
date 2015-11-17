@@ -124,11 +124,11 @@ module fastnet {
                                 var mp = new managePricing(this.app);
                                 mp.start();
                                 break;
-                            case "email-templates":
-                                f.close();
-                                var et = new emailTemplates(this.app);
-                                et.start();
-                                break;
+                            //case "email-templates":
+                            //    f.close();
+                            //    var et = new emailTemplates(this.app);
+                            //    et.start();
+                            //    break;
                             default:
                                 var ch = factory.getCustomAdminIndex();
                                 if (ch != null && ch.handleCommand(f, this.app, cmd)) {
@@ -176,6 +176,11 @@ module fastnet {
                                 f.close();
                                 var pf = new parametersApp(this.app);
                                 pf.start();
+                                break;
+                            case "edit-email-templates":
+                                f.close();
+                                var et = new emailTemplates(this.app);
+                                et.start();
                                 break;
                             default:
                                 forms.messageBox.show("This feature not yet implemented").then(() => { });

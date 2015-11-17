@@ -16,25 +16,47 @@
                 <div class="col-xs-12">
                     <div class="form-group-sm">
                         <label>
+                            Entry Code Notification Period
+                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeNotificationPeriod" />
+                        </label>
+                        <span class="help-block">Enter a number of days. Entry code notification is sent within this period of a confirmed booking start date.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Entry Code Bridge Period
+                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeBridgePeriod" />
+                        </label>
+                        <span class="help-block">Enter a number of days. Both current and previous codes are sent for this number of days after a code changes.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
                             Terms and Conditions Url
                             <input type="text" class="form-control" data-bind="value: termsAndConditionsUrl" />
                         </label>
-                        <span class="help-block">Enter the internal url of the T&amp;C's page, i.e. page/n.</span>
+                        <span class="help-block">Enter the internal url of the T&amp;C's page, e.g. page/n.</span>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xs-8">
                     <div class="form-group-sm">
-                        <label for="groupList">BMC check bypass group</label>
+                        <label for="groupList">Privileged Members Group</label>
                         <select id="groupList" class="selectpicker form-control" data-bind="options: availableGroups,
-                optionsText: 'Name', value: noBMCCheckGroup,  optionsCaption: 'Select a group ...', event: {change: selectionChanged}"></select>
-                        <span class="help-block">Online verification of BMC Membership will not occur for members of this group</span>
+                optionsText: 'Name', value: privilegedMembers,  optionsCaption: 'Select a group ...', event: {change: selectionChanged}"></select>
+                        <span class="help-block">Booking for members of this group are confirmed whether paid or not.</span>
                     </div>
                 </div>
                 <div class="col-xs-4">
                     <div class="form-group-sm">
-                        <button class="btn btn-danger side-button" data-bind="click: clearNoBMCCheckGroup()">Clear</button>
+                        <button class="btn btn-danger side-button" data-bind="click: clearPrivilegedMembers()">Clear</button>
                     </div>
                 </div>
             </div>
