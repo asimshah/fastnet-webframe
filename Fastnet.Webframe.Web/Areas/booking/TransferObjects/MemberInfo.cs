@@ -10,8 +10,11 @@ namespace Fastnet.Webframe.Web.Areas.booking
     public enum BookingPermissions
     {
         Disallowed,
-        WithoutConfirmation,
-        WithConfirmation
+        StandardBookingAllowed,
+        ShortTermBookingAllowed,
+        ShortTermBookingWithoutPaymentAllowed
+        //WithoutConfirmation,
+        //WithConfirmation
     }
     public class MemberInfo
     {
@@ -24,7 +27,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public string OnBehalfOfMemberId { get; set; }
         public virtual Task UpdatePermissions()
         {
-            BookingPermission = BookingPermissions.WithConfirmation;
+            BookingPermission = BookingPermissions.StandardBookingAllowed;
             Explanation = string.Empty;
             return Task.FromResult(0);
         }

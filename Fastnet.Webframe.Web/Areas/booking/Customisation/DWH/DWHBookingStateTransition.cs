@@ -119,6 +119,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     booking.Status = bookingStatus.WaitingPayment;
                 }
             }
+            booking.StatusLastChanged = DateTime.Now;
             QueueEmails(booking, null);
         }
 

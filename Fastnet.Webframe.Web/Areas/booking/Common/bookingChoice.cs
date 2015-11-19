@@ -34,5 +34,6 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public bookingChoice choice { get; set; }
         public bool under18spresent { get; set; }
         public bool isPaid { get; set; }
+        public string phoneNumber { get; set; }
     }
 }

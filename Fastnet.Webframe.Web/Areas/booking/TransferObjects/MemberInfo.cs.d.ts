@@ -1,8 +1,9 @@
 ﻿declare module server {
 	const enum BookingPermissions {
 		Disallowed,
-		WithoutConfirmation,
-		WithConfirmation,
+		StandardBookingAllowed,
+		ShortTermBookingAllowed,
+		ShortTermBookingWithoutPaymentAllowed,
 	}
 	interface MemberInfo {
 		Anonymous: boolean;

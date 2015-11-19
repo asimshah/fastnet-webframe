@@ -36,6 +36,7 @@
             public startDate: Date;
             public endDate: Date;
             public numberOfPeople: number;
+            public under18Present: boolean;
             public mobileNumber: string;
             public shortTermBookingAllowed: boolean;
             public shortBookingInterval: number;
@@ -57,6 +58,7 @@
             public startDate: KnockoutObservable<Date>;
             public endDate: KnockoutObservable<Date>;
             public numberOfPeople: KnockoutObservable<number>;
+            public under18Present: KnockoutObservable<boolean>;
             public helpText: any;// KnockoutComputed<string>;
             public mobileNumber: KnockoutObservable<string>;
             public shortTermBookingAllowed: boolean;
@@ -67,19 +69,28 @@
                 this.today = m.today;
                 this.shortBookingInterval = m.shortBookingInterval;
                 this.shortTermBookingAllowed = m.shortTermBookingAllowed;
-                if (!this.shortTermBookingAllowed) {
-                    var minStart = this.today.add(this.shortBookingInterval, 'd');
-                    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
-                    this.startDate = ko.observable<Date>(m.startDate).extend({
-                        required: { message: "A start date is required" },
-                        dateGreaterThan: { params: minStart,  date: minStart, message: msg }
-                    });
-                } else {
-                    this.startDate = ko.observable<Date>(m.startDate).extend({
-                        required: { message: "An arrival date is required" },
-                    });
-                }
-
+                //if (!this.shortTermBookingAllowed) {
+                //    var minStart = this.today.add(this.shortBookingInterval, 'd');
+                //    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
+                //    this.startDate = ko.observable<Date>(m.startDate).extend({
+                //        required: { message: "A start date is required" },
+                //        dateGreaterThan: { params: minStart,  date: minStart, message: msg }
+                //    });
+                //} else {
+                //    this.startDate = ko.observable<Date>(m.startDate).extend({
+                //        required: { message: "An arrival date is required" },
+                //    });
+                //}
+                this.under18Present = ko.observable(false);
+                this.startDate = ko.observable<Date>(m.startDate);
+                this.under18Present.subscribe((val) => {
+                    ko.validation.validateObservable(this.startDate);
+                });
+                this.startDate.extend({
+                    required: { message: "An arrival date is required" },
+                    //bookingStartDate: { today: this.today, shortBookingInterval: this.shortBookingInterval, shortTermBookingAllowed: this.shortTermBookingAllowed, under18Present: this.under18Present }
+                    bookingStartDate: { today: this.today, todayString: str.toDateString(this.today), shortBookingInterval: this.shortBookingInterval, shortTermBookingAllowed: this.shortTermBookingAllowed, under18Present: this.under18Present }
+                });
                 this.endDate = ko.observable<Date>(m.endDate).extend({
                     required: { message: "A departure date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
@@ -103,6 +114,7 @@
                         message: str.format("The maximum number of people that can be acommodated is {0}", opts.maximumNumberOfPeople)
                     }
                 });
+
                 this.mobileNumber = ko.observable(m.mobileNumber).extend({
                     required: { message: "Please provide a mobile number" },
                     phoneNumber: true
@@ -128,6 +140,7 @@
                 this.endDate.isModified(false);
                 this.numberOfPeople(null);
                 this.numberOfPeople.isModified(false);
+                this.under18Present(false);
             }
             public getHelpText(): string {
                 var sdm = this.toMoment(this.startDate());
@@ -172,11 +185,13 @@
             public fromDate: string;
             public toDate: string;
             public numberOfPeople: number;
-            constructor(m: request_step2, fromDate: string, toDate: string, numberOfPeople: number) {
+            public under18Present: boolean;
+            constructor(m: request_step2, fromDate: string, toDate: string, numberOfPeople: number, under18Present: boolean) {
                 super();
                 this.fromDate = fromDate;
                 this.toDate = toDate;
                 this.numberOfPeople = numberOfPeople;
+                this.under18Present = under18Present;
                 this.choices = ko.observableArray<observableBookingChoice>();
                 m.choices.forEach((o, i, arr) => {
                     this.choices.push(new observableBookingChoice(o));
@@ -195,7 +210,7 @@
             public fromDate: string;
             public toDate: string;
             public choice: server.bookingChoice;
-            //public phoneNumber: string;
+            public phoneNumber: string;
             public under18Present: boolean;
             public tcLinkAvailable: boolean;
             public tcLink: string;
@@ -205,12 +220,15 @@
             public isShortTermBooking: boolean;
             constructor(fromDate: string, toDate: string, choice: server.bookingChoice,
                 tcLink: string, isShortTermBooking: boolean,
-                shortTermBookingInterval: number, paymentGatewayAvailable: boolean) {
+                shortTermBookingInterval: number, under18Present: boolean,
+                phoneNumber: string,
+                paymentGatewayAvailable: boolean) {
                 super();
                 this.fromDate = fromDate;
                 this.toDate = toDate;
                 this.choice = choice;
-                //this.phoneNumber = phoneNumber;
+                this.under18Present = under18Present;
+                this.phoneNumber = phoneNumber;
                 this.tcLinkAvailable = tcLink !== null;
                 this.tcLink = tcLink;
                 this.isShortTermBooking = isShortTermBooking;
@@ -222,8 +240,8 @@
             public fromDate: string;
             public toDate: string;
             public choice: server.bookingChoice;
-            //public phoneNumber: KnockoutObservable<string>;
-            public under18Present: KnockoutObservable<boolean>;
+            public phoneNumber: string;
+            public under18Present: boolean;// KnockoutObservable<boolean>;
             public tcLinkAvailable: boolean;
             public tcLink: string;
             public tcAgreed: KnockoutObservable<boolean>;
@@ -237,8 +255,8 @@
                 this.toDate = str.toMoment(m.toDate).format("ddd DDMMMYYYY");// m.toDate;
                 this.choice = m.choice;
                 this.choice.formattedCost = accounting.formatMoney(this.choice.totalCost, "£", 0, ",", ".", "%s%v");
-                //this.phoneNumber = ko.observable(m.phoneNumber);
-                this.under18Present = ko.observable(false);
+                this.phoneNumber = m.phoneNumber;
+                this.under18Present = m.under18Present;// ko.observable(false);
                 this.tcLinkAvailable = m.tcLinkAvailable;
                 this.tcLink = m.tcLink;
                 this.tcAgreed = ko.observable(false).extend({

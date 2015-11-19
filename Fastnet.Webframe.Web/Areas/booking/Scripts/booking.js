@@ -277,8 +277,8 @@ var fastnet;
                             var html = str.format("<div class='booking-disallowed'>Booking is currently unavailable:<div class='explanation'>{0}</div></div>", this.currentMember.Explanation);
                             $(".booking-interaction").empty().append($(html));
                             break;
-                        case 2 /* WithConfirmation */:
-                        case 1 /* WithoutConfirmation */:
+                        //case server.BookingPermissions.WithConfirmation:
+                        //case server.BookingPermissions.WithoutConfirmation:
                         default:
                             this.startBooking();
                             break;
@@ -411,14 +411,11 @@ var fastnet;
                     maxDate: app.calendarPeriod.end,
                     beforeShow: this.beforeShowingDatePicker,
                     beforeShowDay: function (d) { return _this.beforeShowDay(d); },
-                    //onChangeMonthYear: (m, y) => {
-                    //    //debug.print("onChangeMonthYear: month {0} year {1}", m, y);
-                    //    //app.calendarOnChangeMonth(m, y);
-                    //},
-                    // onSelect: this.onSelectDate,
                     dateFormat: 'dMyy'
                 };
-                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable;
+                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
+                    || this.bookingApp.currentMember.BookingPermission === 2 /* ShortTermBookingAllowed */
+                    || this.bookingApp.currentMember.BookingPermission === 3 /* ShortTermBookingWithoutPaymentAllowed */;
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var today = str.toMoment(this.bookingApp.bookingParameters.today);
                 this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
@@ -489,9 +486,10 @@ var fastnet;
                 var sd = str.toDateString(this.step1_vm.startDate());
                 var ed = str.toDateString(this.step1_vm.endDate());
                 var np = parseInt(this.step1_vm.numberOfPeople());
+                var under18Present = this.step1_vm.under18Present();
                 this.step2_model = new booking.request_step2();
                 this.step2_model.choices = choices;
-                this.step2_vm = new booking.observableRequest_step2(this.step2_model, sd, ed, np);
+                this.step2_vm = new booking.observableRequest_step2(this.step2_model, sd, ed, np, under18Present);
                 var buttons = [
                     {
                         text: "Back",
@@ -538,10 +536,12 @@ var fastnet;
                 //var sd: string = <any>this.step1_vm.startDate();
                 //var ed: string = <any>this.step1_vm.endDate();
                 var np = parseInt(this.step1_vm.numberOfPeople());
+                var under18Present = this.step1_vm.under18Present();
+                var phoneNumber = this.step1_vm.mobileNumber();
                 var daysToStart = str.toMoment(sd).diff(td, 'd');
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var isShortTerm = daysToStart < shortBookingInterval;
-                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, this.bookingApp.bookingParameters.paymentGatewayAvailable);
+                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, under18Present, phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable);
                 this.step3_vm = new booking.observableRequest_step3(this.step3_model);
                 var buttons = [
                     {
@@ -597,7 +597,8 @@ var fastnet;
                     fromDate: str.toDateString(model.fromDate),
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present,
-                    isPaid: false
+                    isPaid: false,
+                    phoneNumber: model.phoneNumber
                 };
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
                 var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);

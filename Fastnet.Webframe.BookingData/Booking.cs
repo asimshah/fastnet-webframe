@@ -22,6 +22,7 @@ namespace Fastnet.Webframe.BookingData
         public DateTime From { get; set; }
         public DateTime To { get; set; } // **NB** From/To are inclusive dates, i.e. for a one day booking To will equal From
         public DateTime CreatedOn { get; set; }
+        public DateTime StatusLastChanged { get; set; }
         public Decimal TotalCost { get; set; }
         public int PartySize { get; set; }
         public bool IsPaid { get; set; }

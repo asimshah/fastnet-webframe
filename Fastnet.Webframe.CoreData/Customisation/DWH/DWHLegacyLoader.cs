@@ -768,6 +768,7 @@ namespace Fastnet.Webframe.CoreData
                             }
                             break;
                     }
+                    b.StatusLastChanged = DateTime.Now;
                     b.AddHistory("System", "Created during conversion");
                     CreateBookings(bctx, b, lBooking, member);
                 }

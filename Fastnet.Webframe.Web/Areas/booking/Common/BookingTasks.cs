@@ -81,14 +81,14 @@ namespace Fastnet.Webframe.Web.Areas.booking
                             await ms.Start();
                             mail.Status = BookingEmailStatus.Sent;
                             mail.UtcSentAt = DateTime.UtcNow;
-                            booking.AddHistory("System", string.Format("Email (using the {0} template) sent", mail.Template.ToString()));
+                            booking.AddHistory("System", string.Format("Email (using the {0} template) sent to {1}", mail.Template.ToString(), mail.EmailAddress));
                         }
                         catch (Exception xe)
                         {
                             // mail sending failed
                             mail.FailureDescription = xe.Message;
                             mail.UtcSentAt = null;
-                            booking.AddHistory("System", string.Format("Email (using the {0} template) failed: {1}", mail.Template.ToString(), mail.FailureDescription));
+                            booking.AddHistory("System", string.Format("Email (using the {0} template) to {1} failed: {2}", mail.Template.ToString(), mail.EmailAddress, mail.FailureDescription));
                             if (mail.RetryCountToDate > ApplicationSettings.Key("Booking:MailRetryCount", 3))
                             {
                                 mail.Status = BookingEmailStatus.Failed;

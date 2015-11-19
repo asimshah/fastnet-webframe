@@ -292,8 +292,8 @@ module fastnet {
                             var html = str.format("<div class='booking-disallowed'>Booking is currently unavailable:<div class='explanation'>{0}</div></div>", this.currentMember.Explanation);
                             $(".booking-interaction").empty().append($(html));
                             break;
-                        case server.BookingPermissions.WithConfirmation:
-                        case server.BookingPermissions.WithoutConfirmation:
+                        //case server.BookingPermissions.WithConfirmation:
+                        //case server.BookingPermissions.WithoutConfirmation:
                         default:
                             this.startBooking();
                             break;
@@ -429,14 +429,11 @@ module fastnet {
                     maxDate: app.calendarPeriod.end,
                     beforeShow: this.beforeShowingDatePicker,
                     beforeShowDay: (d) => { return this.beforeShowDay(d); },
-                    //onChangeMonthYear: (m, y) => {
-                    //    //debug.print("onChangeMonthYear: month {0} year {1}", m, y);
-                    //    //app.calendarOnChangeMonth(m, y);
-                    //},
-                    // onSelect: this.onSelectDate,
                     dateFormat: 'dMyy'
                 };
-                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable;
+                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
+                    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingAllowed
+                    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var today = str.toMoment(this.bookingApp.bookingParameters.today);
                 this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
@@ -505,10 +502,11 @@ module fastnet {
                 var sd: string = str.toDateString(this.step1_vm.startDate());
                 var ed: string = str.toDateString(this.step1_vm.endDate());
                 var np = parseInt(<any>this.step1_vm.numberOfPeople());
+                var under18Present = this.step1_vm.under18Present();
                 this.step2_model = new request_step2();
                 this.step2_model.choices = choices;
 
-                this.step2_vm = new observableRequest_step2(this.step2_model, sd, ed, np);
+                this.step2_vm = new observableRequest_step2(this.step2_model, sd, ed, np, under18Present);
                 var buttons: forms.formButton[] = [
                     {
                         text: "Back",
@@ -554,11 +552,14 @@ module fastnet {
                 //var sd: string = <any>this.step1_vm.startDate();
                 //var ed: string = <any>this.step1_vm.endDate();
                 var np = parseInt(<any>this.step1_vm.numberOfPeople());
+                var under18Present = this.step1_vm.under18Present();
+                var phoneNumber = this.step1_vm.mobileNumber();
                 var daysToStart = str.toMoment(sd).diff(td, 'd');
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var isShortTerm = daysToStart < shortBookingInterval;
                 this.step3_model = new request_step3(sd, ed, choice,
-                    this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, this.bookingApp.bookingParameters.paymentGatewayAvailable);
+                    this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, under18Present,
+                    phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable);
                 this.step3_vm = new observableRequest_step3(this.step3_model);
                 var buttons: forms.formButton[] = [
                     {
@@ -615,7 +616,8 @@ module fastnet {
                     fromDate: str.toDateString(model.fromDate),
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present,
-                    isPaid: false
+                    isPaid: false,
+                    phoneNumber: model.phoneNumber
                 };
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
                 var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);

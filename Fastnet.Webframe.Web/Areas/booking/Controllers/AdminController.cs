@@ -123,6 +123,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                     if (booking.Status != oldStatus)
                     {
+                        booking.StatusLastChanged = DateTime.Now;
                         bst.ChangeState(booking, oldStatus);
                     }
                     ctx.SaveChanges();
@@ -182,6 +183,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     bool isPrivileged = bookingMember.IsMemberOf(privileged);
                     bookingStatus old = booking.Status;
                     booking.Status = isPrivileged ? bookingStatus.Confirmed : bookingStatus.WaitingPayment;
+                    booking.StatusLastChanged = DateTime.Now;
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                     bst.ChangeState(booking, old);
@@ -207,6 +209,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 {
                     bookingStatus old = booking.Status;
                     booking.Status = bookingStatus.Cancelled;
+                    booking.StatusLastChanged = DateTime.Now;
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                     bst.ChangeState(booking, old);
@@ -570,6 +573,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 BookingEmailTemplates t = (BookingEmailTemplates)Enum.Parse(typeof(BookingEmailTemplates), template);
                 ctx.SaveEmailTemplate(t, subjectText, bodyText);
                 ctx.SaveChanges();
+                EmailHelper.ClearEmailTemplateCache();
             }
         }            
         private static IEnumerable<Availability> GetBlockedItems(BookingDataContext ctx)

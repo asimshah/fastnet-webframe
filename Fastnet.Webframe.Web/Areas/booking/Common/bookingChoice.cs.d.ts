@@ -24,5 +24,6 @@ declare module server {
 		choice: server.bookingChoice;
 		under18spresent: boolean;
 		isPaid: boolean;
+		phoneNumber: string;
 	}
 }

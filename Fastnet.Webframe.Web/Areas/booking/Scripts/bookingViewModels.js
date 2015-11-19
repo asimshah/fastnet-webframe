@@ -74,19 +74,28 @@ var fastnet;
                 this.today = m.today;
                 this.shortBookingInterval = m.shortBookingInterval;
                 this.shortTermBookingAllowed = m.shortTermBookingAllowed;
-                if (!this.shortTermBookingAllowed) {
-                    var minStart = this.today.add(this.shortBookingInterval, 'd');
-                    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
-                    this.startDate = ko.observable(m.startDate).extend({
-                        required: { message: "A start date is required" },
-                        dateGreaterThan: { params: minStart, date: minStart, message: msg }
-                    });
-                }
-                else {
-                    this.startDate = ko.observable(m.startDate).extend({
-                        required: { message: "An arrival date is required" },
-                    });
-                }
+                //if (!this.shortTermBookingAllowed) {
+                //    var minStart = this.today.add(this.shortBookingInterval, 'd');
+                //    var msg = str.format("Bookings need to be at least {0} days in advance, i.e. from {1}", this.shortBookingInterval, str.toDateString(minStart));
+                //    this.startDate = ko.observable<Date>(m.startDate).extend({
+                //        required: { message: "A start date is required" },
+                //        dateGreaterThan: { params: minStart,  date: minStart, message: msg }
+                //    });
+                //} else {
+                //    this.startDate = ko.observable<Date>(m.startDate).extend({
+                //        required: { message: "An arrival date is required" },
+                //    });
+                //}
+                this.under18Present = ko.observable(false);
+                this.startDate = ko.observable(m.startDate);
+                this.under18Present.subscribe(function (val) {
+                    ko.validation.validateObservable(_this.startDate);
+                });
+                this.startDate.extend({
+                    required: { message: "An arrival date is required" },
+                    //bookingStartDate: { today: this.today, shortBookingInterval: this.shortBookingInterval, shortTermBookingAllowed: this.shortTermBookingAllowed, under18Present: this.under18Present }
+                    bookingStartDate: { today: this.today, todayString: str.toDateString(this.today), shortBookingInterval: this.shortBookingInterval, shortTermBookingAllowed: this.shortTermBookingAllowed, under18Present: this.under18Present }
+                });
                 this.endDate = ko.observable(m.endDate).extend({
                     required: { message: "A departure date is required" },
                     bookingEndDate: { startDate: this.startDate, fred: "asim" }
@@ -134,6 +143,7 @@ var fastnet;
                 this.endDate.isModified(false);
                 this.numberOfPeople(null);
                 this.numberOfPeople.isModified(false);
+                this.under18Present(false);
             };
             observableRequest_step1.prototype.getHelpText = function () {
                 var sdm = this.toMoment(this.startDate());
@@ -182,12 +192,13 @@ var fastnet;
         booking.observableBookingChoice = observableBookingChoice;
         var observableRequest_step2 = (function (_super) {
             __extends(observableRequest_step2, _super);
-            function observableRequest_step2(m, fromDate, toDate, numberOfPeople) {
+            function observableRequest_step2(m, fromDate, toDate, numberOfPeople, under18Present) {
                 var _this = this;
                 _super.call(this);
                 this.fromDate = fromDate;
                 this.toDate = toDate;
                 this.numberOfPeople = numberOfPeople;
+                this.under18Present = under18Present;
                 this.choices = ko.observableArray();
                 m.choices.forEach(function (o, i, arr) {
                     _this.choices.push(new observableBookingChoice(o));
@@ -209,12 +220,13 @@ var fastnet;
         booking.step3Models = step3Models;
         var request_step3 = (function (_super) {
             __extends(request_step3, _super);
-            function request_step3(fromDate, toDate, choice, tcLink, isShortTermBooking, shortTermBookingInterval, paymentGatewayAvailable) {
+            function request_step3(fromDate, toDate, choice, tcLink, isShortTermBooking, shortTermBookingInterval, under18Present, phoneNumber, paymentGatewayAvailable) {
                 _super.call(this);
                 this.fromDate = fromDate;
                 this.toDate = toDate;
                 this.choice = choice;
-                //this.phoneNumber = phoneNumber;
+                this.under18Present = under18Present;
+                this.phoneNumber = phoneNumber;
                 this.tcLinkAvailable = tcLink !== null;
                 this.tcLink = tcLink;
                 this.isShortTermBooking = isShortTermBooking;
@@ -232,8 +244,8 @@ var fastnet;
                 this.toDate = str.toMoment(m.toDate).format("ddd DDMMMYYYY"); // m.toDate;
                 this.choice = m.choice;
                 this.choice.formattedCost = accounting.formatMoney(this.choice.totalCost, "£", 0, ",", ".", "%s%v");
-                //this.phoneNumber = ko.observable(m.phoneNumber);
-                this.under18Present = ko.observable(false);
+                this.phoneNumber = m.phoneNumber;
+                this.under18Present = m.under18Present; // ko.observable(false);
                 this.tcLinkAvailable = m.tcLinkAvailable;
                 this.tcLink = m.tcLink;
                 this.tcAgreed = ko.observable(false).extend({

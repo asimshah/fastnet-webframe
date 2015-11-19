@@ -47,13 +47,30 @@
                 var diff = thisDate.diff(refDate, 'd');
                 return diff >= 0;
             }
+            public static validateBookingStartDate: forms.knockoutValidator = function (val, params): boolean {
+                if (h$.isNullOrUndefined(val)) {
+                    return true;
+                }
+                var shortTermBookingAllowed: boolean = params.shortTermBookingAllowed;
+                var under18Present = ko.unwrap(params.under18Present);
+                var today = moment(params.today);
+                var minStart = today.add(params.shortBookingInterval, 'd');
+                var startMoment = moment(val);
+                if ((under18Present || !shortTermBookingAllowed) && startMoment < minStart) {
+                    var fmt = under18Present ? "When any under 18s are present, bookings need to be at least {0} days in advance, i.e. from {1}" : "Bookings need to be at least {0} days in advance, i.e. from {1}";
+                    this.message = str.format(fmt, params.shortBookingInterval, str.toDateString(minStart));
+                    return false;
+                } else {
+                    return true;
+                }
+            }
             public static validateBookingEndDate: forms.knockoutValidator = function (val, params): boolean {
                 if (h$.isNullOrUndefined(val)) {
                     return true;
                 }
                 var startDate = ko.unwrap(params.startDate);
                 if (h$.isNullOrUndefined(startDate)) {
-                    this.message = "No end date is valid without a start date";
+                    this.message = "No departure date is valid without an arrival date";
                     return false;
                 }
                 var startMoment = moment(startDate);
@@ -62,13 +79,14 @@
                 if (d > 0) {
                     return true;
                 } else {
-                    this.message = "End date must be after start date";
+                    this.message = "Departure date must be after the arrival date";
                     return false;
                 }
             }
             public static GetValidators() {
                 var rules: any[] = [];
-                rules.push({ name: "bookingEndDate", async: false, validator: bookingAppValidations.validateBookingEndDate, message: "This end date is not valid" });
+                rules.push({ name: "bookingStartDate", async: false, validator: bookingAppValidations.validateBookingStartDate, message: "This arrival date is not valid" });
+                rules.push({ name: "bookingEndDate", async: false, validator: bookingAppValidations.validateBookingEndDate, message: "This departure date is not valid" });
                 rules.push({ name: "dateGreaterThan", async: false, validator: bookingAppValidations.validateDateGreaterThan, message: "This date is not valid" });
                 //rules.push({ name: "bookingEndDate2", async: true, validator: bookingAppValidations.validateBookingEndDate2, message: "This end date is not valid" });
                 return rules;

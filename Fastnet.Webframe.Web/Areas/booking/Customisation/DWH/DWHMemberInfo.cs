@@ -18,38 +18,43 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 var para = bctx.Parameters.OfType<DWHParameter>().Single();
                 using (CoreDataReadOnly core = new CoreDataReadOnly())
                 {
-                    Func<string, string> formatExplanation = (text) =>
-                    {
-                        string fmt = "<span>Booking is restricted to BMC Members. " + text + " Please contact the <a href='mailto://{0}'>Booking Secretary</a> to update our records.</span>";
-                        return string.Format(fmt, Globals.GetBookingSecretaryEmailAddress());
-                    };
-                    Group noCheckGroup = null;
-                    Group bmcMembers = null;
-                    if (para.NonBMCMembers != null)
-                    {
-                        noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NonBMCMembers);
-                    }
-                    if (para.BMCMembers != null)
-                    {
-                        bmcMembers = core.Groups.SingleOrDefault(x => x.Name == para.BMCMembers);
-                    }
+                    //Func<string, string> formatExplanation = (text) =>
+                    //{
+                    //    string fmt = "<span>Booking is restricted to BMC Members. " + text + " Please contact the <a href='mailto://{0}'>Booking Secretary</a> to update our records.</span>";
+                    //    return string.Format(fmt, Globals.GetBookingSecretaryEmailAddress());
+                    //};
+                    Group privileged = core.Groups.SingleOrDefault(x => x.Name == para.PrivilegedMembers);
+                    //Group noCheckGroup = null;
+                    //Group bmcMembers = null;
+                    //if (para.NonBMCMembers != null)
+                    //{
+                    //    noCheckGroup = core.Groups.SingleOrDefault(x => x.Name == para.NonBMCMembers);
+                    //}
+                    //if (para.BMCMembers != null)
+                    //{
+                    //    bmcMembers = core.Groups.SingleOrDefault(x => x.Name == para.BMCMembers);
+                    //}
                     DWHMember member = core.Members.OfType<DWHMember>().Single(x => x.Id == MemberId);
                     //if(noCheckGroup != null && member.IsMemberOf(noCheckGroup)) {
                     //    BookingDisallowed = false;
                     //}
                     //else
                     //{
-                    BookingPermission = BookingPermissions.WithConfirmation;
-
-                    if (member.IsMemberOf(bmcMembers) || member.IsMemberOf(noCheckGroup))
+                    if(member.IsMemberOf(privileged))
                     {
-                        BookingPermission = BookingPermissions.WithConfirmation;
+                        BookingPermission = BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
                     }
+                    //BookingPermission = BookingPermissions.WithConfirmation;
 
-                    else
-                    {
-                        Explanation = formatExplanation("You are not a member of the BMC");
-                    }
+                    //if (member.IsMemberOf(bmcMembers) || member.IsMemberOf(noCheckGroup))
+                    //{
+                    //    BookingPermission = BookingPermissions.WithConfirmation;
+                    //}
+
+                    //else
+                    //{
+                    //    Explanation = formatExplanation("You are not a member of the BMC");
+                    //}
                 }
             }
         }

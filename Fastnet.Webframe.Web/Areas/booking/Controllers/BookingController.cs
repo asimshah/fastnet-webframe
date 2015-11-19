@@ -56,6 +56,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 else
                 {
                     mi.UpdatePermissions();
+                    //
+                    //mi.BookingPermission = BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
                 }
                 return mi;
             }
@@ -272,6 +274,12 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             Under18sInParty = request.under18spresent,
                             PartySize = request.choice.partySize
                         };
+                        if(request.phoneNumber != this.GetCurrentMember().PhoneNumber)
+                        {
+                            MemberBase m = this.GetCurrentMember();
+                            m.PhoneNumber = request.phoneNumber;
+                            await DataContext.SaveChangesAsync();
+                        }
                         foreach(var a in toBeBooked)
                         {
                             b.AccomodationCollection.Add(a);
