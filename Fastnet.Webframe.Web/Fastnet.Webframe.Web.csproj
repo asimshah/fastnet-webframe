@@ -1489,6 +1489,7 @@
     <Content Include="Templates\Forms\Form.html" />
     <Content Include="Templates\Forms\ModalForm.html" />
     <Content Include="Templates\Forms\Account\RegistrationConfirmation.html" />
+    <Content Include="test.html" />
     <Content Include="webframelogo-16.16.ico" />
     <Content Include="Content\Main\main.less" />
     <Content Include="Content\Main\constants.less" />
@@ -1779,7 +1780,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

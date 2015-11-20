@@ -51,7 +51,8 @@ namespace Fastnet.Webframe.BookingData
             var t = this.EmailTemplates.SingleOrDefault(x => x.Template == template);
             if (t == null)
             {
-                bodyText = string.Format(@"<div>No {0} email template defined<div>", template.ToString());
+                bodyText = string.Format(@"<div style='margin-bottom: 4px;'>No {0} email template defined</div>", template.ToString());
+                bodyText += GetKeywordBody();
                 subjectText = "";
             }
             else
@@ -70,6 +71,70 @@ namespace Fastnet.Webframe.BookingData
             }
             t.SubjectText = subjextText;
             t.BodyText = bodyText;
+        }
+        private string GetKeywordBody()
+        {
+            string html =
+            @"<div>Current key word values are:</div>
+<table style='margin: 8px;'>
+    <tr>
+        <td>hutName</td>
+        <td>{{hutName}}</td>
+    </tr>
+    <tr>
+        <td>bookingSecretaryEmailAddress</td>
+        <td>{{bookingSecretaryEmailAddress}}</td>
+    </tr>
+    <tr>
+        <td>memberName</td>
+        <td>{{memberName}}</td>
+    </tr>
+    <tr>
+        <td>memberEmailAddress</td>
+        <td>{{memberEmailAddress}}</td>
+    </tr>
+    <tr>
+        <td>memberPhoneNumber</td>
+        <td>{{memberPhoneNumber}}</td>
+    </tr>
+    <tr>
+        <td>reference</td>
+        <td>{{reference}}</td>
+    </tr>
+    <tr>
+        <td>from</td>
+        <td>{{from}}</td>
+    </tr>
+    <tr>
+        <td>to</td>
+        <td>{{to}}</td>
+    </tr>
+    <tr>
+        <td>numberOfNights</td>
+        <td>{{numberOfNights}}</td>
+    </tr>
+    <tr>
+        <td>description</td>
+        <td>{{description}}</td>
+    </tr>
+    <tr>
+        <td>partySize</td>
+        <td>{{partySize}}</td>
+    </tr>
+    <tr>
+        <td>bookedOn</td>
+        <td>{{bookedOn}}</td>
+    </tr>
+    <tr>
+        <td>cost</td>
+        <td>{{cost}}</td>
+    </tr>
+    <tr>
+        <td>entryCode</td>
+        <td>{{entryCode}}</td>
+    </tr>
+</table>";
+            return html;
         }
     }
 }

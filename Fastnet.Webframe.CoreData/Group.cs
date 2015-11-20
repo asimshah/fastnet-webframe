@@ -196,9 +196,12 @@ namespace Fastnet.Webframe.CoreData
             addParentName(fragments, this);
             return string.Join("/", fragments.ToArray().Reverse());
         }
-        private static Group GetSystemGroup(SystemGroups sg)
+        public static Group GetSystemGroup(SystemGroups sg, CoreDataContext ctx = null)
         {
-            CoreDataContext ctx = Core.GetDataContext();
+            if (ctx == null)
+            {
+                ctx = Core.GetDataContext();
+            }
             return ctx.Groups.ToArray().Single(x => x.Name == sg.ToString() && x.Type.HasFlag(GroupTypes.System));
         }
     }

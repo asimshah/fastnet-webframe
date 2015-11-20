@@ -233,9 +233,29 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         public async Task<HttpResponseMessage> GetMailHistory()
         {
             var ctx = ((IObjectContextAdapter)DataContext).ObjectContext;
-            var data = await DataContext.Actions.OfType<MailAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
-            await ctx.RefreshAsync(RefreshMode.StoreWins, data);
+            var mails = await DataContext.Actions.OfType<MailAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
+            await ctx.RefreshAsync(RefreshMode.StoreWins, mails);
+            var data = mails.Select(x => new {
+                ActionBaseId = x.ActionBaseId,
+                Failure = x.Failure,
+                From = x.From,
+                //MailBody = x.MailBody,
+                MailDisabled = x.MailDisabled,
+                MailTemplate = x.MailTemplate,
+                RecordedOn = x.RecordedOn,
+                Redirected = x.Redirected,
+                RedirectedTo = x.RedirectedTo,
+                Subject = x.Subject,
+                To= x.To,                
+            });
             return this.Request.CreateResponse(HttpStatusCode.OK, data);
+        }
+        [HttpGet]
+        [Route("get/mail/body/{id}")]
+        public HttpResponseMessage GetMailBody(long id)
+        {
+            var mail = DataContext.Actions.OfType<MailAction>().Single(x => x.ActionBaseId == id);
+            return this.Request.CreateResponse(HttpStatusCode.OK, mail.MailBody);
         }
         [HttpPost]
         [Route("sendmail")]

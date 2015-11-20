@@ -118,8 +118,14 @@
                     var data = q2[0];
                     showHistory(template, data, "report-mail-history");
                     $(".mail-history td div.to").on("click", function () {
-                        var body = $(this).siblings(".body");
-                        $U.MessageBox(body[0].innerHTML, { Title: "Email Content" });
+                        var id = $(this).closest("tr").attr("data-id");
+                        var bodyUrl = "cmsapi/get/mail/body/" + id;
+                        $U.AjaxGet({ url: bodyUrl }).then(function (r) {
+
+                        //var body = $(this).siblings(".body");
+                        $U.MessageBox(r, { Title: "Email Content" });
+
+                        });
                     });
                 });
         }

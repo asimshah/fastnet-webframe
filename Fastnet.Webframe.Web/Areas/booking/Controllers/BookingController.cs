@@ -198,7 +198,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                                 else
                                 {
                                     var t = choice.ToClientType();
-                                    if(t.totalCost < existing.totalCost)
+                                    if (t.totalCost < existing.totalCost)
                                     {
                                         ai.choices.Remove(existing);
                                         ai.choices.Add(t);
@@ -218,7 +218,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("create/{abodeId}")]
         public async Task<dynamic> MakeBooking(long abodeId, bookingRequest request)
         {
-            
+
             // default isolation level is Serializable, meaning no one else can do anything
             string reference = null;
             bool paymentGatewayEnabled = new PaymentGateway().Enabled;
@@ -248,7 +248,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             else
                             {
                                 var overlapping = a.Bookings.Where(ex => ex.From <= to && from <= ex.To);
-                                if(overlapping.Count() > 0)
+                                if (overlapping.Count() > 0)
                                 {
                                     return new { Success = false, Error = "Accomodation no longer available", Code = "AvailabilityLost" };
                                 }
@@ -274,20 +274,20 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             Under18sInParty = request.under18spresent,
                             PartySize = request.choice.partySize
                         };
-                        if(request.phoneNumber != this.GetCurrentMember().PhoneNumber)
+                        if (request.phoneNumber != this.GetCurrentMember().PhoneNumber)
                         {
                             MemberBase m = this.GetCurrentMember();
                             m.PhoneNumber = request.phoneNumber;
                             await DataContext.SaveChangesAsync();
                         }
-                        foreach(var a in toBeBooked)
+                        foreach (var a in toBeBooked)
                         {
                             b.AccomodationCollection.Add(a);
                         }
                         ctx.Bookings.Add(b);
                         await ctx.SaveChangesAsync();
                         var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-                        bst.ToNew(b);                        
+                        bst.ToNew(b);
                         await ctx.SaveChangesAsync();
                         tran.Complete();
                         reference = b.Reference;
@@ -324,7 +324,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && x.MemberId == member.Id && (x.To >= today))
                         .OrderBy(x => x.Reference).ToArray();
                     //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
-                    var data = bookings.Select(x => Factory.GetBooking( x));
+                    var data = bookings.Select(x => Factory.GetBooking(x)).ToArray();
                     return new { member = member.Fullname, bookings = data };
                 }
             }
@@ -336,21 +336,25 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             DateTime time = DateTime.Now;
             Log.Write("Polled received");
-            TestTask tt = new TestTask();
-            await tt.Start();
-            StartStandardTasks();
+            //TestTask tt = new TestTask();
+            //await tt.Start();
+            await StartStandardTasks();
         }
 
-        private void StartStandardTasks()
+        private async Task StartStandardTasks()
         {
-            TaskBase finalreminders = Factory.GetRemindersTask(true);
-            finalreminders.StartAndForget();
-            TaskBase reminders = Factory.GetRemindersTask();
-            reminders.StartAndForget();
-            BookingMailer bm = new BookingMailer();
-            bm.StartAndForget();
             EntryNotificationTask ent = new EntryNotificationTask();
             ent.StartAndForget();
+            await Task.Delay(1000);
+            TaskBase finalreminders = Factory.GetRemindersTask(true);
+            finalreminders.StartAndForget();
+            await Task.Delay(1000);
+            TaskBase reminders = Factory.GetRemindersTask();
+            reminders.StartAndForget();
+            await Task.Delay(1000);
+            BookingMailer bm = new BookingMailer();
+            bm.StartAndForget();
+
         }
 
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)

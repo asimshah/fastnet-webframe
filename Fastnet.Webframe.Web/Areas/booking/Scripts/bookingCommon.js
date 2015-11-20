@@ -72,11 +72,23 @@ var fastnet;
                 var shortTermBookingAllowed = params.shortTermBookingAllowed;
                 var under18Present = ko.unwrap(params.under18Present);
                 var today = moment(params.today);
-                var minStart = today.add(params.shortBookingInterval, 'd');
+                var fmt = "";
                 var startMoment = moment(val);
-                if ((under18Present || !shortTermBookingAllowed) && startMoment < minStart) {
-                    var fmt = under18Present ? "When any under 18s are present, bookings need to be at least {0} days in advance, i.e. from {1}" : "Bookings need to be at least {0} days in advance, i.e. from {1}";
-                    this.message = str.format(fmt, params.shortBookingInterval, str.toDateString(minStart));
+                var minStart = today;
+                var interval = 0; // params.shortBookingInterval;
+                if (under18Present) {
+                    interval = params.shortBookingInterval + 7;
+                    //minStart = today.add(params.shortBookingInterval + 7, 'd');
+                    fmt = "When any under 18s are present, bookings need to be at least {0} days in advance, i.e. from {1}";
+                }
+                else if (shortTermBookingAllowed == false) {
+                    interval = params.shortBookingInterval;
+                    //minStart = today.add(params.shortBookingInterval, 'd');
+                    fmt = "Bookings need to be at least {0} days in advance, i.e.from {1}";
+                }
+                minStart = today.add(interval, 'd');
+                if (startMoment < minStart) {
+                    this.message = str.format(fmt, interval, str.toDateString(minStart));
                     return false;
                 }
                 else {
