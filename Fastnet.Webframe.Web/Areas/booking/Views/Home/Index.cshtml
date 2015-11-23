@@ -1,6 +1,7 @@
 ﻿@using Fastnet.Webframe.BookingData
 @{
     ViewBag.Title = "Booking";
+    ViewBag.BaseUrl = Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/");
     ViewBag.AppName = BookingGlobals.GetAbodeName() + " Booking System";
 }
 <div class="row">

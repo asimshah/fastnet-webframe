@@ -1177,4 +1177,3 @@ var fastnet;
         })(adminSubapp);
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingAdmin.js.map

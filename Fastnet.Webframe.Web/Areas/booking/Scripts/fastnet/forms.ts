@@ -311,6 +311,9 @@ module fastnet {
                                     $.extend(additionalOptions, {height: rtOptions.height});
                                 }
                             }
+                            var baseUrl = $("head base").prop("href");
+                            var _tinymceUrl = baseUrl + "Scripts/tinymce/";
+                            tinymce.baseURL = _tinymceUrl;
                             var mceOptions = {
                                 plugins: "textcolor colorpicker visualblocks link image code",
                                 menubar: false,
