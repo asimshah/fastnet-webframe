@@ -5,6 +5,7 @@ using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Web.Common;
 using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -40,8 +41,13 @@ namespace Fastnet.Webframe.Web
             }
             AutofacConfig.ConfigureContainer();
             dynamic version = VersionInfo.Get(typeof(MvcApplication));
-
+            using(var appdb = new ApplicationDbContext())
+            {
+                int count = appdb.Users.Count();
+                Debug.Print("ApplicationDbContext user count = {0}", count);
+            }
             Log.SetApplicationName(ConfigurationManager.AppSettings["SiteUrl"]);
+            ApplicationDbContext.SetInitializer();
             CoreDataContext.SetInitializer();
             BookingDataContext.SetInitializer();
             RouteConfig.MapMVC(RouteTable.Routes);

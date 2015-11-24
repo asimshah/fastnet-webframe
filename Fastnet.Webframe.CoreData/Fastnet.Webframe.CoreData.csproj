@@ -181,7 +181,6 @@
     <Compile Include="FileChunk.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="Actions.cs" />
-    <Compile Include="IdentityModels.cs" />
     <Compile Include="Hierarchy.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="ImageInformation.cs" />
@@ -194,6 +193,11 @@
     <Compile Include="MemberFactory.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="MenuMaster.cs" />
+    <Compile Include="Migrations\201511240732427_InitialCreate.cs" />
+    <Compile Include="Migrations\201511240732427_InitialCreate.Designer.cs">
+      <DependentUpon>201511240732427_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="PageAccessRule.cs" />
     <Compile Include="PageMarkup.cs" />
@@ -218,6 +222,15 @@
       <Project>{354f79dd-7aa1-43d5-a482-da1b1f9c96cc}</Project>
       <Name>Fastnet.Webframe.BookingData</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Fastnet.Webframe.IdentityData\Fastnet.Webframe.IdentityData.csproj">
+      <Project>{080f0a59-2af8-49ad-98bf-e506bec85406}</Project>
+      <Name>Fastnet.Webframe.IdentityData</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201511240732427_InitialCreate.resx">
+      <DependentUpon>201511240732427_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

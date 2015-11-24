@@ -1668,6 +1668,10 @@
       <Project>{f780da43-e8f6-4dab-bc5f-e637414d1e17}</Project>
       <Name>Fastnet.Webframe.CoreData</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Fastnet.Webframe.IdentityData\Fastnet.Webframe.IdentityData.csproj">
+      <Project>{080f0a59-2af8-49ad-98bf-e506bec85406}</Project>
+      <Name>Fastnet.Webframe.IdentityData</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\membership\Scripts\membership.js" />
@@ -1780,7 +1784,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -1,13 +1,9 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
+﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
-using System.ComponentModel.DataAnnotations;
 using System;
-using System.Linq;
-using System.Data.Linq;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.CoreData
 {
@@ -61,12 +57,20 @@ namespace Fastnet.Webframe.CoreData
     //public class ApplicationDbContext : IdentityDbContext<Member>
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public ApplicationDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString, throwIfV1Schema: false)
+        {
+        }
         public ApplicationDbContext()
             : base("CoreData", throwIfV1Schema: false)
             //: base("IdentityConnection", throwIfV1Schema: false)
         {
         }
 
+        public static void SetInitializer()
+        {
+            System.Data.Entity.Database.SetInitializer(new IdentityDataInitializer());
+        }
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
@@ -78,5 +82,8 @@ namespace Fastnet.Webframe.CoreData
             modelBuilder.Properties<DateTime>().Configure(c => c.HasColumnType("datetime2"));
             base.OnModelCreating(modelBuilder);
         }
+    }
+    internal class IdentityDataInitializer : MigrateDatabaseToLatestVersion<ApplicationDbContext, Fastnet.Webframe.IdentityData.Migrations.Configuration>
+    {
     }
 }

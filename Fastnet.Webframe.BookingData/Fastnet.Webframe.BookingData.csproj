@@ -70,6 +70,11 @@
   <ItemGroup>
     <Compile Include="Accomodation.cs" />
     <Compile Include="BookingEmail.cs" />
+    <Compile Include="Migrations\201511240716100_InitialCreate.cs" />
+    <Compile Include="Migrations\201511240716100_InitialCreate.Designer.cs">
+      <DependentUpon>201511240716100_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Tasklog.cs" />
     <Compile Include="Classes with typings\bookingStatus.cs" />
     <Compile Include="Customisation\DWH\DWHParameter.cs" />
@@ -102,6 +107,11 @@
     <TypeScriptCompile Include="Classes with typings\calendarSetup.cs.d.ts">
       <DependentUpon>calendarSetup.cs</DependentUpon>
     </TypeScriptCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201511240716100_InitialCreate.resx">
+      <DependentUpon>201511240716100_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

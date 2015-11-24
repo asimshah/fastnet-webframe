@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web;
 using System.Web.Security;
 using LDB = Fastnet.Webframe.Web.DataModel;
 
@@ -31,8 +32,9 @@ namespace Fastnet.Webframe.CoreData
             defaultMemberPassword = Settings.legacy.defaultMemberPassword;
             //LoaderFactory lf = new LoaderFactory();
             string configConnectionString = GetLegacyConnectionString();
-            //coreDb = context;
+            //connectionString="Data Source=.\sqlexpress;AttachDbFilename=|DataDirectory|\sitedb.mdf;initial catalog=v4-default;Integrated Security=True;MultipleActiveResultSets=True"
             appDb = new ApplicationDbContext();
+            //var userCount = appDb.Users.Count();
             //this.configConnectionString = configConnectionString;
             string connectionString = GetEntityConnectionString(configConnectionString);
             legacyDb = new LDB.WebframeDataEntities(connectionString);
@@ -239,10 +241,11 @@ namespace Fastnet.Webframe.CoreData
         internal void AddBMCGroups()
         {
             int weightIncrement = Group.GetWeightIncrement();
+            Group allMembers = Group.GetSystemGroup(SystemGroups.AllMembers, coreDb);
             Group bmcMembers = new Group
             {
                 Name = "BMC Members",
-                ParentGroup = Group.AllMembers,
+                ParentGroup = allMembers,// Group.AllMembers,
                 Description = "Members who are also members of the BMC",
                 Weight = Group.AllMembers.Weight + weightIncrement,
                 Type = GroupTypes.User,
@@ -251,7 +254,7 @@ namespace Fastnet.Webframe.CoreData
             Group nonBmcMembers = new Group
             {
                 Name = "Non BMC Members",
-                ParentGroup = Group.AllMembers,
+                ParentGroup = allMembers,// Group.AllMembers,
                 Description = "Members who do not have BMC membership",
                 Weight = Group.AllMembers.Weight + weightIncrement,
                 Type = GroupTypes.User,
@@ -586,6 +589,10 @@ namespace Fastnet.Webframe.CoreData
                 PasswordHash = Member.HashPassword(password),
                 SecurityStamp = Guid.NewGuid().ToString()
             };
+            //if(appDb == null)
+            //{
+            //    appDb = new ApplicationDbContext();
+            //}
             appDb.Users.Add(user);
             appDb.SaveChanges();
             DWHMember m = new DWHMember

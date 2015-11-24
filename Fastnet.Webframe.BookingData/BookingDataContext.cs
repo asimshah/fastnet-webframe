@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Fastnet.Webframe.BookingData
 {
-    internal class BookingDataInitializer : CreateDatabaseIfNotExists<BookingDataContext>// DropCreateDatabaseIfModelChanges<BookingDataContext>
+    //internal class BookingDataInitializer : CreateDatabaseIfNotExists<BookingDataContext>// DropCreateDatabaseIfModelChanges<BookingDataContext>
+    internal class BookingDataInitializer : MigrateDatabaseToLatestVersion<BookingDataContext, Fastnet.Webframe.BookingData.Migrations.Configuration>
     {
     }
     public partial class BookingDataContext : DbContext
@@ -36,7 +37,7 @@ namespace Fastnet.Webframe.BookingData
         public DbSet<Tasklog> Tasklogs { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("book");
+            modelBuilder.HasDefaultSchema("book");            
             modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
             //modelBuilder.Types().Configure(entity => entity.ToTable("book_" + entity.ClrType.Name));
