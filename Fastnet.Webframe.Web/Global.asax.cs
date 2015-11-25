@@ -46,6 +46,7 @@ namespace Fastnet.Webframe.Web
                 int count = appdb.Users.Count();
                 Debug.Print("ApplicationDbContext user count = {0}", count);
             }
+
             Log.SetApplicationName(ConfigurationManager.AppSettings["SiteUrl"]);
             ApplicationDbContext.SetInitializer();
             CoreDataContext.SetInitializer();

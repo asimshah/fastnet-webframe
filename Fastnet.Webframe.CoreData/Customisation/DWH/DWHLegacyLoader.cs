@@ -473,7 +473,7 @@ namespace Fastnet.Webframe.CoreData
                 return name;
             };
             var forwardBookings = legacyBookingData.Bookings.Where(b => b.To > DateTime.Today);
-            var visitors = forwardBookings.Select(b => b.Visitor);
+            var visitors = forwardBookings.Select(b => b.Visitor).OrderBy(o1 => o1.LastName).ThenBy(o2 => o2.FirstName);
 
             foreach (var v in visitors)
             {
