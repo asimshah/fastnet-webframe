@@ -12,8 +12,6 @@ namespace Fastnet.Webframe.CoreData
 {
     public class DataSeeder
     {
-        //private bool dataload;
-        //private string legacyConnectionString;
         private CoreDataContext ctx;
         public DataSeeder(CoreDataContext context)
         {
@@ -22,7 +20,6 @@ namespace Fastnet.Webframe.CoreData
         public void Seed()
         {           
             bool isEmpty = IsDatabaseCompletelyEmpty();
-            //if (isEmpty && ApplicationSettings.Key("LegacyDataLoad", false))
             if (isEmpty)
             {
                 LoaderFactory lf = LoaderFactory.Get(ctx);// new LoaderFactory();
@@ -34,22 +31,18 @@ namespace Fastnet.Webframe.CoreData
                     }
                     EnsureRequiredGroups();
                     EnsureAdministratorInAdministratorsGroup();
-                    SetSiteVersion("4.0.0.0");
-                    //WriteCustomStylesheets();
                 }
                 else
                 {
-                    //EnsureClientApplications();
                     EnsureRequiredGroups();
-                    //EnsureRequiredPanels();
                     EnsureInitialPages();
                     CreateDefaultMenu();
-                    CreateLeftSidePanelMenu();
-                    SetSiteVersion("4.0.0.0");
+                    CreateLeftSidePanelMenu();                    
                 }
             }
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
+            EnsureSiteVersion("4.0.0.1");
         }
 
 
@@ -514,7 +507,7 @@ namespace Fastnet.Webframe.CoreData
             //}
             ctx.SaveChanges();
         }
-        private void SetSiteVersion(string version)
+        private void EnsureSiteVersion(string version)
         {
             SiteSetting ss = ctx.SiteSettings.SingleOrDefault(x => x.Name == "Version");
             if (ss != null)
