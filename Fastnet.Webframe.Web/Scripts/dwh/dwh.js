@@ -10,13 +10,14 @@
                 //var dob = ctx.data["date-of-birth"];
                 var bmcMembership = ctx.data["bmc-membership"];
                 var organisation = ctx.data["organisation"];
-                return {dob: dob, bmcMembership: bmcMembership, organisation: organisation};
+                //return { dob: dob, bmcMembership: bmcMembership, organisation: organisation };
+                return { bmcMembership: bmcMembership, organisation: organisation };
                 break;
         }
         return {};
     }
     function customise(ctx) {
-        $U.Debug("dwh: process: {0}, action: {1}", ctx.process, ctx.action);
+        //$U.Debug("dwh: process: {0}, action: {1}", ctx.process, ctx.action);
         switch (ctx.process) {
             case "registration":
                 return registration(ctx);

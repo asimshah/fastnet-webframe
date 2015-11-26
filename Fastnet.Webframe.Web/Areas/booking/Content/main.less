@@ -18,6 +18,42 @@
     width: device-width;
 }
 
+table.dataTable {
+    thead {
+        .sorting {
+            background-image: url("../../../Content/datatables/images/sort_both.png");
+        }
+        .sorting_asc {
+            background-image: url("../../../Content/datatables/images/sort_asc.png");
+        }
+        .sorting_desc {
+            background-image: url("../../../Content/datatables/images/sort_desc.png");
+        }
+        .sorting_asc_disabled {
+            background-image: url("../../../Content/datatables/images/sort_asc_disabled.png");
+        }
+        .sorting_desc_disabled {
+            background-image: url("../../../Content/datatables/images/sort_desc_disabled.png");
+        }
+    }
+        /*
+           table.dataTable thead .sorting {
+          background-image: url("../images/sort_both.png");
+        }
+        table.dataTable thead .sorting_asc {
+          background-image: url("../images/sort_asc.png");
+        }
+        table.dataTable thead .sorting_desc {
+          background-image: url("../images/sort_desc.png");
+        }
+        table.dataTable thead .sorting_asc_disabled {
+          background-image: url("../images/sort_asc_disabled.png");
+        }
+        table.dataTable thead .sorting_desc_disabled {
+          background-image: url("../images/sort_desc_disabled.png");
+        }
+        */
+}
 
 .SitePanel {
     width: auto;
@@ -600,12 +636,14 @@ button.side-button {
             .row:not(:first-child):not(:last-child) {
                 border-top: 1px solid @separator-colour;
             }
+
             .form-group-sm {
                 margin-top: 8px;
             }
+
             select {
-             margin-bottom: 4px;   
-            }                   
+                margin-bottom: 4px;
+            }
         }
 
         .help-block {
@@ -640,6 +678,7 @@ button.side-button {
 
         .template-editor {
             margin-top: 12px;
+
             iframe {
                 height: 400px;
             }
@@ -770,11 +809,13 @@ button.side-button {
 
         table {
             width: 100%;
+
             tr.privileged-member {
                 td.member {
                     color: @dark-green;
                 }
             }
+
             tr.is-paid {
                 td.payment-indicator {
                     span.fa-check {

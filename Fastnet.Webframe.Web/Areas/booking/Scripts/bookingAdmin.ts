@@ -608,15 +608,16 @@ module fastnet {
                 $.fn.dataTable.moment('DDMMMYYYY');
                 var reportFormTemplate = "booking/bookingreportform";
                 var reportTemplate = "booking/bookingreport";
-                var dataurl = str.format("bookingadmin/get/bookings/{0}", this.app.parameters.currentAbode.id);
-                var heading = "All Bookings";
+                var dataurl = "";//str.format("bookingadmin/get/bookings/{0}", this.app.parameters.currentAbode.id);
+                var heading = "";//"All Bookings";
                 switch (rt) {
                     case bookingReportType.normal:
-                    default:
+                        dataurl = str.format("bookingadmin/get/bookings/{0}", this.app.parameters.currentAbode.id);
+                        heading = "All Bookings";
                         break;
                     case bookingReportType.unpaid:
                         heading = "All Unpaid Bookings";
-                        dataurl += "/true";
+                        dataurl = str.format("bookingadmin/get/bookings/{0}/true", this.app.parameters.currentAbode.id);
                         break;
                     case bookingReportType.cancelled:
                         heading = "Cancelled Bookings";
