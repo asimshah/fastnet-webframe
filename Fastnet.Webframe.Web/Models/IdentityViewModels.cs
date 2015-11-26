@@ -34,7 +34,7 @@ namespace Fastnet.Webframe.Web.Models
     }
     public class AdministratorViewModel
     {
-        private static readonly int MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 6);
+        private static readonly int MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 8);
         private bool RequireComplexPassword = ApplicationSettings.Key("RequireComplexPassword", false);
         [Required]
         [EmailAddress]

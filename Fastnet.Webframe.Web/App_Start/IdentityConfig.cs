@@ -51,7 +51,7 @@ namespace Fastnet.Webframe.Web
                 AllowOnlyAlphanumericUserNames = false,
                 RequireUniqueEmail = true
             };
-            var passwordLength = ApplicationSettings.Key("MinimumPasswordLength", 6) ;
+            var passwordLength = ApplicationSettings.Key("MinimumPasswordLength", 8) ;
             var complex = ApplicationSettings.Key("RequireComplexPassword", false);
             // Configure validation logic for passwords
             manager.PasswordValidator = new PasswordValidator

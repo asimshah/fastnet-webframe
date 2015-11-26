@@ -125,7 +125,7 @@ namespace Fastnet.Webframe.Web.Models
             : base(ClientSideActions.register, true, true)
         {
 
-            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 6);
+            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 8);
             RequireComplexPassword = ApplicationSettings.Key("RequireComplexPassword", false);
         }
     }
@@ -142,7 +142,7 @@ namespace Fastnet.Webframe.Web.Models
             this.EmailAddress = member.EmailAddress;
             this.FirstName = member.FirstName;
             this.LastName = member.LastName;
-            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 6);
+            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 8);
             RequireComplexPassword = ApplicationSettings.Key("RequireComplexPassword", false);
         }
     }

@@ -12,7 +12,7 @@ namespace Fastnet.Webframe.Web.Models
         public bool RequireComplexPassword { get; private set; }
         public OptionsModel()
         {
-            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 6);
+            MinimumPasswordLength = ApplicationSettings.Key("MinimumPasswordLength", 8);
             RequireComplexPassword = ApplicationSettings.Key("RequireComplexPassword", false);
         }
     }

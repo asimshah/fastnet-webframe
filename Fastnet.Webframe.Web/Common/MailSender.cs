@@ -46,19 +46,20 @@ namespace Fastnet.Webframe.Web.Common
         protected override async Task<WebtaskResult> Execute()
         {
             WebtaskResult wtr = new WebtaskResult { User = smo };
-            bool mailEnabled = ApplicationSettings.Key("MailEnabled", true);
+            bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
             if (mailEnabled)
             {
                 try
                 {
                     SmtpClient client = new SmtpClient();
-                    await client.SendMailAsync(smo.MailMessage);                  
+                    smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
+                    await client.SendMailAsync(smo.MailMessage);
                     RecordMail(smo);
                 }
                 catch (Exception xe)
                 {
                     wtr.HasFailed = true;
-                    wtr.Exception = xe;                  
+                    wtr.Exception = xe;
                     RecordMailException(smo, xe);
                 }
             }
