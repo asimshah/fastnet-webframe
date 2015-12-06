@@ -21,7 +21,8 @@ namespace Fastnet.Webframe.CoreData
         Expired,
         NotFound,
         Missing,
-        Unknown
+        Unknown,
+        Error
     }
     class BMCApiFactory : CustomFactory
     {
@@ -93,6 +94,7 @@ namespace Fastnet.Webframe.CoreData
                 {
                     result.Success = false;
                     result.Error = r.Error ?? "unknown error";
+                    result.Status = BMCMembershipStatus.Error;
                 }
                 return result;
             }
@@ -103,6 +105,7 @@ namespace Fastnet.Webframe.CoreData
                 //dynamic result = new ExpandoObject();
                 result.Success = false;
                 result.Error = xe.Message;
+                result.Status = BMCMembershipStatus.Error;
                 return result;
             }
         }

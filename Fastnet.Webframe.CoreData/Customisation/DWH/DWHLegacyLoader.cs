@@ -512,11 +512,26 @@ namespace Fastnet.Webframe.CoreData
                 if (!string.IsNullOrWhiteSpace(bmcNumber) && mf.EnableBMCApi)
                 {
                     dynamic result = await mf.ValidateBMCNumber(bmcNumber, member.LastName);
-                    status = result.Status;
-                    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                    if (result.Success)
                     {
-                        member.BMCMembershipExpiresOn = result.Expiry;
-                        bmcGroup.Members.Add(member);
+                        status = result.Status;
+                        if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                        {
+                            member.BMCMembershipExpiresOn = result.Expiry;
+                            bmcGroup.Members.Add(member);
+                        }
+                        else
+                        {
+                            status = BMCMembershipStatus.Missing;
+                            Log.Write("Member {1}, email {0}: membership is not valid", member.EmailAddress, member.Fullname);
+                            nonBmcGroup.Members.Add(member);
+                        }
+                    }
+                    else
+                    {
+                        status = BMCMembershipStatus.Missing;
+                        Log.Write("Member {1}, email {0}: api failed", member.EmailAddress, member.Fullname);
+                        nonBmcGroup.Members.Add(member);
                     }
                 }
                 else if (bmcNumber == null)
