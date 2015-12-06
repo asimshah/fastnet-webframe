@@ -503,7 +503,7 @@ namespace Fastnet.Webframe.CoreData
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
             Group bmcGroup = coreDb.Groups.Single(x => x.Name == bmcMembersGroupName);// "BMC Members");
             Group nonBmcGroup = coreDb.Groups.Single(x => x.Name == nonBmcMembersGroupName);// "Non BMC Members");
-            var allMembers = coreDb.Members.OfType<DWHMember>();
+            var allMembers = coreDb.Members.OfType<DWHMember>().OrderBy(x => x.LastName).ThenBy(x => x.FirstName);
             foreach(var member in allMembers)
             {
                 string bmcNumber = member.BMCMembership;
@@ -511,26 +511,35 @@ namespace Fastnet.Webframe.CoreData
                 BMCMembershipStatus status = BMCMembershipStatus.Unknown;
                 if (!string.IsNullOrWhiteSpace(bmcNumber) && mf.EnableBMCApi)
                 {
-                    dynamic result = await mf.ValidateBMCNumber(bmcNumber, member.LastName);
-                    if (result.Success)
+                    try
                     {
-                        status = result.Status;
-                        if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                        dynamic result = await mf.ValidateBMCNumber(bmcNumber, member.LastName);
+                        if (result.Success)
                         {
-                            member.BMCMembershipExpiresOn = result.Expiry;
-                            bmcGroup.Members.Add(member);
+                            status = result.Status;
+                            if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
+                            {
+                                member.BMCMembershipExpiresOn = result.Expiry;
+                                bmcGroup.Members.Add(member);
+                            }
+                            else
+                            {
+                                status = BMCMembershipStatus.Missing;
+                                Log.Write("Member {1}, email {0}: membership is not valid", member.EmailAddress, member.Fullname);
+                                nonBmcGroup.Members.Add(member);
+                            }
                         }
                         else
                         {
                             status = BMCMembershipStatus.Missing;
-                            Log.Write("Member {1}, email {0}: membership is not valid", member.EmailAddress, member.Fullname);
+                            Log.Write("Member {1}, email {0}: api failed", member.EmailAddress, member.Fullname);
                             nonBmcGroup.Members.Add(member);
                         }
                     }
-                    else
+                    catch (Exception xe)
                     {
                         status = BMCMembershipStatus.Missing;
-                        Log.Write("Member {1}, email {0}: api failed", member.EmailAddress, member.Fullname);
+                        Log.Write("Member {1}, email {0}: api failed, {2}", member.EmailAddress, member.Fullname, xe.Message);
                         nonBmcGroup.Members.Add(member);
                     }
                 }
@@ -556,24 +565,6 @@ namespace Fastnet.Webframe.CoreData
                     bestDetail = kvp.Value.First();
                 }
                 string bmcNumber = bestDetail.bmcNumber ?? null;
-                //DateTime? expiry = null;
-                ////good++;
-                //if (bmcNumber != null && mf.EnableBMCApi)
-                //{
-                //    dynamic result = await mf.ValidateBMCNumber((string)bestDetail.bmcNumber, (string)bestDetail.lastName);
-                //    status = result.Status;
-                //    if (status == BMCMembershipStatus.Current || status == BMCMembershipStatus.Expired)
-                //    {
-                //        expiry = result.Expiry;
-
-                //    }
-                //}
-                //else if (bmcNumber == null)
-                //{
-                //    status = BMCMembershipStatus.Missing;
-                //}
-                //Debug.Print("{2}: validate: {0}, {1}, ***** {3}", (string)x.lastName, (string)x.bmcNumber, good, status.ToString());
-                //Debugger.Break();
                 string email = kvp.Key;
                 //bool newlyCreated = false;
                 DWHMember member = coreDb.Members.OfType<DWHMember>().SingleOrDefault(m => m.EmailAddress == email);
@@ -582,22 +573,12 @@ namespace Fastnet.Webframe.CoreData
                     member = CreateMember(email, defaultMemberPassword, ((string)bestDetail.firstName).ToString(), ((string)bestDetail.lastName).ToString(), DateTime.Today, null, false);
                     allMembers.Members.Add(member);
                     member.PlainPassword = defaultMemberPassword;
-                    //newlyCreated = true;
-                    //if (status == BMCMembershipStatus.Current)
-                    //{
-                    //    //p.BMCMembers = "BMC Members";
-                    //    bmcGroup.Members.Add(member);
-                    //}
-                    //Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "No BMC Membership number", status.ToString());
+                    Log.Write("Member record created for {0} with default password", member.Fullname);
                 }
                 member.BMCMembership = bmcNumber?.Trim();
                 //member.BMCMembershipExpiresOn = expiry;
                 member.Organisation = bestDetail.club;
                 member.PhoneNumber = bestDetail.phoneNumber;
-                //if (newlyCreated)
-                //{
-                //    Log.Write("Member created: {0}, {1}, {2}, bmc membership status: {3}", member.EmailAddress, member.Fullname, member.BMCMembership ?? "**No BMC Membership number**", status.ToString());
-                //}
             }
         }
         private DWHMember CreateMember(string email, string password, string firstName, string lastName,
