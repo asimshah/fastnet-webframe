@@ -52,11 +52,12 @@ namespace Fastnet.Webframe.CoreData
         }
         public async Task<ExpandoObject> Validate(string bmcMembership, string lastName)
         {
+            dynamic result = new ExpandoObject();
+            result.ApiEnabled = true;
             try
             {
                 string url = string.Format("MemberUpdate/QueryLight?lastName={0}&membershipNumber={1}&contentType=json&apiuser={2}&apikey={3}",
                     lastName, bmcMembership, BMCApiUser, BMCApiKey);
-                dynamic result = new ExpandoObject();
 
                 dynamic r = await GetAsync(url);
                 if (r is JObject)
@@ -99,7 +100,7 @@ namespace Fastnet.Webframe.CoreData
             catch (Exception xe)
             {
                 Log.Write(xe);
-                dynamic result = new ExpandoObject();
+                //dynamic result = new ExpandoObject();
                 result.Success = false;
                 result.Error = xe.Message;
                 return result;

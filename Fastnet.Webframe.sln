@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fastnet.Webframe.BookingDat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fastnet.Webframe.IdentityData", "Fastnet.Webframe.IdentityData\Fastnet.Webframe.IdentityData.csproj", "{080F0A59-2AF8-49AD-98BF-E506BEC85406}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fastnet.Webframe.LegacyData", "Fastnet.Webframe.LegacyData\Fastnet.Webframe.LegacyData.csproj", "{9C5CEBCF-D6F3-460B-8751-9651AB571FCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{080F0A59-2AF8-49AD-98BF-E506BEC85406}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{080F0A59-2AF8-49AD-98BF-E506BEC85406}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{080F0A59-2AF8-49AD-98BF-E506BEC85406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C5CEBCF-D6F3-460B-8751-9651AB571FCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C5CEBCF-D6F3-460B-8751-9651AB571FCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C5CEBCF-D6F3-460B-8751-9651AB571FCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C5CEBCF-D6F3-460B-8751-9651AB571FCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,7 +16,7 @@
     <AssemblyName>Fastnet.Webframe.Web</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -1776,7 +1776,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54958</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost/fastnet.webframe.web</IISUrl>
+          <IISUrl>http://localhost:54958/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
@@ -1784,7 +1784,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

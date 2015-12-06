@@ -2,6 +2,7 @@
 using Fastnet.EventSystem;
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData.DWH;
+using Fastnet.Webframe.LegacyData.DWH;
 using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,11 +19,15 @@ using System.Transactions;
 using System.Web;
 using System.Web.Security;
 using LDB = Fastnet.Webframe.Web.DataModel;
+//using DWH = Fastnet.Webframe.LegacyData.DWH;
 
 namespace Fastnet.Webframe.CoreData
 {
     public class DWHLegacyLoader : LoaderFactory //: IDisposable
     {
+        private const string bmcMembersGroupName = "BMC Members";
+        private const string nonBmcMembersGroupName = "Non BMC Members";
+        private const string privilegedMembersGroupName = "Privileged Members";
         private ApplicationDbContext appDb;
         private LDB.WebframeDataEntities legacyDb;
         private DWHLegacyBookingDbContext legacyBookingData;
@@ -36,7 +41,8 @@ namespace Fastnet.Webframe.CoreData
             appDb = new ApplicationDbContext();
             //var userCount = appDb.Users.Count();
             //this.configConnectionString = configConnectionString;
-            string connectionString = GetEntityConnectionString(configConnectionString);
+            string cs = GetSqlConnectionString(configConnectionString);
+            string connectionString = GetEntityConnectionString(cs);
             legacyDb = new LDB.WebframeDataEntities(connectionString);
             string bookingConnectionString = GetLegacyBookingConnectionString();
             legacyBookingData = new DWHLegacyBookingDbContext(bookingConnectionString);
@@ -222,7 +228,7 @@ namespace Fastnet.Webframe.CoreData
                 Group g = new Group { Name = item.Name, ParentGroup = parent, Description = item.Description, Weight = weight, Type = (GroupTypes)(int)item.Type };
                 if(g.Name == "Priveleged Users")
                 {
-                    g.Name = "Privileged Members"; 
+                    g.Name = privilegedMembersGroupName;// "Privileged Members"; 
                     g.Description = "Members whose bookings are confirmed without their necessarily having paid.";
                 }
                 coreDb.Groups.Add(g);
@@ -244,7 +250,7 @@ namespace Fastnet.Webframe.CoreData
             Group allMembers = Group.GetSystemGroup(SystemGroups.AllMembers, coreDb);
             Group bmcMembers = new Group
             {
-                Name = "BMC Members",
+                Name = bmcMembersGroupName,// "BMC Members",
                 ParentGroup = allMembers,// Group.AllMembers,
                 Description = "Members who are also members of the BMC",
                 Weight = Group.AllMembers.Weight + weightIncrement,
@@ -253,7 +259,7 @@ namespace Fastnet.Webframe.CoreData
             coreDb.Groups.Add(bmcMembers);
             Group nonBmcMembers = new Group
             {
-                Name = "Non BMC Members",
+                Name = nonBmcMembersGroupName,//  "Non BMC Members",
                 ParentGroup = allMembers,// Group.AllMembers,
                 Description = "Members who do not have BMC membership",
                 Weight = Group.AllMembers.Weight + weightIncrement,
@@ -491,11 +497,12 @@ namespace Fastnet.Webframe.CoreData
             CreateMembersFromCandidates(candidates);
             coreDb.SaveChanges();
         }
+
         private async Task ValidateBMCMembership()
         {
             DWHMemberFactory mf = MemberFactory.GetInstance() as DWHMemberFactory;
-            Group bmcGroup = coreDb.Groups.Single(x => x.Name == "BMC Members");
-            Group nonBmcGroup = coreDb.Groups.Single(x => x.Name == "Non BMC Members");
+            Group bmcGroup = coreDb.Groups.Single(x => x.Name == bmcMembersGroupName);// "BMC Members");
+            Group nonBmcGroup = coreDb.Groups.Single(x => x.Name == nonBmcMembersGroupName);// "Non BMC Members");
             var allMembers = coreDb.Members.OfType<DWHMember>();
             foreach(var member in allMembers)
             {
@@ -624,17 +631,22 @@ namespace Fastnet.Webframe.CoreData
 
             return m;
         }
+        private string GetSqlConnectionString(string configConnectionString)
+        {
+            string sqlConnectionString = ConfigurationManager.ConnectionStrings[configConnectionString].ConnectionString;
+            return sqlConnectionString;
+        }
         private string GetEntityConnectionString(string cs)
         {
-            string sqlConnectionString = ConfigurationManager.ConnectionStrings[cs].ConnectionString;
-            SqlConnectionStringBuilder cb = new SqlConnectionStringBuilder(sqlConnectionString);
+            //string sqlConnectionString = ConfigurationManager.ConnectionStrings[cs].ConnectionString;
+            SqlConnectionStringBuilder cb = new SqlConnectionStringBuilder(cs);
             cb.MultipleActiveResultSets = true;
             cb.ApplicationName = "Webframe";
-            sqlConnectionString = cb.ToString();
+            cs = cb.ToString();
             // metadata=res://*/WebframeDataModel.csdl|res://*/WebframeDataModel.ssdl|res://*/WebframeDataModel.msl
             EntityConnectionStringBuilder ecb = new EntityConnectionStringBuilder();
             ecb.Provider = "System.Data.SqlClient";
-            ecb.ProviderConnectionString = sqlConnectionString;
+            ecb.ProviderConnectionString = cs;
             ecb.Metadata = @"res://*/WebframeDataModel.csdl|res://*/WebframeDataModel.ssdl|res://*/WebframeDataModel.msl";
             return ecb.ToString();
         }
@@ -642,16 +654,29 @@ namespace Fastnet.Webframe.CoreData
         {
             try
             {
-                string cs = Settings.legacy.bookingConnectionStringName;
-                if (string.IsNullOrWhiteSpace(cs))
+                string legacyBookingDbName = Settings.legacy.bookingDatabaseName;
+                //string cs = Settings.legacy.connectionStringName;
+                if (string.IsNullOrWhiteSpace(legacyBookingDbName))
                 {
-                    throw new ApplicationException("No legacy booking connection string defined");
+                    throw new ApplicationException("No legacy database defined");
                 }
                 else
                 {
-                    return cs;
+                    return GetConnectionStringForDatabase(legacyBookingDbName);
                 }
             }
+            //try
+            //{
+            //    string cs = Settings.legacy.bookingConnectionStringName;
+            //    if (string.IsNullOrWhiteSpace(cs))
+            //    {
+            //        throw new ApplicationException("No legacy booking connection string defined");
+            //    }
+            //    else
+            //    {
+            //        return cs;
+            //    }
+            //}
             catch (Exception xe)
             {
                 Log.Write(xe);
@@ -692,9 +717,9 @@ namespace Fastnet.Webframe.CoreData
             };
             DWHParameter p = Factory.CreateNewParameter() as DWHParameter;
             p.ForwardBookingPeriod = pp;
-            p.BMCMembers = "BMC Members";
-            p.NonBMCMembers = "Non BMC Members";
-            p.PrivilegedMembers = "Privileged Members";
+            p.BMCMembers = bmcMembersGroupName;// "BMC Members";
+            p.NonBMCMembers = nonBmcMembersGroupName;// "Non BMC Members";
+            p.PrivilegedMembers = privilegedMembersGroupName;// "Privileged Members";
             p.ShortBookingInterval = 28;
             p.EntryCodeNotificationPeriod = 7;
             p.EntryCodeBridgePeriod = 7;
@@ -787,7 +812,7 @@ namespace Fastnet.Webframe.CoreData
                 throw;
             }
         }
-        private void CreateBookings(BookingDataContext bctx, BookingData.Booking newBooking, DWH.Booking lBooking, DWHMember member)
+        private void CreateBookings(BookingDataContext bctx, BookingData.Booking newBooking, LegacyData.DWH.Booking lBooking, DWHMember member)
         {
             Action<IEnumerable<ReleasedItem>> addAccomodation = (items) =>
             {

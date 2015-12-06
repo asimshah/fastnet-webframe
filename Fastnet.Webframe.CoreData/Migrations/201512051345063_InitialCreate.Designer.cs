@@ -13,7 +13,7 @@ namespace Fastnet.Webframe.CoreData.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201511240732427_InitialCreate"; }
+            get { return "201512051345063_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

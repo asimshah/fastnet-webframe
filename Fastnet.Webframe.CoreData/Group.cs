@@ -204,5 +204,13 @@ namespace Fastnet.Webframe.CoreData
             }
             return ctx.Groups.ToArray().Single(x => x.Name == sg.ToString() && x.Type.HasFlag(GroupTypes.System));
         }
+        public static Group GetGroup(string name, CoreDataContext ctx = null)
+        {
+            if (ctx == null)
+            {
+                ctx = Core.GetDataContext();
+            }
+            return ctx.Groups.ToArray().Single(x => x.Name == name && x.Type.HasFlag(GroupTypes.User));
+        }
     }
 }

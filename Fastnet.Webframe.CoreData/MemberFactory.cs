@@ -41,7 +41,7 @@ namespace Fastnet.Webframe.CoreData
             member.LastName = lastName;
             member.CreationDate = DateTime.UtcNow;
         }
-        public virtual MemberBase CreateNew(string id, dynamic data)
+        public virtual MemberBase CreateNew(string id, dynamic data, object additionalData)
         {
             MemberBase member = CreateMemberInstance();
 
@@ -62,6 +62,13 @@ namespace Fastnet.Webframe.CoreData
             result.Success = true;
             result.Error = "";
             return await Task.FromResult(result);
+        }
+        public virtual void AssignGroups(MemberBase member)
+        {
+            if (Group.AllMembers.Members.SingleOrDefault(x => x.Id == member.Id) == null)
+            {
+                Group.AllMembers.Members.Add(member);
+            }
         }
     }
 }

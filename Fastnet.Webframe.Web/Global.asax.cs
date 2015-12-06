@@ -41,16 +41,31 @@ namespace Fastnet.Webframe.Web
             }
             AutofacConfig.ConfigureContainer();
             dynamic version = VersionInfo.Get(typeof(MvcApplication));
-            using(var appdb = new ApplicationDbContext())
+            if (new CoreDataContext().Database.Exists() == false)
             {
-                int count = appdb.Users.Count();
-                Debug.Print("ApplicationDbContext user count = {0}", count);
+                // **NB**
+                // Creating database schemas with migrations is not intuitive.
+                // 1. I have multiple schemas in one database. This might be contributing some complication.
+                //    The simple call to CreateIfNotExists tests a database not a schema (so may be that complicates matters with
+                //    multiple datacontexts.
+                // 2. Probing the data (as done below for the appdb and bookingdb) works but ONLY if it is before the
+                //    SetInitializer call! This is counter intuitive to me!
+                // 3. On a separate point, I should find a way of only probing the booking db if booking is enabled ...
+                using (var appdb = new ApplicationDbContext())
+                {
+                    int count = appdb.Users.Count();
+                    Debug.Print("ApplicationDbContext user count = {0}", count);
+                }
+                using (var db = new BookingDataContext())
+                {
+                    int count = db.Bookings.Count();
+                    Debug.Print("BookingDataContext booking count = {0}", count);
+                }
             }
-
             Log.SetApplicationName(ConfigurationManager.AppSettings["SiteUrl"]);
             ApplicationDbContext.SetInitializer();
-            CoreDataContext.SetInitializer();
             BookingDataContext.SetInitializer();
+            CoreDataContext.SetInitializer();
             RouteConfig.MapMVC(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
@@ -58,6 +73,8 @@ namespace Fastnet.Webframe.Web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             TemplateLibrary.ScanForTemplates();
+
+
             using (CoreDataContext core = new CoreDataContext())
             {
                 //int count = core.Groups.Count(); // causes seeding, migrations, etc.

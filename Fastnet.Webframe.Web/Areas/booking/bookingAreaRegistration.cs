@@ -1,4 +1,7 @@
-﻿using Fastnet.Webframe.Web.Common;
+﻿using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.Web.Common;
+using System.Diagnostics;
+using System.Linq;
 using System.Web.Mvc;
 using System.Web.Optimization;
 
@@ -16,6 +19,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
 
         public override void RegisterArea(AreaRegistrationContext context)
         {
+
             RegisterBundles();
             //context.MapRoute(
             //    "booking_default",

@@ -14,6 +14,8 @@ namespace Fastnet.Webframe.CoreData
         [MaxLength(128)]
         public string BMCMembership { get; set; }
         public DateTime? BMCMembershipExpiresOn { get; set; }
+        public bool BMCMembershipIsValid { get; set; }
+        public DateTime? BMCMembershipValidatedOn { get; set; }
         [MaxLength(128)]
         public string Organisation { get; set; }
 
@@ -49,18 +51,22 @@ namespace Fastnet.Webframe.CoreData
             r.Success = true;
             if (needsRevalidation)
             {
+                this.BMCMembershipIsValid = false;
+                this.BMCMembershipValidatedOn = null;
                 r = await mf.ValidateRegistration(data);//, newDob);
             }
             if (r.Success)
             {
+                if(needsRevalidation)
+                {
+                    this.BMCMembershipIsValid = true;
+                    this.BMCMembershipValidatedOn = DateTime.Now;
+                    mf.AssignGroups(this);
+                }
                 Update(newEmailAddress, newFirstName, newLastName, newDisabled);
                 string newOrganisation = data.organisation?.Value ?? "";
                 BMCMembership = newBmcMembership;
-                //DateOfBirth = newDob;
                 Organisation = newOrganisation;
-                //dynamic result = new ExpandoObject();
-                //result.Success = true;
-                //return result;
             }
             return r;
 

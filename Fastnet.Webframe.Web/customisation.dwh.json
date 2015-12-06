@@ -1,6 +1,8 @@
 ﻿{
   "factory": "DonWhillansHut",
   "legacy": {
+    "legacyDatabaseName": "dwh-002",
+    "bookingDatabaseName": "dwh-booking-002",
     "connectionStringName": "LegacyData",
     "dataload": true,
     "bookingConnectionStringName": "LegacyBooking",

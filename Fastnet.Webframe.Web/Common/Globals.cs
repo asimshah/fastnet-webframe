@@ -22,7 +22,7 @@ namespace Fastnet.Webframe.Web.Common
         }
         private static string GetAdminEmailAddress()
         {
-            using (CoreDataReadOnly DataContext = new CoreDataReadOnly())
+            using (CoreDataContext DataContext = new CoreDataContext())
             {
                 MemberBase adminMember = DataContext.Members.Single(m => m.IsAdministrator);
                 return adminMember.EmailAddress;

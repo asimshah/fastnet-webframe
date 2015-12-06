@@ -429,7 +429,7 @@ namespace Fastnet.Webframe.Web.Controllers
                         data.emailAddress = model.Email;
                         data.firstName = "";
                         data.lastName = "Administrator";
-                        MemberBase member = mf.CreateNew(user.Id, data);
+                        MemberBase member = mf.CreateNew(user.Id, data, null);
                         member.EmailAddressConfirmed = true;
                         member.IsAdministrator = true;
                         member.CreationMethod = MemberCreationMethod.SystemGenerated;

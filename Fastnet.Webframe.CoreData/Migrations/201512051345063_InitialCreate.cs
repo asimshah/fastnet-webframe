@@ -123,6 +123,8 @@ namespace Fastnet.Webframe.CoreData.Migrations
                         CreationMethod = c.Int(nullable: false),
                         BMCMembership = c.String(maxLength: 128),
                         BMCMembershipExpiresOn = c.DateTime(precision: 7, storeType: "datetime2"),
+                        BMCMembershipIsValid = c.Boolean(),
+                        BMCMembershipValidatedOn = c.DateTime(precision: 7, storeType: "datetime2"),
                         Organisation = c.String(maxLength: 128),
                         Discriminator = c.String(nullable: false, maxLength: 128),
                     })

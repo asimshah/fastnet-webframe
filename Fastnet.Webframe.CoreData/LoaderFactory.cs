@@ -2,6 +2,7 @@
 using Fastnet.Web.Common;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ namespace Fastnet.Webframe.CoreData
         {
             try
             {
+                // should this be hardcoded as "LegacyData" (cos I think it is in polaris...)
                 string cs = Settings.legacy.connectionStringName;
                 if (string.IsNullOrWhiteSpace(cs))
                 {
@@ -55,5 +57,14 @@ namespace Fastnet.Webframe.CoreData
         }
         public abstract void Dispose();
         public abstract Task Load();
+        protected string GetConnectionStringForDatabase(string databaseName)
+        {
+            SqlConnectionStringBuilder cb = new SqlConnectionStringBuilder();
+            cb.DataSource = @".\sqlexpress";
+            cb.InitialCatalog = databaseName;
+            cb.MultipleActiveResultSets = true;
+            cb.IntegratedSecurity = true;
+            return cb.ToString();
+        }
     }
 }

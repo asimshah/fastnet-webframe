@@ -1,4 +1,5 @@
 ﻿using Fastnet.Common;
+using Fastnet.Webframe.BookingData;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -33,29 +34,49 @@ namespace Fastnet.Webframe.CoreData
         {
             return new DWHMember();
         }
-        public override MemberBase CreateNew(string id, dynamic data)
+        public override MemberBase CreateNew(string id, dynamic data, object additionalData)
         {
+            dynamic vr = additionalData;
             DWHMember m = CreateMemberInstance() as DWHMember;
             string emailAddress = data.emailAddress;
-            //string password = data.password;
             string firstName = data.firstName;
             string lastName = data.lastName;
             Fill(m, id, emailAddress, firstName, lastName);
-            //string bmc = data.bmcMembership?.Value ?? "";
             m.BMCMembership = ExtractBmcMembership(data);// bmc.Trim();
-            // m.DateOfBirth = ExtractDob(data);// data.dob?.Value;
-            //string dob = data.dob.Value ?? "";
-            //if(!string.IsNullOrWhiteSpace(dob))
-            //{
-            //    m.DateOfBirth = DateTime.Parse(dob);
-            //}
-
             m.Organisation = data.organisation?.Value ?? "";
+            if(vr.Success)
+            {
+                m.BMCMembershipIsValid = true;
+                m.BMCMembershipValidatedOn = DateTime.Now;
+            }
             return m;
         }
         public override MemberBase Find(CoreDataContext ctx, string id)
         {
             return ctx.Members.Find(id) as DWHMember;
+        }
+        public override void AssignGroups(MemberBase m)
+        {
+            string addToGroup = null;
+            string removeFromGroup = null;
+            DWHMember member = m as DWHMember;
+            base.AssignGroups(member);
+            using (var bctx = new BookingDataContext())
+            {
+                var para = bctx.Parameters.OfType<DWHParameter>().Single();
+                addToGroup = member.BMCMembershipIsValid ? para.BMCMembers : para.NonBMCMembers;
+                removeFromGroup = member.BMCMembershipIsValid ? para.NonBMCMembers : para.BMCMembers;
+            }
+            Group add = Group.GetGroup(addToGroup);
+            Group remove = Group.GetGroup(removeFromGroup);
+            if (add.Members.SingleOrDefault(x => x.Id == member.Id) == null)
+            {
+                add.Members.Add(member);
+            }
+            if(remove.Members.SingleOrDefault(x => x.Id == member.Id) != null)
+            {
+                remove.Members.Remove(member);
+            }
         }
         public string ExtractBmcMembership(dynamic data)
         {
@@ -74,7 +95,6 @@ namespace Fastnet.Webframe.CoreData
         {
 
             dynamic result = new ExpandoObject();
-            //string BMCMembership = data.bmcMembership;
             if (!string.IsNullOrWhiteSpace(bmcMembership))
             {
                 if (!BMCNumberInUse(bmcMembership))
@@ -86,7 +106,10 @@ namespace Fastnet.Webframe.CoreData
                     }
                     else
                     {
-                        result.Success = true;
+                        //result.Success = true;
+                        result.Success = false;
+                        result.ApiEnabled = false;
+                        result.Error = "BMC validation gateway is disabled";
                     }
                 }
                 else

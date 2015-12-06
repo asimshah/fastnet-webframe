@@ -193,9 +193,9 @@
     <Compile Include="MemberFactory.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="MenuMaster.cs" />
-    <Compile Include="Migrations\201511240732427_InitialCreate.cs" />
-    <Compile Include="Migrations\201511240732427_InitialCreate.Designer.cs">
-      <DependentUpon>201511240732427_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\201512051345063_InitialCreate.cs" />
+    <Compile Include="Migrations\201512051345063_InitialCreate.Designer.cs">
+      <DependentUpon>201512051345063_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Page.cs" />
@@ -226,10 +226,14 @@
       <Project>{080f0a59-2af8-49ad-98bf-e506bec85406}</Project>
       <Name>Fastnet.Webframe.IdentityData</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Fastnet.Webframe.LegacyData\Fastnet.Webframe.LegacyData.csproj">
+      <Project>{9c5cebcf-d6f3-460b-8751-9651ab571fcf}</Project>
+      <Name>Fastnet.Webframe.LegacyData</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201511240732427_InitialCreate.resx">
-      <DependentUpon>201511240732427_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201512051345063_InitialCreate.resx">
+      <DependentUpon>201512051345063_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

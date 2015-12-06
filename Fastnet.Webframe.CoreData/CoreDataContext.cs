@@ -175,21 +175,21 @@ namespace Fastnet.Webframe.CoreData
         }
 
     }
-    public class CoreDataReadOnly : CoreDataContext
-    {
-        public override int SaveChanges()
-        {
-            throw new InvalidOperationException("This context is read-only.");
-        }
-        public override System.Threading.Tasks.Task<int> SaveChangesAsync()
-        {
-            throw new InvalidOperationException("This context is read-only.");
-        }
-        public override System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken)
-        {
-            throw new InvalidOperationException("This context is read-only.");
-        }
-    }
+    //public class CoreDataReadOnly : CoreDataContext
+    //{
+    //    public override int SaveChanges()
+    //    {
+    //        throw new InvalidOperationException("This context is read-only.");
+    //    }
+    //    public override System.Threading.Tasks.Task<int> SaveChangesAsync()
+    //    {
+    //        throw new InvalidOperationException("This context is read-only.");
+    //    }
+    //    public override System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken)
+    //    {
+    //        throw new InvalidOperationException("This context is read-only.");
+    //    }
+    //}
 
 
 }

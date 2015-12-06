@@ -60,23 +60,27 @@ namespace Fastnet.Webframe.Web.Controllers
             string password = data.password;
             MemberFactory mf = MemberFactory.GetInstance();
             dynamic r = await mf.ValidateRegistration(data);
-            if (r.Success)
+            if (r.Success || r.ApiEnabled == false)
             {
                 using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
+                        //r.Success
                         var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
                         var result = await UserManager.CreateAsync(user, password);
                         if (result.Succeeded)
                         {
-                            MemberBase member = mf.CreateNew(user.Id, data);
+                            MemberBase member = mf.CreateNew(user.Id, data, r);
                             member.CreationMethod = MemberCreationMethod.SelfRegistration;
                             DataContext.Members.Add(member);
-                            Group.AllMembers.Members.Add(member);
+                           
+                            //Group.AllMembers.Members.Add(member);
                             member.ActivationCode = Guid.NewGuid().ToString();
                             member.ActivationEmailSentDate = DateTime.UtcNow;
                             member.RecordChanges(null, MemberAction.MemberActionTypes.New);
+                            await DataContext.SaveChangesAsync();
+                            mf.AssignGroups(member);
                             await DataContext.SaveChangesAsync();
                             MailHelper mh = new MailHelper();
                             mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);

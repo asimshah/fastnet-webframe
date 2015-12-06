@@ -310,30 +310,26 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             //Debug.Print("Creating {0} .", emailAddress);
             MemberFactory mf = MemberFactory.GetInstance();
             dynamic r = await mf.ValidateRegistration(data);
-            if (r.Success)
+            if (r.Success || r.ApiEnabled == false)
             {
                 using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
+                        //r.Success, etc
                         var user = new ApplicationUser { UserName = emailAddress, Email = emailAddress };
                         var appUserManager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
                         IdentityResult result = await appUserManager.CreateAsync(user, password);
                         if (result.Succeeded)
                         {
-                            //bool visiblePassword = false;// ApplicationSettings.Key("VisiblePassword", false) || ApplicationSettings.Key("Membership:EditablePassword", false);// SiteSetting.Get("VisiblePassword", false);
-                            //Debug.Print("Creating {0} ..", emailAddress);
-                            var member = mf.CreateNew(user.Id, data);
-                            //if (visiblePassword)
-                            //{
-                            //    member.PlainPassword = password;
-                            //}
-                            //Debug.Print("Creating {0} ...", emailAddress);
+                            var member = mf.CreateNew(user.Id, data, r);
                             DataContext.Members.Add(member);
-                            cd.Group.AllMembers.Members.Add(member);
+                            //cd.Group.AllMembers.Members.Add(member);
                             member.ActivationCode = Guid.NewGuid().ToString();
                             member.ActivationEmailSentDate = DateTime.UtcNow;
                             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
+                            await DataContext.SaveChangesAsync();
+                            mf.AssignGroups(member);
                             await DataContext.SaveChangesAsync();
                             MailHelper mh = new MailHelper();
                             mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
@@ -357,7 +353,6 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             else
             {
                 return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = r.Success, Error = r.Error });
-                //return Json(r);
             }
         }
         [HttpPost]

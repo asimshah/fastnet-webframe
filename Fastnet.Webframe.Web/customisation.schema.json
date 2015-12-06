@@ -101,6 +101,10 @@
           "type": "string",
           "description": "one of the available connectionsStrings in web.config"
         },
+        "bookingDatabaseName": {
+          "type": "string",
+          "description": "booking database name"
+        },
         "bookingConnectionStringName": {
           "type": "string",
           "description": "one of the available connectionStrings in web.config"
