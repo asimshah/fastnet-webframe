@@ -77,21 +77,20 @@
                 $U.Debug("Editor asked for new page {0}", r.url);
                 $T.GotoInternalLink(r.url);
             });
-            $(window).bind('popstate', function (event) {
-                var obj = event.originalEvent.state;
-                if (obj === null) {
-                    location.href = "home";
-                } else {
-                    var url = obj.href;
-                    if (url.startsWith("page/")) {
-                        //var id = parseInt(url.substring(6));
-                        $T.SetPage(url.substring(5));
+            if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
+                $(window).bind('popstate', function (event) {
+                    var obj = event.originalEvent.state;
+                    if (obj === null) {
+                        location.href = "home";
+                    } else {
+                        var url = obj.href;
+                        if (url.startsWith("page/")) {
+                            //var id = parseInt(url.substring(6));
+                            $T.SetPage(url.substring(5));
+                        }
                     }
-                }
-                if (navigator.appVersion.toLowerCase().indexOf("safari") === -1) {
-                    //location.href = location.href;
-                }
-            });
+                });
+            }
         },
         FindEditablePanel: function (panelSelector) {
             var result = null;
@@ -222,13 +221,13 @@
             switch (url) {
                 //case "/home":
                 case "login":
-                //case "/login":
+                    //case "/login":
                     $T.ShowDialog("login");
                     break;
                 case "register":
                 case "recoverpassword":
-                //case "/studio":
-                //case "/membership":
+                    //case "/studio":
+                    //case "/membership":
                     $.fastnet$account.AccountOperation(url);
                     break;
                 case "userprofile":
@@ -250,7 +249,7 @@
             //    "home", "login", "logon", "login", "logoff", "register", "recoverpassword",
             //    "studio", "membership"];
             var builtIn = [
-               "login", "logon",  "logoff", "register", "recoverpassword"];
+               "login", "logon", "logoff", "register", "recoverpassword"];
             function isBuiltIn(url) {
                 var r = false;
                 $.each(builtIn, function (i, item) {
