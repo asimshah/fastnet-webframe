@@ -53,7 +53,7 @@
           }
         }
       }
-    }
+    },
   },
   "title": "JSON Schema for customisation JSON file format",
   "type": "object",
@@ -191,6 +191,22 @@
           }
         }
       }
+    },
+    "paymentGateway": {
+      "type": "string",
+      "description": "Settings for the payment gateway",
+      "enum": [ "SagePay" ]
+    },
+    "sagePay": {
+      "type": "object",
+      "properties": {
+        "vendorName": { "type": "string" },
+        "liveUrl": { "type": "string" },
+        "testUrl": { "type": "string" },
+        "mockUrl": { "type": "string" },
+        "simulatorUrl": { "type": "string" }
+      },
+      "required": ["vendorName", "mockUrl", "liveUrl", "simulatorUrl", "testUrl"]
     }
   }
 }

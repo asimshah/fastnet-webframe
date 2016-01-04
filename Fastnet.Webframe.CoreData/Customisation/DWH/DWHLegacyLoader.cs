@@ -810,9 +810,9 @@ namespace Fastnet.Webframe.CoreData
                 }
                 bctx.SaveChanges();
             }
-            catch (Exception xe)
+            catch (Exception)
             {
-                Debugger.Break();
+                //Debugger.Break();
                 throw;
             }
         }

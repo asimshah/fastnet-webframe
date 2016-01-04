@@ -166,3 +166,4 @@ var fastnet;
     })();
     fastnet.tests = tests;
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=tests.js.map

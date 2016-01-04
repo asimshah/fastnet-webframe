@@ -89,9 +89,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     paymentGatewayAvailable = pg.Enabled;
                     AfterLoad(core, para);
                 }
-                catch (Exception xe)
+                catch (Exception)
                 {
-                    Debugger.Break();
+                    //Debugger.Break();
                     throw;
                 }
             }

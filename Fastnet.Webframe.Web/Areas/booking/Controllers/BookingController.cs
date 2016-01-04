@@ -301,7 +301,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     return new { Success = false, Error = xe.Message, Code = "SystemError" };
                 }
             }
-            StartStandardTasks();
+            await StartStandardTasks();
             return new
             {
                 Success = true,

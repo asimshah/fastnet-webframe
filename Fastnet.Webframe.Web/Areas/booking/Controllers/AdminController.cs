@@ -409,9 +409,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     //var temp = bedPrices.ToArray();
                     return bedPrices.ToArray().Select(x => new pricing(x));
                 }
-                catch (Exception xe)
+                catch (Exception)
                 {
-                    Debugger.Break();
+                    //Debugger.Break();
                     throw;
                 }
             }

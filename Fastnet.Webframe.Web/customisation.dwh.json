@@ -162,4 +162,12 @@
       "enable": true
     }
   }
+  "paymentGateway": "SagePay",
+  "sagePay": {
+    "liveUrl": "https://live.sagepay.com/gateway/service/vspserver-register.vsp",
+    "mockUrl": "https://live.sagepay.com/gateway/service/vspserver-register.vsp",
+    "simulatorUrl": "https://test.sagepay.com/simulator/VSPServerGateway.asp?Service=VendorRegisterTx",
+    "testUrl": "https://test.sagepay.com/gateway/service/vspserver-register.vsp",
+    "vendorName": "SomeVendorName"
+  }
 }
