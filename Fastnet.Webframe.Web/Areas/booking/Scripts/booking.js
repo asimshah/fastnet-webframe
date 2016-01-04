@@ -581,6 +581,7 @@ var fastnet;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
+                                    //this.step3_vm.showPaymentRequiredMessage
                                     _this.saveBookingChoice(f, data.current);
                                 }
                                 break;
@@ -712,4 +713,3 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=booking.js.map

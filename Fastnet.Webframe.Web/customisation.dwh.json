@@ -159,7 +159,7 @@
       }
     ],
     "paymentGateway": {
-      "enable": false
+      "enable": true
     }
   }
 }

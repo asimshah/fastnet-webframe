@@ -783,4 +783,3 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=forms.js.map

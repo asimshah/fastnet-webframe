@@ -255,6 +255,7 @@
     <Compile Include="Areas\booking\Common\Globals.cs" />
     <Compile Include="Areas\booking\Common\DayInformationClasses.cs" />
     <Compile Include="Areas\booking\Common\PaymentGateway.cs" />
+    <Compile Include="Areas\booking\Common\SagePay.cs" />
     <Compile Include="Areas\booking\Controllers\AdminController.cs" />
     <Compile Include="Areas\booking\Controllers\BookingController.cs" />
     <Compile Include="Areas\booking\Controllers\HomeController.cs" />
@@ -1784,7 +1785,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

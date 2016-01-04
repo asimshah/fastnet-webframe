@@ -11,9 +11,11 @@ using System.Configuration;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Web;
@@ -272,7 +274,9 @@ namespace Fastnet.Webframe.CoreData
         {
             try
             {
-                
+                CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
+                TextInfo textInfo = cultureInfo.TextInfo;
+                Group privileged = coreDb.Groups.Single(x => x.Name == "Privileged Members");
                 foreach (var item in legacyDb.Members.OrderBy(x => x.UserId))
                 {
                     if (item.Name == "Administrator$")
@@ -287,8 +291,8 @@ namespace Fastnet.Webframe.CoreData
                     }
                     string password = mu.GetPassword();
                     string email = item.Email.ToLower();
-                    string firstName = item.FirstName;
-                    string lastName = item.LastName;
+                    string firstName = textInfo.ToTitleCase(item.FirstName);
+                    string lastName = textInfo.ToTitleCase(item.LastName);
                     if (item.Name == "Administrator")
                     {
                         firstName = "";
@@ -307,6 +311,10 @@ namespace Fastnet.Webframe.CoreData
                         {
                             m.Groups.Add(ng);
                         }
+                    }
+                    if (m.LastName == "Stock" || m.LastName == "Shah" || m.LastName == "Battye")
+                    {
+                        m.Groups.Add(privileged);
                     }
                 }
                 appDb.SaveChanges();

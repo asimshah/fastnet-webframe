@@ -598,6 +598,7 @@ module fastnet {
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
+                                    //this.step3_vm.showPaymentRequiredMessage
                                     this.saveBookingChoice(f, data.current);
                                 }
                                 break;
