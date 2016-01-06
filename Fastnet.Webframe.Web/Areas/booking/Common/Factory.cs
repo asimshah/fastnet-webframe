@@ -79,7 +79,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new ApplicationException(string.Format("No ChoiceFilter type is available for factory", FactoryName));
             }
         }
-        public static BookingStateTransitionBase GetBookingStateTransition(BookingDataContext ctx, long abodeId)
+        public static BookingStateTransitionBase GetBookingStateTransition(BookingDataContext ctx, long abodeId = 1)
         {
             switch (FactoryName)
             {

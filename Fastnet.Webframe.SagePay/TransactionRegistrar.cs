@@ -22,7 +22,7 @@ namespace Fastnet.Webframe.SagePay
             requestSender = new HttpRequestSender();
             urlResolver = new DefaultUrlResolver();
         }
-        public object Send(string vendorTxCode, decimal amount,
+        public TransactionRegistrationResponse Send(string vendorTxCode, string description, decimal amount,
                 Address billingAddress, Address deliveryAddress, string customerEmail, PaymentFormProfile paymentFormProfile = PaymentFormProfile.Normal, string currencyCode = "GBP",
                 MerchantAccountType accountType = MerchantAccountType.Ecommerce, TxType txType = TxType.Payment)
         {
@@ -30,7 +30,7 @@ namespace Fastnet.Webframe.SagePay
             string notificationUrl = urlResolver.BuildNotificationUrl();
 
             var registration = new TransactionRegistration(
-                vendorTxCode, amount, notificationUrl,
+                vendorTxCode, description, amount, notificationUrl,
                 billingAddress, deliveryAddress, customerEmail,
                 configuration.VendorName,
                 currencyCode, paymentFormProfile, accountType, txType);

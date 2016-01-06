@@ -10,6 +10,7 @@ namespace Fastnet.Webframe.SagePay
     {
         readonly ShoppingBasket basket;
         readonly decimal amount;
+        readonly string description;
         readonly Address billingAddress;
         readonly Address deliveryAddress;
         readonly string customerEMail;
@@ -28,13 +29,14 @@ namespace Fastnet.Webframe.SagePay
         const string TxTypePayment = "PAYMENT";
         const string TxTypeDeferred = "DEFERRED";
         const string TxTypeAuthenticate = "AUTHENTICATE";
-        public TransactionRegistration(string vendorTxCode, decimal amount, string notificationUrl,
+        public TransactionRegistration(string vendorTxCode, string description, decimal amount, string notificationUrl,
             Address billingAddress, Address deliveryAddress, string customerEmail,
             string vendorName, string currencyCode, PaymentFormProfile paymentFormProfile,
             MerchantAccountType accountType, TxType txType)
         {
             VendorTxCode = vendorTxCode;
             NotificationURL = notificationUrl;
+            this.description = description;
             this.amount = amount;
             this.billingAddress = billingAddress;
             this.deliveryAddress = deliveryAddress;
@@ -135,7 +137,18 @@ namespace Fastnet.Webframe.SagePay
 
         public string Description
         {
-            get { return basket.Name; }
+            get
+            {
+                if (basket == null)
+                {
+                    return description;
+                }
+                else
+                {
+                    return basket.Name;
+                }
+                //return basket.Name;
+            }
         }
 
         [Unencoded]
@@ -244,7 +257,7 @@ namespace Fastnet.Webframe.SagePay
 
         public string Basket
         {
-            get { return basket.ToString(); }
+            get { return basket?.ToString(); }
         }
 
         //NOTE: Not currently supported

@@ -222,6 +222,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             // default isolation level is Serializable, meaning no one else can do anything
             string reference = null;
+            long bookingId;
             bool paymentGatewayEnabled = new PaymentGateway().Enabled;
             using (var tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -292,7 +293,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         await ctx.SaveChangesAsync();
                         tran.Complete();
                         reference = b.Reference;
-
+                        bookingId = b.BookingId;
                     }
 
                 }
@@ -307,6 +308,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             {
                 Success = true,
                 Error = string.Empty,
+                Code = string.Empty,
+                BookingId = bookingId,
                 BookingReference = reference,
                 MemberEmailAddress = this.GetCurrentMember().EmailAddress,
                 BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress()
@@ -343,10 +346,12 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         [HttpPost]
         [Route("pay")]
-        public async Task MakePayment(dynamic data)
+        public async Task<dynamic> MakePayment(dynamic data)
         {
+            string errorMessage = "";
             long bookingId = data.bookingId;
             dynamic address = data.address;
+            string uiSource = data.source;
             string firstNames = data.firstNames;
             string surname = data.surname;
             string address1 = data.address1;
@@ -354,7 +359,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             string city = data.city;
             string postCode = data.postCode;
             string country = "GB";
-            if(string.IsNullOrWhiteSpace(address2))
+            if (string.IsNullOrWhiteSpace(address2))
             {
                 address2 = null;
             }
@@ -376,20 +381,70 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             City = city,
                             Country = country,
                             PostCode = postCode
-                        };                        
+                        };
+                        string vendorTxCode = Guid.NewGuid().ToString();
                         var registrar = new TransactionRegistrar(this.Request.RequestUri);
-                        var result = registrar.Send("vendorTxCode", booking.TotalCost, sagePayAddress,
+                        var result = registrar.Send(vendorTxCode, booking.GetAccomodationDescription(), booking.TotalCost, sagePayAddress,
                             sagePayAddress, member.EmailAddress);
+                        if (result.Status == ResponseType.Ok)
+                        {
+                            SageTransaction st = new SageTransaction
+                            {
+                                VendorTxCode = vendorTxCode,
+                                VpsTxId = result.VPSTxId,
+                                SecurityKey = result.SecurityKey,
+                                Timestamp = DateTime.Now,
+                                RedirectUrl = result.NextURL,
+                                LongUserKey = booking.BookingId,
+                                GuidUserKey = member.Id,
+                                UserString = uiSource
+                            };
+                            DataContext.SageTransactions.Add(st);
+                            await DataContext.SaveChangesAsync();
+                            Redirect(st.RedirectUrl);
+                        }
+                        else
+                        {
+                            string detail = result.StatusDetail;
+                            errorMessage = string.Format("{0}: {1}", result.Status, result.StatusDetail);
+                            Log.Write(EventSeverities.Error, "SagePay transaction did not register: booking {0}, member {1}, status {2}, detail {3}", booking.BookingId, member.Fullname, result.Status, result.StatusDetail);
+                        }
                     }
                     else
                     {
-                        Log.Write(EventSeverities.Error, "Payment attempted for booking id {0} when status is {1}", bookingId, booking.Status);
+                        errorMessage = string.Format("Payment attempted for booking id {0} when status is {1}", bookingId, booking.Status);
+                        Log.Write(EventSeverities.Error, errorMessage);
                     }
                 }
             }
             else
             {
-                Log.Write(EventSeverities.Error, "Payment attempted for booking id {0} when not logged in", bookingId);
+                errorMessage = string.Format("Payment attempted for booking id {0} when not logged in", bookingId);
+                Log.Write(EventSeverities.Error, errorMessage);
+            }
+            return new { Success = false, Error = errorMessage };
+        }
+        [HttpPost]
+        [Route("cancel")]
+        public async Task CancelBooking(dynamic data)
+        {
+            long bookingId = data.bookingId;
+            using (var ctx = new BookingDataContext())
+            {
+                var booking = await ctx.Bookings.FindAsync(bookingId);
+                var m = this.GetCurrentMember();
+                var name = m.Fullname;
+                var today = BookingGlobals.GetToday();
+                if (booking.Status != bookingStatus.Cancelled && booking.Status != bookingStatus.AutoCancelled)
+                {
+                    bookingStatus old = booking.Status;
+                    booking.Status = bookingStatus.AutoCancelled;
+                    booking.StatusLastChanged = DateTime.Now;
+                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    var bst = Factory.GetBookingStateTransition(ctx);
+                    bst.ChangeState(booking, old);
+                    ctx.SaveChanges();
+                }
             }
         }
         private async Task StartStandardTasks()
@@ -407,7 +462,6 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             bm.StartAndForget();
 
         }
-
         private bookingChoice GetExistingChoice(List<bookingChoice> list, BookingChoice choice)
         {
             bookingChoice result = null;

@@ -207,4 +207,3 @@ var fastnet;
         utilOnReady.init();
     })(util = fastnet.util || (fastnet.util = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=utilities.js.map

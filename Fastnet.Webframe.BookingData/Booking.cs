@@ -49,6 +49,41 @@ namespace Fastnet.Webframe.BookingData
                 name, today.ToDefault(), time.ToString("HH:mm:ss"), text) + System.Environment.NewLine;
             this.History = text + this.History;
         }
+        public bookingStatus SetPaid(BookingDataContext ctx, string memberFullname, bool paid, long abodeId = 1)
+        {
+            bookingStatus oldStatus = this.Status;
+            this.Status = bookingStatus.Confirmed;
+            this.IsPaid = paid;
+            this.AddHistory(memberFullname, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
+            return oldStatus;
+            //var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+            //if (booking.Status != oldStatus)
+            //{
+            //    booking.StatusLastChanged = DateTime.Now;
+            //    bst.ChangeState(booking, oldStatus);
+            //}
+        }
+        //public string GetAccomodationDescription(Booking b)
+        public string GetAccomodationDescription()
+        {
+            var byGroup = this.AccomodationCollection.GroupBy(x => x.Type, x => x, (k, g) => new { type = k, list = g });
+            List<string> lines = new List<string>();
+            foreach (var typeItem in byGroup)
+            {
+                int count = typeItem.list.Count();
+                //int itemCapacity = typeItem.list.Select(x => x.c).Sum();
+                if (typeItem.type == AccomodationType.Bed)
+                {
+                    lines.Add(string.Format("{0} {1}{2}", count, typeItem.type, count > 1 ? "s" : ""));
+                }
+                else
+                {
+                    int capacity = typeItem.list.SelectMany(x => x.Descendants).Count(x => x.Type == AccomodationType.Bed);
+                    lines.Add(string.Format("{0} {1}{2} for {3}", count, typeItem.type, count > 1 ? "s" : "", capacity));
+                }
+            }
+            return string.Join(" plus ", lines);
+        }
     }
 
 }

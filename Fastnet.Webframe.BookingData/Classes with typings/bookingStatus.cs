@@ -13,5 +13,6 @@ namespace Fastnet.Webframe.BookingData
         Confirmed,
         AutoCancelled,
         Cancelled,
+        WaitingImmediatePayment
     }
 }

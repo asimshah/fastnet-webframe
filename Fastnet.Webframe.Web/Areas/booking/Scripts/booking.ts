@@ -30,9 +30,11 @@ module fastnet {
             (mt: monthTuple): monthTuple;
         }
         interface completedBooking {
+            BookingId: number;
             BookingReference: string;
             MemberEmailAddress: string;
             BookingSecretaryEmailAddress: string;
+            OnlinePaymentRequired: boolean;
         }
         class configuration {
             public static getFormStyleClasses(): string[] {
@@ -52,7 +54,7 @@ module fastnet {
                 };
                 this.today = new Date();
                 forms.form.initialise(config);
-                this.getMemberInfo().then(() => { 
+                this.getMemberInfo().then(() => {
                     this.showBookings();
                 });
             }
@@ -128,20 +130,40 @@ module fastnet {
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
-                                    this.startPayment(data.current, bookingId);
+                                    this.startPayment(data.current, bookingId).then((b: boolean) => {
+                                        if (!b) {
+                                            f.close();
+                                            this.showBookings();
+                                        }
+                                    });
                                 }
                                 break;
                         }
                     });
                 });
             }
-            private startPayment(m: addressModel, bookingId: number) {
+            private startPayment(m: addressModel, bookingId: number): JQueryPromise<boolean> {
+                var deferred = $.Deferred<boolean>();
                 ajax.Post({
                     url: "bookingapi/pay", data: {
+                        source: "mybooking",
                         bookingId: bookingId,
                         address: m
                     }
+                }).then((r: { Success: boolean, Error: string }) => {
+                    if (r.Success == false) {
+                        var message = `Access to Sage has failed.
+${r.Error}
+This is a system error`;
+                        forms.messageBox.show(message).then(() => {
+                            deferred.resolve(false);
+                        });
+                    }
+                    else {
+                        deferred.resolve(true);
+                    }
                 });
+                return deferred.promise();
             }
             private embeddedButtonHandler(list: server.booking[], e: JQueryEventObject): void {
                 e.stopPropagation();
@@ -368,6 +390,101 @@ module fastnet {
             private onBookingCompleted(cb: completedBooking): void {
                 debug.print("Booking {0} made", cb.BookingReference);
                 // show confirmation template here
+                if (cb.OnlinePaymentRequired == false) {
+                    this.showStandardConfirmation(cb);
+                } else {
+                    // we must collect additional info and move to online payment
+                    // 1. gather an address for card verification
+                    // 2. call sagepay through server-side integration
+                    this.getAddressDetails(cb).then(() => {
+                    });
+                }
+                //var bookingConfirmationTemplateUrl = "booking/bookingConfirmation";
+                //wt.getTemplate({ ctx: this, templateUrl: bookingConfirmationTemplateUrl }).then((r) => {
+                //    var template = r.template;
+                //    $("#bookingCalendar").empty();
+                //    $(".booking-interaction").empty();
+                //    var html = $(Mustache.render(template, cb));
+                //    $(".booking-interaction").append(html);
+                //});
+            }
+            private getAddressDetails(cb: completedBooking): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var address: addressModel = new addressModel(this.currentMember.FirstName, this.currentMember.LastName);
+                var address_vm = new observableAddressModel(address);
+                var addressForm = new forms.form(this, {
+                    modal: false,
+                    title: "Name & Address (for payment verification)",
+                    cancelButtonText: "Cancel",
+                    okButtonText: "Pay (via Sage)"
+                }, address_vm);
+                var addressTemplateUrl = "booking/addressDetails";
+                wt.getTemplate({ ctx: this, templateUrl: addressTemplateUrl }).then((r) => {
+                    addressForm.setContentHtml(r.template);
+                    addressForm.open((ctx: myBooking, f: forms.form, cmd: string, data: addressModels) => {
+                        switch (cmd) {
+                            case "cancel-command":
+                                // cancelling at this stage means that the existing booking must be cancelled
+                                f.close();
+                                this.cancelBooking(cb.BookingId).then(() => {
+                                    this.start();
+                                });
+                                break;
+                            case "ok-command":
+                                if (f.isValid()) {
+                                    this.startPayment(data.current, cb.BookingId).then((b: boolean) => {
+                                        f.close();
+                                        if (b) {
+                                            this.showStandardConfirmation(cb);
+                                        } else {
+                                            // a failed payment means that the existing booking must be cancelled
+                                            this.cancelBooking(cb.BookingId).then(() => {
+                                                this.start();
+                                            });
+                                        }
+                                    });
+                                }
+                                break;
+                        }
+                    });
+                });
+                return deferred.promise();
+            }
+            private cancelBooking(bookingId: number): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                ajax.Post({
+                    url: "bookingapi/cancel", data: {
+                        bookingId: bookingId,
+                    }
+                }).then(() => {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            }
+            private startPayment(m: addressModel, bookingId: number): JQueryPromise<boolean> {
+                var deferred = $.Deferred<boolean>();
+                ajax.Post({
+                    url: "bookingapi/pay", data: {
+                        source: "onlinebooking",
+                        bookingId: bookingId,
+                        address: m
+                    }
+                }).then((r: { Success: boolean, Error: string }) => {
+                    if (r.Success == false) {
+                        var message = `Access to Sage has failed.
+${r.Error}
+This is a system error`;
+                        forms.messageBox.show(message).then(() => {
+                            deferred.resolve(false);
+                        });
+                    }
+                    else {
+                        deferred.resolve(true);
+                    }
+                });
+                return deferred.promise();
+            }
+            private showStandardConfirmation(cb: completedBooking) {
                 var bookingConfirmationTemplateUrl = "booking/bookingConfirmation";
                 wt.getTemplate({ ctx: this, templateUrl: bookingConfirmationTemplateUrl }).then((r) => {
                     var template = r.template;
@@ -376,7 +493,6 @@ module fastnet {
                     var html = $(Mustache.render(template, cb));
                     $(".booking-interaction").append(html);
                 });
-                //this.startBooking();
             }
             private retryCredentials(): void {
                 var memberInfoUrl = "bookingapi/member";
@@ -656,15 +772,14 @@ module fastnet {
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
-                                    //this.step3_vm.showPaymentRequiredMessage
-                                    this.saveBookingChoice(f, data.current);
+                                    this.saveBookingChoice(f, data.current, this.step3_vm.showPaymentRequiredMessage);
                                 }
                                 break;
                         }
                     });
                 });
             }
-            private saveBookingChoice(f: forms.form, model: request_step3): void {
+            private saveBookingChoice(f: forms.form, model: request_step3, onlinePayment: boolean): void {
                 var htmlAvailabilityLost = `<div>This booking could not be made.</div>
                                   <div>The most probable reason is that another booking has just been made that overlaps with these dates.</div>
                                 <div>Availability calendar(s) have been updated. It is possible that the booking may succeed on a retry.</div>`;
@@ -700,9 +815,11 @@ module fastnet {
                         this.bookingApp.reloadCalendar().then(() => {
                             if (r.Success) {
                                 var cb: completedBooking = {
+                                    BookingId: r.BookingId,
                                     BookingReference: r.BookingReference,
                                     MemberEmailAddress: r.MemberEmailAddress,
-                                    BookingSecretaryEmailAddress: r.BookingSecretaryEmailAddress
+                                    BookingSecretaryEmailAddress: r.BookingSecretaryEmailAddress,
+                                    OnlinePaymentRequired: onlinePayment
                                 };
                                 this.makeBooking.resolve(cb);
                             } else {

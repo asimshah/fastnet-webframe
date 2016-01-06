@@ -1,4 +1,5 @@
-﻿using Fastnet.Webframe.CoreData;
+﻿using Fastnet.Webframe.BookingData;
+using Fastnet.Webframe.CoreData;
 using Fastnet.Webframe.Mvc;
 using Fastnet.Webframe.SagePay;
 using System;
@@ -40,33 +41,77 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             {
                 return new ErrorResult();
             }
-
-            // Get the order out of our "database"
-            var order =  _orderRepository.GetById(response.VendorTxCode);
-
-            // IF there was no matching order, send a TransactionNotfound error
-            if (order == null)
+            CoreDataContext DataContext = Core.GetDataContext();
+            var st = DataContext.SageTransactions.Find(response.VendorTxCode);
+            if (st == null)
             {
                 return new TransactionNotFoundResult(response.VendorTxCode);
             }
+            //// Get the order out of our "database"
+            //var order =  _orderRepository.GetById(response.VendorTxCode);
+
+            //// IF there was no matching order, send a TransactionNotfound error
+            //if (order == null)
+            //{
+            //    return new TransactionNotFoundResult(response.VendorTxCode);
+            //}
 
             // Check if the signature is valid.
             // Note that we need to look up the vendor name from our configuration.
-            if (!response.IsSignatureValid(order.SecurityKey, Configuration.Current.VendorName))
+            if (!response.IsSignatureValid(st.SecurityKey, Configuration.Current.VendorName))
             {
                 return new InvalidSignatureResult(response.VendorTxCode);
             }
 
             // All good - tell SagePay it's safe to charge the customer.
-            return new ValidOrderResult(order.VendorTxCode, response);
+            return new ValidOrderResult(st.VendorTxCode, response);
         }
         [Route("sage/failed/{vendorTxCode}")]
         public ActionResult Failed(string vendorTxCode)
         {
-            return View();
+            CoreDataContext DataContext = Core.GetDataContext();
+            var st = DataContext.SageTransactions.Find(vendorTxCode);
+            if (st == null)
+            {
+                // what should we do here? Can it happen?
+                return new TransactionNotFoundResult(vendorTxCode);
+            }
+            var memberId = st.GuidUserKey;
+            var member = DataContext.Members.Find(memberId);
+            var bookingId = st.LongUserKey;
+            PaymentFailedModel m = new PaymentFailedModel();
+            m.MemberEmailAddress = member.EmailAddress;
+            m.BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
+            m.UiSource = st.UserString;
+            return View(m);
         }
         [Route("sage/success/{vendorTxCode}")]
         public ActionResult Success(string vendorTxCode)
+        {
+            CoreDataContext DataContext = Core.GetDataContext();
+            var st = DataContext.SageTransactions.Find(vendorTxCode);
+            if (st == null)
+            {
+                // what should we do here? Can it happen?
+                return new TransactionNotFoundResult(vendorTxCode);
+            }
+            var memberId = st.GuidUserKey;
+            var member = DataContext.Members.Find(memberId);
+            var bookingId = st.LongUserKey;
+            PaymentSuccessModel m = new PaymentSuccessModel();
+            m.MemberEmailAddress = member.EmailAddress;
+            m.BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
+            using (var ctx = new BookingDataContext())
+            {
+                var booking = ctx.Bookings.Find(bookingId);
+                bookingStatus oldStatus = booking.SetPaid(ctx, member.Fullname, true);
+                booking.PerformStateTransition(ctx, oldStatus);
+                m.BookingReference = booking.Reference;
+            }
+            return View(m);
+        }
+        [Route("sage/success/{vendorTxCode}")]
+        public ActionResult RegistrationFailed(string vendorTxCode)
         {
             return View();
         }

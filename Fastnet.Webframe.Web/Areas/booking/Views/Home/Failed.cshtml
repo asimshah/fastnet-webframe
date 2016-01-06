@@ -1,0 +1,28 @@
+﻿@model Fastnet.Webframe.Web.Areas.booking.PaymentFailedModel
+@{
+    ViewBag.Title = "Payment Status";
+    ViewBag.BaseUrl = Request.Url.GetLeftPart(UriPartial.Authority) + VirtualPathUtility.ToAbsolute("~/");
+}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="booking-failed">
+            <h3>Payment Failed</h3>
+            @if (Model.UiSource == "mybooking")
+            {
+                <div class="paragraph">
+                    Payment for booking <strong>@Model.BookingReference</strong> failed.
+                </div>
+            }
+            else
+            {
+                <div class="paragraph">
+                    As payment has failed, no booking has been made.
+                </div>
+            }
+            <div class="boiler-plate">
+                <div class="paragraph">Please contact the <a href="mailto://@Model.BookingSecretaryEmailAddress">Booking Secretary</a> for assistance.</div>
+            </div>
+            <div class="home-link"><a href="/home">Back to home page</a></div>
+        </div>
+    </div>
+</div>

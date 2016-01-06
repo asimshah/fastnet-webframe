@@ -114,7 +114,12 @@ var fastnet;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
-                                    _this.startPayment(data.current, bookingId);
+                                    _this.startPayment(data.current, bookingId).then(function (b) {
+                                        if (!b) {
+                                            f.close();
+                                            _this.showBookings();
+                                        }
+                                    });
                                 }
                                 break;
                         }
@@ -122,12 +127,25 @@ var fastnet;
                 });
             };
             myBooking.prototype.startPayment = function (m, bookingId) {
+                var deferred = $.Deferred();
                 ajax.Post({
                     url: "bookingapi/pay", data: {
+                        source: "mybooking",
                         bookingId: bookingId,
                         address: m
                     }
+                }).then(function (r) {
+                    if (r.Success == false) {
+                        var message = "Access to Sage has failed.\n" + r.Error + "\nThis is a system error";
+                        forms.messageBox.show(message).then(function () {
+                            deferred.resolve(false);
+                        });
+                    }
+                    else {
+                        deferred.resolve(true);
+                    }
                 });
+                return deferred.promise();
             };
             myBooking.prototype.embeddedButtonHandler = function (list, e) {
                 e.stopPropagation();
@@ -356,6 +374,102 @@ var fastnet;
             bookingApp.prototype.onBookingCompleted = function (cb) {
                 debug.print("Booking {0} made", cb.BookingReference);
                 // show confirmation template here
+                if (cb.OnlinePaymentRequired == false) {
+                    this.showStandardConfirmation(cb);
+                }
+                else {
+                    // we must collect additional info and move to online payment
+                    // 1. gather an address for card verification
+                    // 2. call sagepay through server-side integration
+                    this.getAddressDetails(cb).then(function () {
+                    });
+                }
+                //var bookingConfirmationTemplateUrl = "booking/bookingConfirmation";
+                //wt.getTemplate({ ctx: this, templateUrl: bookingConfirmationTemplateUrl }).then((r) => {
+                //    var template = r.template;
+                //    $("#bookingCalendar").empty();
+                //    $(".booking-interaction").empty();
+                //    var html = $(Mustache.render(template, cb));
+                //    $(".booking-interaction").append(html);
+                //});
+            };
+            bookingApp.prototype.getAddressDetails = function (cb) {
+                var _this = this;
+                var deferred = $.Deferred();
+                var address = new booking.addressModel(this.currentMember.FirstName, this.currentMember.LastName);
+                var address_vm = new booking.observableAddressModel(address);
+                var addressForm = new forms.form(this, {
+                    modal: false,
+                    title: "Name & Address (for payment verification)",
+                    cancelButtonText: "Cancel",
+                    okButtonText: "Pay (via Sage)"
+                }, address_vm);
+                var addressTemplateUrl = "booking/addressDetails";
+                wt.getTemplate({ ctx: this, templateUrl: addressTemplateUrl }).then(function (r) {
+                    addressForm.setContentHtml(r.template);
+                    addressForm.open(function (ctx, f, cmd, data) {
+                        switch (cmd) {
+                            case "cancel-command":
+                                // cancelling at this stage means that the existing booking must be cancelled
+                                f.close();
+                                _this.cancelBooking(cb.BookingId).then(function () {
+                                    _this.start();
+                                });
+                                break;
+                            case "ok-command":
+                                if (f.isValid()) {
+                                    _this.startPayment(data.current, cb.BookingId).then(function (b) {
+                                        f.close();
+                                        if (b) {
+                                            _this.showStandardConfirmation(cb);
+                                        }
+                                        else {
+                                            // a failed payment means that the existing booking must be cancelled
+                                            _this.cancelBooking(cb.BookingId).then(function () {
+                                                _this.start();
+                                            });
+                                        }
+                                    });
+                                }
+                                break;
+                        }
+                    });
+                });
+                return deferred.promise();
+            };
+            bookingApp.prototype.cancelBooking = function (bookingId) {
+                var deferred = $.Deferred();
+                ajax.Post({
+                    url: "bookingapi/cancel", data: {
+                        bookingId: bookingId,
+                    }
+                }).then(function () {
+                    deferred.resolve();
+                });
+                return deferred.promise();
+            };
+            bookingApp.prototype.startPayment = function (m, bookingId) {
+                var deferred = $.Deferred();
+                ajax.Post({
+                    url: "bookingapi/pay", data: {
+                        source: "onlinebooking",
+                        bookingId: bookingId,
+                        address: m
+                    }
+                }).then(function (r) {
+                    if (r.Success == false) {
+                        var message = "Access to Sage has failed.\n" + r.Error + "\nThis is a system error";
+                        forms.messageBox.show(message).then(function () {
+                            deferred.resolve(false);
+                        });
+                    }
+                    else {
+                        deferred.resolve(true);
+                    }
+                });
+                return deferred.promise();
+            };
+            bookingApp.prototype.showStandardConfirmation = function (cb) {
                 var bookingConfirmationTemplateUrl = "booking/bookingConfirmation";
                 wt.getTemplate({ ctx: this, templateUrl: bookingConfirmationTemplateUrl }).then(function (r) {
                     var template = r.template;
@@ -364,7 +478,6 @@ var fastnet;
                     var html = $(Mustache.render(template, cb));
                     $(".booking-interaction").append(html);
                 });
-                //this.startBooking();
             };
             bookingApp.prototype.retryCredentials = function () {
                 var _this = this;
@@ -641,15 +754,14 @@ var fastnet;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
-                                    //this.step3_vm.showPaymentRequiredMessage
-                                    _this.saveBookingChoice(f, data.current);
+                                    _this.saveBookingChoice(f, data.current, _this.step3_vm.showPaymentRequiredMessage);
                                 }
                                 break;
                         }
                     });
                 });
             };
-            bookDates.prototype.saveBookingChoice = function (f, model) {
+            bookDates.prototype.saveBookingChoice = function (f, model, onlinePayment) {
                 var _this = this;
                 var htmlAvailabilityLost = "<div>This booking could not be made.</div>\n                                  <div>The most probable reason is that another booking has just been made that overlaps with these dates.</div>\n                                <div>Availability calendar(s) have been updated. It is possible that the booking may succeed on a retry.</div>";
                 var htmlFailed = "<div>This booking could not be made.</div>\n                                  <div>An internal error has occurred.</div>";
@@ -683,9 +795,11 @@ var fastnet;
                         _this.bookingApp.reloadCalendar().then(function () {
                             if (r.Success) {
                                 var cb = {
+                                    BookingId: r.BookingId,
                                     BookingReference: r.BookingReference,
                                     MemberEmailAddress: r.MemberEmailAddress,
-                                    BookingSecretaryEmailAddress: r.BookingSecretaryEmailAddress
+                                    BookingSecretaryEmailAddress: r.BookingSecretaryEmailAddress,
+                                    OnlinePaymentRequired: onlinePayment
                                 };
                                 _this.makeBooking.resolve(cb);
                             }
@@ -773,4 +887,3 @@ var fastnet;
         })();
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=booking.js.map

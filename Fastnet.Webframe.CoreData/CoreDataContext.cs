@@ -136,6 +136,7 @@ namespace Fastnet.Webframe.CoreData
         public DbSet<Recorder> Recorders { get; set; }
         public DbSet<Record> Records { get; set; }
         public DbSet<Webtask> Webtasks { get; set; }
+        public DbSet<SageTransaction> SageTransactions { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

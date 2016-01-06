@@ -56,7 +56,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.entryInformation = b.EntryInformation;
             this.under18sInParty = b.Under18sInParty;
             this.memberId = b.MemberId;
-            this.description = GetAccomodationDescription(b);
+            this.description = b.GetAccomodationDescription();// GetAccomodationDescription(b);
             using (var ctx = new CoreDataContext())
             {
                 MemberBase m = ctx.Members.Find(b.MemberId);
@@ -69,25 +69,25 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.memberEmailAddress = m.EmailAddress;
             this.memberPhoneNumber = m.PhoneNumber;         
         }
-        private string GetAccomodationDescription(Booking b)
-        {
-            var byGroup = b.AccomodationCollection.GroupBy(x => x.Type, x => x, (k, g) => new { type = k, list = g });
-            List<string> lines = new List<string>();
-            foreach (var typeItem in byGroup)
-            {
-                int count = typeItem.list.Count();
-                //int itemCapacity = typeItem.list.Select(x => x.c).Sum();
-                if (typeItem.type == AccomodationType.Bed)
-                {
-                    lines.Add(string.Format("{0} {1}{2}", count, typeItem.type, count > 1 ? "s" : ""));
-                }
-                else
-                {
-                    int capacity = typeItem.list.SelectMany(x => x.Descendants).Count(x => x.Type == AccomodationType.Bed);
-                    lines.Add(string.Format("{0} {1}{2} for {3}", count, typeItem.type, count > 1 ? "s" : "", capacity));
-                }
-            }
-            return string.Join(" plus ", lines);
-        }
+        //private string GetAccomodationDescription(Booking b)
+        //{
+        //    var byGroup = b.AccomodationCollection.GroupBy(x => x.Type, x => x, (k, g) => new { type = k, list = g });
+        //    List<string> lines = new List<string>();
+        //    foreach (var typeItem in byGroup)
+        //    {
+        //        int count = typeItem.list.Count();
+        //        //int itemCapacity = typeItem.list.Select(x => x.c).Sum();
+        //        if (typeItem.type == AccomodationType.Bed)
+        //        {
+        //            lines.Add(string.Format("{0} {1}{2}", count, typeItem.type, count > 1 ? "s" : ""));
+        //        }
+        //        else
+        //        {
+        //            int capacity = typeItem.list.SelectMany(x => x.Descendants).Count(x => x.Type == AccomodationType.Bed);
+        //            lines.Add(string.Format("{0} {1}{2} for {3}", count, typeItem.type, count > 1 ? "s" : "", capacity));
+        //        }
+        //    }
+        //    return string.Join(" plus ", lines);
+        //}
     }
 }

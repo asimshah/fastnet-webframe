@@ -31,4 +31,3 @@ var fastnet;
         booking.dwhRequestCustomiser = dwhRequestCustomiser;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=dwhRequestCustomiser.js.map

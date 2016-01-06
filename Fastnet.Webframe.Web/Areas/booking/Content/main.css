@@ -242,14 +242,17 @@ button.side-button {
 .address-details .validation-error {
   border: 1px solid red;
 }
-.booking-confirmation {
+.booking-confirmation,
+.booking-failed {
   margin-left: 5px;
   margin-right: 5px;
 }
-.booking-confirmation .paragraph {
+.booking-confirmation .paragraph,
+.booking-failed .paragraph {
   margin-bottom: 8px;
 }
-.booking-confirmation .boiler-plate {
+.booking-confirmation .boiler-plate,
+.booking-failed .boiler-plate {
   font-size: 0.8em;
   color: #373737;
 }

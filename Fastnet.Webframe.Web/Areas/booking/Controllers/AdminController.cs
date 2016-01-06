@@ -106,7 +106,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("update/booking/{id}/paidstate/{paid}")]
         public void UpdateBooking(long id, bool paid)
         {
-            long abodeId = 1;
+            //long abodeId = 1;
             using (var ctx = new BookingDataContext())
             {
                 var m = this.GetCurrentMember();
@@ -116,22 +116,29 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 
                 if (booking != null)
                 {
-                    bookingStatus oldStatus = booking.Status;
-                    booking.Status = bookingStatus.Confirmed;
-                    booking.IsPaid = paid;
-                    booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
-                    var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-                    if (booking.Status != oldStatus)
-                    {
-                        booking.StatusLastChanged = DateTime.Now;
-                        bst.ChangeState(booking, oldStatus);
-                    }
+                    SetPaid(ctx, booking, paid, name);
                     ctx.SaveChanges();
                 }
-
             }
             StartStandardTasks();
         }
+
+        private void SetPaid(BookingDataContext ctx, Booking booking, bool paid, string memberFullname, long abodeId = 1)
+        {
+            bookingStatus oldStatus = booking.SetPaid(ctx, memberFullname, paid, abodeId);
+            booking.PerformStateTransition(ctx, oldStatus);
+            //bookingStatus oldStatus = booking.Status;
+            //booking.Status = bookingStatus.Confirmed;
+            //booking.IsPaid = paid;
+            //booking.AddHistory(name, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
+            //var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+            //if (booking.Status != oldStatus)
+            //{
+            //    booking.StatusLastChanged = DateTime.Now;
+            //    bst.ChangeState(booking, oldStatus);
+            //}
+        }
+
         [HttpPost]
         [Route("update/booking")]
         public void UpdateBooking(dynamic data)

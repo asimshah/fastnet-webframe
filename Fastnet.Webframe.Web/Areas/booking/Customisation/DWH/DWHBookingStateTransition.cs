@@ -111,10 +111,22 @@ namespace Fastnet.Webframe.Web.Areas.booking
             }
             else
             {
-                if (isPrivileged || (booking.From - today).TotalDays < NDays && booking.IsPaid)
+                //if (isPrivileged || (booking.From - today).TotalDays < NDays && booking.IsPaid)
+                //{
+                //    booking.Status = bookingStatus.Confirmed;
+                //} else
+                //{
+                //    booking.Status = bookingStatus.WaitingPayment;
+                //}
+                if (isPrivileged)
                 {
                     booking.Status = bookingStatus.Confirmed;
-                } else
+                }
+                else if ((booking.From - today).TotalDays < NDays)
+                {
+                    booking.Status = bookingStatus.WaitingImmediatePayment;
+                }
+                else
                 {
                     booking.Status = bookingStatus.WaitingPayment;
                 }
