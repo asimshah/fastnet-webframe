@@ -9,6 +9,7 @@ namespace Fastnet.Webframe.SagePay
     public class TransactionRegistration
     {
         readonly ShoppingBasket basket;
+        readonly decimal amount;
         readonly Address billingAddress;
         readonly Address deliveryAddress;
         readonly string customerEMail;
@@ -27,7 +28,39 @@ namespace Fastnet.Webframe.SagePay
         const string TxTypePayment = "PAYMENT";
         const string TxTypeDeferred = "DEFERRED";
         const string TxTypeAuthenticate = "AUTHENTICATE";
-
+        public TransactionRegistration(string vendorTxCode, decimal amount, string notificationUrl,
+            Address billingAddress, Address deliveryAddress, string customerEmail,
+            string vendorName, string currencyCode, PaymentFormProfile paymentFormProfile,
+            MerchantAccountType accountType, TxType txType)
+        {
+            VendorTxCode = vendorTxCode;
+            NotificationURL = notificationUrl;
+            this.amount = amount;
+            this.billingAddress = billingAddress;
+            this.deliveryAddress = deliveryAddress;
+            customerEMail = customerEmail;
+            this.vendorName = vendorName;
+            switch (paymentFormProfile)
+            {
+                case PaymentFormProfile.Low:
+                    profile = LowProfileFormMode;
+                    break;
+                default:
+                    profile = NormalFormMode;
+                    break;
+            }
+            switch (accountType)
+            {
+                case MerchantAccountType.MailOrder:
+                    this.accountType = AccountTypeMailOrder;
+                    break;
+                default:
+                    this.accountType = AccountTypeEcommerce;
+                    break;
+            }
+            this.currency = currencyCode;
+            this.txType = txType.ToString().ToUpperInvariant();
+        }
         public TransactionRegistration(string vendorTxCode, ShoppingBasket basket, string notificationUrl,
             Address billingAddress, Address deliveryAddress, string customerEmail,
             string vendorName, string currencyCode, PaymentFormProfile paymentFormProfile,
@@ -82,7 +115,17 @@ namespace Fastnet.Webframe.SagePay
         [Format("f2")]
         public decimal Amount
         {
-            get { return basket.Total; }
+            get
+            {
+                if (basket == null)
+                {
+                    return amount;
+                }
+                else
+                {
+                    return basket.Total;
+                }
+            }
         }
 
         public string Currency

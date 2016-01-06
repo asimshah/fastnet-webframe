@@ -161,7 +161,7 @@
     "paymentGateway": {
       "enable": true
     }
-  }
+  },
   "paymentGateway": "SagePay",
   "sagePay": {
     "liveUrl": "https://live.sagepay.com/gateway/service/vspserver-register.vsp",

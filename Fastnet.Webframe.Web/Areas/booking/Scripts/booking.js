@@ -26,14 +26,22 @@ var fastnet;
         var myBooking = (function () {
             function myBooking() {
             }
-            myBooking.prototype.start = function () {
+            myBooking.prototype.start = function (paymentGateway) {
                 var _this = this;
+                this.paymentGatewayAvailable = paymentGateway;
                 $.fn.dataTable.moment('DDMMMYYYY');
                 var config = {
                     modelessContainer: "booking-interaction",
+                    additionalValidations: booking.bookingAppValidations.GetValidators()
                 };
                 this.today = new Date();
                 forms.form.initialise(config);
+                this.getMemberInfo().then(function () {
+                    _this.showBookings();
+                });
+            };
+            myBooking.prototype.showBookings = function () {
+                var _this = this;
                 var templateUrl = "booking/mybookings";
                 var dataurl = str.format("bookingapi/get/my/bookings");
                 ajax.Get({ url: dataurl }, false).then(function (result) {
@@ -63,6 +71,9 @@ var fastnet;
                                     break;
                             }
                         }).then(function () {
+                            if (_this.paymentGatewayAvailable === false) {
+                                f.find(".my-bookings").addClass("payment-gateway-disabled");
+                            }
                             f.find("#my-bookings button[data-table-cmd]").on("click", function (e) {
                                 _this.embeddedButtonHandler(result.bookings, e);
                             });
@@ -82,6 +93,42 @@ var fastnet;
                     });
                 });
             };
+            myBooking.prototype.getAddressDetails = function (bookingId) {
+                var _this = this;
+                var address = new booking.addressModel(this.currentMember.FirstName, this.currentMember.LastName);
+                var address_vm = new booking.observableAddressModel(address);
+                var addressForm = new forms.form(this, {
+                    modal: false,
+                    title: "Name & Address (for payment verification)",
+                    cancelButtonText: "Cancel",
+                    okButtonText: "Pay (via Sage)"
+                }, address_vm);
+                var addressTemplateUrl = "booking/addressDetails";
+                wt.getTemplate({ ctx: this, templateUrl: addressTemplateUrl }).then(function (r) {
+                    addressForm.setContentHtml(r.template);
+                    addressForm.open(function (ctx, f, cmd, data) {
+                        switch (cmd) {
+                            case "cancel-command":
+                                f.close();
+                                _this.showBookings();
+                                break;
+                            case "ok-command":
+                                if (f.isValid()) {
+                                    _this.startPayment(data.current, bookingId);
+                                }
+                                break;
+                        }
+                    });
+                });
+            };
+            myBooking.prototype.startPayment = function (m, bookingId) {
+                ajax.Post({
+                    url: "bookingapi/pay", data: {
+                        bookingId: bookingId,
+                        address: m
+                    }
+                });
+            };
             myBooking.prototype.embeddedButtonHandler = function (list, e) {
                 e.stopPropagation();
                 var ct = e.target;
@@ -90,8 +137,19 @@ var fastnet;
                 switch (cmd) {
                     case "make-payment":
                         debug.print("make payment for booking {0}", id);
+                        this.getAddressDetails(id);
                         break;
                 }
+            };
+            myBooking.prototype.getMemberInfo = function () {
+                var _this = this;
+                var deferred = $.Deferred();
+                var memberInfoUrl = "bookingapi/member";
+                ajax.Get({ url: memberInfoUrl }, false).then(function (r) {
+                    _this.currentMember = r;
+                    deferred.resolve();
+                });
+                return deferred.promise();
             };
             return myBooking;
         })();
@@ -112,6 +170,8 @@ var fastnet;
                 this.currentMember = {
                     Anonymous: true,
                     Fullname: null,
+                    FirstName: null,
+                    LastName: null,
                     MemberId: null,
                     OnBehalfOfMemberId: null,
                     BookingPermission: 0 /* Disallowed */,

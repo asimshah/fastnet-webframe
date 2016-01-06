@@ -103,5 +103,58 @@
                 return rules;
             }
         }
+        export class addressModels extends forms.models {
+            current: addressModel;
+            original: addressModel;
+        }
+        export class addressModel extends forms.model {
+            public firstNames: string;
+            public surname: string;
+            public address1: string;
+            public address2: string;
+            public city: string;
+            public postCode: string;
+            constructor(firstName: string, surname: string) {
+                super();
+                this.firstNames = firstName;
+                this.surname = surname;
+                this.address1 = null;
+                this.address2 = null;
+                this.city = null;
+                this.postCode = null;
+            }
+        }
+        export class observableAddressModel extends forms.viewModel {
+            public firstNames: KnockoutObservable<string>;
+            public surname: KnockoutObservable<string>;
+            public address1: KnockoutObservable<string>;
+            public address2: KnockoutObservable<string>;
+            public city: KnockoutObservable<string>;
+            public postCode: KnockoutObservable<string>;
+            constructor(m: addressModel) {
+                super();
+                this.firstNames = ko.observable(m.firstNames);
+                this.surname = ko.observable(m.surname);
+                this.address1 = ko.observable(m.address1);
+                this.address2 = ko.observable(m.address2);
+                this.city = ko.observable(m.city);
+                this.postCode = ko.observable(m.postCode);
+                this.firstNames.extend({
+                    required: {message: "One or more first names are required"}
+                });
+                this.surname.extend({
+                    required: {message: "A surname is required"}
+                });
+                this.address1.extend({
+                    required: {message: "An address line is required"}
+                });
+                this.city.extend({
+                    required: { message: "A UK city is required" }
+                });
+                this.postCode.extend({
+                    required: { message: "A UK post code in the standard format is required" }
+                });
+            }
+        }
     }
 }

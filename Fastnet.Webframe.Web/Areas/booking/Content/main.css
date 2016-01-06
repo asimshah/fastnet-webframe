@@ -224,8 +224,23 @@ button.side-button {
     font-size: 0.6em;
   }
 }
-.my-bookings .make-payment-button {
+.my-bookings.payment-gateway-disabled .make-payment-button {
   display: none;
+}
+.my-bookings .table.dataTable.no-footer {
+  border: none;
+}
+.my-bookings .table.dataTable thead th,
+.my-bookings .table.dataTable tbody td {
+  border: none;
+}
+.address-details .validationMessage {
+  font-size: x-small;
+  color: #b91d47;
+  font-style: italic;
+}
+.address-details .validation-error {
+  border: 1px solid red;
 }
 .booking-confirmation {
   margin-left: 5px;

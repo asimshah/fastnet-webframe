@@ -2,6 +2,7 @@
 using Fastnet.EventSystem;
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
+using Fastnet.Webframe.SagePay;
 using Fastnet.Webframe.WebApi;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Web;
 using System.Web.Http;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
@@ -218,7 +220,6 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("create/{abodeId}")]
         public async Task<dynamic> MakeBooking(long abodeId, bookingRequest request)
         {
-
             // default isolation level is Serializable, meaning no one else can do anything
             string reference = null;
             bool paymentGatewayEnabled = new PaymentGateway().Enabled;
@@ -340,7 +341,57 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             //await tt.Start();
             await StartStandardTasks();
         }
-
+        [HttpPost]
+        [Route("pay")]
+        public async Task MakePayment(dynamic data)
+        {
+            long bookingId = data.bookingId;
+            dynamic address = data.address;
+            string firstNames = data.firstNames;
+            string surname = data.surname;
+            string address1 = data.address1;
+            string address2 = data.address2;
+            string city = data.city;
+            string postCode = data.postCode;
+            string country = "GB";
+            if(string.IsNullOrWhiteSpace(address2))
+            {
+                address2 = null;
+            }
+            var member = this.GetCurrentMember();
+            if (!member.IsAnonymous)
+            {
+                using (var ctx = new BookingDataContext())
+                {
+                    var today = BookingGlobals.GetToday();
+                    var booking = await ctx.Bookings.FindAsync(bookingId);
+                    if (booking.Status == bookingStatus.WaitingPayment)
+                    {
+                        Address sagePayAddress = new Address
+                        {
+                            Firstnames = firstNames,
+                            Surname = surname,
+                            Address1 = address1,
+                            Address2 = address2,
+                            City = city,
+                            Country = country,
+                            PostCode = postCode
+                        };                        
+                        var registrar = new TransactionRegistrar(this.Request.RequestUri);
+                        var result = registrar.Send("vendorTxCode", booking.TotalCost, sagePayAddress,
+                            sagePayAddress, member.EmailAddress);
+                    }
+                    else
+                    {
+                        Log.Write(EventSeverities.Error, "Payment attempted for booking id {0} when status is {1}", bookingId, booking.Status);
+                    }
+                }
+            }
+            else
+            {
+                Log.Write(EventSeverities.Error, "Payment attempted for booking id {0} when not logged in", bookingId);
+            }
+        }
         private async Task StartStandardTasks()
         {
             EntryNotificationTask ent = new EntryNotificationTask();

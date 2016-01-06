@@ -5,26 +5,32 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
 
+
+
 namespace Fastnet.Webframe.SagePay
 {
     public class TransactionRegistrar
     {
-        private readonly Config configuration;
+        
+        private readonly Configuration configuration;
         private readonly HttpRequestSender requestSender;
-        public TransactionRegistrar(Config config)
+        private readonly DefaultUrlResolver urlResolver;
+        public TransactionRegistrar(Uri requestUri)
         {
-            this.configuration = config;
+            this.configuration = Configuration.Current;
+            this.configuration.SetNotificationHost(requestUri.Host, requestUri.Port);
             requestSender = new HttpRequestSender();
+            urlResolver = new DefaultUrlResolver();
         }
-        public object Send(RequestContext context, string vendorTxCode, ShoppingBasket basket,
-                        Address billingAddress, Address deliveryAddress, string customerEmail, PaymentFormProfile paymentFormProfile = PaymentFormProfile.Normal, string currencyCode = "GBP",
-                        MerchantAccountType accountType = MerchantAccountType.Ecommerce, TxType txType = TxType.Payment)
+        public object Send(string vendorTxCode, decimal amount,
+                Address billingAddress, Address deliveryAddress, string customerEmail, PaymentFormProfile paymentFormProfile = PaymentFormProfile.Normal, string currencyCode = "GBP",
+                MerchantAccountType accountType = MerchantAccountType.Ecommerce, TxType txType = TxType.Payment)
         {
             string sagePayUrl = configuration.RegistrationUrl;
-            string notificationUrl = configuration.BuildNotificationUrl(context);// urlResolver.BuildNotificationUrl(context);
+            string notificationUrl = urlResolver.BuildNotificationUrl();
 
             var registration = new TransactionRegistration(
-                vendorTxCode, basket, notificationUrl,
+                vendorTxCode, amount, notificationUrl,
                 billingAddress, deliveryAddress, customerEmail,
                 configuration.VendorName,
                 currencyCode, paymentFormProfile, accountType, txType);
@@ -37,5 +43,26 @@ namespace Fastnet.Webframe.SagePay
             var deserializer = new ResponseSerializer();
             return deserializer.Deserialize<TransactionRegistrationResponse>(response);
         }
+        //public object Send(RequestContext context, string vendorTxCode, ShoppingBasket basket,
+        //                Address billingAddress, Address deliveryAddress, string customerEmail, PaymentFormProfile paymentFormProfile = PaymentFormProfile.Normal, string currencyCode = "GBP",
+        //                MerchantAccountType accountType = MerchantAccountType.Ecommerce, TxType txType = TxType.Payment)
+        //{
+        //    string sagePayUrl = configuration.RegistrationUrl;
+        //    string notificationUrl = urlResolver.BuildNotificationUrl();
+
+        //    var registration = new TransactionRegistration(
+        //        vendorTxCode, basket, notificationUrl,
+        //        billingAddress, deliveryAddress, customerEmail,
+        //        configuration.VendorName,
+        //        currencyCode, paymentFormProfile, accountType, txType);
+
+        //    var serializer = new HttpPostSerializer();
+        //    var postData = serializer.Serialize(registration);
+
+        //    var response = requestSender.SendRequest(sagePayUrl, postData);
+
+        //    var deserializer = new ResponseSerializer();
+        //    return deserializer.Deserialize<TransactionRegistrationResponse>(response);
+        //}
     }
 }

@@ -53,7 +53,7 @@
           }
         }
       }
-    },
+    }
   },
   "title": "JSON Schema for customisation JSON file format",
   "type": "object",

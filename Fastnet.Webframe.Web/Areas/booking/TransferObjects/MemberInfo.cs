@@ -21,6 +21,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public Boolean Anonymous { get; set; }
         public string MemberId { get; set; }
         public string Fullname { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string MobileNumber { get; set; }
         public BookingPermissions BookingPermission { get; set; }
         public string Explanation { get; set; }
@@ -36,6 +38,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
             Anonymous = false;
             MemberId = m.Id;
             Fullname = m.Fullname;
+            FirstName = m.FirstName;
+            LastName = m.LastName;
             MobileNumber = m.PhoneNumber;
         }
     }

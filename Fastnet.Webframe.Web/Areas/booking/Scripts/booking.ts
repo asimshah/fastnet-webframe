@@ -41,14 +41,22 @@ module fastnet {
         }
         export class myBooking {
             public today: Date;
-            public start(): void {
+            public currentMember: server.MemberInfo;
+            public paymentGatewayAvailable: boolean;
+            public start(paymentGateway: boolean): void {
+                this.paymentGatewayAvailable = paymentGateway;
                 $.fn.dataTable.moment('DDMMMYYYY');
                 var config: forms.configuration = {
                     modelessContainer: "booking-interaction",
-                    //additionalValidations: bookingAppValidations.GetValidators()
+                    additionalValidations: bookingAppValidations.GetValidators()
                 };
                 this.today = new Date();
                 forms.form.initialise(config);
+                this.getMemberInfo().then(() => { 
+                    this.showBookings();
+                });
+            }
+            public showBookings() {
                 var templateUrl = "booking/mybookings";
                 var dataurl = str.format("bookingapi/get/my/bookings");
                 ajax.Get({ url: dataurl }, false).then((result: { member: string, bookings: server.booking[] }) => {
@@ -78,6 +86,9 @@ module fastnet {
                                     break;
                             }
                         }).then(() => {
+                            if (this.paymentGatewayAvailable === false) {
+                                f.find(".my-bookings").addClass("payment-gateway-disabled");
+                            }
                             f.find("#my-bookings button[data-table-cmd]").on("click", (e) => {
                                 this.embeddedButtonHandler(result.bookings, e);
                             });
@@ -97,6 +108,41 @@ module fastnet {
                     });
                 });
             }
+            public getAddressDetails(bookingId: number) {
+                var address: addressModel = new addressModel(this.currentMember.FirstName, this.currentMember.LastName);
+                var address_vm = new observableAddressModel(address);
+                var addressForm = new forms.form(this, {
+                    modal: false,
+                    title: "Name & Address (for payment verification)",
+                    cancelButtonText: "Cancel",
+                    okButtonText: "Pay (via Sage)"
+                }, address_vm);
+                var addressTemplateUrl = "booking/addressDetails";
+                wt.getTemplate({ ctx: this, templateUrl: addressTemplateUrl }).then((r) => {
+                    addressForm.setContentHtml(r.template);
+                    addressForm.open((ctx: myBooking, f: forms.form, cmd: string, data: addressModels) => {
+                        switch (cmd) {
+                            case "cancel-command":
+                                f.close();
+                                this.showBookings();
+                                break;
+                            case "ok-command":
+                                if (f.isValid()) {
+                                    this.startPayment(data.current, bookingId);
+                                }
+                                break;
+                        }
+                    });
+                });
+            }
+            private startPayment(m: addressModel, bookingId: number) {
+                ajax.Post({
+                    url: "bookingapi/pay", data: {
+                        bookingId: bookingId,
+                        address: m
+                    }
+                });
+            }
             private embeddedButtonHandler(list: server.booking[], e: JQueryEventObject): void {
                 e.stopPropagation();
                 var ct = e.target;
@@ -105,8 +151,18 @@ module fastnet {
                 switch (cmd) {
                     case "make-payment":
                         debug.print("make payment for booking {0}", id);
+                        this.getAddressDetails(id);
                         break;
                 }
+            }
+            private getMemberInfo(): JQueryPromise<void> {
+                var deferred = $.Deferred<void>();
+                var memberInfoUrl = "bookingapi/member";
+                ajax.Get({ url: memberInfoUrl }, false).then((r: server.MemberInfo) => {
+                    this.currentMember = r;
+                    deferred.resolve();
+                });
+                return deferred.promise();
             }
         }
         export class bookingApp {
@@ -128,6 +184,8 @@ module fastnet {
                 this.currentMember = {
                     Anonymous: true,
                     Fullname: null,
+                    FirstName: null,
+                    LastName: null,
                     MemberId: null,
                     OnBehalfOfMemberId: null,
                     BookingPermission: server.BookingPermissions.Disallowed,

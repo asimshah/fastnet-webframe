@@ -9,7 +9,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
 {
     public class Globals
     {
-        private static Config sagePayConfig;
+        //private static Config sagePayConfig;
         public static bool BookingIsOpen()
         {
             return !BookingSettings.Get(BookingSettingKeys.OnlineBookingClosed, true);// SiteSetting.Get("OnlineBookingClosed", true);
@@ -19,13 +19,13 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
             return Fastnet.Webframe.Web.Common.Globals.AdminEmailAddress;
         }
-        public static Config GetSagePayConfig()
-        {
-            if(sagePayConfig == null)
-            {
-                sagePayConfig = new Config("controller", "index", "success", "failed");
-            }
-            return sagePayConfig;
-        }
+        //public static Config GetSagePayConfig()
+        //{
+        //    if(sagePayConfig == null)
+        //    {
+        //        sagePayConfig = new Config("controller", "index", "success", "failed");
+        //    }
+        //    return sagePayConfig;
+        //}
     }
 }

@@ -17,10 +17,11 @@
     @Scripts.Render("~/bundles/booking")
     @Scripts.Render("~/bundles/booking/datatables")
     <script>
-        var bookingApp = null;
+        var bookingApp = null;        
         (function ($) {
+            var True = true; False = false;
             var myBooking = new fastnet.booking.myBooking();
-            myBooking.start();
+            myBooking.start(@ViewBag.PaymentGatewayAvailable);
         })(jQuery);
     </script>
 }

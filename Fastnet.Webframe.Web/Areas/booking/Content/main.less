@@ -23,20 +23,24 @@ table.dataTable {
         .sorting {
             background-image: url("../../../Content/datatables/images/sort_both.png");
         }
+
         .sorting_asc {
             background-image: url("../../../Content/datatables/images/sort_asc.png");
         }
+
         .sorting_desc {
             background-image: url("../../../Content/datatables/images/sort_desc.png");
         }
+
         .sorting_asc_disabled {
             background-image: url("../../../Content/datatables/images/sort_asc_disabled.png");
         }
+
         .sorting_desc_disabled {
             background-image: url("../../../Content/datatables/images/sort_desc_disabled.png");
         }
     }
-        /*
+    /*
            table.dataTable thead .sorting {
           background-image: url("../images/sort_both.png");
         }
@@ -175,11 +179,34 @@ button.side-button {
         font-size: 0.6em;
     }
 
-    .make-payment-button {
-        display: none;
+    &.payment-gateway-disabled {
+        .make-payment-button {
+            display: none;
+        }
+    }
+
+
+
+    .table.dataTable.no-footer {
+        border: none;
+    }
+
+    .table.dataTable thead th, .table.dataTable tbody td {
+        border: none;
     }
 }
 
+.address-details {
+    .validationMessage {
+        font-size: x-small;
+        color: @dark-red;
+        font-style: italic;
+    }
+
+    .validation-error {
+        border: 1px solid red;
+    }
+}
 
 .booking-confirmation {
     margin-left: 5px;

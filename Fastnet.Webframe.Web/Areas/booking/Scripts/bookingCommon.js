@@ -118,6 +118,57 @@ var fastnet;
             return bookingAppValidations;
         })();
         booking.bookingAppValidations = bookingAppValidations;
+        var addressModels = (function (_super) {
+            __extends(addressModels, _super);
+            function addressModels() {
+                _super.apply(this, arguments);
+            }
+            return addressModels;
+        })(forms.models);
+        booking.addressModels = addressModels;
+        var addressModel = (function (_super) {
+            __extends(addressModel, _super);
+            function addressModel(firstName, surname) {
+                _super.call(this);
+                this.firstNames = firstName;
+                this.surname = surname;
+                this.address1 = null;
+                this.address2 = null;
+                this.city = null;
+                this.postCode = null;
+            }
+            return addressModel;
+        })(forms.model);
+        booking.addressModel = addressModel;
+        var observableAddressModel = (function (_super) {
+            __extends(observableAddressModel, _super);
+            function observableAddressModel(m) {
+                _super.call(this);
+                this.firstNames = ko.observable(m.firstNames);
+                this.surname = ko.observable(m.surname);
+                this.address1 = ko.observable(m.address1);
+                this.address2 = ko.observable(m.address2);
+                this.city = ko.observable(m.city);
+                this.postCode = ko.observable(m.postCode);
+                this.firstNames.extend({
+                    required: { message: "One or more first names are required" }
+                });
+                this.surname.extend({
+                    required: { message: "A surname is required" }
+                });
+                this.address1.extend({
+                    required: { message: "An address line is required" }
+                });
+                this.city.extend({
+                    required: { message: "A UK city is required" }
+                });
+                this.postCode.extend({
+                    required: { message: "A UK post code in the standard format is required" }
+                });
+            }
+            return observableAddressModel;
+        })(forms.viewModel);
+        booking.observableAddressModel = observableAddressModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=bookingCommon.js.map

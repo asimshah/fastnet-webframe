@@ -380,6 +380,7 @@
     <Content Include="Areas\booking\CustomTemplates\DWH\entryCodes.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\Parameters.html" />
     <Content Include="Areas\booking\CustomTemplates\DWH\request-step1.html" />
+    <Content Include="Areas\booking\Templates\addressDetails.html" />
     <Content Include="Areas\booking\Templates\adminIndex.html" />
     <Content Include="Areas\booking\Templates\bookingConfirmation.html" />
     <Content Include="Areas\booking\Templates\BookingReport.html" />
