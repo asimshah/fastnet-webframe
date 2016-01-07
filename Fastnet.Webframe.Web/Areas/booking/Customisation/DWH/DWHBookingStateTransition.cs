@@ -124,7 +124,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 }
                 else if ((booking.From - today).TotalDays < NDays)
                 {
-                    booking.Status = bookingStatus.WaitingImmediatePayment;
+                    booking.Status = bookingStatus.WaitingGateway;
                 }
                 else
                 {

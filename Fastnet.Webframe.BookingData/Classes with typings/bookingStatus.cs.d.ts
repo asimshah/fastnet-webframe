@@ -5,5 +5,6 @@
 		Confirmed,
 		AutoCancelled,
 		Cancelled,
+		WaitingGateway,
 	}
 }

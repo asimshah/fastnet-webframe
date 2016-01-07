@@ -217,3 +217,4 @@ var fastnet;
         booking.editTemplateModels = editTemplateModels;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=adminViewModels.js.map

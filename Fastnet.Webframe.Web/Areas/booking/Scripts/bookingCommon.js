@@ -171,3 +171,4 @@ var fastnet;
         booking.observableAddressModel = observableAddressModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=bookingCommon.js.map
