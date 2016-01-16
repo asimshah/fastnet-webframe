@@ -46,7 +46,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                         EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WANotification, bookingSecretaryEmailAddress, b);
                         break;
                     case bookingStatus.Confirmed:
-                        EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.BookingConfirmed, memberEmailAddress, b);
+                        EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.ConfirmedPriv, memberEmailAddress, b);
                         break;
                     case bookingStatus.WaitingPayment:
                         EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WaitingPayment, memberEmailAddress, b);
@@ -76,7 +76,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                                 EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WPNotification, bookingSecretaryEmailAddress, b);
                                 break;
                             case bookingStatus.Confirmed:
-                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.BookingConfirmed, memberEmailAddress, b);
+                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.ConfirmedPriv, memberEmailAddress, b);
                                 break;
                         }
                         break;
@@ -92,7 +92,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                             //    EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.CANNotification, bookingSecretaryEmailAddress, b);
                             //    break;
                             case bookingStatus.Confirmed:
-                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.BookingConfirmed, memberEmailAddress, b);
+                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.ConfirmedPriv, memberEmailAddress, b);
                                 break;
                         }
                         break;
