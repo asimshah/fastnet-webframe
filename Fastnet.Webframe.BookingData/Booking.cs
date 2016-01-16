@@ -49,13 +49,13 @@ namespace Fastnet.Webframe.BookingData
                 name, today.ToDefault(), time.ToString("HH:mm:ss"), text) + System.Environment.NewLine;
             this.History = text + this.History;
         }
-        public bookingStatus SetPaid(BookingDataContext ctx, string memberFullname, bool paid, long abodeId = 1)
+        public void SetPaid(BookingDataContext ctx, string memberFullname, bool paid, long abodeId = 1)
         {
-            bookingStatus oldStatus = this.Status;
-            this.Status = bookingStatus.Confirmed;
+            //bookingStatus oldStatus = this.Status;
+            //this.Status = bookingStatus.Confirmed;
             this.IsPaid = paid;
             this.AddHistory(memberFullname, string.Format("Mark as {0}", paid ? "paid" : "not paid"));
-            return oldStatus;
+            //return oldStatus;
             //var bst = Factory.GetBookingStateTransition(ctx, abodeId);
             //if (booking.Status != oldStatus)
             //{

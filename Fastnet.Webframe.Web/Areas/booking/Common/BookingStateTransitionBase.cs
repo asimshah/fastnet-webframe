@@ -16,7 +16,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.ctx = ctx;
             this.abodeId = abodeId;
         }
-        public abstract void ToNew(Booking booking);
-        public abstract void ChangeState(Booking booking, bookingStatus from);
+        public abstract bookingStatus GetInitialState(Booking booking);
+        public abstract bookingStatus GetPostApprovalState(Booking booking);
+        public abstract void ModifyState(Booking booking, bookingStatus? from, bookingStatus to, bool bySystem);
+        //public abstract void ToNew(Booking booking);
+        //public abstract void ChangeState(Booking booking, bookingStatus from);
     }
 }

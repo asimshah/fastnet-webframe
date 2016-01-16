@@ -204,12 +204,12 @@ namespace Fastnet.Webframe.Web.Areas.booking
             var bookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
             var today = BookingGlobals.GetToday();
             var NDays = today.AddDays(shortBookingInterval);
-            var NDaysLess7 = NDays.AddDays(-7);
+            var NDaysPlus7 = NDays.AddDays(7);
             using (var ctx = new BookingDataContext())
             {
                 var tran = ctx.Database.BeginTransaction();
                 DateTime utcDueAt = DateTime.UtcNow;
-                var nearBookings = ctx.Bookings.Where(x => x.Status == bookingStatus.WaitingPayment && x.From >= today && x.From <= NDays).ToArray();
+                var nearBookings = ctx.Bookings.Where(x => x.Status == bookingStatus.WaitingPayment && x.From >= today && x.From <= NDaysPlus7).ToArray();
                 var reminderSet = nearBookings.Where(x => x.Emails.Any(z => z.Template == BookingEmailTemplates.Reminder) == false && x.Emails.Any(z => z.Template == BookingEmailTemplates.FinalReminder) == false);
                 foreach (var booking in reminderSet)
                 {
@@ -258,6 +258,50 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 {
                     booking b = Factory.GetBooking(booking);
                     EmailHelper.QueueEmail(ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.FinalReminder, b.memberEmailAddress, b);
+                }
+
+                await ctx.SaveChangesAsync();
+                tran.Commit();
+            }
+            return wtr;
+        }
+    }
+    public class DWHCancellation : TaskBase
+    {
+        const string taskId = "4DB77B14-5620-44F5-847B-6E7CCBFE29DE";
+        //private bool final;
+        public DWHCancellation() : base(taskId)
+        {
+
+        }
+        protected override async Task<WebtaskResult> Execute()
+        {
+            WebtaskResult wtr = new WebtaskResult();
+            int shortBookingInterval = 0;
+            string abodeName = "";
+            using (var ctx = new CoreDataContext())
+            {
+                var pars = Factory.GetBookingParameters() as dwhBookingParameters;
+                pars.Load(ctx);
+                shortBookingInterval = pars.shortBookingInterval;
+                abodeName = pars.currentAbode.name;
+            }
+            //string abodeName = ctx.AccomodationSet.Find(abodeId).DisplayName;
+            var bookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
+            var today = BookingGlobals.GetToday();
+            var NDays = today.AddDays(shortBookingInterval);
+            var NDaysLess1 = NDays.AddDays(-1);
+            using (var ctx = new BookingDataContext())
+            {
+                var tran = ctx.Database.BeginTransaction();
+                DateTime utcDueAt = DateTime.UtcNow;
+                var nearBookings = ctx.Bookings.Where(x => x.Status == bookingStatus.WaitingPayment && x.From >= today && x.From <= NDaysLess1).ToArray();
+                //var reminderSet = nearBookings.Where(x => x.Emails.Any(z => z.Template == BookingEmailTemplates.Reminder) == false && x.Emails.Any(z => z.Template == BookingEmailTemplates.FinalReminder) == false);
+                foreach (var booking in nearBookings)
+                {
+                    booking b = Factory.GetBooking(booking);
+                    booking.PerformStateTransition(ctx, bookingStatus.WaitingPayment, bookingStatus.Cancelled, true);
+                    //EmailHelper.QueueEmail(ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.Reminder, b.memberEmailAddress, b);
                 }
 
                 await ctx.SaveChangesAsync();

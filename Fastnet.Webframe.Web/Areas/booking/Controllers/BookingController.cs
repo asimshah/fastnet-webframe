@@ -289,7 +289,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         ctx.Bookings.Add(b);
                         await ctx.SaveChangesAsync();
                         var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-                        bst.ToNew(b);
+                        var initial = bst.GetInitialState(b);
+                        b.PerformStateTransition(ctx, null, initial, false);
+                        //bst.ToNew(b);
                         await ctx.SaveChangesAsync();
                         tran.Complete();
                         reference = b.Reference;
@@ -370,7 +372,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 {
                     var today = BookingGlobals.GetToday();
                     var booking = await ctx.Bookings.FindAsync(bookingId);
-                    if (booking.Status == bookingStatus.WaitingPayment)
+                    //NB: booking will be in WaitingGateway in the case of an online booking, else WaitingPayment
+                    if (booking.Status == bookingStatus.WaitingPayment || booking.Status == bookingStatus.WaitingGateway)
                     {
                         Address sagePayAddress = new Address
                         {
@@ -438,11 +441,13 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 if (booking.Status != bookingStatus.Cancelled)
                 {
                     bookingStatus old = booking.Status;
-                    booking.Status = bookingStatus.Cancelled;
-                    booking.StatusLastChanged = DateTime.Now;
+                    //booking.Status = bookingStatus.Cancelled;
+                    //booking.StatusLastChanged = DateTime.Now;
+                    
+                    //var bst = Factory.GetBookingStateTransition(ctx);
+                    //bst.ChangeState(booking, old);
+                    booking.PerformStateTransition(ctx, old, bookingStatus.Cancelled, false);
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
-                    var bst = Factory.GetBookingStateTransition(ctx);
-                    bst.ChangeState(booking, old);
                     ctx.SaveChanges();
                 }
             }
@@ -451,13 +456,16 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         {
             EntryNotificationTask ent = new EntryNotificationTask();
             ent.StartAndForget();
-            await Task.Delay(1000);
+            await Task.Delay(500);
             TaskBase finalreminders = Factory.GetRemindersTask(true);
             finalreminders.StartAndForget();
-            await Task.Delay(1000);
+            await Task.Delay(500);
             TaskBase reminders = Factory.GetRemindersTask();
             reminders.StartAndForget();
-            await Task.Delay(1000);
+            await Task.Delay(500);
+            TaskBase cancellations = Factory.GetCancellationTask();
+            cancellations.StartAndForget();
+            await Task.Delay(500);
             BookingMailer bm = new BookingMailer();
             bm.StartAndForget();
 

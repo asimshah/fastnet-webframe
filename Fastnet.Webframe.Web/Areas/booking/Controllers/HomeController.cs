@@ -83,7 +83,14 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             m.MemberEmailAddress = member.EmailAddress;
             m.BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
             m.UiSource = st.UserString;
-            return View(m);
+            using (var ctx = new BookingDataContext())
+            {
+                var booking = ctx.Bookings.Find(bookingId);
+                var paymentDuringNewBooking = "onlinebooking" == st.UserString;
+                booking.PerformStateTransition(ctx, booking.Status, paymentDuringNewBooking ? bookingStatus.Cancelled : bookingStatus.WaitingPayment, false);
+                ctx.SaveChanges();
+            }
+                return View(m);
         }
         [Route("sage/success/{vendorTxCode}")]
         public ActionResult Success(string vendorTxCode)
@@ -98,22 +105,23 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             var memberId = st.GuidUserKey;
             var member = DataContext.Members.Find(memberId);
             var bookingId = st.LongUserKey;
-            PaymentSuccessModel m = new PaymentSuccessModel();
-            m.MemberEmailAddress = member.EmailAddress;
-            m.BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
+            PaymentSuccessModel psm = new PaymentSuccessModel();
+            psm.MemberEmailAddress = member.EmailAddress;
+            psm.BookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
             using (var ctx = new BookingDataContext())
             {
                 var booking = ctx.Bookings.Find(bookingId);
-                bookingStatus oldStatus = booking.SetPaid(ctx, member.Fullname, true);
-                booking.PerformStateTransition(ctx, oldStatus);
-                m.BookingReference = booking.Reference;
+                booking.SetPaid(ctx, member.Fullname, true);
+                booking.PerformStateTransition(ctx, booking.Status, bookingStatus.Confirmed, false);
+                psm.BookingReference = booking.Reference;
+                ctx.SaveChanges();
             }
-            return View(m);
+            return View(psm);
         }
-        [Route("sage/success/{vendorTxCode}")]
-        public ActionResult RegistrationFailed(string vendorTxCode)
-        {
-            return View();
-        }
+        //[Route("sage/success/{vendorTxCode}")]
+        //public ActionResult RegistrationFailed(string vendorTxCode)
+        //{
+        //    return View();
+        //}
     }
 }

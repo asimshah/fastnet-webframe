@@ -125,8 +125,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 
         private void SetPaid(BookingDataContext ctx, Booking booking, bool paid, string memberFullname, long abodeId = 1)
         {
-            bookingStatus oldStatus = booking.SetPaid(ctx, memberFullname, paid, abodeId);
-            booking.PerformStateTransition(ctx, oldStatus);
+            booking.SetPaid(ctx, memberFullname, paid, abodeId);
+            booking.PerformStateTransition(ctx, booking.Status, bookingStatus.Confirmed, false);
             //bookingStatus oldStatus = booking.Status;
             //booking.Status = bookingStatus.Confirmed;
             //booking.IsPaid = paid;
@@ -184,16 +184,19 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 var today = BookingGlobals.GetToday();
                 if (booking.Status == bookingStatus.WaitingApproval)
                 {
-                    var pars = Factory.GetBookingParameters() as dwhBookingParameters;
-                    pars.Load(DataContext);
-                    Group privileged = DataContext.Groups.Find(pars.privilegedMembers.Id);
-                    bool isPrivileged = bookingMember.IsMemberOf(privileged);
-                    bookingStatus old = booking.Status;
-                    booking.Status = isPrivileged ? bookingStatus.Confirmed : bookingStatus.WaitingPayment;
-                    booking.StatusLastChanged = DateTime.Now;
-                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    //var pars = Factory.GetBookingParameters() as dwhBookingParameters;
+                    //pars.Load(DataContext);
+                    //Group privileged = DataContext.Groups.Find(pars.privilegedMembers.Id);
+                    //bool isPrivileged = bookingMember.IsMemberOf(privileged);
+                    //bookingStatus old = booking.Status;
+                    //booking.Status = isPrivileged ? bookingStatus.Confirmed : bookingStatus.WaitingPayment;
+                    //booking.StatusLastChanged = DateTime.Now;
+
                     var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-                    bst.ChangeState(booking, old);
+                    bookingStatus postApproval = bst.GetPostApprovalState(booking);
+                    booking.PerformStateTransition(ctx, bookingStatus.WaitingApproval, postApproval, false);
+                    //bst.ChangeState(booking, old);
+                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", bookingStatus.WaitingApproval.ToString(), booking.Status.ToString()));
                     ctx.SaveChanges();
                 }
             }
@@ -205,7 +208,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         [Route("cancel/booking/{id}")]
         public void CancelBooking(long id)
         {
-            long abodeId = 1;
+            //long abodeId = 1;
             using (var ctx = new BookingDataContext())
             {
                 var m = this.GetCurrentMember();
@@ -215,11 +218,13 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 if (booking.Status != bookingStatus.Cancelled)
                 {
                     bookingStatus old = booking.Status;
-                    booking.Status = bookingStatus.Cancelled;
-                    booking.StatusLastChanged = DateTime.Now;
+                    //booking.Status = bookingStatus.Cancelled;
+                    //booking.StatusLastChanged = DateTime.Now;
+                    //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    //var bst = Factory.GetBookingStateTransition(ctx, abodeId);
+                    //bst.ChangeState(booking, old);
+                    booking.PerformStateTransition(ctx, old, bookingStatus.Cancelled, false);
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
-                    var bst = Factory.GetBookingStateTransition(ctx, abodeId);
-                    bst.ChangeState(booking, old);
                     ctx.SaveChanges();
                 }
             }
