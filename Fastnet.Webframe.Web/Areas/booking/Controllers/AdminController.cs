@@ -37,7 +37,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 try
                 {
                     var today = BookingGlobals.GetToday();
-                    var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && (x.To >= today || x.IsPaid == false))
+                    var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To >= today || x.IsPaid == false))
                         .Where(x => unpaidOnly == false || x.IsPaid == false)
                         .OrderBy(x => x.Reference).ToArrayAsync();
                     //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
@@ -58,7 +58,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
+                var bookings = await ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && (x.To < today && x.IsPaid == true)).OrderBy(x => x.Reference).ToArrayAsync();
                 //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
                 var data = bookings.Select(x => Factory.GetBooking( x));
                 return data;
@@ -71,7 +71,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             using (var ctx = new BookingDataContext())
             {
                 var today = BookingGlobals.GetToday();
-                var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled || x.Status == bookingStatus.AutoCancelled).OrderBy(x => x.Reference).ToArrayAsync();
+                var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
                 //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
                 var data = bookings.Select(x => Factory.GetBooking( x));
                 return data;
@@ -212,7 +212,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 var name = m.Fullname;
                 var booking = ctx.Bookings.Find(id);
                 var today = BookingGlobals.GetToday();
-                if (booking.Status != bookingStatus.Cancelled && booking.Status != bookingStatus.AutoCancelled)
+                if (booking.Status != bookingStatus.Cancelled)
                 {
                     bookingStatus old = booking.Status;
                     booking.Status = bookingStatus.Cancelled;

@@ -87,10 +87,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
                             case bookingStatus.Cancelled:
                                 EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.Cancelled, memberEmailAddress, b);
                                 break;
-                            case bookingStatus.AutoCancelled:
-                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.AutoCancelled, memberEmailAddress, b);
-                                EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.CANNotification, bookingSecretaryEmailAddress, b);
-                                break;
+                            //case bookingStatus.AutoCancelled:
+                            //    EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.AutoCancelled, memberEmailAddress, b);
+                            //    EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.CANNotification, bookingSecretaryEmailAddress, b);
+                            //    break;
                             case bookingStatus.Confirmed:
                                 EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.BookingConfirmed, memberEmailAddress, b);
                                 break;

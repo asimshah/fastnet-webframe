@@ -11,7 +11,7 @@ namespace Fastnet.Webframe.BookingData
         WaitingApproval,
         WaitingPayment,
         Confirmed,
-        AutoCancelled,
+        //AutoCancelled,
         Cancelled,
         WaitingGateway
     }

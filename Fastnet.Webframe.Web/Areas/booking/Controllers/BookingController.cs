@@ -325,7 +325,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 using (var ctx = new BookingDataContext())
                 {
                     var today = BookingGlobals.GetToday();
-                    var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.Status != bookingStatus.AutoCancelled && x.MemberId == member.Id && (x.To >= today))
+                    var bookings = ctx.Bookings.Where(x => x.Status != bookingStatus.Cancelled && x.MemberId == member.Id && (x.To >= today))
                         .OrderBy(x => x.Reference).ToArray();
                     //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
                     var data = bookings.Select(x => Factory.GetBooking(x)).ToArray();
@@ -435,10 +435,10 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 var m = this.GetCurrentMember();
                 var name = m.Fullname;
                 var today = BookingGlobals.GetToday();
-                if (booking.Status != bookingStatus.Cancelled && booking.Status != bookingStatus.AutoCancelled)
+                if (booking.Status != bookingStatus.Cancelled)
                 {
                     bookingStatus old = booking.Status;
-                    booking.Status = bookingStatus.AutoCancelled;
+                    booking.Status = bookingStatus.Cancelled;
                     booking.StatusLastChanged = DateTime.Now;
                     booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     var bst = Factory.GetBookingStateTransition(ctx);

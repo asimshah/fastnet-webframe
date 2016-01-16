@@ -757,8 +757,8 @@ module fastnet {
                                             return "WaitingApproval";
                                         case server.bookingStatus.Cancelled:
                                             return "Cancelled";
-                                        case server.bookingStatus.AutoCancelled:
-                                            return "AutoCancelled";
+                                        //case server.bookingStatus.AutoCancelled:
+                                        //    return "AutoCancelled";
                                         case server.bookingStatus.Confirmed:
                                             return "Confirmed";
                                         case server.bookingStatus.WaitingPayment:
