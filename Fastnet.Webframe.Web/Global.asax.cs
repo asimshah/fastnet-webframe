@@ -41,6 +41,7 @@ namespace Fastnet.Webframe.Web
             }
             AutofacConfig.ConfigureContainer();
             dynamic version = VersionInfo.Get(typeof(MvcApplication));
+            bool coreDbExists = true;
             if (new CoreDataContext().Database.Exists() == false)
             {
                 // **NB**
@@ -61,11 +62,12 @@ namespace Fastnet.Webframe.Web
                     int count = db.Bookings.Count();
                     Debug.Print("BookingDataContext booking count = {0}", count);
                 }
+                coreDbExists = false;
             }
             Log.SetApplicationName(ConfigurationManager.AppSettings["SiteUrl"]);
             ApplicationDbContext.SetInitializer();
             BookingDataContext.SetInitializer();
-            CoreDataContext.SetInitializer();
+            CoreDataContext.SetInitializer(!coreDbExists);
             RouteConfig.MapMVC(RouteTable.Routes);
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);

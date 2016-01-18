@@ -64,10 +64,18 @@ namespace Fastnet.Webframe.Mvc
             this.message = message;
             var ctx = Core.GetDataContext();
             var permittedTo = ctx.Groups.SingleOrDefault(g => g.Type == GroupTypes.System && string.Compare(g.Name, group.ToString(), true) == 0);
-            groupPK = permittedTo.GroupId;
+            if (permittedTo != null)
+            {
+                groupPK = permittedTo.GroupId;
+            }
         }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            if(groupPK == 0)
+            {
+                Log.Write(EventSeverities.Error, $"Permission Filter on {this.GetType().Name} failed: no group available");
+                return;
+            }
             try
             {
                 string actionName = filterContext.ActionDescriptor.ActionName;

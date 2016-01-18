@@ -101,9 +101,9 @@ namespace Fastnet.Webframe.CoreData
     }
     public partial class CoreDataContext : DbContext
     {
-        public static void SetInitializer()
+        public static void SetInitializer(bool noExistingDatabase)
         {
-            System.Data.Entity.Database.SetInitializer(new CoreDbInitializer());
+            System.Data.Entity.Database.SetInitializer(new CoreDbInitializer(noExistingDatabase));
         }
         public CoreDataContext()
             : base("CoreData")

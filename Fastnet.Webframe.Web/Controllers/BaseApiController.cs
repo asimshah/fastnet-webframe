@@ -30,10 +30,18 @@
         {
             var ctx = Core.GetDataContext();
             var permittedTo = ctx.Groups.SingleOrDefault(g => g.Type == GroupTypes.System && string.Compare(g.Name, group.ToString(), true) == 0);
-            groupPK = permittedTo.GroupId;
+            if (permittedTo != null)
+            {
+                groupPK = permittedTo.GroupId;
+            }
         }
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
+            if (groupPK == 0)
+            {
+                Log.Write(EventSeverities.Error, $"Permission Filter on {this.GetType().Name} failed: no group available");
+                return;
+            }
             try
             {
                 var m = ((BaseApiController)actionContext.ControllerContext.Controller).GetCurrentMember();
