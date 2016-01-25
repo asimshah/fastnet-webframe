@@ -72,8 +72,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             {
                 var today = BookingGlobals.GetToday();
                 var bookings = await ctx.Bookings.Where(x => x.Status == bookingStatus.Cancelled).OrderBy(x => x.Reference).ToArrayAsync();
-                //var data = bookings.Select(x => Factory.GetBooking(DataContext, x));
-                var data = bookings.Select(x => Factory.GetBooking( x));
+                var data = bookings.Select(x => Factory.GetBooking( x)).ToArray();
                 return data;
             }
         }
