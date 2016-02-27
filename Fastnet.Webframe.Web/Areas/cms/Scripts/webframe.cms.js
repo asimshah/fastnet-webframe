@@ -320,7 +320,8 @@
                         openNavigationTable();
                         break;
                     case "back-home":
-                        window.location("/");
+                       // window.location("/");
+                        window.location.href = "/home";
                         break;
                 }
             });
