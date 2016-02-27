@@ -169,10 +169,11 @@
                         "ordering": false,
                         "searching": false,
                         "ajax": "get/ss/membershiphistory",
+                        //"ajax": "cms/get/ss/membershiphistory",
                         "createdRow": function (row, data, index) {
                             var x = data[0];
                             var y = moment(moment.utc(data[0]).toDate()).format("DDMMMYYYY HH:mm:ss");
-                            row.cells(0).innerText = y;
+                            row.cells[0].innerText = y;
                             $U.Debug("{0} changed to {1}", x, y)
                         }
                     });
