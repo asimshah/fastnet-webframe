@@ -18,7 +18,8 @@ namespace Fastnet.Webframe.CoreData
             ctx = context;
         }
         public void Seed()
-        {           
+        {            
+            Log.Write($"{nameof(DataSeeder)} called");     
             bool isEmpty = IsDatabaseCompletelyEmpty();
             if (isEmpty)
             {

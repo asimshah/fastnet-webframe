@@ -106,8 +106,10 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Url = p.Url,
                 LandingPage = p.IsLandingPage,
                 PageType = p.Type,
-                LandingPageImage = "/" + Page.GetLandingPageImageUrl(),
-                PageTypeImage = "/" + p.GetTypeImageUrl(),
+                //LandingPageImage = "/" + Page.GetLandingPageImageUrl(),
+                //PageTypeImage = "/" + p.GetTypeImageUrl(),
+                LandingPageImage = Page.GetLandingPageImageUrl(),
+                PageTypeImage = p.GetTypeImageUrl(),
                 PageTypeTooltip = p.GetTypeTooltip(),
                 LastModifiedOn = p.ModifiedOn ?? p.CreatedOn,
                 LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy: p.CreatedBy

@@ -106,5 +106,16 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     throw new ApplicationException(string.Format("No Reminder Task is available for factory", FactoryName));
             }
         }
+
+        internal static TaskBase GetCancellationTask()
+        {
+            switch (FactoryName)
+            {
+                case FactoryName.DonWhillansHut:
+                    return new DWHCancellation();
+                default:
+                    throw new ApplicationException(string.Format("No Cancellation Task is available for factory", FactoryName));
+            }
+        }
     }
 }

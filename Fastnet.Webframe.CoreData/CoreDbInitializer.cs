@@ -16,5 +16,19 @@ namespace Fastnet.Webframe.CoreData
         //    DataSeeder seeder = new DataSeeder(context);
         //    seeder.Seed();
         //}
+        private bool noExistingDatabase;
+        public CoreDbInitializer(bool noExistingDatabase)
+        {
+            this.noExistingDatabase = noExistingDatabase;
+        }
+        public override void InitializeDatabase(CoreDataContext context)
+        {
+            base.InitializeDatabase(context);
+            if (noExistingDatabase)
+            {
+                DataSeeder seeder = new DataSeeder(context);
+                seeder.Seed();
+            }
+        }
     }
 }

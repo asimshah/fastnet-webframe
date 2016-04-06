@@ -767,10 +767,10 @@ var fastnet;
                                     switch (s) {
                                         case 0 /* WaitingApproval */:
                                             return "WaitingApproval";
-                                        case 4 /* Cancelled */:
+                                        case 3 /* Cancelled */:
                                             return "Cancelled";
-                                        case 3 /* AutoCancelled */:
-                                            return "AutoCancelled";
+                                        //case server.bookingStatus.AutoCancelled:
+                                        //    return "AutoCancelled";
                                         case 2 /* Confirmed */:
                                             return "Confirmed";
                                         case 1 /* WaitingPayment */:
@@ -876,7 +876,7 @@ var fastnet;
                                 _this.updateBooking(data.current).then(function () {
                                     result.dataUpdated = true;
                                     result.booking = data.current;
-                                    if (result.booking.status != 4 /* Cancelled */) {
+                                    if (result.booking.status != 3 /* Cancelled */) {
                                         f.enableCommand("cancel-booking");
                                         if (result.booking.status != 2 /* Confirmed */) {
                                             f.enableCommand("confirm-booking");

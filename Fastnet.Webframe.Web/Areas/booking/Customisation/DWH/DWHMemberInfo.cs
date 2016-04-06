@@ -33,6 +33,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     {
                         BookingPermission = BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
                     }
+                    else
+                    {
+                        BookingPermission = BookingPermissions.ShortTermBookingAllowed;
+                    }
                 }
             }
         }

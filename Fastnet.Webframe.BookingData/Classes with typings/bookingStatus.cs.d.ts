@@ -3,7 +3,6 @@
 		WaitingApproval,
 		WaitingPayment,
 		Confirmed,
-		AutoCancelled,
 		Cancelled,
 		WaitingGateway,
 	}

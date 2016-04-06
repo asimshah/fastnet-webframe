@@ -77,13 +77,12 @@ var fastnet;
                 var minStart = today;
                 var interval = 0; // params.shortBookingInterval;
                 if (under18Present) {
-                    interval = params.shortBookingInterval + 14;
-                    //minStart = today.add(params.shortBookingInterval + 7, 'd');
+                    // interval = params.shortBookingInterval + 14;
+                    interval = 14;
                     fmt = "When any under 18s are present, bookings need to be at least {0} days in advance, i.e. from {1}";
                 }
                 else if (shortTermBookingAllowed == false) {
                     interval = params.shortBookingInterval;
-                    //minStart = today.add(params.shortBookingInterval, 'd');
                     fmt = "Bookings need to be at least {0} days in advance, i.e.from {1}";
                 }
                 minStart = today.add(interval, 'd');

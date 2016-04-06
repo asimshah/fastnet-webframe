@@ -50,7 +50,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             this.totalCost = b.TotalCost;
             this.formattedCost = string.Format("£{0:#0}", this.totalCost);
             this.isPaid = b.IsPaid;
-            this.canPay = (b.Status != bookingStatus.WaitingApproval && b.Status != bookingStatus.Cancelled && b.Status != bookingStatus.AutoCancelled);
+            this.canPay = (b.Status != bookingStatus.WaitingApproval && b.Status != bookingStatus.Cancelled);
             this.notes = b.Notes;
             this.history = b.History;
             this.entryInformation = b.EntryInformation;
