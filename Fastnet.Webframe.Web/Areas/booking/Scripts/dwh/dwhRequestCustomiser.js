@@ -27,7 +27,7 @@ var fastnet;
                 });
             };
             return dwhRequestCustomiser;
-        })(booking.requestCustomiser);
+        }(booking.requestCustomiser));
         booking.dwhRequestCustomiser = dwhRequestCustomiser;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

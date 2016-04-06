@@ -18,7 +18,7 @@ var fastnet;
                     _super.apply(this, arguments);
                 }
                 return loginModels;
-            })(forms.models);
+            }(forms.models));
             login.loginModels = loginModels;
             //export class credentials extends forms.viewModel {
             var credentials = (function (_super) {
@@ -27,7 +27,7 @@ var fastnet;
                     _super.apply(this, arguments);
                 }
                 return credentials;
-            })(forms.model);
+            }(forms.model));
             login.credentials = credentials;
             var observableCredentials = (function (_super) {
                 __extends(observableCredentials, _super);
@@ -41,7 +41,7 @@ var fastnet;
                     });
                 }
                 return observableCredentials;
-            })(forms.viewModel);
+            }(forms.viewModel));
             login.observableCredentials = observableCredentials;
         })(login = booking.login || (booking.login = {}));
         var step1Models = (function (_super) {
@@ -50,7 +50,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return step1Models;
-        })(forms.models);
+        }(forms.models));
         booking.step1Models = step1Models;
         var request_step1 = (function (_super) {
             __extends(request_step1, _super);
@@ -64,7 +64,7 @@ var fastnet;
                 this.shortTermBookingAllowed = shortTermBookingAllowed;
             }
             return request_step1;
-        })(forms.model);
+        }(forms.model));
         booking.request_step1 = request_step1;
         var observableRequest_step1 = (function (_super) {
             __extends(observableRequest_step1, _super);
@@ -158,7 +158,7 @@ var fastnet;
                 }
             };
             return observableRequest_step1;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableRequest_step1 = observableRequest_step1;
         //
         //
@@ -168,7 +168,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return step2Models;
-        })(forms.models);
+        }(forms.models));
         booking.step2Models = step2Models;
         var request_step2 = (function (_super) {
             __extends(request_step2, _super);
@@ -176,7 +176,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return request_step2;
-        })(forms.model);
+        }(forms.model));
         booking.request_step2 = request_step2;
         var observableBookingChoice = (function (_super) {
             __extends(observableBookingChoice, _super);
@@ -188,7 +188,7 @@ var fastnet;
                 this.description = m.description;
             }
             return observableBookingChoice;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableBookingChoice = observableBookingChoice;
         var observableRequest_step2 = (function (_super) {
             __extends(observableRequest_step2, _super);
@@ -208,7 +208,7 @@ var fastnet;
                 this.announcement = str.format("From {0} to {1}, the following alternatives are available for {2} {3}:", this.fromDate, this.toDate, this.numberOfPeople, this.numberOfPeople === 1 ? "person" : "people");
             }
             return observableRequest_step2;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableRequest_step2 = observableRequest_step2;
         var step3Models = (function (_super) {
             __extends(step3Models, _super);
@@ -216,7 +216,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return step3Models;
-        })(forms.models);
+        }(forms.models));
         booking.step3Models = step3Models;
         var request_step3 = (function (_super) {
             __extends(request_step3, _super);
@@ -234,7 +234,7 @@ var fastnet;
                 this.paymentGatewayAvailable = paymentGatewayAvailable;
             }
             return request_step3;
-        })(forms.model);
+        }(forms.model));
         booking.request_step3 = request_step3;
         var observableRequest_step3 = (function (_super) {
             __extends(observableRequest_step3, _super);
@@ -257,7 +257,7 @@ var fastnet;
                 this.showPaymentRequiredMessage = m.paymentGatewayAvailable === true && m.isShortTermBooking;
             }
             return observableRequest_step3;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableRequest_step3 = observableRequest_step3;
         var observableMyBookingsModel = (function (_super) {
             __extends(observableMyBookingsModel, _super);
@@ -267,7 +267,7 @@ var fastnet;
                 this.hasBookings = bookings.length > 0;
             }
             return observableMyBookingsModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableMyBookingsModel = observableMyBookingsModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

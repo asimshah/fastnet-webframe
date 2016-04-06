@@ -29,7 +29,7 @@ var fastnet;
             });
         };
         return testValidations;
-    })();
+    }());
     var configuration = (function () {
         function configuration() {
         }
@@ -37,7 +37,7 @@ var fastnet;
             return ["booking-forms"];
         };
         return configuration;
-    })();
+    }());
     //interface ITestModel {
     //    email: string;
     //    password: string;
@@ -163,7 +163,7 @@ var fastnet;
             });
         };
         return tests;
-    })();
+    }());
     fastnet.tests = tests;
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=tests.js.map

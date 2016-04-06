@@ -19,7 +19,7 @@ var fastnet;
             return ["report-forms"];
         };
         return configuration;
-    })();
+    }());
     var booking;
     (function (booking_1) {
         var bookingReportType;
@@ -60,20 +60,20 @@ var fastnet;
                 return deferred.promise();
             };
             return adminApp;
-        })();
+        }());
         booking_1.adminApp = adminApp;
         var adminSubapp = (function () {
             function adminSubapp(app) {
                 this.app = app;
             }
             return adminSubapp;
-        })();
+        }());
         booking_1.adminSubapp = adminSubapp;
         var adminCustomIndex = (function () {
             function adminCustomIndex() {
             }
             return adminCustomIndex;
-        })();
+        }());
         booking_1.adminCustomIndex = adminCustomIndex;
         var adminIndex = (function (_super) {
             __extends(adminIndex, _super);
@@ -159,7 +159,7 @@ var fastnet;
                 });
             };
             return adminIndex;
-        })(adminSubapp);
+        }(adminSubapp));
         booking_1.adminIndex = adminIndex;
         var configIndex = (function (_super) {
             __extends(configIndex, _super);
@@ -212,7 +212,7 @@ var fastnet;
                 });
             };
             return configIndex;
-        })(adminSubapp);
+        }(adminSubapp));
         var parametersApp = (function (_super) {
             __extends(parametersApp, _super);
             function parametersApp(app) {
@@ -274,7 +274,7 @@ var fastnet;
                 });
             };
             return parametersApp;
-        })(adminSubapp);
+        }(adminSubapp));
         var managePricing = (function (_super) {
             __extends(managePricing, _super);
             function managePricing(app) {
@@ -357,7 +357,7 @@ var fastnet;
                 return deferred.promise();
             };
             return managePricing;
-        })(adminSubapp);
+        }(adminSubapp));
         var manageDays = (function (_super) {
             __extends(manageDays, _super);
             function manageDays(app) {
@@ -602,12 +602,12 @@ var fastnet;
                 return deferred.promise();
             };
             return manageDays;
-        })(adminSubapp);
+        }(adminSubapp));
         var editBookingResult = (function () {
             function editBookingResult() {
             }
             return editBookingResult;
-        })();
+        }());
         var bookingReport = (function (_super) {
             __extends(bookingReport, _super);
             function bookingReport(app) {
@@ -969,7 +969,7 @@ var fastnet;
                 return deferred.promise();
             };
             return bookingReport;
-        })(adminSubapp);
+        }(adminSubapp));
         var occupancyReport = (function (_super) {
             __extends(occupancyReport, _super);
             function occupancyReport(app) {
@@ -1067,7 +1067,7 @@ var fastnet;
                 });
             };
             return occupancyReport;
-        })(adminSubapp);
+        }(adminSubapp));
         var emailTemplates = (function (_super) {
             __extends(emailTemplates, _super);
             function emailTemplates(app) {
@@ -1175,7 +1175,7 @@ var fastnet;
                 return deferred.promise();
             };
             return emailTemplates;
-        })(adminSubapp);
+        }(adminSubapp));
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=bookingAdmin.js.map

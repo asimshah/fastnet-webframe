@@ -34,7 +34,7 @@ var fastnet;
                 return ko.validation.rules.pattern.validator(val, pattern);
             };
             return validations;
-        })();
+        }());
         forms.validations = validations;
         /**
          * data returned to a CommandCallback.
@@ -51,7 +51,7 @@ var fastnet;
                 return null;
             };
             return model;
-        })();
+        }());
         forms.model = model;
         /**
          * base class for a data class to be used with a form
@@ -75,13 +75,13 @@ var fastnet;
                 return str.toDateString(d);
             };
             return viewModel;
-        })();
+        }());
         forms.viewModel = viewModel;
         var models = (function () {
             function models() {
             }
             return models;
-        })();
+        }());
         forms.models = models;
         /**
          * creates a new form
@@ -758,7 +758,7 @@ var fastnet;
             form.config = null;
             form.modelessFormTemplate = "\n            <div class='ui-form' >\n                <div class='ui-form-titlebar' >\n                    <span class='ui-form-title' ></span>\n                </div>\n                <div class='ui-form-content' ></div>\n                <div class='ui-form-buttonpane' >\n                    <div class='ui-form-buttonset' ></div>\n                </div>\n            </div>".trim();
             return form;
-        })();
+        }());
         forms.form = form;
         var messageBox = (function () {
             function messageBox() {
@@ -779,7 +779,7 @@ var fastnet;
                 return deferred.promise();
             };
             return messageBox;
-        })();
+        }());
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));

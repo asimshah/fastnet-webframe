@@ -16,7 +16,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return bookingModel;
-        })(forms.model);
+        }(forms.model));
         booking.bookingModel = bookingModel;
         var observableBookingModel = (function (_super) {
             __extends(observableBookingModel, _super);
@@ -47,7 +47,7 @@ var fastnet;
                 this.duration = str.format("{0} for {1} night{2}", b.to, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
             }
             return observableBookingModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableBookingModel = observableBookingModel;
         var bookingModels = (function (_super) {
             __extends(bookingModels, _super);
@@ -55,7 +55,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return bookingModels;
-        })(forms.models);
+        }(forms.models));
         booking.bookingModels = bookingModels;
         var manageDaysModels = (function (_super) {
             __extends(manageDaysModels, _super);
@@ -63,7 +63,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return manageDaysModels;
-        })(forms.models);
+        }(forms.models));
         booking.manageDaysModels = manageDaysModels;
         var manageDaysModel = (function (_super) {
             __extends(manageDaysModel, _super);
@@ -74,7 +74,7 @@ var fastnet;
                 this.blockedPeriods = d.blockedPeriods;
             }
             return manageDaysModel;
-        })(forms.model);
+        }(forms.model));
         booking.manageDaysModel = manageDaysModel;
         var observableBlockedPeriod = (function () {
             function observableBlockedPeriod(bp) {
@@ -84,7 +84,7 @@ var fastnet;
                 this.remarks = bp.remarks;
             }
             return observableBlockedPeriod;
-        })();
+        }());
         var observableManageDaysModel = (function (_super) {
             __extends(observableManageDaysModel, _super);
             function observableManageDaysModel(m) {
@@ -109,7 +109,7 @@ var fastnet;
                 return !this.isOpen();
             };
             return observableManageDaysModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableManageDaysModel = observableManageDaysModel;
         var pricingModels = (function (_super) {
             __extends(pricingModels, _super);
@@ -117,7 +117,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return pricingModels;
-        })(forms.models);
+        }(forms.models));
         booking.pricingModels = pricingModels;
         var pricingModel = (function (_super) {
             __extends(pricingModel, _super);
@@ -139,13 +139,13 @@ var fastnet;
                 //this.prices = prices;
             }
             return pricingModel;
-        })(forms.model);
+        }(forms.model));
         booking.pricingModel = pricingModel;
         var observablePrice = (function () {
             function observablePrice() {
             }
             return observablePrice;
-        })();
+        }());
         var observablePricingModel = (function (_super) {
             __extends(observablePricingModel, _super);
             function observablePricingModel(m) {
@@ -177,7 +177,7 @@ var fastnet;
                 });
             }
             return observablePricingModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observablePricingModel = observablePricingModel;
         var editTemplateModel = (function (_super) {
             __extends(editTemplateModel, _super);
@@ -188,7 +188,7 @@ var fastnet;
                 this.bodyHtml = "";
             }
             return editTemplateModel;
-        })(forms.model);
+        }(forms.model));
         booking.editTemplateModel = editTemplateModel;
         var observableEditTemplateModel = (function (_super) {
             __extends(observableEditTemplateModel, _super);
@@ -205,7 +205,7 @@ var fastnet;
                 this.selectedTemplate = ko.observable();
             }
             return observableEditTemplateModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableEditTemplateModel = observableEditTemplateModel;
         var editTemplateModels = (function (_super) {
             __extends(editTemplateModels, _super);
@@ -213,7 +213,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return editTemplateModels;
-        })(forms.models);
+        }(forms.models));
         booking.editTemplateModels = editTemplateModels;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

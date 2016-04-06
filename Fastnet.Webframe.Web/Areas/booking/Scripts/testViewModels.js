@@ -14,13 +14,13 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return testModels;
-        })(forms.models);
+        }(forms.models));
         test.testModels = testModels;
         var order = (function () {
             function order() {
             }
             return order;
-        })();
+        }());
         var observableOrder = (function () {
             function observableOrder(order) {
                 this.id = ko.observable(order.id);
@@ -30,14 +30,14 @@ var fastnet;
                 this.price = ko.observable(order.price);
             }
             return observableOrder;
-        })();
+        }());
         var testModel = (function (_super) {
             __extends(testModel, _super);
             function testModel() {
                 _super.apply(this, arguments);
             }
             return testModel;
-        })(forms.model);
+        }(forms.model));
         test.testModel = testModel;
         var observableTestModel = (function (_super) {
             __extends(observableTestModel, _super);
@@ -69,7 +69,7 @@ var fastnet;
                 this.orders.push(new observableOrder(new order()));
             };
             return observableTestModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         test.observableTestModel = observableTestModel;
     })(test = fastnet.test || (fastnet.test = {}));
 })(fastnet || (fastnet = {}));

@@ -34,7 +34,7 @@
                 switch (factory.name) {
                     case  FactoryName.DonWhillansHut:
                         return new dwhRequestCustomiser();
-                        break;
+                        //break;
                     default:
                         return new requestCustomiser();
                 }
@@ -44,7 +44,7 @@
                     case FactoryName.DonWhillansHut:
                         var dwhbm = <dwhBookingModel>b;
                         return new observableDwhBookingModel(dwhbm);
-                        break;
+                        //break;
                     default:
                         return new observableBookingModel(b);
                 }
@@ -53,7 +53,7 @@
                 switch (factory.name) {
                     case FactoryName.DonWhillansHut:
                         return new dwhAdminIndex();
-                        break;
+                        //break;
                     default:
                         return null;
                 }

@@ -16,7 +16,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return parameterModels;
-        })(forms.models);
+        }(forms.models));
         booking.parameterModels = parameterModels;
         var parameters = (function () {
             function parameters() {
@@ -28,7 +28,7 @@ var fastnet;
                 $.extend(this, data);
             };
             return parameters;
-        })();
+        }());
         booking.parameters = parameters;
         var observableParameters = (function (_super) {
             __extends(observableParameters, _super);
@@ -38,7 +38,7 @@ var fastnet;
                 this.availableGroups = m.availableGroups;
             }
             return observableParameters;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableParameters = observableParameters;
         var requestCustomiser = (function () {
             function requestCustomiser() {
@@ -46,7 +46,7 @@ var fastnet;
             requestCustomiser.prototype.customise_Step1 = function (stepObservable) {
             };
             return requestCustomiser;
-        })();
+        }());
         booking.requestCustomiser = requestCustomiser;
         var bookingAppValidations = (function () {
             function bookingAppValidations() {
@@ -116,7 +116,7 @@ var fastnet;
                 }
             };
             return bookingAppValidations;
-        })();
+        }());
         booking.bookingAppValidations = bookingAppValidations;
         var addressModels = (function (_super) {
             __extends(addressModels, _super);
@@ -124,7 +124,7 @@ var fastnet;
                 _super.apply(this, arguments);
             }
             return addressModels;
-        })(forms.models);
+        }(forms.models));
         booking.addressModels = addressModels;
         var addressModel = (function (_super) {
             __extends(addressModel, _super);
@@ -138,7 +138,7 @@ var fastnet;
                 this.postCode = null;
             }
             return addressModel;
-        })(forms.model);
+        }(forms.model));
         booking.addressModel = addressModel;
         var observableAddressModel = (function (_super) {
             __extends(observableAddressModel, _super);
@@ -167,7 +167,7 @@ var fastnet;
                 });
             }
             return observableAddressModel;
-        })(forms.viewModel);
+        }(forms.viewModel));
         booking.observableAddressModel = observableAddressModel;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

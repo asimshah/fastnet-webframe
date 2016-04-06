@@ -38,7 +38,7 @@ var fastnet;
                 switch (factory.name) {
                     case FactoryName.DonWhillansHut:
                         return new booking.dwhRequestCustomiser();
-                        break;
+                    //break;
                     default:
                         return new booking.requestCustomiser();
                 }
@@ -48,7 +48,7 @@ var fastnet;
                     case FactoryName.DonWhillansHut:
                         var dwhbm = b;
                         return new booking.observableDwhBookingModel(dwhbm);
-                        break;
+                    //break;
                     default:
                         return new booking.observableBookingModel(b);
                 }
@@ -57,14 +57,14 @@ var fastnet;
                 switch (factory.name) {
                     case FactoryName.DonWhillansHut:
                         return new booking.dwhAdminIndex();
-                        break;
+                    //break;
                     default:
                         return null;
                 }
             };
             factory.name = FactoryName.None;
             return factory;
-        })();
+        }());
         booking.factory = factory;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));

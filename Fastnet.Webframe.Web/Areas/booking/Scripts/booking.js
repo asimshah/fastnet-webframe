@@ -22,7 +22,7 @@ var fastnet;
                 return ["booking-forms"];
             };
             return configuration;
-        })();
+        }());
         var myBooking = (function () {
             function myBooking() {
             }
@@ -170,7 +170,7 @@ var fastnet;
                 return deferred.promise();
             };
             return myBooking;
-        })();
+        }());
         booking.myBooking = myBooking;
         var bookingApp = (function () {
             function bookingApp() {
@@ -488,7 +488,7 @@ var fastnet;
                 });
             };
             return bookingApp;
-        })();
+        }());
         booking.bookingApp = bookingApp;
         var loginModels = fastnet.booking.login;
         var LoginManager = (function () {
@@ -569,7 +569,7 @@ var fastnet;
                 });
             };
             return LoginManager;
-        })();
+        }());
         var bookingModels = fastnet.booking; // bookingVM;
         var bookDates = (function () {
             function bookDates() {
@@ -884,7 +884,7 @@ var fastnet;
                 });
             };
             return bookDates;
-        })();
+        }());
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
 //# sourceMappingURL=booking.js.map

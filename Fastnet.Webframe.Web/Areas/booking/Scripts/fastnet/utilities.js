@@ -11,7 +11,7 @@ var fastnet;
                 fastnet.util.debug.print("star wars");
             };
             return dark;
-        })();
+        }());
         force.dark = dark;
     })(force = fastnet.force || (fastnet.force = {}));
     var web;
@@ -30,7 +30,7 @@ var fastnet;
                 return deferred.promise();
             };
             return tools;
-        })();
+        }());
         web.tools = tools;
     })(web = fastnet.web || (fastnet.web = {}));
     var util;
@@ -41,7 +41,7 @@ var fastnet;
             utilOnReady.init = function () {
             };
             return utilOnReady;
-        })();
+        }());
         var ajax = (function () {
             function ajax() {
             }
@@ -75,7 +75,7 @@ var fastnet;
             };
             ajax.rootUrl = "/";
             return ajax;
-        })();
+        }());
         util.ajax = ajax;
         var str = (function () {
             function str() {
@@ -145,7 +145,7 @@ var fastnet;
                 return md.format("DDMMMYYYY");
             };
             return str;
-        })();
+        }());
         util.str = str;
         var debug = (function () {
             function debug() {
@@ -171,7 +171,7 @@ var fastnet;
             };
             debug.routeMessagesToVisualStudio = false;
             return debug;
-        })();
+        }());
         util.debug = debug;
         var helper = (function () {
             function helper() {
@@ -202,7 +202,7 @@ var fastnet;
             };
             helper.nameSpace = "fastnet-";
             return helper;
-        })();
+        }());
         util.helper = helper;
         utilOnReady.init();
     })(util = fastnet.util || (fastnet.util = {}));
