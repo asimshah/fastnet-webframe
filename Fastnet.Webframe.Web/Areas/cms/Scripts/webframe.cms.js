@@ -107,9 +107,19 @@
                 });
         }
         function showMailHistory() {
+            function attachClickHandler() {
+                $(".mail-history td div.to").off().on("click", function () {
+                    var id = $(this).closest("tr").attr("data-id");
+                    var bodyUrl = "cmsapi/get/mail/body/" + id;
+                    $U.AjaxGet({ url: bodyUrl }).then(function (r) {
+                        $U.MessageBox(r, { Title: "Email Content" });
+                    });
+                });
+            }
             //var templateurl = "cms/template/type/mailhistory";
             var templateurl = "template/get/cms/mailhistory";
             var dataurl = "cmsapi/get/mailhistory";
+            var pageChanged = false;
             $.when(
                 $U.AjaxGet({ url: templateurl }),
                 $U.AjaxGet({ url: dataurl })
@@ -117,16 +127,18 @@
                     var template = q1[0].Template;
                     var data = q2[0];
                     showHistory(template, data, "report-mail-history");
-                    $(".mail-history td div.to").on("click", function () {
-                        var id = $(this).closest("tr").attr("data-id");
-                        var bodyUrl = "cmsapi/get/mail/body/" + id;
-                        $U.AjaxGet({ url: bodyUrl }).then(function (r) {
-
-                        //var body = $(this).siblings(".body");
-                        $U.MessageBox(r, { Title: "Email Content" });
-
-                        });
+                    $(".report-container table").on('draw.dt', function () {
+                        if (pageChanged) {
+                            attachClickHandler();
+                            pageChanged = false;
+                        }
                     });
+                    $(".report-container table").on('page.dt', function () {
+                        $U.Debug("datatable page event");
+                        pageChanged = true;
+
+                    });
+                    attachClickHandler();
                 });
         }
         function showGroupHistory() {
