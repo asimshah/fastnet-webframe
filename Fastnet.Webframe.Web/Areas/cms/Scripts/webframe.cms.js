@@ -133,8 +133,8 @@
                             pageChanged = false;
                         }
                     });
-                    $(".report-container table").on('page.dt', function () {
-                        $U.Debug("datatable page event");
+                    $(".report-container table").on('page.dt length.dt search.dt', function () {
+                        $U.Debug("datatable additional event");
                         pageChanged = true;
 
                     });
