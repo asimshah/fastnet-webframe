@@ -180,7 +180,7 @@
                         "serverSide": true,
                         "ordering": false,
                         "searching": false,
-                        "ajax": "get/ss/membershiphistory",
+                        "ajax": "cms/get/ss/membershiphistory",
                         //"ajax": "cms/get/ss/membershiphistory",
                         "createdRow": function (row, data, index) {
                             var x = data[0];
@@ -207,9 +207,9 @@
         }
         function showHistory(template, data, reportClass) {
             var html = $(Mustache.to_html(template, { data: data }));
-            html.find(".recordedOn").each(function (i, item) {
-                item.innerText = moment($(item).text()).format("DDMMMYYYY HH:mm:ss");
-            });
+            //html.find(".recordedOn").each(function (i, item) {
+            //    item.innerText = moment($(item).text()).format("DDMMMYYYY HH:mm:ss");
+            //});
             $(".report-container").addClass(reportClass).append(html);
             $(".report-container table").dataTable({
                 pagingType: "simple",

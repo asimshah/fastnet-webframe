@@ -22,7 +22,12 @@ namespace Fastnet.Webframe.CoreData
         [NotMapped]
         public string RecordedOnString
         {
-            get { return RecordedOn.ToString().Replace("T", " "); }
+            get { return RecordedOn.UtcDateTime.ToString("ddMMMyyyy HH:mm:ss"); }
+        }
+        [NotMapped]
+        public long RecordedOnUnix
+        {
+            get { return RecordedOn.ToUnixTimeSeconds(); }
         }
     }
     public class ApplicationAction : ActionBase

@@ -15,7 +15,7 @@
         <tbody>
             {{#data}}
             <tr class="" data-id="{{GroupId}}">
-                <td><div class="recordedOn">{{RecordedOn}}</div></td>
+                <td  data-order="{{RecordedOnUnix}}"><div class="recordedOn">{{RecordedOnString}}</div></td>
                 <td><div class="actionName">{{ActionName}}</div></td>
                 <td><div class="Name">{{FullName}}</div></td>
                 <td><div class="actionBy">{{ActionBy}}</div></td>
