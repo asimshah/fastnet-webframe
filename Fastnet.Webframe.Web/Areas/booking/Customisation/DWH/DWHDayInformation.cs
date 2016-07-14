@@ -23,7 +23,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             switch (Status)
             {
                 case DayStatus.IsClosed:
-                    descr = string.Format("Don Whillans Hut is closed for maintenance");//, BookingGlobals.GetLodgementName());
+                    descr = string.Format("Don Whillans Hut is closed for bookings");//, BookingGlobals.GetLodgementName());
                     break;
                 case DayStatus.IsNotBookable:
                     descr = "Saturdays are not separately bookable";
