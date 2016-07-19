@@ -72,7 +72,9 @@ namespace Fastnet.Webframe.Web.Controllers
             long pageId = Int64.Parse(id);
             Page page = DataContext.Pages.Find(pageId);
             var m = GetCurrentMember();
+            TraceAccess("page/access/ call :: test access: member {0}, {1}", m.Fullname, page.Url);
             AccessResult ar = m.GetAccessResult(page);
+            TraceAccess("page/access/ call :: member {0}, page {1}, access result: {2}", m.Fullname, page.Url, ar.ToString());
             string descr = ar.ToString().ToLower();
             //bool result = admins.Members.Contains(m) || m.CanEdit(page);
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Access = descr });
@@ -233,6 +235,7 @@ namespace Fastnet.Webframe.Web.Controllers
                     }
                     if (loweredurl.StartsWith("page/") || loweredurl.StartsWith("document/") || loweredurl.StartsWith("image/"))
                     {
+                        TraceAccess("menu item call :: test access: {0}", loweredurl);
                         return canAccessInternalUrl(loweredurl);
                     }
                 }
@@ -388,6 +391,14 @@ namespace Fastnet.Webframe.Web.Controllers
             {
                 Log.Write(xe, "Invalid internal url {0}", loweredurl);
                 throw;
+            }
+        }
+        private void TraceAccess(string fmt, params object[] args)
+        {
+            bool trace = ApplicationSettings.Key("TraceAccess", false);
+            if (trace)
+            {
+                Log.Write(fmt, args);
             }
         }
 

@@ -234,6 +234,7 @@ namespace Fastnet.Webframe.CoreData
                     g.Description = "Members whose bookings are confirmed without their necessarily having paid.";
                 }
                 coreDb.Groups.Add(g);
+                Log.Write("Group {0}, created", g.Name);
                 foreach (var child in item.Children)
                 {
                     addGroup(child, g);
@@ -259,6 +260,7 @@ namespace Fastnet.Webframe.CoreData
                 Type = GroupTypes.User,
             };
             coreDb.Groups.Add(bmcMembers);
+            Log.Write("Group {0}, created", bmcMembers.Name);
             Group nonBmcMembers = new Group
             {
                 Name = nonBmcMembersGroupName,//  "Non BMC Members",
@@ -268,6 +270,7 @@ namespace Fastnet.Webframe.CoreData
                 Type = GroupTypes.User,
             };
             coreDb.Groups.Add(nonBmcMembers);
+            Log.Write("Group {0}, created", nonBmcMembers.Name);
             coreDb.SaveChanges();
         }
         internal void LoadMembers()
@@ -310,11 +313,13 @@ namespace Fastnet.Webframe.CoreData
                         if (ng != null)
                         {
                             m.Groups.Add(ng);
+                            Log.Write("Group {2}, member {0} ({1}) added", m.EmailAddress, m.Fullname, ng.Name);
                         }
                     }
                     if (m.LastName == "Stock" || m.LastName == "Shah" || m.LastName == "Battye")
                     {
                         m.Groups.Add(privileged);
+                        Log.Write("Group {2}, member {0} ({1}) added", m.EmailAddress, m.Fullname, privileged.Name);
                     }
                 }
                 appDb.SaveChanges();

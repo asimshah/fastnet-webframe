@@ -483,15 +483,18 @@ namespace Fastnet.Webframe.CoreData
             MemberBase originalAdmin = ctx.Members.Single(x => x.IsAdministrator);
             if (!adminMembers.Contains(originalAdmin))
             {
-                adminMembers.Add(originalAdmin);
+                admingroup.Members.Add(originalAdmin);
+                Log.Write("Group {2}, member {0} ({1}) added", originalAdmin.EmailAddress, originalAdmin.Fullname, admingroup.Name);
             }
             if (!editorsGroup.Members.Contains(originalAdmin))
             {
                 editorsGroup.Members.Add(originalAdmin);
+                Log.Write("Group {2}, member {0} ({1}) added", originalAdmin.EmailAddress, originalAdmin.Fullname, editorsGroup.Name);
             }
             if (!designersGroup.Members.Contains(originalAdmin))
             {
                 designersGroup.Members.Add(originalAdmin);
+                Log.Write("Group {2}, member {0} ({1}) added", originalAdmin.EmailAddress, originalAdmin.Fullname, designersGroup.Name);
             }
             //var editorsGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Editors");
             //var designersGroup = ctx.Groups.ToArray().Single(x => x.Type.HasFlag(GroupTypes.System) && x.Name == "Designers");

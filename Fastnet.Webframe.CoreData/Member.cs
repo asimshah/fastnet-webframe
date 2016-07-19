@@ -171,19 +171,19 @@ namespace Fastnet.Webframe.CoreData
         //}
         public AccessResult GetAccessResult(Page page)
         {
-            TraceAccess("Access: for {0}, url {1}", this.Fullname, page.Url);
+            TraceAccess("Access: member {0}, {1}", this.Fullname, page.Url);
             Directory dir = page.Directory;
             return GetAccessResult(dir);
         }
         public AccessResult GetAccessResult(Document doc)
         {
-            TraceAccess("Access: for {0}, url {1}", this.Fullname, doc.Url);
+            TraceAccess("Access: member {0}, {1}", this.Fullname, doc.Url);
             Directory dir = doc.Directory;
             return GetAccessResult(dir);
         }
         public AccessResult GetAccessResult(Image image)
         {
-            TraceAccess("Access: for {0}, url {1}", this.Fullname, image.Url);
+            TraceAccess("Access: member {0}, {1}", this.Fullname, image.Url);
             Directory dir = image.Directory;
             return GetAccessResult(dir);
         }
@@ -196,25 +196,28 @@ namespace Fastnet.Webframe.CoreData
             Page result = null;
             CoreDataContext DataContext = Core.GetDataContext();
             var lps = DataContext.Pages.Where(x => x.IsLandingPage).ToArray();
+            TraceAccess("Access: defined landing page(s) {0}", string.Join(", ", lps.Select(x => x.Url).ToArray()));
             var pages = lps.Where(x => canAccess(GetAccessResult(x))).ToArray();
+            TraceAccess("Access: member {0} can access landing page(s) {1}", this.Fullname, string.Join(", ", pages.Select(x => x.Url).ToArray()));
             if (pages.Count() > 1)
             {
                 var pagesWithWeight = pages.Select(x => new { Page = x, Weight = FindWeight(x) });
-                TraceAccess("Access: for {0}, candidate landing pages: {1}", this.Fullname, string.Join(", ", pagesWithWeight.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
+                TraceAccess("Access: member {0}, page weights are: {1}", this.Fullname, string.Join(", ", pagesWithWeight.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
                 var maxWeight = pagesWithWeight.Max(x => x.Weight);
                 var heaviest = pagesWithWeight.Where(x => x.Weight == maxWeight);
                 if (heaviest.Count() > 1)
                 {
                     Log.Write("Multiple landing pages found for {0}: {1}", this.Fullname, string.Join(", ", heaviest.Select(x => string.Format("{0}, weight {1:#0.00}", x.Page.Url, x.Weight)).ToArray()));
                 }
-                TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, string.Format("{0} weight {1:#0.00}", heaviest.First().Page.Url, heaviest.First().Weight));
+                TraceAccess("Access: member {0}, selected landing page {1}", this.Fullname, string.Format("{0} weight {1:#0.00}", heaviest.First().Page.Url, heaviest.First().Weight));
                 result = heaviest.First().Page;
             }
             else
             {
                 result = pages.First();
+                TraceAccess("Access: member {0}, selected landing page {1}", this.Fullname, result.Url);
             }
-            TraceAccess("Access: for {0}, selected landing page {1}", this.Fullname, result.Url);
+           
             return result;
         }
         //public abstract dynamic GetMinimumDetails();
@@ -362,32 +365,32 @@ namespace Fastnet.Webframe.CoreData
         private AccessResult GetAccessResult(Directory dir)
         {
             AccessResult ar = AccessResult.Rejected;
-            TraceAccess("Access: for {0}, directory {1}", this.Fullname, dir.DisplayName);
+            TraceAccess("Access: member {0}, directory {1}", this.Fullname, dir.DisplayName);
             var drgSet = dir.DirectoryGroups;
             if (drgSet.Count() == 0)
             {
-                TraceAccess("Access: for {0}, directory {1}, no direct restrictions", this.Fullname, dir.DisplayName);
+                TraceAccess("Access: member {0}, directory {1}, no direct restrictions (going to parent ...)", this.Fullname, dir.DisplayName);
                 dir = dir.ParentDirectory;
                 ar = GetAccessResult(dir);
             }
-            TraceAccess("Access: for {0}, directory {1}, direct restriction group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", drgSet.Select(x => x.Group.Fullpath).ToArray()));
+            TraceAccess("Access: member {0}, directory {1}, direct restriction group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", drgSet.Select(x => x.Group.Fullpath).ToArray()));
             if (drgSet.Select(x => x.Group).Any(x => IsMemberOf(x)))
             {
                 var dgs = drgSet.Where(x => IsMemberOf(x.Group));
-                TraceAccess("Access: for {0}, directory {1}, member of group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Select(x => x.Group.Fullpath).ToArray()));
+                TraceAccess("Access: member {0}, directory {1}, member of group(s): {2}", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Select(x => x.Group.Fullpath).ToArray()));
                 if (dgs.Any(x => x.EditAllowed))
                 {
-                    TraceAccess("Access: for {0}, directory {1}, edit allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.EditAllowed).Select(x => x.Group.Fullpath).ToArray()));
+                    TraceAccess("Access: member {0}, directory {1}, edit allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.EditAllowed).Select(x => x.Group.Fullpath).ToArray()));
                     ar = AccessResult.EditAllowed;
                 }
                 else if (dgs.Any(x => x.ViewAllowed))
                 {
                     //var xx = dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray();
-                    TraceAccess("Access: for {0}, directory {1}, view allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray()));
+                    TraceAccess("Access: member {0}, directory {1}, view allowed for group(s): {2} ", this.Fullname, dir.DisplayName, string.Join(", ", dgs.Where(x => x.ViewAllowed).Select(x => x.Group.Fullpath).ToArray()));
                     ar = AccessResult.ViewAllowed;
                 }
             }
-            TraceAccess("Access: for {0}, directory {1}, access result: {2}", this.Fullname, dir.DisplayName, ar.ToString());
+            TraceAccess("Access: member {0}, directory {1}, access result: {2}", this.Fullname, dir.DisplayName, ar.ToString());
             return ar;
         }
         public bool IsMemberOf(Group group)

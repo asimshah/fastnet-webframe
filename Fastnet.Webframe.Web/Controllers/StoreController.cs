@@ -274,42 +274,55 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("update/directory/groups")]
         public async Task<HttpResponseMessage> UpdateRestrictingGroups(dynamic data)
         {
-            long directoryId = data.directoryId;
-            JArray list = data.groups;
-            dynamic[] items = list.ToObject<dynamic[]>();
-            CD.Directory directory = await DataContext.Directories.FindAsync(directoryId);
-            foreach (dynamic item in items)
+            try
             {
-                long groupId = item.groupId;
-                bool isChecked = item.isChecked;
-                bool view = item.view;
-                bool edit = item.edit;
-                if (isChecked)
+                long directoryId = data.directoryId;
+                JArray list = data.groups;
+                dynamic[] items = list.ToObject<dynamic[]>();
+                CD.Directory directory = await DataContext.Directories.FindAsync(directoryId);
+                foreach (dynamic item in items)
                 {
-                    bool isNew = false;
-                    var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
-                    if (dg == null)
+                    long groupId = item.groupId;
+                    bool isChecked = item.isChecked;
+                    bool view = item.view;
+                    bool edit = item.edit;
+                    Log.Debug("UpdateRestrictingGroups(): directory {0}, group id {1}", directory.Name, groupId);
+                    if (isChecked)
                     {
-                        isNew = true;
-                        CD.Group group = await DataContext.Groups.FindAsync(groupId);
-                        dg = new CD.DirectoryGroup { Directory = directory, Group = group };
-                        DataContext.DirectoryGroups.Add(dg);
+                        bool isNew = false;
+                        var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
+                        if (dg == null)
+                        {
+                            isNew = true;
+                            CD.Group group = await DataContext.Groups.FindAsync(groupId);
+                            dg = new CD.DirectoryGroup { Directory = directory, Group = group };
+                            DataContext.DirectoryGroups.Add(dg);
+                            Log.Debug("New dg created: directory {0}, group {1}", directory.Name, group.Name);
+                        }
+                        dg.SetView(true);
+                        dg.SetEdit(edit);
+                        Log.Debug("dg modified: directory {0}, group {1}, edit = {2}", dg.Directory.Name, dg.Group.Name, edit);
+                        dg.RecordChanges(this.GetCurrentMember().Fullname, isNew ? CD.RestrictionAction.EditingActionTypes.RestrictionAdded : CD.EditingAction.EditingActionTypes.RestrictionModified);
                     }
-                    dg.SetView(true);
-                    dg.SetEdit(edit);
-                    dg.RecordChanges(this.GetCurrentMember().Fullname, isNew ? CD.RestrictionAction.EditingActionTypes.RestrictionAdded : CD.EditingAction.EditingActionTypes.RestrictionModified);
-                }
-                else
-                {
-                    var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
-                    if (dg != null)
+                    else
                     {
-                        DataContext.DirectoryGroups.Remove(dg);
-                        dg.RecordChanges(this.GetCurrentMember().Fullname, CD.RestrictionAction.EditingActionTypes.RestrictionRemoved);
+                        var dg = directory.DirectoryGroups.SingleOrDefault(x => x.Group.GroupId == groupId);
+                        if (dg != null)
+                        {
+                            Log.Debug("dg removed: directory {0}, group {1}", dg.Directory.Name, dg.Group.Name);
+                            dg.RecordChanges(this.GetCurrentMember().Fullname, CD.RestrictionAction.EditingActionTypes.RestrictionRemoved);
+                            DataContext.DirectoryGroups.Remove(dg);
+                        }
                     }
                 }
+                await DataContext.SaveChangesAsync();
             }
-            await DataContext.SaveChangesAsync();
+            catch (Exception xe)
+            {
+                //Debugger.Break();
+                Log.Write(xe);
+                throw;
+            }
             return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
         }
         [HttpPost]
