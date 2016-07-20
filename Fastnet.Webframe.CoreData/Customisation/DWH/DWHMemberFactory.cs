@@ -1,4 +1,5 @@
 ﻿using Fastnet.Common;
+using Fastnet.EventSystem;
 using Fastnet.Webframe.BookingData;
 using System;
 using System.Collections.Generic;
@@ -102,6 +103,7 @@ namespace Fastnet.Webframe.CoreData
                     if (EnableBMCApi) // ApplicationSettings.Key("DWH:ValidateBMCMembership", true))
                     {
                         dynamic r = await ValidateBMCNumber(bmcMembership, lastName);
+                        Log.Write("BMC membership validation: {1}, number {0}, success = {2}", bmcMembership, lastName, (bool)r.Success);
                         return r;
                     }
                     else

@@ -15,6 +15,7 @@ namespace Fastnet.Webframe.CoreData
     {
         public long ActionBaseId { get; set; }
         public DateTimeOffset RecordedOn { get; set; } // always UTC
+        public string Remark { get; set; }
         public ActionBase()
         {
             RecordedOn = DateTimeOffset.UtcNow;
@@ -34,7 +35,7 @@ namespace Fastnet.Webframe.CoreData
     {
         public string SiteUrl { get; set; }
         public string Version { get; set; }
-        public string Remark { get; set; }
+
     }
     public class SessionAction : ActionBase
     {
