@@ -11,7 +11,6 @@ using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -50,7 +49,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             {
                 Path = d.DisplayName,
                 Id = d.DirectoryId,
-                Restrictions = d.DirectoryGroups.Select(x => new { Group = x.Group.Fullpath, View = x.ViewAllowed, Edit = x.EditAllowed, Access = x.GetAccessDescription(), Weight = x.Group.Weight }),
+                Restrictions = d.DirectoryGroups.Select(x => new { Group = x.Group.Fullpath, View = x.ViewAllowed, Edit = x.EditAllowed, Access = x.GetAccessDescription(), Weight = x.Group.Weight}),
                 InheritedRestrictions = d.GetClosestDirectoryGroups().Select(x => new { Group = x.Group.Fullpath, View = x.ViewAllowed, Edit = x.EditAllowed, Access = x.GetAccessDescription(), Weight = x.Group.Weight })
             }); // add properties here as required
             return this.Request.CreateResponse(HttpStatusCode.OK, folders);
@@ -113,7 +112,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 PageTypeImage = p.GetTypeImageUrl(),
                 PageTypeTooltip = p.GetTypeTooltip(),
                 LastModifiedOn = p.ModifiedOn ?? p.CreatedOn,
-                LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy : p.CreatedBy
+                LastModifiedBy = p.ModifiedOn.HasValue ? p.ModifiedBy: p.CreatedBy
             }));
             list.AddRange(documents.Select(d => new
             {
@@ -168,7 +167,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             data.recordsFiltered = total;
             var selected = all.Skip(start).Take(length);
             List<string[]> l = new List<string[]>();
-            foreach (MemberAction ma in selected)
+            foreach(MemberAction ma in selected)
             {
                 string ro = ma.RecordedOn.UtcDateTime.ToString("ddMMMyyyy HH:mm:ss");
                 string an = ma.ActionName;
@@ -178,7 +177,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 string pc = null;
                 string ov = null;
                 string nv = null;
-                if (ma.IsModification)
+                if(ma.IsModification)
                 {
                     pc = ma.PropertyChanged;
                     ov = ma.OldValue;
@@ -235,49 +234,10 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
         [Route("get/mailhistory")]
         public async Task<HttpResponseMessage> GetMailHistory()
         {
-            Func<string, bool, string, bool, string, string> buildText = (failure, redirected, redirectedTo, disabled, remark) =>
-            {
-                List<string> parts = new List<string>();
-                if(!string.IsNullOrWhiteSpace(remark))
-                {
-                    parts.Add(remark);
-                }
-                if(redirected)
-                {
-                    parts.Add($"Redirected to {redirectedTo}");
-                }
-                if(disabled)
-                {
-                    parts.Add("Mail is disabled");
-                }
-                if(!string.IsNullOrWhiteSpace(failure))
-                {
-                    parts.Add(failure);
-                }
-                return string.Join(" ", parts);
-            };
-            Func<string, bool,  bool,  string> buildClasses = (failure, redirected,  disabled) =>
-            {
-                List<string> parts = new List<string>();
-                if (redirected)
-                {
-                    parts.Add("redirectedto");
-                }
-                if (disabled)
-                {
-                    parts.Add("mail-disabled");
-                }
-                if (!string.IsNullOrWhiteSpace(failure))
-                {
-                    parts.Add("mail-failed-delivery");
-                }
-                return string.Join(" ", parts);
-            };
             var ctx = ((IObjectContextAdapter)DataContext).ObjectContext;
             var mails = await DataContext.Actions.OfType<MailAction>().OrderByDescending(x => x.RecordedOn).ToArrayAsync();
             await ctx.RefreshAsync(RefreshMode.StoreWins, mails);
-            var data = mails.Select(x => new
-            {
+            var data = mails.Select(x => new {
                 ActionBaseId = x.ActionBaseId,
                 Failure = x.Failure,
                 From = x.From,
@@ -289,10 +249,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
                 Redirected = x.Redirected,
                 RedirectedTo = x.RedirectedTo,
                 Subject = x.Subject,
-                To = x.To,
-                Remark = x.Remark,
-                CombinedDescription = buildText(x.Failure, x.Redirected, x.RedirectedTo, x.MailDisabled, x.Remark),
-                CombinedDescriptionClasses = buildClasses(x.Failure, x.Redirected, x.MailDisabled)
+                To= x.To,                
             });
             return this.Request.CreateResponse(HttpStatusCode.OK, data);
         }

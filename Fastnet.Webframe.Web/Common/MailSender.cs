@@ -17,7 +17,6 @@ namespace Fastnet.Webframe.Web.Common
         public bool Redirected { get; set; }
         public string OriginalAddress { get; set; }
         public int RetryCount { get; set; }
-        public string Remark { get; set; }
         public SendMailObject()
         {
 
@@ -112,7 +111,7 @@ namespace Fastnet.Webframe.Web.Common
                 string templateName = smo.Template;
                 MailAction ma = GetBaseRecord(smo);
                 ma.MailDisabled = mailDisabled;
-                ma.Remark = smo.Remark;
+
                 dctx.Actions.Add(ma);
                 dctx.SaveChanges();
             }

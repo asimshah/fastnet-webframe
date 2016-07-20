@@ -45,7 +45,7 @@ namespace Fastnet.Webframe.CoreData
     {
         private string BMCApiUser;
         private string BMCApiKey;
-
+        
         internal BMCApiClient(string url, string BMCApiUser, string BMCApiKey) : base(url)
         {
             this.BMCApiUser = BMCApiUser;
@@ -59,7 +59,7 @@ namespace Fastnet.Webframe.CoreData
             {
                 string url = string.Format("MemberUpdate/QueryLight?lastName={0}&membershipNumber={1}&contentType=json&apiuser={2}&apikey={3}",
                     lastName, bmcMembership, BMCApiUser, BMCApiKey);
-                ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
                 dynamic r = await GetAsync(url);
                 if (r is JObject)
                 {

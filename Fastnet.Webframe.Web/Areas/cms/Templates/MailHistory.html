@@ -8,6 +8,7 @@
                 <th>Subject</th>
                 <th>From</th>
                 <th>Template</th>
+                <!--<th>Body</th>-->
                 <th></th>
             </tr>
         </thead>
@@ -19,7 +20,20 @@
                 <td><div class="subject">{{Subject}}</div></td>
                 <td><div class="from">{{From}}</div></td>
                 <td><div class="mailtemplate">{{MailTemplate}}</div></td>
-                <td><div class="{{CombinedDescriptionClasses}}">{{CombinedDescription}}</div></td>
+                {{^MailDisabled}}
+                    {{#Redirected}}
+                        <td><div class="redirectedto"></div>Redirected to {{RedirectedTo}}</td>
+                    {{/Redirected}}
+                    {{^Redirected}}
+                        <td><div class="redirectedto"></div></td>
+                    {{/Redirected}}
+                {{/MailDisabled}}
+                {{#MailDisabled}}
+                    <td><div class="mail-disabled">Mail is disabled</div></td>
+                {{/MailDisabled}}
+                {{#Failure}}
+                <td><div class="mail-failed-delivery">{{Failure}}</div></td>
+                {{/Failure}}
             </tr>
             {{/data}}
         </tbody>

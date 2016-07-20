@@ -534,33 +534,32 @@ namespace Fastnet.Webframe.CoreData
                             {
                                 member.BMCMembershipExpiresOn = result.Expiry;
                                 bmcGroup.Members.Add(member);
-                                Log.Write("Member {0} ({1}): BMC {2} added to group {3}", member.EmailAddress, member.Fullname, bmcNumber, bmcGroup.Name);
                             }
                             else
                             {
                                 status = BMCMembershipStatus.Missing;
-                                Log.Write("Member {0} ({1}): BMC membership is not valid", member.EmailAddress, member.Fullname);
+                                Log.Write("Member {1}, email {0}: membership is not valid", member.EmailAddress, member.Fullname);
                                 nonBmcGroup.Members.Add(member);
                             }
                         }
                         else
                         {
                             status = BMCMembershipStatus.Missing;
-                            Log.Write("Member {0} ({1}): api failed", member.EmailAddress, member.Fullname);
+                            Log.Write("Member {1}, email {0}: api failed", member.EmailAddress, member.Fullname);
                             nonBmcGroup.Members.Add(member);
                         }
                     }
                     catch (Exception xe)
                     {
                         status = BMCMembershipStatus.Missing;
-                        Log.Write("Member {0} ({1}): api failed, {2}", member.EmailAddress, member.Fullname, xe.Message);
+                        Log.Write("Member {1}, email {0}: api failed, {2}", member.EmailAddress, member.Fullname, xe.Message);
                         nonBmcGroup.Members.Add(member);
                     }
                 }
                 else if (bmcNumber == null)
                 {
                     status = BMCMembershipStatus.Missing;
-                    Log.Write("Member {0} ({1}): no BMC number available", member.EmailAddress, member.Fullname);
+                    Log.Write("Member {1}, email {0} is not a member of the BMC", member.EmailAddress, member.Fullname);
                     nonBmcGroup.Members.Add(member);
                 }
             }

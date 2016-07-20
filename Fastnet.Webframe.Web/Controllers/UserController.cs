@@ -84,7 +84,6 @@ namespace Fastnet.Webframe.Web.Controllers
                             await DataContext.SaveChangesAsync();
                             MailHelper mh = new MailHelper();
                             mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
-                            Log.Write("Member created: {0} ({{1}})", member.EmailAddress, member.Fullname);
                             tran.Complete();
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
                         }
