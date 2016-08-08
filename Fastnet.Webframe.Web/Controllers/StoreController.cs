@@ -729,6 +729,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private async Task DeleteDirectory(CD.Directory dir)
         {
+            dir.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderDeleted);
             foreach (CD.Page p in dir.Pages.ToArray())
             {
                 DeletePage(p);
@@ -738,7 +739,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 await DeleteDirectory(d);
             }
             DataContext.Directories.Remove(dir);
-            dir.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderDeleted);
+           
             await DataContext.SaveChangesAsync();
         }
         private async Task DeletePage(long id)
@@ -750,10 +751,10 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private void DeletePage(CD.Page p)
         {
+            p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageDeleted);
             CD.PageMarkup pm = p.PageMarkup;
             DataContext.PageMarkups.Remove(pm);
             DataContext.Pages.Remove(p);
-            p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageDeleted);
         }
         private string GetUniquePageName(CD.Directory dir, CD.PageType type)
         {
