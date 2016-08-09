@@ -38,17 +38,27 @@ namespace Fastnet.Webframe.Web.Controllers
         public Task<HttpResponseMessage> GetDirectories(long? id = null)
         {
             //var directories = null;
-            if (!id.HasValue)
+            try
             {
-                var rd = DataContext.Directories.Single(d => d.ParentDirectory == null);
-                var data = new List<dynamic>();
-                data.Add(new { Id = rd.DirectoryId, Name = "Store", SubdirectoryCount = rd.SubDirectories.Count });
-                return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+                if (!id.HasValue)
+                {
+                    var rd = DataContext.Directories.Single(d => d.ParentDirectory == null);
+                    var data = new List<dynamic>();
+                    data.Add(new { Id = rd.DirectoryId, Name = "Store", SubdirectoryCount = rd.SubDirectories.Count });
+                    return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+                }
+                var directories = DataContext.Directories.Where(d => d.ParentDirectory.DirectoryId == id.Value)
+                    .OrderBy(x => x.Name)
+                    .Select(x => new { Id = x.DirectoryId, Name = x.Name, SubdirectoryCount = x.SubDirectories.Count() });
+                return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, directories));
             }
-            var directories = DataContext.Directories.Where(d => d.ParentDirectory.DirectoryId == id.Value)
-                .OrderBy(x => x.Name)
-                .Select(x => new { Id = x.DirectoryId, Name = x.Name, SubdirectoryCount = x.SubDirectories.Count() });
-            return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, directories));
+            catch (Exception xe)
+            {
+                Log.Write(xe.Message);
+                //result = false;
+
+            }
+            return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpGet]
         [Route("content/{id}/{filter?}")]
@@ -64,57 +74,67 @@ namespace Fastnet.Webframe.Web.Controllers
                         return true;
                 }
             };
-            var directory = DataContext.Directories.Find(id);
-            List<dynamic> folderContent = new List<dynamic>();
-            foreach (var page in directory.Pages.OrderBy(x => x.PageId))
+            try
             {
-                if (filter.HasFlag(ContentFilter.CentrePages)  && page.Type == CD.PageType.Centre
-                    || filter.HasFlag(ContentFilter.SidePages) && isSidePage(page.Type))
+                var directory = DataContext.Directories.Find(id);
+                List<dynamic> folderContent = new List<dynamic>();
+                foreach (var page in directory.Pages.OrderBy(x => x.PageId))
                 {
-                    folderContent.Add(new
+                    if (filter.HasFlag(ContentFilter.CentrePages) && page.Type == CD.PageType.Centre
+                        || filter.HasFlag(ContentFilter.SidePages) && isSidePage(page.Type))
                     {
-                        Type = "page",
-                        Id = page.PageId,
-                        Url = page.Url,
-                        Name = page.Name,
-                        PageType = page.Type.ToString().ToLower(),
-                        LandingPage = page.IsLandingPage,
-                        LandingPageImage = CD.Page.GetLandingPageImageUrl(),
-                        PageTypeImage = page.GetTypeImageUrl(),
-                        PageTypeTooltip = page.GetTypeTooltip()
-                    });
+                        folderContent.Add(new
+                        {
+                            Type = "page",
+                            Id = page.PageId,
+                            Url = page.Url,
+                            Name = page.Name,
+                            PageType = page.Type.ToString().ToLower(),
+                            LandingPage = page.IsLandingPage,
+                            LandingPageImage = CD.Page.GetLandingPageImageUrl(),
+                            PageTypeImage = page.GetTypeImageUrl(),
+                            PageTypeTooltip = page.GetTypeTooltip()
+                        });
+                    }
                 }
+                foreach (var image in directory.Images.OrderBy(x => x.ImageId))
+                {
+                    if (filter.HasFlag(ContentFilter.Images))
+                    {
+                        folderContent.Add(new
+                        {
+                            Type = "image",
+                            Id = image.ImageId,
+                            Url = image.Url,
+                            Name = image.Name,
+                            Size = image.Size,
+                            ImageTypeImage = image.GetImageTypeImage()
+                        });
+                    }
+                }
+                foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
+                {
+                    if (filter.HasFlag(ContentFilter.Documents))
+                    {
+                        folderContent.Add(new
+                        {
+                            Type = "document",
+                            Id = document.DocumentId,
+                            Url = document.Url,
+                            Name = document.Name,
+                            DocumentTypeImage = document.GetTypeImageUrl()
+                        });
+                    }
+                }
+                return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, folderContent));
             }
-            foreach (var image in directory.Images.OrderBy(x => x.ImageId))
+            catch (Exception xe)
             {
-                if (filter.HasFlag(ContentFilter.Images))
-                {
-                    folderContent.Add(new
-                    {
-                        Type = "image",
-                        Id = image.ImageId,
-                        Url = image.Url,
-                        Name = image.Name,
-                        Size = image.Size,
-                        ImageTypeImage = image.GetImageTypeImage()
-                    });
-                }
+                Log.Write(xe.Message);
+                //result = false;
+
             }
-            foreach (var document in directory.Documents.OrderBy(x => x.DocumentId))
-            {
-                if (filter.HasFlag(ContentFilter.Documents))
-                {
-                    folderContent.Add(new
-                    {
-                        Type = "document",
-                        Id = document.DocumentId,
-                        Url = document.Url,
-                        Name = document.Name,
-                        DocumentTypeImage = document.GetTypeImageUrl()
-                    });
-                }
-            }
-            return Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, folderContent));
+            return  Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
         [Route("createdirectory")]
@@ -208,67 +228,86 @@ namespace Fastnet.Webframe.Web.Controllers
         [Route("get/directory/{id}")]
         public async Task<HttpResponseMessage> GetDirectoryDetails(long id)
         {
-            CD.Directory d = DataContext.Directories.Find(id);
-            var data = new
+            try
             {
-                Id = d.DirectoryId,
-                Name = d.Name,
-                InheritedRestrictions = d.GetClosestDirectoryGroups().Select(dg => new
+                CD.Directory d = DataContext.Directories.Find(id);
+                var data = new
                 {
-                    Group = dg.Group.GetClientSideGroupDetails(),
-                    View = dg.ViewAllowed,
-                    Edit = dg.EditAllowed,
-                    AccessDescription = dg.GetAccessDescription()
-                }),
-                DirectRestrictions = d.DirectoryGroups.Select(dg => new
-                {
-                    Group = dg.Group.GetClientSideGroupDetails(),
-                    View = dg.ViewAllowed,
-                    Edit = dg.EditAllowed,
-                    AccessDescription = dg.GetAccessDescription()
-                }),
-                Groups = d.DirectoryGroups.Select(x => x.Group.GetClientSideGroupDetails())
-            };
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
-            //return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.Forbidden));
+                    Id = d.DirectoryId,
+                    Name = d.Name,
+                    InheritedRestrictions = d.GetClosestDirectoryGroups().Select(dg => new
+                    {
+                        Group = dg.Group.GetClientSideGroupDetails(),
+                        View = dg.ViewAllowed,
+                        Edit = dg.EditAllowed,
+                        AccessDescription = dg.GetAccessDescription()
+                    }),
+                    DirectRestrictions = d.DirectoryGroups.Select(dg => new
+                    {
+                        Group = dg.Group.GetClientSideGroupDetails(),
+                        View = dg.ViewAllowed,
+                        Edit = dg.EditAllowed,
+                        AccessDescription = dg.GetAccessDescription()
+                    }),
+                    Groups = d.DirectoryGroups.Select(x => x.Group.GetClientSideGroupDetails())
+                };
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe.Message);
+                //result = false;
+
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpGet]
         [Route("get/directory/groups/{id}")]
         public async Task<HttpResponseMessage> GetRestrictingGroups(long id)
         {
-            //Func<dynamic> getRestrictionInfo
-            CD.Directory d = DataContext.Directories.Find(id);
-            // first find the first parent directory with any group restrictions
-            // then for each group restriction find all children (as a flat list)
-            var currentRestrictions = d.DirectoryGroups.ToArray();
-            var groups = d.GetClosestDirectoryGroups().Select(dg => dg.Group);
-            List<CD.Group> list = new List<CD.Group>();
-            foreach (var group in groups)
+            try
             {
-                //list.AddRange(group.GetAllChildren());
-                list.AddRange(group.Descendants);
-            }
-            var result = new List<dynamic>();
-            foreach (var group in list.Where(g => g.GroupId != CD.Group.Anonymous.GroupId))
-            {
-                dynamic item = new ExpandoObject();
-                item.Group = group.GetClientSideGroupDetails();
-                bool selected = currentRestrictions.Select(cr => cr.Group).Contains(group);
-                bool view = false;
-                bool edit = false;
-                if (selected)
+                //Func<dynamic> getRestrictionInfo
+                CD.Directory d = DataContext.Directories.Find(id);
+                // first find the first parent directory with any group restrictions
+                // then for each group restriction find all children (as a flat list)
+                var currentRestrictions = d.DirectoryGroups.ToArray();
+                var groups = d.GetClosestDirectoryGroups().Select(dg => dg.Group);
+                List<CD.Group> list = new List<CD.Group>();
+                foreach (var group in groups)
                 {
-                    var dg = currentRestrictions.Single(x => x.Group == group);
-                    view = dg.ViewAllowed;
-                    edit = dg.EditAllowed;
+                    //list.AddRange(group.GetAllChildren());
+                    list.AddRange(group.Descendants);
                 }
-                item.Parent = group.ParentGroup.GetClientSideGroupDetails();
-                item.Selected = selected;
-                item.View = view;
-                item.Edit = edit;
-                result.Add(item);
+                var result = new List<dynamic>();
+                foreach (var group in list.Where(g => g.GroupId != CD.Group.Anonymous.GroupId))
+                {
+                    dynamic item = new ExpandoObject();
+                    item.Group = group.GetClientSideGroupDetails();
+                    bool selected = currentRestrictions.Select(cr => cr.Group).Contains(group);
+                    bool view = false;
+                    bool edit = false;
+                    if (selected)
+                    {
+                        var dg = currentRestrictions.Single(x => x.Group == group);
+                        view = dg.ViewAllowed;
+                        edit = dg.EditAllowed;
+                    }
+                    item.Parent = group.ParentGroup.GetClientSideGroupDetails();
+                    item.Selected = selected;
+                    item.View = view;
+                    item.Edit = edit;
+                    result.Add(item);
+                }
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, result));
             }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, result));
+            catch (Exception xe)
+            {
+                Log.Write(xe.Message);
+                //result = false;
+
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
         [Route("update/directory/groups")]
@@ -316,169 +355,181 @@ namespace Fastnet.Webframe.Web.Controllers
                     }
                 }
                 await DataContext.SaveChangesAsync();
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
             }
             catch (Exception xe)
             {
                 //Debugger.Break();
                 Log.Write(xe);
-                throw;
+
             }
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
         [Route("update/directory")]
         public async Task<HttpResponseMessage> UpdateDirectory(dynamic data)
         {
-            long id = data.id;
-            CD.Directory d = DataContext.Directories.Find(id);
-            d.Name = data.name;
-            d.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderModified);
-            await DataContext.SaveChangesAsync();
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            try
+            {
+                long id = data.id;
+                CD.Directory d = DataContext.Directories.Find(id);
+                d.Name = data.name;
+                d.RecordChanges(this.GetCurrentMember().Fullname, CD.FolderAction.EditingActionTypes.FolderModified);
+                await DataContext.SaveChangesAsync();
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            }
+            catch (Exception xe)
+            {
+                //Debugger.Break();
+                Log.Write(xe);
+
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpGet]
         [Route("get/page/{id}")]
         public async Task<HttpResponseMessage> GetPageDetails(long id)
         {
-            CD.Page p = DataContext.Pages.Find(id);
-            var data = new
+            try
             {
-                Id = p.PageId,
-                Url = p.Url,
-                Name = p.Name,
-                IsLandingPage = p.IsLandingPage,
-                LandingPageLocked = p.Directory.ParentDirectory == null && p.IsLandingPage,
-                LandingPageImage = CD.Page.GetLandingPageImageUrl(),
-                CreatedBy = p.PageMarkup.CreatedBy,
-                CreatedOn = p.PageMarkup.CreatedOn.ToString("ddMMMyyyy HH:mm"),
-                ModifiedBy = p.PageMarkup.ModifiedBy,
-                ModifiedOn = p.PageMarkup.ModifiedOn.HasValue ? p.PageMarkup.ModifiedOn.Value.ToString("ddMMMyyyy HH:mm") : "",
-                ModificationState = p.PageMarkup.ModifiedOn.HasValue ? "visible" : "hidden"
-            };
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+                CD.Page p = DataContext.Pages.Find(id);
+                var data = new
+                {
+                    Id = p.PageId,
+                    Url = p.Url,
+                    Name = p.Name,
+                    IsLandingPage = p.IsLandingPage,
+                    LandingPageLocked = p.Directory.ParentDirectory == null && p.IsLandingPage,
+                    LandingPageImage = CD.Page.GetLandingPageImageUrl(),
+                    CreatedBy = p.PageMarkup.CreatedBy,
+                    CreatedOn = p.PageMarkup.CreatedOn.ToString("ddMMMyyyy HH:mm"),
+                    ModifiedBy = p.PageMarkup.ModifiedBy,
+                    ModifiedOn = p.PageMarkup.ModifiedOn.HasValue ? p.PageMarkup.ModifiedOn.Value.ToString("ddMMMyyyy HH:mm") : "",
+                    ModificationState = p.PageMarkup.ModifiedOn.HasValue ? "visible" : "hidden"
+                };
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK, data));
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpGet]
         [Route("sidepages/{id}")]
         public HttpResponseMessage GetSidePages(string id)
         {
-            //Func<CD.Page, long?> getPageId = (p) =>
-            //    {
-            //        if (p == null)
-            //        {
-            //            return null;
-            //        }
-            //        else
-            //        {
-            //            return p.PageId;
-            //        }
-            //    };
-            //Func<CD.Page, CD.Panel, CD.Page> sidePanelPage = (cp, panel) =>
-            //{
-            //    CD.Page sp = null;
-            //    if (panel.Visible)
-            //    {
-            //        CD.PanelPage panelPage = cp.SidePanelPages.SingleOrDefault(pp => pp.Panel.PanelId == panel.PanelId);
-            //        sp = panelPage != null ? panelPage.Page : null;
-            //    }
-            //    return sp;
-            //};
-            //CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
-            //CD.Page bp = sidePanelPage(centrePage, CD.Panel.BannerPanel);
-            //CD.Page lp = sidePanelPage(centrePage, CD.Panel.LeftPanel);
-            //CD.Page rp = sidePanelPage(centrePage, CD.Panel.RightPanel);
-            //var result = new
-            //{
-            //    BannerPanel = new { PageId = getPageId(bp) },
-            //    LeftPanel = new { PageId = getPageId(lp) },
-            //    RightPanel = new { PageId = getPageId(rp) }
-            //};
-            CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
-            var Banner = centrePage.FindSidePage(CD.PageType.Banner, false);
-            var Left = centrePage.FindSidePage(CD.PageType.Left, false);
-            var Right = centrePage.FindSidePage(CD.PageType.Right, false);
-            if (ApplicationSettings.Key("TraceSidePages", false))
+            try
             {
-                Log.Write("StoreController::GetSidePages(): centre {0}, banner {1}, left {2}, right {3}", centrePage.Url,
-                    Banner == null ? "none" : Banner.Url,
-                    Left == null ? "none" : Left.Url,
-                    Right == null ? "none" : Right.Url);
-            }
+                CD.Page centrePage = DataContext.Pages.Find(Int64.Parse(id));
+                var Banner = centrePage.FindSidePage(CD.PageType.Banner, false);
+                var Left = centrePage.FindSidePage(CD.PageType.Left, false);
+                var Right = centrePage.FindSidePage(CD.PageType.Right, false);
+                if (ApplicationSettings.Key("TraceSidePages", false))
+                {
+                    Log.Write("StoreController::GetSidePages(): centre {0}, banner {1}, left {2}, right {3}", centrePage.Url,
+                        Banner == null ? "none" : Banner.Url,
+                        Left == null ? "none" : Left.Url,
+                        Right == null ? "none" : Right.Url);
+                }
 
-            var b = Banner == null ? default(long?) : Banner.PageId;
-            var l = Left == null ? default(long?) : Left.PageId;
-            var r = Right == null ? default(long?) : Right.PageId;
-            var result = new { Banner = b, Left = l, Right = r };
-            return this.Request.CreateResponse(HttpStatusCode.OK, result);
+                var b = Banner == null ? default(long?) : Banner.PageId;
+                var l = Left == null ? default(long?) : Left.PageId;
+                var r = Right == null ? default(long?) : Right.PageId;
+                var result = new { Banner = b, Left = l, Right = r };
+                return this.Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+            }
+            return this.Request.CreateResponse(HttpStatusCode.InternalServerError);
         }
         [HttpPost]
         [Route("update/page")]
         public async Task<HttpResponseMessage> UpdatePage(dynamic data)
         {
-            long id = data.id;
-            bool isLandingPage = data.isLandingPage;
-            CD.Page p = DataContext.Pages.Find(id);
-            p.Name = data.name;
-            if (isLandingPage && !p.IsLandingPage)
+            try
             {
-                // we are making this page the landing page
-                var otherPages = p.Directory.Pages.Where(x => x.PageId != p.PageId);
-                var previousLandingPage = otherPages.SingleOrDefault(x => x.IsLandingPage);
-                if (previousLandingPage != null)
+                long id = data.id;
+                bool isLandingPage = data.isLandingPage;
+                CD.Page p = DataContext.Pages.Find(id);
+                p.Name = data.name;
+                if (isLandingPage && !p.IsLandingPage)
                 {
-                    previousLandingPage.IsLandingPage = false;
-                    previousLandingPage.RecordChanges(this.GetCurrentMember().Fullname, CD.EditingAction.EditingActionTypes.PageModified);
-                }
-                p.IsLandingPage = true;
-            }
-            else
-            {
-                if (p.Directory.ParentDirectory == null)
-                {
-                    // we cannot remove the landing page in the root directory
-                    // (we can replace it)
+                    // we are making this page the landing page
+                    var otherPages = p.Directory.Pages.Where(x => x.PageId != p.PageId);
+                    var previousLandingPage = otherPages.SingleOrDefault(x => x.IsLandingPage);
+                    if (previousLandingPage != null)
+                    {
+                        previousLandingPage.IsLandingPage = false;
+                        previousLandingPage.RecordChanges(this.GetCurrentMember().Fullname, CD.EditingAction.EditingActionTypes.PageModified);
+                    }
+                    p.IsLandingPage = true;
                 }
                 else
                 {
-                    p.IsLandingPage = false;
+                    if (p.Directory.ParentDirectory == null)
+                    {
+                        // we cannot remove the landing page in the root directory
+                        // (we can replace it)
+                    }
+                    else
+                    {
+                        p.IsLandingPage = false;
+                    }
                 }
+                p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageModified);
+                await DataContext.SaveChangesAsync();
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
             }
-            p.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageModified);
-            await DataContext.SaveChangesAsync();
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
         [Route("update/page/content")]
         public async Task<HttpResponseMessage> UpdatePageContent(dynamic data)
         {
-            dynamic banner = data.banner;
-            dynamic left = data.left;
-            dynamic centre = data.centre;
-            dynamic right = data.right;
-
-            Action<dynamic> update = (pd) =>
+            try
             {
-                bool hasChanges = pd.hasChanges;
-                if (hasChanges)
+                dynamic banner = data.banner;
+                dynamic left = data.left;
+                dynamic centre = data.centre;
+                dynamic right = data.right;
+
+                Action<dynamic> update = (pd) =>
                 {
-                    string pageId = pd.id;
-                    long id = Convert.ToInt64(pageId);
-                    string htmlText = (string)pd.html;
-                    CD.Page page = DataContext.Pages.Find(id);
-                    CD.PageMarkup pm = page.PageMarkup;
-                    pm.HtmlText = htmlText;
-                    pm.HtmlTextLength = htmlText.Length;
-                    pm.ModifiedBy = this.GetCurrentMember().Fullname;
-                    pm.ModifiedOn = DateTime.UtcNow;
-                    page.MarkupType = CD.MarkupType.Html;
-                    page.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageContentModified);
-                }
-            };
-            update(banner);
-            update(left);
-            update(centre);
-            update(right);
-            await DataContext.SaveChangesAsync();
-            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+                    bool hasChanges = pd.hasChanges;
+                    if (hasChanges)
+                    {
+                        string pageId = pd.id;
+                        long id = Convert.ToInt64(pageId);
+                        string htmlText = (string)pd.html;
+                        CD.Page page = DataContext.Pages.Find(id);
+                        CD.PageMarkup pm = page.PageMarkup;
+                        pm.HtmlText = htmlText;
+                        pm.HtmlTextLength = htmlText.Length;
+                        pm.ModifiedBy = this.GetCurrentMember().Fullname;
+                        pm.ModifiedOn = DateTime.UtcNow;
+                        page.MarkupType = CD.MarkupType.Html;
+                        page.RecordChanges(this.GetCurrentMember().Fullname, CD.PageAction.EditingActionTypes.PageContentModified);
+                    }
+                };
+                update(banner);
+                update(left);
+                update(centre);
+                update(right);
+                await DataContext.SaveChangesAsync();
+                return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.OK));
+            }
+            catch (Exception xe)
+            {
+                Log.Write(xe);
+            }
+            return await Task.FromResult(this.Request.CreateResponse(HttpStatusCode.InternalServerError));
         }
         [HttpPost]
         [Route("upload/file")]
