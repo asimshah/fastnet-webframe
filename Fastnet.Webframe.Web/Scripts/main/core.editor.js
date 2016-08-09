@@ -23,7 +23,9 @@
                     ).then(function (result) {
                         _removePanelOverlay(panel);
                         var panelName = pages[panel].panelSelector.substring(1);
-                        $.core$page.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+                        var ep = $.core$page.FindEditablePanel("." + panelName);
+                        //$.core$page.SetContent(panelName, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
+                        $.core$page.SetContent(ep, { styleList: result.HtmlStyles, html: result.HtmlText, pageId: result.PageId, location: result.Location });
                         pages[panel].pageId = result.PageId;
                         _initEditing(panel);
                     });

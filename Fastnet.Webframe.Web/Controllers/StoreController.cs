@@ -210,13 +210,15 @@ namespace Fastnet.Webframe.Web.Controllers
                     case "directory":
                         await DeleteDirectory(id);
                         break;
+                    default:
+                        Log.Write($"Delete request for type {(string)data.type}, id {id} - not implemented");
+                        break;
                 }
             }
             catch (Exception xe)
             {
                 Log.Write(xe);
                 result = false;
-
             }
             if (!result)
             {
