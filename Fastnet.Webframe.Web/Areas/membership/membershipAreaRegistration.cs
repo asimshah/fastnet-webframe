@@ -36,10 +36,10 @@ namespace Fastnet.Webframe.Web.Areas.membership
 
             bundles.Add(new ScriptBundle("~/bundles/membership").Include(
                 "~/Scripts/mustache.js",
-                "~/Scripts/fastnet/fastnet.utilities.js",
-                "~/Scripts/fastnet/fastnet.validators.js",
-                "~/Scripts/fastnet/fastnet.forms.js",
-                "~/Scripts/fastnet/fastnet.treeview.js",
+                "~/Scripts/fastnet-legacy/fastnet.utilities.js",
+                "~/Scripts/fastnet-legacy/fastnet.validators.js",
+                "~/Scripts/fastnet-legacy/fastnet.forms.js",
+                "~/Scripts/fastnet-legacy/fastnet.treeview.js",
                 "~/Areas/membership/Scripts/membership.js",
                 "~/Areas/membership/Scripts/webframe.membership.js"
                 ));

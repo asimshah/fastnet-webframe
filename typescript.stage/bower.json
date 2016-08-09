@@ -1,0 +1,11 @@
+{
+  "name": "asp.net",
+  "private": true,
+  "dependencies": {
+    "normalize-css": "4.1.1",
+    "fastnet": "asimshah/fastnet-typescript"
+  },
+  "resolutions": {
+    "jquery": ">= 1.7.2"
+  }
+}

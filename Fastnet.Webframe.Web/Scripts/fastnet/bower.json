@@ -1,0 +1,36 @@
+{
+  "name": "fastnet",
+  "version": "0.0.1",
+  "authors": [
+    "Asim Shah <asimshah@hotmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "main": [],
+  "ignore": [
+    "**/.*",
+    "*.css",
+    "*.js",
+    "*.map",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    ".vscode",
+    "tsconfig.json",
+    "bower.json",
+    "typings",
+    "typings.json",
+    "package.json.old"
+  ],
+  "dependencies": {
+      "es6-promise": "3.2.1",
+      "moment":  "^2.12.0",
+      "jquery": "^2.2.3",
+      "signalr": "^2.2.0",
+      "knockout": "^3.4.0",
+      "knockout-validation": "2.0.3",
+      "font-awesome": "^4.6.1",
+      "interact": "^1.2.6"
+  }
+}

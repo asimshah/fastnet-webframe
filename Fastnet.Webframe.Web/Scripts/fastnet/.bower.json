@@ -1,0 +1,45 @@
+{
+  "name": "fastnet",
+  "authors": [
+    "Asim Shah <asimshah@hotmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "main": [],
+  "ignore": [
+    "**/.*",
+    "*.css",
+    "*.js",
+    "*.map",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    ".vscode",
+    "tsconfig.json",
+    "bower.json",
+    "typings",
+    "typings.json",
+    "package.json.old"
+  ],
+  "dependencies": {
+    "es6-promise": "3.2.1",
+    "moment": "^2.12.0",
+    "jquery": "^2.2.3",
+    "signalr": "^2.2.0",
+    "knockout": "^3.4.0",
+    "knockout-validation": "2.0.3",
+    "font-awesome": "^4.6.1",
+    "interact": "^1.2.6"
+  },
+  "homepage": "https://github.com/asimshah/fastnet-typescript",
+  "_release": "b62c718540",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "b62c7185404a6b58134bce83bdf9d5224ce67421"
+  },
+  "_source": "git://github.com/asimshah/fastnet-typescript.git",
+  "_target": "*",
+  "_originalSource": "asimshah/fastnet-typescript"
+}

@@ -37,8 +37,8 @@ namespace Fastnet.Webframe.Web.Areas.cms
                 "~/Scripts/mustache.js",
                 "~/Scripts/datatables/jquery.dataTables.js",
                 "~/Scripts/datatables/dataTables.bootstrap.js",
-                "~/Scripts/fastnet/fastnet.validators.js",
-                "~/Scripts/fastnet/fastnet.forms.js",
+                "~/Scripts/fastnet-legacy/fastnet.validators.js",
+                "~/Scripts/fastnet-legacy/fastnet.forms.js",
                 "~/Areas/cms/Scripts/webframe.cms.js"
                 ));
         }

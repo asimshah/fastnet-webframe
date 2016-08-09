@@ -1104,13 +1104,13 @@
     <Content Include="Scripts\dropzone\dropzone.min.css" />
     <Content Include="Scripts\dropzone\dropzone.min.js" />
     <Content Include="Scripts\dwh\dwh.js" />
-    <Content Include="Scripts\fastnet\fastnet.account.js" />
-    <Content Include="Scripts\fastnet\fastnet.contextmenu.js" />
-    <Content Include="Scripts\fastnet\fastnet.forms.js" />
-    <Content Include="Scripts\fastnet\fastnet.menus.js" />
-    <Content Include="Scripts\fastnet\fastnet.treeview.js" />
-    <Content Include="Scripts\fastnet\fastnet.utilities.js" />
-    <Content Include="Scripts\fastnet\fastnet.validators.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.account.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.contextmenu.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.forms.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.menus.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.treeview.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.utilities.js" />
+    <Content Include="Scripts\fastnet-legacy\fastnet.validators.js" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
@@ -1238,6 +1238,11 @@
     <Content Include="Areas\booking\Views\Home\Success.cshtml" />
     <Content Include="Areas\booking\Views\Home\Failed.cshtml" />
     <None Include="compilerconfig.json" />
+    <Content Include="Scripts\fastnet\.bower.json" />
+    <Content Include="Scripts\fastnet\bower.json" />
+    <Content Include="Scripts\fastnet\busyIndicator.scss" />
+    <Content Include="Scripts\fastnet\forms.scss" />
+    <Content Include="Scripts\fastnet\tsconfig.json" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.js" />
     <Content Include="Scripts\i18n\defaults-bg_BG.min.js" />
@@ -1675,6 +1680,14 @@
     <Folder Include="Areas\cms\Models\" />
     <Folder Include="Content\Main\CustomLess\" />
     <Folder Include="Scripts\collections\" />
+    <Folder Include="Scripts\fastnet\ambient\es6-promise\" />
+    <Folder Include="Scripts\fastnet\ambient\interact\" />
+    <Folder Include="Scripts\fastnet\ambient\jquery\" />
+    <Folder Include="Scripts\fastnet\ambient\knockout.validation\" />
+    <Folder Include="Scripts\fastnet\ambient\knockout\" />
+    <Folder Include="Scripts\fastnet\ambient\moment-node\" />
+    <Folder Include="Scripts\fastnet\ambient\moment\" />
+    <Folder Include="Scripts\fastnet\ambient\signalr\" />
     <Folder Include="Scripts\main\Archive\" />
   </ItemGroup>
   <ItemGroup>
@@ -1754,6 +1767,20 @@
     <TypeScriptCompile Include="Areas\booking\TransferObjects\pricing.cs.d.ts">
       <DependentUpon>pricing.cs</DependentUpon>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Scripts\fastnet\ajax.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\busyIndicator.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\collections.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\commands.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\date.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\debug.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\fastnet.d.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\forms.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\javascriptExtensions.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\jqhelper.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\knockout.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\messagehub.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\packages.d.ts" />
+    <TypeScriptCompile Include="Scripts\fastnet\template.ts" />
     <TypeScriptCompile Include="Scripts\typings\accounting\accounting.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.blockUI\jquery.blockUI.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery.dataTables\jquery.dataTables.d.ts" />

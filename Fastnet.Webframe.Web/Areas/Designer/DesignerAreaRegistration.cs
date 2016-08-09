@@ -41,9 +41,9 @@ namespace Fastnet.Webframe.Web.Areas.Designer
             bundles.Add(new ScriptBundle("~/bundles/designer").Include(
                 //"~/Scripts/moment.js",
                 "~/Scripts/mustache.js",
-                "~/Scripts/fastnet/fastnet.validators.js",
-                "~/Scripts/fastnet/fastnet.forms.js",
-                "~/Scripts/fastnet/fastnet.treeview.js",
+                "~/Scripts/fastnet-legacy/fastnet.validators.js",
+                "~/Scripts/fastnet-legacy/fastnet.forms.js",
+                "~/Scripts/fastnet-legacy/fastnet.treeview.js",
                 "~/Scripts/main/core.storebrowser.js",
                 "~/Areas/Designer/Scripts/webframe.designer.js"
                 ));

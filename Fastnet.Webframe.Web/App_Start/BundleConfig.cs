@@ -45,18 +45,18 @@ namespace Fastnet.Webframe.Web
                 .Include(
                     "~/Scripts/moment.js",
                     "~/Scripts/mustache.js",
-                    "~/Scripts/fastnet/fastnet.utilities.js"
+                    "~/Scripts/fastnet-legacy/fastnet.utilities.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/fastnet/utils")
                 .Include(
                     "~/Scripts/moment.js",
-                    "~/Scripts/fastnet/fastnet.utilities.js"
+                    "~/Scripts/fastnet-legacy/fastnet.utilities.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
-                    "~/Scripts/fastnet/fastnet.menus.js",
+                    "~/Scripts/fastnet-legacy/fastnet.menus.js",
                     "~/Scripts/main/core.pagetoolbar.js",
                     "~/Scripts/main/core.page.js",
                     "~/Scripts/main/core.storebrowser.js",
@@ -66,9 +66,9 @@ namespace Fastnet.Webframe.Web
             bundles.Add(new ScriptBundle("~/bundles/identity")
                 .Include(
                     "~/Scripts/jquery.blockUI.js",
-                    "~/Scripts/fastnet/fastnet.validators.js",
-                    "~/Scripts/fastnet/fastnet.forms.js",
-                    "~/Scripts/fastnet/fastnet.account.js"
+                    "~/Scripts/fastnet-legacy/fastnet.validators.js",
+                    "~/Scripts/fastnet-legacy/fastnet.forms.js",
+                    "~/Scripts/fastnet-legacy/fastnet.account.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/main/editor")
@@ -77,8 +77,8 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/dropzone/dropzone.js",
-                    "~/Scripts/fastnet/fastnet.contextmenu.js",
-                    "~/Scripts/fastnet/fastnet.treeview.js",
+                    "~/Scripts/fastnet-legacy/fastnet.contextmenu.js",
+                    "~/Scripts/fastnet-legacy/fastnet.treeview.js",
                     "~/Scripts/main/core.editor.js"
                 ));
 

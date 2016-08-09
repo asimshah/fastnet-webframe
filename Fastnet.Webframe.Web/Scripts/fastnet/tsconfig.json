@@ -1,0 +1,26 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5"
+  },
+  "files": [
+    "packages.d.ts",
+    "javascriptExtensions.ts",
+    "debug.ts",
+    "busyIndicator.ts",
+    "date.ts",
+    "ajax.ts",
+    "template.ts",
+    "knockout.ts",
+    "jqhelper.ts",
+    "commands.ts",
+    "collections.ts",
+    "messagehub.ts",
+    "forms.ts"
+  ],
+  "exclude": [ "ambient"]
+}

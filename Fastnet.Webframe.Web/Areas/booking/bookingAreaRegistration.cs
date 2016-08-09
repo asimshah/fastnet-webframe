@@ -62,8 +62,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 "~/Scripts/knockout.validation.js",
                 //"~/Scripts/collections/collections.js",
                 "~/Areas/booking/Scripts/collections/collections.js",
-                "~/Areas/booking/Scripts/fastnet/utilities.js",
-                "~/Areas/booking/Scripts/fastnet/forms.js"
+                "~/Areas/booking/Scripts/fastnet-legacy/utilities.js",
+                "~/Areas/booking/Scripts/fastnet-legacy/forms.js"
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/booking/datatables").Include(
