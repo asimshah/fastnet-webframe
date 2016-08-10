@@ -6,3 +6,4 @@
 /// <reference path="ambient/moment/index.d.ts" />
 /// <reference path="ambient/moment-node/index.d.ts" />
 /// <reference path="ambient/signalr/index.d.ts" />
+/// <reference path="ambient/mustache/mustache.d.ts" />

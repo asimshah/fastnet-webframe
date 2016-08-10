@@ -52,6 +52,7 @@
             MenuPanel: { masterMenus: [], menuList: [], menuData: [] },
         },
         Init: function () {
+            fastnet.debug.print("hello");
             function _toolbarOpened() {
                 // before we load editors we need to park all menus
 
@@ -152,7 +153,7 @@
                     var md = findMenuData(mm.Id);
                     md.loaded = true;
                     if (r.length > 0) {
-                        var menu = Menu.get();
+                        var menu = new fastnet.Menu();// Menu.get();
                         t$m = menu;// for diagnostics
                         var options = $.extend({ menuClasses: [mm.Name, mm.ClassName] }, opts);
                         var menuid = menu.create(panelSelector, r, options);

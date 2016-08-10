@@ -212,6 +212,28 @@ body {
     }
 }
 
+.webframe-form {
+    @fc: white;
+    @bc: #022736;
+    @borderc: #1d5063;
+    box-shadow: 0 0 5px 3px rgba(255, 255, 255, 0.75);
+
+    .form {
+        color: white;
+        background-color: @bc;
+        border: solid 0.2rem @borderc;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0;
+        .form-body {
+             overflow-y: auto;
+            color: black; //black;
+            background-color: lightgrey; // lightgrey;           
+        }
+    }
+}
+
 
 .context-menu-container {
     border: 2px solid @context-menu-border-colour;
@@ -423,7 +445,7 @@ i.mce-i-deletepage:before {
 }
 
 .login-status {
-    z-index: 33333;
+    //z-index: 33333;
 
     &.enable {
         display: block;
@@ -523,8 +545,7 @@ i.mce-i-deletepage:before {
 
         @totalHeight: 400px;
         @dataHeight: @totalHeight - 30px;
-        width: 650px;
-
+        //width: 650px;
         &.edit-disabled {
             button[data-cmd='add-new-page'] {
                 display: none;

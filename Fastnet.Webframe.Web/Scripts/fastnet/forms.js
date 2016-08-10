@@ -141,8 +141,11 @@ var fastnet;
             this.setSize(w, h);
         };
         baseForm.prototype.setSize = function (w, h) {
-            $("#" + this.id).height(h);
-            $("#" + this.id).width(w);
+            //$(`#${this.id}`).height(h);
+            //$(`#${this.id}`).width(w);
+            $("#" + this.id).outerHeight(h);
+            $("#" + this.id).outerWidth(w);
+            fastnet.debug.print("form set to (" + w + ", " + h + ")");
             this.centre(w, h);
         };
         baseForm.prototype.centre = function (w, h) {
@@ -178,7 +181,11 @@ var fastnet;
                     }
                     var nw = parseFloat(target.style.width) + dx * 2;
                     var nh = parseFloat(target.style.height) + dy * 2;
+                    fastnet.debug.print("new size (" + nw + ", " + nh + ")");
                     _this.setSize(nw, nh);
+                    var h = $("#" + _this.id).height();
+                    var w = $("#" + _this.id).width();
+                    fastnet.debug.print("body (" + baseForm.bodyHeight + "," + baseForm.bodyWidth + "), form (" + nw + "," + nh + "), delta " + dx + " w, " + dy + " h");
                 });
             });
         };
@@ -192,6 +199,7 @@ var fastnet;
                 var body = $("body");
                 baseForm.bodyHeight = body.height();
                 baseForm.bodyWidth = body.width();
+                fastnet.debug.print("body resize to (" + baseForm.bodyWidth + ", " + baseForm.bodyHeight + ")");
                 var cf = baseForm.formStack.peek();
                 var f = $("#" + cf.id);
                 var currentForm = cf.f;
@@ -365,6 +373,10 @@ var fastnet;
             else {
                 return this.modelGroup.errors();
             }
+        };
+        form.prototype.find = function (selector) {
+            var r = "#" + this.Id;
+            return $(r).find(selector);
         };
         form.prototype.buildForm = function (baseTemplate, templateBody) {
             var title = null;

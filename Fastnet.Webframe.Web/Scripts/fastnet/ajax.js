@@ -48,8 +48,8 @@ var fastnet;
                         dr.success = true;
                         dr.message = dr.exceptionMessage = null;
                     }
-                    if (!data.success) {
-                        fastnet.debug.print("GET Query: " + url + " dataResult failed: message " + data.message + ", exceptio " + data.exceptionMessage);
+                    if (data.success && !data.success) {
+                        fastnet.debug.print("GET Query: " + url + " dataResult failed: message " + data.message + ", exception " + data.exceptionMessage);
                     }
                     resolve(data);
                 });

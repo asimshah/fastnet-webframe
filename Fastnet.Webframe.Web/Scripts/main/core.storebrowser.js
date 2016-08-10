@@ -87,7 +87,7 @@
             function findGroupInfo(id) {
                 var result = null;
                 $.each(groupList, function (i, item) {
-                    if(item.Group.Id === id) {
+                    if (item.Group.Id === id) {
                         result = item;
                         return false;
                     }
@@ -208,7 +208,7 @@
                             ppf.disableCommand("save-changes");
                         }
                     },
-                    OnChange: function(f, dataItem, checked) {
+                    OnChange: function (f, dataItem, checked) {
                         if (dataItem === "landing-page") {
                             ppf.enableCommand("save-changes");
                         }
@@ -240,7 +240,7 @@
                     // is set to isLoaded.
                     tview.SetNodeLoaded(node);
                 } else {
-                    loadTreeViewItem( node, data);
+                    loadTreeViewItem(node, data);
                 }
             });
         }
@@ -365,7 +365,7 @@
                             var id = parseInt(dataRow.attr("data-id"));
                             var type = dataRow.attr("data-type");
                             var message = $U.Format("Please confirm that <b>/{0}/{1}</b> should be deleted", type, id);
-                            $U.Confirm(message, function () { deleteItem( type, id); });
+                            $U.Confirm(message, function () { deleteItem(type, id); });
                         });
                     } else {
                         $(".browser-folder-content .data").off();
@@ -375,7 +375,7 @@
         }
         function onExpandCollapse(data) {
             if (!data.isLoaded) {
-                loadSubdirectories( data.node, parseInt(data.userData));
+                loadSubdirectories(data.node, parseInt(data.userData));
             }
         }
         function onFolderSelectChanged(data) {
@@ -405,7 +405,7 @@
                     var directoryId = result.DirectoryId;
                     var name = result.Name;
                     var parentNode = findDirectoryNode(parentDirectoryId);
-                    loadTreeViewItem( parentNode, [{ Name: name, Id: directoryId, SubdirectoryCount: 0 }]);
+                    loadTreeViewItem(parentNode, [{ Name: name, Id: directoryId, SubdirectoryCount: 0 }]);
                 });
         }
         function createNewPage() {
@@ -592,12 +592,12 @@
         function onFolderTreeContextMenu(src, index, cmd, data) {
             switch (cmd) {
                 case "new-folder":
-                    createNewDirectory( data.ParentDirectoryId);
+                    createNewDirectory(data.ParentDirectoryId);
                     break;
                 case "delete-folder":
                     var message = $U.Format("Deleting a folder will also delete its content and all sub-folders. Please confirm.");
                     $U.Confirm(message, function () {
-                        deleteItem( "directory", data.DirectoryId);
+                        deleteItem("directory", data.DirectoryId);
                     });
                     break;
                 case "folder-properties":
@@ -605,7 +605,7 @@
                     break;
             }
         }
-        function close() {            
+        function close() {
             form.close();
             form = null;
             tview = null;
@@ -637,13 +637,13 @@
             tview = $.fastnet$treeview.NewTreeview({
                 EnableContextMenu: options.AllowEditing,
                 Selector: ".store-browser .browser-tree",
-                OnSelectChanged: function (d) { onFolderSelectChanged( d) },
-                OnExpandCollapse: function (d) { onExpandCollapse( d) },
+                OnSelectChanged: function (d) { onFolderSelectChanged(d) },
+                OnExpandCollapse: function (d) { onExpandCollapse(d) },
                 OnBeforeContextMenu: function (cm, userData) {
                     var id = parseInt(userData);
                     if (currentDirectoryId === id) {
                         tview.AddMenuItem("New folder", "new-folder", function (src, index, cmd, data) {
-                            onFolderTreeContextMenu( src, index, cmd, data);
+                            onFolderTreeContextMenu(src, index, cmd, data);
                         }, { ParentDirectoryId: id });
                         if (rootDirectoryId !== id) {
                             tview.AddMenuItem("Delete folder ...", "delete-folder", function (src, index, cmd, data) {

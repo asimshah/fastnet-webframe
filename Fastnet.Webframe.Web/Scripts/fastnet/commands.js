@@ -56,6 +56,7 @@ var fastnet;
                         page = $(pageElem).attr(command.pageAttr);
                     }
                     var cmdName = $(e.target).closest("[" + command.commandAttr + "]").attr(command.commandAttr);
+                    cmdName = cmdName.replace(/-/g, "");
                     var cmd = commands[cmdName];
                     if (cmd === undefined) {
                         cmd = commands.unknown;

@@ -199,8 +199,11 @@ namespace fastnet {
             this.setSize(w, h);
         }
         private setSize(w: number, h: number) {
-            $(`#${this.id}`).height(h);
-            $(`#${this.id}`).width(w);
+            //$(`#${this.id}`).height(h);
+            //$(`#${this.id}`).width(w);
+            $(`#${this.id}`).outerHeight(h);
+            $(`#${this.id}`).outerWidth(w);
+            debug.print(`form set to (${w}, ${h})`);
             this.centre(w, h);
         }
         private centre(w: number, h: number) {
@@ -211,6 +214,7 @@ namespace fastnet {
             let availWidth = bw - w;
             formRoot.css("top", availHeight / 2);
             formRoot.css("left", availWidth / 2);
+            
         }
         private openModal(): Promise<void> {
             this.ensureContainer();
@@ -237,7 +241,11 @@ namespace fastnet {
                         }
                         let nw = parseFloat(target.style.width) + dx * 2;
                         let nh = parseFloat(target.style.height) + dy * 2;
+                        debug.print(`new size (${nw}, ${nh})`);
                         this.setSize(nw, nh);
+                        let h = $(`#${this.id}`).height();
+                        let w = $(`#${this.id}`).width();
+                        debug.print(`body (${baseForm.bodyHeight},${baseForm.bodyWidth}), form (${nw},${nh}), delta ${dx} w, ${dy} h`);
                     });
 
             });
@@ -253,6 +261,7 @@ namespace fastnet {
                 let body = $("body");
                 baseForm.bodyHeight = body.height();
                 baseForm.bodyWidth = body.width();
+                debug.print(`body resize to (${baseForm.bodyWidth}, ${baseForm.bodyHeight})`);
                 let cf = baseForm.formStack.peek();
                 let f = $(`#${cf.id}`);
                 let currentForm = cf.f;
@@ -416,6 +425,10 @@ namespace fastnet {
             } else {
                 return this.modelGroup.errors();
             }
+        }
+        public find(selector: string): JQuery {
+            let r = `#${this.Id}`;
+            return $(r).find(selector);
         }
         private buildForm(baseTemplate: string, templateBody: string): string {
             var title: JQuery = null;

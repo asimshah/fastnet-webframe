@@ -3,7 +3,7 @@
     var instances = [];
     function createInstance(opts) {
         var _instance = instances.length;
-        var menuData = { container: null, menuId: "", menuBox: null, panels: [] , parkedHTML: null};
+        var menuData = { container: null, menuId: "", menuBox: null, panels: [], parkedHTML: null };
         var menuSelector = null;
         var options = $.extend({ menuId: "" + _instance, menuClasses: null, direction: "horizontal" }, opts);
         function _getId() {
@@ -56,7 +56,7 @@
                     e.preventDefault();
                 }
                 e.stopPropagation();
-                
+
                 $("#" + id).siblings().each(function (i, sib) {
                     var sibId = $(sib).attr("id");
                     var sib_subPanel = _findPanelByParentId(sibId);
@@ -126,7 +126,7 @@
             $.each(panel.menuItems, function (i, mi) {
                 var tagId = "#" + mi.id;
                 mi.box = _getBox(tagId);
-               // _setContainerOffset(panel.box, mi.box);
+                // _setContainerOffset(panel.box, mi.box);
             });
         }
         function _showCurrentBox(tagId) {
@@ -170,7 +170,7 @@
                 _positionPanel(panel);
             }
             $(tagId).slideDown(function () {
-                if($.isFunction(onComplete)) {
+                if ($.isFunction(onComplete)) {
                     onComplete();
                 }
             });
@@ -314,7 +314,7 @@
                 $(menuData.container).append($(menu2Html));
             }
             var rootPanel = _findPanelByParentId(menuData.menuId);
-            _showPanel(rootPanel, function () { 
+            _showPanel(rootPanel, function () {
                 _discoverStartingDimensions();
             });
             $("body").on("click", function () {
@@ -351,7 +351,7 @@
             park: _parkMenu,
             restore: _unparkMenu,
             menuId: menuData.menuId,
-            getId : _getId
+            getId: _getId
         };
     }
     function getInstance(opts) {

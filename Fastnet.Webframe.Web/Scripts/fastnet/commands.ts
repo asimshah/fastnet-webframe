@@ -78,7 +78,8 @@ namespace fastnet {
                         if (pageElem.length > 0) {
                             page = $(pageElem).attr(command.pageAttr);
                         }
-                        var cmdName = $(e.target).closest(`[${command.commandAttr}]`).attr(command.commandAttr);
+                        let cmdName = $(e.target).closest(`[${command.commandAttr}]`).attr(command.commandAttr);
+                        cmdName = cmdName.replace(/-/g, "");
                         var cmd: commands = commands[cmdName];
                         if (cmd === undefined) {
                             cmd = commands.unknown;

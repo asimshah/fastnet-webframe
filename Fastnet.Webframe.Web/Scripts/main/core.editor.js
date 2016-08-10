@@ -326,7 +326,7 @@
             // Since "select" mode is only ever called from InsertLinkForm, we know
             // userData will be that form - we need this to extract the 
             // selectedItem.url
-            var sb = StoreBrowser.get();
+            var sb = new fastnet.StoreBrowser();// StoreBrowser.get();
             if (mode === "normal") {
                 sb.show();
             } else {

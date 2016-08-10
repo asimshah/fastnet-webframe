@@ -256,6 +256,23 @@ body {
   text-decoration: inherit;
   background-color: inherit;
 }
+.webframe-form {
+  box-shadow: 0 0 5px 3px rgba(255, 255, 255, 0.75);
+}
+.webframe-form .form {
+  color: white;
+  background-color: #022736;
+  border: solid 0.2rem #1d5063;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0;
+}
+.webframe-form .form .form-body {
+  overflow-y: auto;
+  color: black;
+  background-color: lightgrey;
+}
 .context-menu-container {
   border: 2px solid #000000;
   border-radius: 4px;
@@ -425,7 +442,6 @@ i.mce-i-deletepage:before {
   left: 7px;
 }
 .login-status {
-  z-index: 33333;
   position: relative;
   /*.login-name:before {
         content: "Welcome: ";
@@ -494,9 +510,6 @@ i.mce-i-deletepage:before {
 }
 .editor-dialog.upload-file div[data-dz-name] {
   font-size: 11px;
-}
-.editor-dialog.store-browser {
-  width: 650px;
 }
 .editor-dialog.store-browser.edit-disabled button[data-cmd='add-new-page'] {
   display: none;

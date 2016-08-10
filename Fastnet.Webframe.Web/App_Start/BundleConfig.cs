@@ -43,8 +43,23 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/fastnet")
                 .Include(
+                    "~/Scripts/es6-promise.js",
                     "~/Scripts/moment.js",
                     "~/Scripts/mustache.js",
+                    "~/Scripts/knockout-3.3.0.js",
+                    "~/Scripts/knockout.validation.js",
+                    "~/Scripts/interact.js",
+                    "~/Scripts/fastnet/javascriptExtensions.js",
+                    "~/Scripts/fastnet/debug.js",
+                    "~/Scripts/fastnet/busyIndicator.js",
+                    "~/Scripts/fastnet/collections.js",
+                    "~/Scripts/fastnet/date.js",
+                    "~/Scripts/fastnet/ajax.js",
+                    "~/Scripts/fastnet/template.js",
+                    "~/Scripts/fastnet/knockout.js",
+                    "~/Scripts/fastnet/jqhelper.js",
+                    "~/Scripts/fastnet/commands.js",
+                    "~/Scripts/fastnet/forms.js",
                     "~/Scripts/fastnet-legacy/fastnet.utilities.js"
                 ));
 
@@ -56,10 +71,12 @@ namespace Fastnet.Webframe.Web
 
             bundles.Add(new ScriptBundle("~/bundles/main/page")
                 .Include(
-                    "~/Scripts/fastnet-legacy/fastnet.menus.js",
+                    //"~/Scripts/fastnet-legacy/fastnet.menus.js",
+                    "~/Scripts/main/menu.js",
                     "~/Scripts/main/core.pagetoolbar.js",
                     "~/Scripts/main/core.page.js",
-                    "~/Scripts/main/core.storebrowser.js",
+                    //"~/Scripts/main/core.storebrowser.js",
+                    "~/Scripts/main/storeBrowser.js",
                     "~/Scripts/main/core.test.js"
                 ));
 
@@ -77,8 +94,9 @@ namespace Fastnet.Webframe.Web
                     "~/Scripts/datatables/jquery.datatables.js",
                     "~/Scripts/tinymce/tinymce.js",
                     "~/Scripts/dropzone/dropzone.js",
-                    "~/Scripts/fastnet-legacy/fastnet.contextmenu.js",
-                    "~/Scripts/fastnet-legacy/fastnet.treeview.js",
+                    //"~/Scripts/fastnet-legacy/fastnet.contextmenu.js",
+                    //"~/Scripts/fastnet-legacy/fastnet.treeview.js",
+                    "~/Scripts/main/treeview.js",
                     "~/Scripts/main/core.editor.js"
                 ));
 
@@ -93,7 +111,9 @@ namespace Fastnet.Webframe.Web
                    "~/Content/fastnet/menusystem.css",
                    "~/Content/fastnet/menu.css",
                    "~/Content/fastnet/treeview.css",
-                   "~/Content/fastnet/forms.css",
+                   //"~/Content/fastnet/forms.css",
+                   "~/Content/fastnet-new/busyIndicator.css",
+                   "~/Content/fastnet-new/forms.css",
                    "~/Content/main/main.css"));
             // bundles.Add(new StyleBundle("~/Content/jqueryui/css").Include(
             bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
