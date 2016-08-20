@@ -731,8 +731,12 @@ namespace Fastnet.Webframe.CoreData
             p.NonBMCMembers = nonBmcMembersGroupName;// "Non BMC Members";
             p.PrivilegedMembers = privilegedMembersGroupName;// "Privileged Members";
             p.PaymentInterval = 28;
+            p.CancellationInterval = 7;
+            p.FirstReminderInterval = p.PaymentInterval + 7;
+            p.SecondReminderInterval = p.PaymentInterval;
             p.EntryCodeNotificationInterval = 7;
             p.EntryCodeBridgeInterval = 7;
+            p.ReminderSuppressionInterval = 2;
             p.TermsAndConditionsUrl = "page/11";
             bctx.Periods.Add(pp);
             bctx.Parameters.Add(p);

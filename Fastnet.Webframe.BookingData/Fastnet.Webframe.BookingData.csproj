@@ -104,6 +104,10 @@
     <Compile Include="Migrations\201608201447196_RenamePeriodParameters.Designer.cs">
       <DependentUpon>201608201447196_RenamePeriodParameters.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608201500547_AddAdditionalIntervalParameters.cs" />
+    <Compile Include="Migrations\201608201500547_AddAdditionalIntervalParameters.Designer.cs">
+      <DependentUpon>201608201500547_AddAdditionalIntervalParameters.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Tasklog.cs" />
     <Compile Include="Classes with typings\bookingStatus.cs" />
@@ -144,6 +148,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201608201447196_RenamePeriodParameters.resx">
       <DependentUpon>201608201447196_RenamePeriodParameters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608201500547_AddAdditionalIntervalParameters.resx">
+      <DependentUpon>201608201500547_AddAdditionalIntervalParameters.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
