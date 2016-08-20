@@ -100,6 +100,10 @@
     <Compile Include="Migrations\201511240716100_InitialCreate.Designer.cs">
       <DependentUpon>201511240716100_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201608201447196_RenamePeriodParameters.cs" />
+    <Compile Include="Migrations\201608201447196_RenamePeriodParameters.Designer.cs">
+      <DependentUpon>201608201447196_RenamePeriodParameters.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Tasklog.cs" />
     <Compile Include="Classes with typings\bookingStatus.cs" />
@@ -137,6 +141,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201511240716100_InitialCreate.resx">
       <DependentUpon>201511240716100_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201608201447196_RenamePeriodParameters.resx">
+      <DependentUpon>201608201447196_RenamePeriodParameters.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

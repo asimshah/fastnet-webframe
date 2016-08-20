@@ -12,18 +12,18 @@ namespace Fastnet.Webframe.Web.Areas.booking
     {
         public IGroup nonBMCMembers { get; set; }
         public IGroup privilegedMembers { get; set; }
-        public int shortBookingInterval { get; set; }
-        public int entryCodeNotificationPeriod { get; set; }
-        public int entryCodeBridgePeriod { get; set; }
+        public int paymentInterval { get; set; }
+        public int entryCodeNotificationInterval { get; set; }
+        public int entryCodeBridgeInterval { get; set; }
         protected override void BeforeSave(ParameterBase para)
         {
             if (para is DWHParameter)
             {
                 var p = para as DWHParameter;
                 p.NonBMCMembers = this.nonBMCMembers?.Name;
-                p.ShortBookingInterval = this.shortBookingInterval;
-                p.EntryCodeNotificationPeriod = this.entryCodeNotificationPeriod;
-                p.EntryCodeBridgePeriod = this.entryCodeBridgePeriod;
+                p.PaymentInterval = this.paymentInterval;
+                p.EntryCodeNotificationInterval = this.entryCodeNotificationInterval;
+                p.EntryCodeBridgeInterval = this.entryCodeBridgeInterval;
                 p.PrivilegedMembers = this.privilegedMembers?.Name;
             }
         }
@@ -42,9 +42,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     Group PrivilegedMembers = core.Groups.SingleOrDefault(g => g.Name == p.PrivilegedMembers);
                     this.privilegedMembers = new IGroup { Id = PrivilegedMembers.GroupId, Name = PrivilegedMembers.Name };
                 }
-                this.shortBookingInterval = p.ShortBookingInterval;
-                this.entryCodeNotificationPeriod = p.EntryCodeNotificationPeriod;
-                this.entryCodeBridgePeriod = p.EntryCodeBridgePeriod;
+                this.paymentInterval = p.PaymentInterval;
+                this.entryCodeNotificationInterval = p.EntryCodeNotificationInterval;
+                this.entryCodeBridgeInterval = p.EntryCodeBridgeInterval;
             }
         }
     }

@@ -5,10 +5,10 @@
                 <div class="col-xs-12">
                     <div class="form-group-sm">
                         <label>
-                            Short Term Booking Interval
-                            <input type="number" class="form-control" min="1" data-bind="value: shortBookingInterval" />
+                            Payment Interval
+                            <input type="number" class="form-control" min="1" data-bind="value: paymentInterval" />
                         </label>
-                        <span class="help-block">Enter a number of days. Bookings within this period will only be confirmed on successful online payment.</span>
+                        <span class="help-block">Enter a number of days. Payment is due within this many days of the booking start date.</span>
                     </div>
                 </div>
             </div>
@@ -16,8 +16,52 @@
                 <div class="col-xs-12">
                     <div class="form-group-sm">
                         <label>
-                            Entry Code Notification Period
-                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeNotificationPeriod" />
+                            Cancellation Interval
+                            <input type="number" class="form-control" min="1"  />
+                        </label>
+                        <span class="help-block">Enter a number of days. Unpaid bookings are automatically cancelled after this many days from the booking start date.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            First Reminder Interval
+                            <input type="number" class="form-control" min="1" />
+                        </label>
+                        <span class="help-block">Enter a number of days. The first payment reminder is sent this many days before the booking start date.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Second Reminder Interval
+                            <input type="number" class="form-control" min="1" />
+                        </label>
+                        <span class="help-block">Enter a number of days. The second payment reminder is sent this many days before the booking start date.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Reminder Suppression Interval
+                            <input type="number" class="form-control" min="1" />
+                        </label>
+                        <span class="help-block">Enter a number of days. A reminder is held up if a relevant email has been sent within this many days.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="form-group-sm">
+                        <label>
+                            Entry Code Notification Interval
+                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeNotificationInterval" />
                         </label>
                         <span class="help-block">Enter a number of days. Entry code notification is sent within this period of a confirmed booking start date.</span>
                     </div>
@@ -27,10 +71,10 @@
                 <div class="col-xs-12">
                     <div class="form-group-sm">
                         <label>
-                            Entry Code Bridge Period
-                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeBridgePeriod" />
+                            Entry Code Bridge Interval
+                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeBridgeInterval" />
                         </label>
-                        <span class="help-block">Enter a number of days. Both current and previous codes are sent for this number of days after a code changes.</span>
+                        <span class="help-block">Enter a number of days. Both current and previous entry codes are sent for this number of days after a code changes.</span>
                     </div>
                 </div>
             </div>

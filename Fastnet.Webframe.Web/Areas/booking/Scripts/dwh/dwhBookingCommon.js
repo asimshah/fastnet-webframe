@@ -25,9 +25,9 @@ var fastnet;
                 var _this = this;
                 _super.call(this, model);
                 this.privilegedMembers = null;
-                this.shortBookingInterval = ko.observable(model.shortBookingInterval);
-                this.entryCodeNotificationPeriod = ko.observable(model.entryCodeNotificationPeriod);
-                this.entryCodeBridgePeriod = ko.observable(model.entryCodeBridgePeriod);
+                this.paymentInterval = ko.observable(model.paymentInterval);
+                this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
+                this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
                 if (!h$.isNullOrUndefined(model.privilegedMembers)) {
                     $.each(model.availableGroups, function (i, item) {
                         if (item.Id === model.privilegedMembers.Id) {

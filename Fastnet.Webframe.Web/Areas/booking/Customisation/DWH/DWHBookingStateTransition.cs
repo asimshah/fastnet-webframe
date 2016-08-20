@@ -20,7 +20,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
             isPrivileged = false;
             pars = Factory.GetBookingParameters() as dwhBookingParameters;
-            NDays = pars.shortBookingInterval;
+            NDays = pars.paymentInterval;
             today = BookingGlobals.GetToday();
             paymentGatewayAvailable = pars.paymentGatewayAvailable;
         }

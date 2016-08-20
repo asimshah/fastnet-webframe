@@ -11,8 +11,15 @@ namespace Fastnet.Webframe.BookingData
         public string NonBMCMembers { get; set; }
         public string BMCMembers { get; set; }
         public string PrivilegedMembers { get; set; }
-        public int ShortBookingInterval { get; set; }
-        public int EntryCodeNotificationPeriod { get; set; }
-        public int EntryCodeBridgePeriod { get; set; }
+        public int PaymentInterval { get; set; } // tbd: rename to PaymentInterval
+        public int EntryCodeNotificationInterval { get; set; } //tbd: rename to EntryCodeNotificationInterval
+        public int EntryCodeBridgeInterval { get; set; } // tbd: rename to Entry Code Bridge Interval
+        // tbd: add following properties:
+        /*
+         * public int CancellationInterval { get; set; }
+         * public int FirstReminderInterval { get; set; }
+         * public int SecondReminderInterval { get; set; }
+         * public int ReminderSuppressionInterval { get; set; }
+         */
     }
 }

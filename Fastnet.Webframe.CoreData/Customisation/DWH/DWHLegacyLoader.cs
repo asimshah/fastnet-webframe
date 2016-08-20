@@ -730,9 +730,9 @@ namespace Fastnet.Webframe.CoreData
             p.BMCMembers = bmcMembersGroupName;// "BMC Members";
             p.NonBMCMembers = nonBmcMembersGroupName;// "Non BMC Members";
             p.PrivilegedMembers = privilegedMembersGroupName;// "Privileged Members";
-            p.ShortBookingInterval = 28;
-            p.EntryCodeNotificationPeriod = 7;
-            p.EntryCodeBridgePeriod = 7;
+            p.PaymentInterval = 28;
+            p.EntryCodeNotificationInterval = 7;
+            p.EntryCodeBridgeInterval = 7;
             p.TermsAndConditionsUrl = "page/11";
             bctx.Periods.Add(pp);
             bctx.Parameters.Add(p);

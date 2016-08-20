@@ -3,18 +3,18 @@
         import h$ = fastnet.util.helper;
         export class dwhParameters extends parameters {
             public privilegedMembers: server.IGroup;
-            public shortBookingInterval: number;
-            public entryCodeNotificationPeriod: number;
-            public entryCodeBridgePeriod: number;
+            public paymentInterval: number;
+            public entryCodeNotificationInterval: number;
+            public entryCodeBridgeInterval: number;
             public getObservable(): observableDwhParameters {
                 return new observableDwhParameters(this);
             }
         }
         export class observableDwhParameters extends observableParameters {
             public privilegedMembers: KnockoutObservable<server.IGroup> = null;
-            public shortBookingInterval: KnockoutObservable<number>;
-            public entryCodeNotificationPeriod: KnockoutObservable<number>;
-            public entryCodeBridgePeriod: KnockoutObservable<number>;
+            public paymentInterval: KnockoutObservable<number>;
+            public entryCodeNotificationInterval: KnockoutObservable<number>;
+            public entryCodeBridgeInterval: KnockoutObservable<number>;
             public clearPrivilegedMembers(): void {
                 this.privilegedMembers(null);
                 this.message("");
@@ -24,9 +24,9 @@
             }
             constructor(model: dwhParameters) {
                 super(model);
-                this.shortBookingInterval = ko.observable(model.shortBookingInterval);
-                this.entryCodeNotificationPeriod = ko.observable(model.entryCodeNotificationPeriod);
-                this.entryCodeBridgePeriod = ko.observable(model.entryCodeBridgePeriod);
+                this.paymentInterval = ko.observable(model.paymentInterval);
+                this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
+                this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
                 if (!h$.isNullOrUndefined(model.privilegedMembers)) {
                     $.each(model.availableGroups, (i, item) => {
                         if (item.Id === model.privilegedMembers.Id) {

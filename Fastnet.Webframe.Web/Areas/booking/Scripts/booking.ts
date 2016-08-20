@@ -848,7 +848,7 @@ This is a system error`;
             private getShortTermBookingInterval(): number {
                 //ToDo: implement a way to avoid hard coding the cast to dwhParameters)
                 var dwhParameters = <dwhParameters>this.bookingApp.bookingParameters;
-                return dwhParameters.shortBookingInterval
+                return dwhParameters.paymentInterval
             }
             private beforeShowingDatePicker(input: any, inst: any): JQueryUI.DatepickerOptions {
                 if (input.id === "startDatePicker") {

@@ -118,23 +118,23 @@ namespace Fastnet.Webframe.Web.Areas.booking
         protected override async Task<WebtaskResult> Execute()
         {
             WebtaskResult wtr = new WebtaskResult();
-            int shortBookingInterval = 0;
-            int entryCodeNotificationPeriod = 0;
-            int entryCodeBridgePeriod = 0;
+            //int shortBookingInterval = 0;
+            int entryCodeNotificationInterval = 0;
+            int entryCodeBridgeInterval = 0;
             string abodeName = "";
             using (var ctx = new CoreDataContext())
             {
                 var pars = Factory.GetBookingParameters() as dwhBookingParameters;
                 pars.Load(ctx);
-                shortBookingInterval = pars.shortBookingInterval;
-                entryCodeNotificationPeriod = pars.entryCodeNotificationPeriod;
-                entryCodeBridgePeriod = pars.entryCodeBridgePeriod;
+                //shortBookingInterval = pars.paymentInterval;
+                entryCodeNotificationInterval = pars.entryCodeNotificationInterval;
+                entryCodeBridgeInterval = pars.entryCodeBridgeInterval;
                 abodeName = pars.currentAbode.name;
             }
             //string abodeName = ctx.AccomodationSet.Find(abodeId).DisplayName;
             var bookingSecretaryEmailAddress = Globals.GetBookingSecretaryEmailAddress();
             var today = BookingGlobals.GetToday();
-            var notificationDate = today.AddDays(entryCodeNotificationPeriod); // parameterize 7
+            var notificationDate = today.AddDays(entryCodeNotificationInterval); // parameterize 7
             using (var ctx = new BookingDataContext())
             {
                 var tran = ctx.Database.BeginTransaction();
@@ -144,7 +144,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 var notifiableBookings = bookingsStartingSoon.Where(x => x.Emails.Any(z => z.Template == BookingEmailTemplates.EntryCodeNotification) == false);
                 foreach (var booking in notifiableBookings)
                 {
-                    AquireEntryCode(ctx, booking, entryCodeBridgePeriod);
+                    AquireEntryCode(ctx, booking, entryCodeBridgeInterval);
                     booking b = Factory.GetBooking(booking);
                     EmailHelper.QueueEmail(ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.EntryCodeNotification, b.memberEmailAddress, b);
                 }
@@ -198,7 +198,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             {
                 var pars = Factory.GetBookingParameters() as dwhBookingParameters;
                 pars.Load(ctx);
-                shortBookingInterval = pars.shortBookingInterval;
+                shortBookingInterval = pars.paymentInterval;
                 abodeName = pars.currentAbode.name;
             }
             //string abodeName = ctx.AccomodationSet.Find(abodeId).DisplayName;
@@ -241,7 +241,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             {
                 var pars = Factory.GetBookingParameters() as dwhBookingParameters;
                 pars.Load(ctx);
-                shortBookingInterval = pars.shortBookingInterval;
+                shortBookingInterval = pars.paymentInterval;
                 abodeName = pars.currentAbode.name;
             }
             //string abodeName = ctx.AccomodationSet.Find(abodeId).DisplayName;
@@ -284,7 +284,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             {
                 var pars = Factory.GetBookingParameters() as dwhBookingParameters;
                 pars.Load(ctx);
-                shortBookingInterval = pars.shortBookingInterval;
+                shortBookingInterval = pars.paymentInterval;
                 abodeName = pars.currentAbode.name;
             }
             //string abodeName = ctx.AccomodationSet.Find(abodeId).DisplayName;

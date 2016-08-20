@@ -829,7 +829,7 @@ var fastnet;
             bookDates.prototype.getShortTermBookingInterval = function () {
                 //ToDo: implement a way to avoid hard coding the cast to dwhParameters)
                 var dwhParameters = this.bookingApp.bookingParameters;
-                return dwhParameters.shortBookingInterval;
+                return dwhParameters.paymentInterval;
             };
             bookDates.prototype.beforeShowingDatePicker = function (input, inst) {
                 if (input.id === "startDatePicker") {
