@@ -586,9 +586,10 @@ var fastnet;
                     beforeShowDay: function (d) { return _this.beforeShowDay(d); },
                     dateFormat: 'dMyy'
                 };
-                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
-                    || this.bookingApp.currentMember.BookingPermission === 2 /* ShortTermBookingAllowed */
-                    || this.bookingApp.currentMember.BookingPermission === 3 /* ShortTermBookingWithoutPaymentAllowed */;
+                //var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
+                //    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingAllowed
+                //    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
+                var shortTermBookingAllowed = true;
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var today = str.toMoment(this.bookingApp.bookingParameters.today);
                 this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
@@ -714,7 +715,7 @@ var fastnet;
                 var daysToStart = str.toMoment(sd).diff(td, 'd');
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var isShortTerm = daysToStart < shortBookingInterval;
-                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, under18Present, phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable);
+                this.step3_model = new booking.request_step3(sd, ed, choice, this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, under18Present, phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable, np);
                 this.step3_vm = new booking.observableRequest_step3(this.step3_model);
                 var buttons = [
                     {
@@ -771,7 +772,8 @@ var fastnet;
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present,
                     isPaid: false,
-                    phoneNumber: model.phoneNumber
+                    phoneNumber: model.phoneNumber,
+                    partySize: model.numberOfPeople
                 };
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
                 var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);

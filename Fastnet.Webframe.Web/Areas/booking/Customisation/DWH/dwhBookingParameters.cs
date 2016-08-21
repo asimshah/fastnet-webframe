@@ -15,6 +15,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public int paymentInterval { get; set; }
         public int entryCodeNotificationInterval { get; set; }
         public int entryCodeBridgeInterval { get; set; }
+        public int cancellationInterval { get; set; }
+        public int firstReminderInterval { get; set; }
+        public int secondReminderInterval { get; set; }
+        public int reminderSuppressionInterval { get; set; }
         protected override void BeforeSave(ParameterBase para)
         {
             if (para is DWHParameter)
@@ -24,6 +28,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 p.PaymentInterval = this.paymentInterval;
                 p.EntryCodeNotificationInterval = this.entryCodeNotificationInterval;
                 p.EntryCodeBridgeInterval = this.entryCodeBridgeInterval;
+                p.CancellationInterval = this.cancellationInterval;
+                p.FirstReminderInterval = this.firstReminderInterval;
+                p.SecondReminderInterval = this.secondReminderInterval;
+                p.ReminderSuppressionInterval = this.reminderSuppressionInterval;
                 p.PrivilegedMembers = this.privilegedMembers?.Name;
             }
         }
@@ -45,6 +53,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 this.paymentInterval = p.PaymentInterval;
                 this.entryCodeNotificationInterval = p.EntryCodeNotificationInterval;
                 this.entryCodeBridgeInterval = p.EntryCodeBridgeInterval;
+                this.cancellationInterval = p.CancellationInterval;
+                this.firstReminderInterval = p.FirstReminderInterval;
+                this.secondReminderInterval = p.SecondReminderInterval;
+                this.reminderSuppressionInterval = p.ReminderSuppressionInterval;
             }
         }
     }

@@ -14,6 +14,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             = new Dictionary<BookingEmailTemplates, Tuple<Func<object, string>, Func<object, string>>>();
         internal static void QueueEmail(BookingDataContext ctx, string abodeName, string bookingSecretaryEmailAddress, DateTime utcDueAt, BookingEmailTemplates template, string destinationAddress, booking b)
         {
+            
             var bookingInfo = MapBookingInformation(abodeName, bookingSecretaryEmailAddress, b);
             string subjectHtml;
             string bodyHtml;
@@ -61,7 +62,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 entryCode = booking.entryInformation
             };
         }
-        public static void QueueEmail(BookingDataContext ctx,  booking b, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
+        private static void QueueEmail(BookingDataContext ctx,  booking b, BookingEmailTemplates template, DateTime utcDueAt, string emailAddress, string subject, string body)
         {
             var booking = ctx.Bookings.Single(x => x.BookingId == b.bookingId);
             var bem = new BookingEmail

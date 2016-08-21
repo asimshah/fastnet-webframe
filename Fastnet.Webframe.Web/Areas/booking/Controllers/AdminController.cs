@@ -13,6 +13,7 @@ using Fastnet.Common;
 using System.Dynamic;
 using Fastnet.Webframe.Web.Areas.bookings;
 using Fastnet.EventSystem;
+using Newtonsoft.Json.Linq;
 
 namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 {
@@ -26,6 +27,22 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         public void SaveAdminParameters(dynamic data)
         {
             var paras = Factory.GetBookingParameters();
+            paras.termsAndConditionsUrl = data.termsAndConditionsUrl;
+            if (paras is dwhBookingParameters)
+            {
+                var p = paras as dwhBookingParameters;
+                p.paymentInterval = data.paymentInterval;
+                p.entryCodeNotificationInterval = data.entryCodeNotificationInterval;
+                p.entryCodeBridgeInterval = data.entryCodeBridgeInterval;
+                p.cancellationInterval = data.cancellationInterval;
+                p.firstReminderInterval = data.firstReminderInterval;
+                p.secondReminderInterval = data.secondReminderInterval;
+                p.reminderSuppressionInterval = data.reminderSuppressionInterval;
+                dynamic group = (JObject)data.privilegedMembers;
+                long id = group.Id;
+                string name = group.Name;
+                p.privilegedMembers = new IGroup { Id = id, Name = name };
+            }
             paras.Save();
         }
         [HttpGet]
@@ -125,7 +142,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         private void SetPaid(BookingDataContext ctx, Booking booking, bool paid, string memberFullname, long abodeId = 1)
         {
             booking.SetPaid(ctx, memberFullname, paid, abodeId);
-            booking.PerformStateTransition(ctx, booking.Status, bookingStatus.Confirmed, false);
+            booking.PerformStateTransition(GetCurrentMember().Fullname, ctx, booking.Status, bookingStatus.Confirmed, false);
             //bookingStatus oldStatus = booking.Status;
             //booking.Status = bookingStatus.Confirmed;
             //booking.IsPaid = paid;
@@ -193,9 +210,9 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
 
                     var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                     bookingStatus postApproval = bst.GetPostApprovalState(booking);
-                    booking.PerformStateTransition(ctx, bookingStatus.WaitingApproval, postApproval, false);
+                    booking.PerformStateTransition(name, ctx, bookingStatus.WaitingApproval, postApproval, false);
                     //bst.ChangeState(booking, old);
-                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", bookingStatus.WaitingApproval.ToString(), booking.Status.ToString()));
+                    //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", bookingStatus.WaitingApproval.ToString(), booking.Status.ToString()));
                     ctx.SaveChanges();
                 }
             }
@@ -222,8 +239,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     //var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                     //bst.ChangeState(booking, old);
-                    booking.PerformStateTransition(ctx, old, bookingStatus.Cancelled, false);
-                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    booking.PerformStateTransition(name, ctx, old, bookingStatus.Cancelled, false);
+                    //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     ctx.SaveChanges();
                 }
             }

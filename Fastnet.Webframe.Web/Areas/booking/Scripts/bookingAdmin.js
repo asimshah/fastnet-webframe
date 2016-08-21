@@ -269,6 +269,16 @@ var fastnet;
             };
             parametersApp.prototype.saveParameters = function (f, models) {
                 var url = "bookingadmin/save/parameters";
+                // **NB** I am forcing this code to assume that
+                // the parameters are actually dwhParameters!!
+                // I no longer believe that this code will be used for anything but DWH!
+                var currentDWHParameters = models.current;
+                var originalDWHParameters = models.original;
+                if (currentDWHParameters.privilegedMembers === undefined) {
+                    // why does this situation arise? currentDWHParameters.privilegedMembers only exists
+                    // if the drop down was ussed to select a group (apparently!)
+                    currentDWHParameters.privilegedMembers = originalDWHParameters.privilegedMembers;
+                }
                 ajax.Post({ url: url, data: models.current }).then(function (r) {
                     f.setMessage("Changes saved");
                 });

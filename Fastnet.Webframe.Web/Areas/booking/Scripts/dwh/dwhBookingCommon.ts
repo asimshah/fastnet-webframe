@@ -6,6 +6,10 @@
             public paymentInterval: number;
             public entryCodeNotificationInterval: number;
             public entryCodeBridgeInterval: number;
+            public cancellationInterval: number;
+            public firstReminderInterval: number;
+            public secondReminderInterval: number;
+            public reminderSuppressionInterval: number;
             public getObservable(): observableDwhParameters {
                 return new observableDwhParameters(this);
             }
@@ -15,6 +19,10 @@
             public paymentInterval: KnockoutObservable<number>;
             public entryCodeNotificationInterval: KnockoutObservable<number>;
             public entryCodeBridgeInterval: KnockoutObservable<number>;
+            public cancellationInterval: KnockoutObservable<number>;
+            public firstReminderInterval: KnockoutObservable<number>;
+            public secondReminderInterval: KnockoutObservable<number>;
+            public reminderSuppressionInterval: KnockoutObservable<number>;
             public clearPrivilegedMembers(): void {
                 this.privilegedMembers(null);
                 this.message("");
@@ -27,6 +35,10 @@
                 this.paymentInterval = ko.observable(model.paymentInterval);
                 this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
                 this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
+                this.cancellationInterval = ko.observable(model.cancellationInterval);
+                this.firstReminderInterval = ko.observable(model.firstReminderInterval);
+                this.secondReminderInterval = ko.observable(model.secondReminderInterval);
+                this.reminderSuppressionInterval = ko.observable(model.reminderSuppressionInterval);
                 if (!h$.isNullOrUndefined(model.privilegedMembers)) {
                     $.each(model.availableGroups, (i, item) => {
                         if (item.Id === model.privilegedMembers.Id) {

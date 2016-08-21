@@ -712,9 +712,15 @@ button.side-button {
 .report-forms .parameters-form .inner-panel {
   padding-left: 15px;
   padding-right: 15px;
+  /*.row:not(:first-child):not(:last-child) {
+                border-top: 1px solid @separator-colour;
+            }*/
 }
-.report-forms .parameters-form .inner-panel .row:not(:first-child):not(:last-child) {
-  border-top: 1px solid #8cbef6;
+.report-forms .parameters-form .inner-panel .boxed-group {
+  border: 2px solid #8cbef6;
+  border-radius: 4px;
+  margin: 4px;
+  padding: 4px;
 }
 .report-forms .parameters-form .inner-panel .form-group-sm {
   margin-top: 8px;

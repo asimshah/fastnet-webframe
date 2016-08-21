@@ -87,7 +87,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             {
                 var booking = ctx.Bookings.Find(bookingId);
                 var paymentDuringNewBooking = "onlinebooking" == st.UserString;
-                booking.PerformStateTransition(ctx, booking.Status, paymentDuringNewBooking ? bookingStatus.Cancelled : bookingStatus.WaitingPayment, false);
+                booking.PerformStateTransition("System", ctx, booking.Status, paymentDuringNewBooking ? bookingStatus.Cancelled : bookingStatus.WaitingPayment, false);
                 ctx.SaveChanges();
             }
                 return View(m);
@@ -112,7 +112,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
             {
                 var booking = ctx.Bookings.Find(bookingId);
                 booking.SetPaid(ctx, member.Fullname, true);
-                booking.PerformStateTransition(ctx, booking.Status, bookingStatus.Confirmed, false);
+                booking.PerformStateTransition("System", ctx, booking.Status, bookingStatus.Confirmed, false);
                 psm.BookingReference = booking.Reference;
                 ctx.SaveChanges();
             }

@@ -21,8 +21,8 @@ namespace Fastnet.Webframe.BookingData
         CANNotification,
         AutoCancelled,
         Cancelled,
-        EntryCodeNotification
-
+        EntryCodeNotification,
+        WaitingDuePayment
     }
     public enum BookingEmailStatus
     {

@@ -220,7 +220,7 @@ var fastnet;
         booking.step3Models = step3Models;
         var request_step3 = (function (_super) {
             __extends(request_step3, _super);
-            function request_step3(fromDate, toDate, choice, tcLink, isShortTermBooking, shortTermBookingInterval, under18Present, phoneNumber, paymentGatewayAvailable) {
+            function request_step3(fromDate, toDate, choice, tcLink, isShortTermBooking, shortTermBookingInterval, under18Present, phoneNumber, paymentGatewayAvailable, np) {
                 _super.call(this);
                 this.fromDate = fromDate;
                 this.toDate = toDate;
@@ -232,6 +232,7 @@ var fastnet;
                 this.isShortTermBooking = isShortTermBooking;
                 this.shortTermBookingInterval = shortTermBookingInterval;
                 this.paymentGatewayAvailable = paymentGatewayAvailable;
+                this.numberOfPeople = np;
             }
             return request_step3;
         }(forms.model));
@@ -255,6 +256,7 @@ var fastnet;
                 this.shortTermBookingInterval = m.shortTermBookingInterval;
                 this.paymentGatewayAvailable = m.paymentGatewayAvailable;
                 this.showPaymentRequiredMessage = m.paymentGatewayAvailable === true && m.isShortTermBooking;
+                this.numberOfPeople = m.numberOfPeople;
             }
             return observableRequest_step3;
         }(forms.viewModel));

@@ -48,7 +48,7 @@ namespace Fastnet.Webframe.BookingData
             {
                 bodyText = string.Format(@"<div style='margin-bottom: 4px;'>No {0} email template defined</div>", template.ToString());
                 bodyText += GetKeywordBody();
-                subjectText = "";
+                subjectText = "{{reference}}: "  + string.Format("(subject line for {0})", template.ToString());
             }
             else
             {

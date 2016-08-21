@@ -659,10 +659,15 @@ button.side-button {
             @separator-colour: lighten(@blue, 20%);
             padding-left: 15px;
             padding-right: 15px;
-
-            .row:not(:first-child):not(:last-child) {
-                border-top: 1px solid @separator-colour;
+            .boxed-group {
+                border: 2px solid @separator-colour;
+                border-radius: 4px;
+                margin: 4px;
+                padding: 4px;
             }
+            /*.row:not(:first-child):not(:last-child) {
+                border-top: 1px solid @separator-colour;
+            }*/
 
             .form-group-sm {
                 margin-top: 8px;

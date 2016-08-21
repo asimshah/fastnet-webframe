@@ -33,7 +33,7 @@
     <UpdateAssemblyFileVersion>False</UpdateAssemblyFileVersion>
     <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
     <AssemblyVersionSettings>None.None.DeltaDayStamp.IncrementOnDemandWithReset</AssemblyVersionSettings>
-    <AssemblyVersion>4.1.6077.2</AssemblyVersion>
+    <AssemblyVersion>4.1.6078.2</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

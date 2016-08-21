@@ -12,7 +12,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
     {
         private dwhBookingParameters pars;
         private bool isPrivileged;
-        private int NDays;
+        private int paymentInterval;
         private DateTime today;
         private string memberEmailAddress;
         private bool paymentGatewayAvailable;
@@ -20,7 +20,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         {
             isPrivileged = false;
             pars = Factory.GetBookingParameters() as dwhBookingParameters;
-            NDays = pars.paymentInterval;
+            paymentInterval = pars.paymentInterval;
             today = BookingGlobals.GetToday();
             paymentGatewayAvailable = pars.paymentGatewayAvailable;
         }
@@ -44,15 +44,15 @@ namespace Fastnet.Webframe.Web.Areas.booking
             booking b = Factory.GetBooking(booking);
             if (from.HasValue == false) // this is a new booking
             {
-                NewBookingEmail(to, abodeName, bookingSecretaryEmailAddress, utcDueAt, b);
+                NewBookingEmail(to, abodeName, bookingSecretaryEmailAddress, utcDueAt, booking, b);
             }
             else
             {
-                ExistingBookingEmail(from.Value, to, abodeName, bookingSecretaryEmailAddress, utcDueAt, b, bySystem);
+                ExistingBookingEmail(from.Value, to, abodeName, bookingSecretaryEmailAddress, utcDueAt, booking, b, bySystem);
             }
         }
 
-        private void NewBookingEmail(bookingStatus to, string abodeName, string bookingSecretaryEmailAddress, DateTime utcDueAt, booking b)
+        private void NewBookingEmail(bookingStatus to, string abodeName, string bookingSecretaryEmailAddress, DateTime utcDueAt, Booking booking, booking b)
         {
             switch (to)
             {
@@ -61,7 +61,8 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WANotification, bookingSecretaryEmailAddress, b);
                     break;
                 case bookingStatus.WaitingPayment:
-                    EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WaitingPayment, memberEmailAddress, b);
+                    var emailTemplate = SelectWaitingPaymentEmail(booking);
+                    EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, emailTemplate, memberEmailAddress, b);
                     EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WPNotification, bookingSecretaryEmailAddress, b);
                     break;
                 case bookingStatus.Confirmed:
@@ -72,7 +73,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     break;
             }
         }
-        private void ExistingBookingEmail(bookingStatus from, bookingStatus to, string abodeName, string bookingSecretaryEmailAddress, DateTime utcDueAt, booking b, bool bySystem)
+        private void ExistingBookingEmail(bookingStatus from, bookingStatus to, string abodeName, string bookingSecretaryEmailAddress, DateTime utcDueAt, Booking booking, booking b, bool bySystem)
         {
             switch (from)
             {
@@ -110,7 +111,9 @@ namespace Fastnet.Webframe.Web.Areas.booking
                             EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.ConfirmedPriv, memberEmailAddress, b);
                             break;
                         case bookingStatus.WaitingPayment:
-                            EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WaitingPayment, memberEmailAddress, b);
+                            var emailTemplate = SelectWaitingPaymentEmail(booking);
+                            EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, emailTemplate, memberEmailAddress, b);
+
                             EmailHelper.QueueEmail(this.ctx, abodeName, bookingSecretaryEmailAddress, utcDueAt, BookingEmailTemplates.WPNotification, bookingSecretaryEmailAddress, b);
                             break;
                         case bookingStatus.WaitingApproval:
@@ -161,46 +164,11 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     break;
             }
         }
-        //public override void ToNew(Booking booking)
-        //{
-        //    LoadMemberInfo(booking);
-        //    int NDays = pars.shortBookingInterval;
-        //    DateTime today = BookingGlobals.GetToday();
-        //    if(booking.Under18sInParty)
-        //    {
-        //        booking.Status = bookingStatus.WaitingApproval;
-        //    }
-        //    else
-        //    {
-        //        //if (isPrivileged || (booking.From - today).TotalDays < NDays && booking.IsPaid)
-        //        //{
-        //        //    booking.Status = bookingStatus.Confirmed;
-        //        //} else
-        //        //{
-        //        //    booking.Status = bookingStatus.WaitingPayment;
-        //        //}
-        //        if (isPrivileged)
-        //        {
-        //            booking.Status = bookingStatus.Confirmed;
-        //        }
-        //        else if ((booking.From - today).TotalDays < NDays)
-        //        {
-        //            booking.Status = bookingStatus.WaitingGateway;
-        //        }
-        //        else
-        //        {
-        //            booking.Status = bookingStatus.WaitingPayment;
-        //        }
-        //    }
-        //    booking.StatusLastChanged = DateTime.Now;
-        //    QueueEmails(booking, null);
-        //}
+        private BookingEmailTemplates SelectWaitingPaymentEmail(Booking b)
+        {
+            return b.From <= today.AddDays(paymentInterval) ? BookingEmailTemplates.WaitingDuePayment : BookingEmailTemplates.WaitingPayment;
+        }
 
-            //public override void ChangeState(Booking booking, bookingStatus from)
-            //{
-            //    LoadMemberInfo(booking);
-            //    QueueEmails(booking, from);
-            //}
         public override bookingStatus GetInitialState(Booking booking)
         {
             bookingStatus initial;
@@ -214,7 +182,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 {
                     initial = bookingStatus.Confirmed;
                 }
-                else if (paymentGatewayAvailable && (booking.From - today).TotalDays < NDays)
+                else if (paymentGatewayAvailable && (booking.From - today).TotalDays < paymentInterval)
                 {
                     initial = bookingStatus.WaitingGateway;
                 }

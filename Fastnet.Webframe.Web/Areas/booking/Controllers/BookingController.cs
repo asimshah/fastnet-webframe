@@ -274,7 +274,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                             To = to, //request.toDate,
                             TotalCost = request.choice.totalCost,
                             Under18sInParty = request.under18spresent,
-                            PartySize = request.choice.partySize
+                            PartySize = request.partySize
                         };
                         if (request.phoneNumber != this.GetCurrentMember().PhoneNumber)
                         {
@@ -290,7 +290,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                         await ctx.SaveChangesAsync();
                         var bst = Factory.GetBookingStateTransition(ctx, abodeId);
                         var initial = bst.GetInitialState(b);
-                        b.PerformStateTransition(ctx, null, initial, false);
+                        b.PerformStateTransition(GetCurrentMember().Fullname, ctx, null, initial, false);
                         //bst.ToNew(b);
                         await ctx.SaveChangesAsync();
                         tran.Complete();
@@ -446,8 +446,8 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     
                     //var bst = Factory.GetBookingStateTransition(ctx);
                     //bst.ChangeState(booking, old);
-                    booking.PerformStateTransition(ctx, old, bookingStatus.Cancelled, false);
-                    booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
+                    booking.PerformStateTransition(name, ctx, old, bookingStatus.Cancelled, false);
+                    //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));
                     ctx.SaveChanges();
                 }
             }

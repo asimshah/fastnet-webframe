@@ -1,112 +1,121 @@
 ﻿<div class="parameters-form">
     <div class="row inner-panel">
-        <div class="col-xs-12">
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Payment Interval
-                            <input type="number" class="form-control" min="1" data-bind="value: paymentInterval" />
-                        </label>
-                        <span class="help-block">Enter a number of days. Payment is due within this many days of the booking start date.</span>
+        <div class="col-xs-6">
+            <div class="boxed-group">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Payment Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: paymentInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. Payment is due within this many days of the booking start date.</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Cancellation Interval
-                            <input type="number" class="form-control" min="1"  />
-                        </label>
-                        <span class="help-block">Enter a number of days. Unpaid bookings are automatically cancelled after this many days from the booking start date.</span>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Cancellation Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: cancellationInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. Unpaid bookings are automatically cancelled after this many days from the booking start date.</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            First Reminder Interval
-                            <input type="number" class="form-control" min="1" />
-                        </label>
-                        <span class="help-block">Enter a number of days. The first payment reminder is sent this many days before the booking start date.</span>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Terms and Conditions Url
+                                <input type="text" class="form-control" data-bind="value: termsAndConditionsUrl" />
+                            </label>
+                            <span class="help-block">Enter the internal url of the T&amp;C's page, e.g. page/n.</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Second Reminder Interval
-                            <input type="number" class="form-control" min="1" />
-                        </label>
-                        <span class="help-block">Enter a number of days. The second payment reminder is sent this many days before the booking start date.</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Reminder Suppression Interval
-                            <input type="number" class="form-control" min="1" />
-                        </label>
-                        <span class="help-block">Enter a number of days. A reminder is held up if a relevant email has been sent within this many days.</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Entry Code Notification Interval
-                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeNotificationInterval" />
-                        </label>
-                        <span class="help-block">Enter a number of days. Entry code notification is sent within this period of a confirmed booking start date.</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Entry Code Bridge Interval
-                            <input type="number" class="form-control" min="1" data-bind="value: entryCodeBridgeInterval" />
-                        </label>
-                        <span class="help-block">Enter a number of days. Both current and previous entry codes are sent for this number of days after a code changes.</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="form-group-sm">
-                        <label>
-                            Terms and Conditions Url
-                            <input type="text" class="form-control" data-bind="value: termsAndConditionsUrl" />
-                        </label>
-                        <span class="help-block">Enter the internal url of the T&amp;C's page, e.g. page/n.</span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-8">
-                    <div class="form-group-sm">
-                        <label for="groupList">Privileged Members Group</label>
-                        <select id="groupList" class="selectpicker form-control" data-bind="options: availableGroups,
+                <div class="row">
+                    <div class="col-xs-8">
+                        <div class="form-group-sm">
+                            <label for="groupList">Privileged Members Group</label>
+                            <select id="groupList" class="selectpicker form-control" data-bind="options: availableGroups,
                 optionsText: 'Name', value: privilegedMembers,  optionsCaption: 'Select a group ...', event: {change: selectionChanged}"></select>
-                        <span class="help-block">Booking for members of this group are confirmed whether paid or not.</span>
+                            <span class="help-block">Booking for members of this group are confirmed whether paid or not.</span>
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        <div class="form-group-sm">
+                            <button class="btn btn-danger side-button" data-bind="click: clearPrivilegedMembers()">Clear</button>
+                        </div>
                     </div>
                 </div>
-                <div class="col-xs-4">
-                    <div class="form-group-sm">
-                        <button class="btn btn-danger side-button" data-bind="click: clearPrivilegedMembers()">Clear</button>
-                    </div>
-                </div>
+
             </div>
             <div class="row">
                 <div class="col-xs-12">
                     <span class="message-block" data-bind="text: message"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="boxed-group">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                First Reminder Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: firstReminderInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. The first payment reminder is sent this many days before the booking start date.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Second Reminder Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: secondReminderInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. The second payment reminder is sent this many days before the booking start date.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Reminder Suppression Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: reminderSuppressionInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. A reminder is held up if a relevant email has been sent within this many days.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="boxed-group">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Entry Code Notification Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: entryCodeNotificationInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. Entry code notification is sent within this period of a confirmed booking start date.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group-sm">
+                            <label>
+                                Entry Code Bridge Interval
+                                <input type="number" class="form-control" min="1" data-bind="value: entryCodeBridgeInterval" />
+                            </label>
+                            <span class="help-block">Enter a number of days. Both current and previous entry codes are sent for this number of days after a code changes.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

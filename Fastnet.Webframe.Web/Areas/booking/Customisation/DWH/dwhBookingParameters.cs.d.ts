@@ -4,8 +4,12 @@ declare module server {
 	interface dwhBookingParameters extends bookingParameters {
 		nonBMCMembers: server.IGroup;
 		privilegedMembers: server.IGroup;
-		shortBookingInterval: number;
+		paymentInterval: number;
 		entryCodeNotificationInterval: number;
-		entryCodeBridgeInterval: number;
+        entryCodeBridgeInterval: number;
+        cancellationInterval: number;
+        firstReminderInterval: number;
+        secondReminderInterval: number;
+        reminderSuppressionInterval: number;
 	}
 }

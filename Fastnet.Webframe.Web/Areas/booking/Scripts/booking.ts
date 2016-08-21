@@ -605,9 +605,10 @@ This is a system error`;
                     beforeShowDay: (d) => { return this.beforeShowDay(d); },
                     dateFormat: 'dMyy'
                 };
-                var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
-                    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingAllowed
-                    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
+                //var shortTermBookingAllowed = this.bookingApp.bookingParameters.paymentGatewayAvailable
+                //    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingAllowed
+                //    || this.bookingApp.currentMember.BookingPermission === server.BookingPermissions.ShortTermBookingWithoutPaymentAllowed;
+                let shortTermBookingAllowed = true;
                 var shortBookingInterval = this.getShortTermBookingInterval();
                 var today = str.toMoment(this.bookingApp.bookingParameters.today);
                 this.step1_model = new bookingModels.request_step1(today, shortTermBookingAllowed, shortBookingInterval);
@@ -733,7 +734,7 @@ This is a system error`;
                 var isShortTerm = daysToStart < shortBookingInterval;
                 this.step3_model = new request_step3(sd, ed, choice,
                     this.bookingApp.bookingParameters.termsAndConditionsUrl, isShortTerm, shortBookingInterval, under18Present,
-                    phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable);
+                    phoneNumber, this.bookingApp.bookingParameters.paymentGatewayAvailable, np);
                 this.step3_vm = new observableRequest_step3(this.step3_model);
                 var buttons: forms.formButton[] = [
                     {
@@ -791,8 +792,10 @@ This is a system error`;
                     toDate: str.toDateString(model.toDate),
                     under18spresent: model.under18Present,
                     isPaid: false,
-                    phoneNumber: model.phoneNumber
+                    phoneNumber: model.phoneNumber,
+                    partySize: model.numberOfPeople
                 };
+                
                 var abodeId = this.bookingApp.bookingParameters.currentAbode.id;
                 var createBookingUrl = str.format("bookingapi/create/{0}", abodeId);
                 ajax.Post({ url: createBookingUrl, data: request }).then((r) => {

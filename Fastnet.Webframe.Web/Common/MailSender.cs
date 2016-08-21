@@ -88,6 +88,7 @@ namespace Fastnet.Webframe.Web.Common
                     {
                         ma.Failure = string.Format("Delivery failed - status {0}", status.ToString());
                     }
+                    Log.Write(EventSeverities.Error, $"Mail to {smo.MailMessage.To.First().Address} failed: {ma.Failure}");
                 }
                 else if (mailError is SmtpFailedRecipientsException)
                 {
@@ -107,7 +108,6 @@ namespace Fastnet.Webframe.Web.Common
         {
             using (var dctx = new CoreDataContext())
             {
-
                 MailMessage mail = smo.MailMessage;
                 string templateName = smo.Template;
                 MailAction ma = GetBaseRecord(smo);
@@ -115,6 +115,7 @@ namespace Fastnet.Webframe.Web.Common
                 ma.Remark = smo.Remark;
                 dctx.Actions.Add(ma);
                 dctx.SaveChanges();
+                Log.Write($"Mail sent to {mail.To.First().Address}: Subject {mail.Subject}, using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
             }
         }
         private MailAction GetBaseRecord(SendMailObject smo)

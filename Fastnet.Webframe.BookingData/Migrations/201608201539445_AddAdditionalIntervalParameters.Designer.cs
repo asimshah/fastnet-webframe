@@ -13,7 +13,7 @@ namespace Fastnet.Webframe.BookingData.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201608201500547_AddAdditionalIntervalParameters"; }
+            get { return "201608201539445_AddAdditionalIntervalParameters"; }
         }
         
         string IMigrationMetadata.Source

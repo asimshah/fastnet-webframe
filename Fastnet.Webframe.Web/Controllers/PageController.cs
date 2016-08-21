@@ -395,7 +395,7 @@ namespace Fastnet.Webframe.Web.Controllers
         }
         private void TraceAccess(string fmt, params object[] args)
         {
-            bool trace = ApplicationSettings.Key("TraceAccess", false);
+            bool trace = ApplicationSettings.Key("Trace:Access", false);
             if (trace)
             {
                 Log.Write(fmt, args);

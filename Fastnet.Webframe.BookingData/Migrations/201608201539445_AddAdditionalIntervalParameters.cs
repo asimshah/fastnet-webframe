@@ -7,10 +7,10 @@ namespace Fastnet.Webframe.BookingData.Migrations
     {
         public override void Up()
         {
-            AddColumn("book.Parameters", "CancellationInterval", c => c.Int());
-            AddColumn("book.Parameters", "FirstReminderInterval", c => c.Int());
-            AddColumn("book.Parameters", "SecondReminderInterval", c => c.Int());
-            AddColumn("book.Parameters", "ReminderSuppressionInterval", c => c.Int());
+            AddColumn("book.Parameters", "CancellationInterval", c => c.Int(nullable: false, defaultValue: 0));
+            AddColumn("book.Parameters", "FirstReminderInterval", c => c.Int(nullable: false, defaultValue: 0));
+            AddColumn("book.Parameters", "SecondReminderInterval", c => c.Int(nullable: false, defaultValue: 0));
+            AddColumn("book.Parameters", "ReminderSuppressionInterval", c => c.Int(nullable: false, defaultValue: 0));
         }
         
         public override void Down()

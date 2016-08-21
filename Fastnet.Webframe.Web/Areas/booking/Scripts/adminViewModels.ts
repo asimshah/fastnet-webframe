@@ -50,6 +50,7 @@ module fastnet {
             duration: string;
             //entryInformation: string;
             under18sInParty: boolean;
+            description: string;
             //numberOfNights: number;
             //hasMultipleDays: boolean;
 
@@ -70,6 +71,7 @@ module fastnet {
                 this.to = b.to;
                 this.createdOn = b.createdOn;
                 this.partySize = b.partySize;
+                this.description = b.description;
                 this.under18sInParty = b.under18sInParty;
                 this.formattedCost = b.formattedCost;
                 this.isPaid = b.isPaid;// ko.observable(b.isPaid);

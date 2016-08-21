@@ -218,11 +218,12 @@
             public shortTermBookingInterval: number;
             public paymentGatewayAvailable: boolean;
             public isShortTermBooking: boolean;
+            public numberOfPeople: number;
             constructor(fromDate: string, toDate: string, choice: server.bookingChoice,
                 tcLink: string, isShortTermBooking: boolean,
                 shortTermBookingInterval: number, under18Present: boolean,
                 phoneNumber: string,
-                paymentGatewayAvailable: boolean) {
+                paymentGatewayAvailable: boolean, np: number) {
                 super();
                 this.fromDate = fromDate;
                 this.toDate = toDate;
@@ -234,6 +235,7 @@
                 this.isShortTermBooking = isShortTermBooking;
                 this.shortTermBookingInterval = shortTermBookingInterval;
                 this.paymentGatewayAvailable = paymentGatewayAvailable;
+                this.numberOfPeople = np;
             }
         }
         export class observableRequest_step3 extends forms.viewModel {
@@ -249,6 +251,7 @@
             public paymentGatewayAvailable: boolean;
             public isShortTermBooking: boolean;
             public showPaymentRequiredMessage: boolean;
+            public numberOfPeople: number;
             constructor(m: request_step3) {
                 super();
                 this.fromDate = str.toMoment(m.fromDate).format("ddd DDMMMYYYY");
@@ -266,6 +269,7 @@
                 this.shortTermBookingInterval = m.shortTermBookingInterval;
                 this.paymentGatewayAvailable = m.paymentGatewayAvailable;
                 this.showPaymentRequiredMessage = m.paymentGatewayAvailable === true && m.isShortTermBooking;
+                this.numberOfPeople = m.numberOfPeople;
             }
         }
         export class observableMyBookingsModel extends forms.viewModel {
