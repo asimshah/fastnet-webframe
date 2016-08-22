@@ -773,6 +773,7 @@ This is a system error`;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
+                                    f.disableCommand("ok-command");
                                     this.saveBookingChoice(f, data.current, this.step3_vm.showPaymentRequiredMessage);
                                 }
                                 break;

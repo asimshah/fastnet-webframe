@@ -755,6 +755,7 @@ var fastnet;
                                 break;
                             case "ok-command":
                                 if (f.isValid()) {
+                                    f.disableCommand("ok-command");
                                     _this.saveBookingChoice(f, data.current, _this.step3_vm.showPaymentRequiredMessage);
                                 }
                                 break;
