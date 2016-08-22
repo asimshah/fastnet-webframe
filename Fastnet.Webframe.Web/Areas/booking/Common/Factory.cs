@@ -1,4 +1,5 @@
-﻿using Fastnet.Web.Common;
+﻿using Fastnet.EventSystem;
+using Fastnet.Web.Common;
 using Fastnet.Webframe.BookingData;
 using Fastnet.Webframe.CoreData;
 using Newtonsoft.Json.Linq;
@@ -53,6 +54,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     break;
             }
             bp.factoryName = FactoryName.ToString();
+            Log.Write($"Factory name is {FactoryName.ToString()}");
             return bp;
         }
         public static DayInformation GetDayInformationInstance(BookingDataContext bctx,long abodeId, DateTime day)

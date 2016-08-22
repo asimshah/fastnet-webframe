@@ -43,7 +43,7 @@ namespace Fastnet.Webframe.CoreData
             }
             EnsureAnonymousMember();
             EnsureRootDirectoryRestrictions();
-            EnsureSiteVersion("4.0.0.1");
+            EnsureSiteVersion("4.0.0.2");
         }
 
 

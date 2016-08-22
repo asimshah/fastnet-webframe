@@ -13,17 +13,17 @@ var fastnet;
             factory.setFactory = function (name) {
                 switch (name) {
                     case "DonWhillansHut":
-                        factory.name = FactoryName.DonWhillansHut;
+                        factory.nameInternal = FactoryName.DonWhillansHut;
                         break;
                 }
             };
             factory.getFactory = function () {
-                return factory.name;
+                return factory.nameInternal;
             };
             factory.getParameters = function (p) {
                 //this.setFactory(p.factoryName);
                 var bp = null;
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         bp = new booking.dwhParameters();
                         break;
@@ -35,7 +35,7 @@ var fastnet;
                 return bp;
             };
             factory.getRequestCustomiser = function () {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         return new booking.dwhRequestCustomiser();
                     //break;
@@ -44,7 +44,7 @@ var fastnet;
                 }
             };
             factory.getObservableBookingModel = function (b) {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         var dwhbm = b;
                         return new booking.observableDwhBookingModel(dwhbm);
@@ -54,7 +54,7 @@ var fastnet;
                 }
             };
             factory.getCustomAdminIndex = function () {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         return new booking.dwhAdminIndex();
                     //break;
@@ -62,7 +62,8 @@ var fastnet;
                         return null;
                 }
             };
-            factory.name = FactoryName.None;
+            // NB DO NOT use "name" as it has a special use in javascript
+            factory.nameInternal = FactoryName.None;
             return factory;
         }());
         booking.factory = factory;

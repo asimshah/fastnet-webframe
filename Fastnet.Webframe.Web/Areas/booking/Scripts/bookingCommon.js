@@ -34,6 +34,7 @@ var fastnet;
             __extends(observableParameters, _super);
             function observableParameters(m) {
                 _super.call(this);
+                this.__$className = "observableParameters";
                 this.termsAndConditionsUrl = ko.observable(m.termsAndConditionsUrl);
                 this.availableGroups = m.availableGroups;
             }

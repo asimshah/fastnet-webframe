@@ -9,6 +9,7 @@
             original: parameters;
         }
         export class parameters implements server.bookingParameters {
+            
             public factoryName: string;
             public availableGroups: server.IGroup[];
             public termsAndConditionsUrl: string;
@@ -28,6 +29,7 @@
             }
         }
         export class observableParameters extends forms.viewModel {
+            public __$className: string = "observableParameters";
             public availableGroups: server.IGroup[];
             public termsAndConditionsUrl: KnockoutObservable<string>;
             constructor(m: parameters) {

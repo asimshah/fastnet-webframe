@@ -199,10 +199,14 @@ module fastnet {
                 //debug.print("parametersApp started");
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then((r: server.bookingParameters) => {
-                    factory.setFactory(r.factoryName);
-                    var model = factory.getParameters(r);
-                    var vm = model.getObservable();
-                    this.showForm(vm);
+                    try {
+                        factory.setFactory(r.factoryName);
+                        var model = factory.getParameters(r);
+                        var vm = model.getObservable();
+                        this.showForm(vm);
+                    } catch (e) {
+                        debugger;
+                    }
                 });
             }
             public showForm(vm: observableParameters) {

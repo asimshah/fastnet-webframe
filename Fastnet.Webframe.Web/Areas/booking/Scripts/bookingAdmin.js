@@ -224,10 +224,15 @@ var fastnet;
                 //debug.print("parametersApp started");
                 var url = "bookingapi/parameters";
                 ajax.Get({ url: url }, false).then(function (r) {
-                    booking_1.factory.setFactory(r.factoryName);
-                    var model = booking_1.factory.getParameters(r);
-                    var vm = model.getObservable();
-                    _this.showForm(vm);
+                    try {
+                        booking_1.factory.setFactory(r.factoryName);
+                        var model = booking_1.factory.getParameters(r);
+                        var vm = model.getObservable();
+                        _this.showForm(vm);
+                    }
+                    catch (e) {
+                        debugger;
+                    }
                 });
             };
             parametersApp.prototype.showForm = function (vm) {

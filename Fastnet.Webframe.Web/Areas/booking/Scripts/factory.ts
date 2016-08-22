@@ -5,21 +5,22 @@
             DonWhillansHut = 1
         }
         export class factory {
-            private static name: FactoryName = FactoryName.None;
+            // NB DO NOT use "name" as it has a special use in javascript
+            private static nameInternal: FactoryName = FactoryName.None;
             public static setFactory(name: string) {
                 switch (name) {
                     case "DonWhillansHut":
-                        factory.name = FactoryName.DonWhillansHut;
+                        factory.nameInternal = FactoryName.DonWhillansHut;
                         break;
                 }
             }
             public static getFactory(): FactoryName {
-                return factory.name;
+                return factory.nameInternal;
             }
             public static getParameters(p: server.bookingParameters): parameters {
                 //this.setFactory(p.factoryName);
                 var bp: parameters = null;
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         bp = new dwhParameters();
                         break;
@@ -31,7 +32,7 @@
                 return bp;
             }
             public static getRequestCustomiser(): requestCustomiser {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case  FactoryName.DonWhillansHut:
                         return new dwhRequestCustomiser();
                         //break;
@@ -40,7 +41,7 @@
                 }
             }
             public static getObservableBookingModel(b: bookingModel | dwhBookingModel): observableBookingModel {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         var dwhbm = <dwhBookingModel>b;
                         return new observableDwhBookingModel(dwhbm);
@@ -50,7 +51,7 @@
                 }
             }
             public static getCustomAdminIndex(): adminCustomIndex {
-                switch (factory.name) {
+                switch (factory.nameInternal) {
                     case FactoryName.DonWhillansHut:
                         return new dwhAdminIndex();
                         //break;

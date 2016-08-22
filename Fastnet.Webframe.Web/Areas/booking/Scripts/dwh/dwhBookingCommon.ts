@@ -15,6 +15,7 @@
             }
         }
         export class observableDwhParameters extends observableParameters {
+            public __$className: string = "observableDwhParameters";
             public privilegedMembers: KnockoutObservable<server.IGroup> = null;
             public paymentInterval: KnockoutObservable<number>;
             public entryCodeNotificationInterval: KnockoutObservable<number>;

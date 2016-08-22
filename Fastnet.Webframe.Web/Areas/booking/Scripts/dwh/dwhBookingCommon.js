@@ -24,6 +24,7 @@ var fastnet;
             function observableDwhParameters(model) {
                 var _this = this;
                 _super.call(this, model);
+                this.__$className = "observableDwhParameters";
                 this.privilegedMembers = null;
                 this.paymentInterval = ko.observable(model.paymentInterval);
                 this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
