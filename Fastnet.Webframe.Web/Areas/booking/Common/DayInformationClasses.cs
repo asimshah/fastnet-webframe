@@ -181,6 +181,10 @@ namespace Fastnet.Webframe.Web.Areas.booking
                         Log.Write(EventSeverities.Error, "{0} booked multiple times on {1}", accomodation.Name, Day.ToDefault());
                     }
                     var booking = bookings.First();
+                    //if(booking.Status == bookingStatus.Cancelled)
+                    //{
+                    //    Debugger.Break();
+                    //}
                     BookingReference = booking.Reference;
                     MemberId = booking.MemberId;
                 }

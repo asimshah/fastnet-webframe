@@ -172,6 +172,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         public override bookingStatus GetInitialState(Booking booking)
         {
             bookingStatus initial;
+            LoadMemberInfo(booking);
             if (booking.Under18sInParty)
             {
                 initial = bookingStatus.WaitingApproval;
@@ -195,6 +196,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         }
         public override bookingStatus GetPostApprovalState(Booking booking)
         {
+            LoadMemberInfo(booking);
             return isPrivileged ? bookingStatus.Confirmed : bookingStatus.WaitingPayment;
         }
         public override void ModifyState(Booking booking, bookingStatus? from, bookingStatus to, bool bySystem)

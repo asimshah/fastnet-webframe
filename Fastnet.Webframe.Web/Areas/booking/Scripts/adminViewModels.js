@@ -45,7 +45,7 @@ var fastnet;
                 this.isPaid = b.isPaid; // ko.observable(b.isPaid);
                 this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);
                 this.history = b.history;
-                this.duration = str.format("{0} for {1} night{2}", b.to, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
+                this.duration = str.format("{0} for {1} night{2}", b.from, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
             }
             return observableBookingModel;
         }(forms.viewModel));

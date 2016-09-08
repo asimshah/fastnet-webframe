@@ -49,15 +49,16 @@ namespace Fastnet.Webframe.BookingData
     {
         public static void Startup()
         {
-            //Mapper.CreateMap<Accomodation, AccomodationTO>()
-            //    //.ForSourceMember(n => n.ParentAccomodation, opt => opt.Ignore())
-            //    //.ForMember(n => n.IsBookable, opt => opt.Ignore())
-            //    .ForMember(n => n.IsBooked, opt => opt.Ignore())
-            //    .ForMember(n => n.IsAvailableToBook, opt => opt.Ignore())
-            //    .ForMember(n => n.BookingReference, opt => opt.Ignore())
-            //    .ForMember(n => n.IsBlocked, opt => opt.Ignore());
-            //Mapper.AssertConfigurationIsValid();
-            //Debugger.Break();
+            //var today = BookingGlobals.GetToday();
+            //using (var ctx = new BookingDataContext())
+            //{
+            //    var cancelledBookings = ctx.Bookings.Where(b => b.Status == bookingStatus.Cancelled && b.To >= today && b.AccomodationCollection.Count() > 0);    
+            //    foreach(var cb in cancelledBookings)
+            //    {
+            //        cb.AccomodationCollection.Clear();
+            //    }
+            //    ctx.SaveChanges();
+            //}
         }
     }
 }

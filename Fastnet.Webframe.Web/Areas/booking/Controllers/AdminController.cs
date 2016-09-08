@@ -234,6 +234,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                 if (booking.Status != bookingStatus.Cancelled)
                 {
                     bookingStatus old = booking.Status;
+                    booking.AccomodationCollection.Clear();
                     //booking.Status = bookingStatus.Cancelled;
                     //booking.StatusLastChanged = DateTime.Now;
                     //booking.AddHistory(name, string.Format("Status changed from {0} to {1}", old.ToString(), booking.Status.ToString()));

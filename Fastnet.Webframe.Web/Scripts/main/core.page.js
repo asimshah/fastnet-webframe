@@ -166,6 +166,9 @@
                             //$U.Debug("menu link to {0}", url);
                             if ($T.IsLinkInternal(url)) {
                                 e.preventDefault();
+                                //if (url == "/login") {
+                                //    $T.options.ReturnUrl = "asim";
+                                //}
                                 $T.GotoInternalLink(url);
                             }
                         });
