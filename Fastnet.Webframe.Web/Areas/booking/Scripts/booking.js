@@ -498,9 +498,8 @@ var fastnet;
                 //`<div class='login-invitation'>
                 //    <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.
                 //    If you are not a member, please <a href='/register' >register</a>.</div>
-                //    <div><button class='btn btn-primary' data-cmd='test-form' >Test Forms</button></div>
-                // </div>`;
-                this.loginInvitation = "<div class='login-invitation'>\n            <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.\n            If you are not a member, please <a href='/register' >register</a>.</div>\n         </div>";
+                //</div>`;
+                this.loginInvitation = "<div class='login-invitation'>\n                <div>Online booking is available to members only. If you are a member please <a href='../login'>login</a> first.\n                If you are not a member, please <a href='/register' >register</a>.</div>\n            </div>";
             }
             LoginManager.prototype.start = function (cb) {
                 var _this = this;

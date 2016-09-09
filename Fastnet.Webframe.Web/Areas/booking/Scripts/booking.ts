@@ -507,17 +507,17 @@ This is a system error`;
             private lastUserKey = "last-successful-user";
             private callback: any;
             public model: loginModels.credentials;
+
             //private loginInvitation: string =
             //`<div class='login-invitation'>
             //    <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.
             //    If you are not a member, please <a href='/register' >register</a>.</div>
-            //    <div><button class='btn btn-primary' data-cmd='test-form' >Test Forms</button></div>
-            // </div>`;
+            //</div>`;
             private loginInvitation: string =
             `<div class='login-invitation'>
-            <div>Online booking is available to members only. If you are a member please <a href='#' data-cmd='login-cmd'>login</a> first.
-            If you are not a member, please <a href='/register' >register</a>.</div>
-         </div>`;
+                <div>Online booking is available to members only. If you are a member please <a href='../login'>login</a> first.
+                If you are not a member, please <a href='/register' >register</a>.</div>
+            </div>`;
             public start(cb: any): void {
                 this.callback = cb;
                 $(".login-name").empty();
