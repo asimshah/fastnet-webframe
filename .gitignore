@@ -187,3 +187,13 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/.vs/config/applicationhost.config
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/bannerpanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/sitepanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/rightpanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/menupanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/menu.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/leftpanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/contentpanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/centrepanel.user.css
+/Fastnet.Webframe.Web/Content/Main/DefaultCSS/browserpanel.user.css
