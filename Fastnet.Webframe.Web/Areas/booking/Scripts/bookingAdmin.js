@@ -778,22 +778,22 @@ var fastnet;
                                 });
                             }
                             else if (r.statusChanged) {
-                                function bookingStatusToString(s) {
-                                    switch (s) {
-                                        case 0 /* WaitingApproval */:
-                                            return "WaitingApproval";
-                                        case 3 /* Cancelled */:
-                                            return "Cancelled";
-                                        //case server.bookingStatus.AutoCancelled:
-                                        //    return "AutoCancelled";
-                                        case 2 /* Confirmed */:
-                                            return "Confirmed";
-                                        case 1 /* WaitingPayment */:
-                                            return "WaitingPayment";
-                                    }
-                                }
+                                //function bookingStatusToString(s: server.bookingStatus): string {
+                                //    switch (s) {
+                                //        case server.bookingStatus.WaitingApproval:
+                                //            return "WaitingApproval";
+                                //        case server.bookingStatus.Cancelled:
+                                //            return "Cancelled";
+                                //        //case server.bookingStatus.AutoCancelled:
+                                //        //    return "AutoCancelled";
+                                //        case server.bookingStatus.Confirmed:
+                                //            return "Confirmed";
+                                //        case server.bookingStatus.WaitingPayment:
+                                //            return "WaitingPayment";
+                                //    }
+                                //}
                                 booking.status = r.booking.status;
-                                booking.statusName = bookingStatusToString(booking.status);
+                                booking.statusName = _this.bookingStatusToString(booking.status);
                                 var rowElement = $(ct).closest("tr");
                                 var d = _this.dataTable.row(rowElement).data();
                                 var snIndex = _this.propertyInfo.getValue("statusName");
@@ -808,6 +808,20 @@ var fastnet;
                             }
                         });
                         break;
+                }
+            };
+            bookingReport.prototype.bookingStatusToString = function (s) {
+                switch (s) {
+                    case 0 /* WaitingApproval */:
+                        return "WaitingApproval";
+                    case 3 /* Cancelled */:
+                        return "Cancelled";
+                    //case server.bookingStatus.AutoCancelled:
+                    //    return "AutoCancelled";
+                    case 2 /* Confirmed */:
+                        return "Confirmed";
+                    case 1 /* WaitingPayment */:
+                        return "WaitingPayment";
                 }
             };
             bookingReport.prototype.findBooking = function (list, id) {

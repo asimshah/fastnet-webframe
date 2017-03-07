@@ -765,22 +765,22 @@ module fastnet {
                                 //var d2 = this.dataTable.row(rowElement).data();
                                 //debug.print("after change: {0}", d2[pnIndex]);
                             } else if (r.statusChanged) {
-                                function bookingStatusToString(s: server.bookingStatus): string {
-                                    switch (s) {
-                                        case server.bookingStatus.WaitingApproval:
-                                            return "WaitingApproval";
-                                        case server.bookingStatus.Cancelled:
-                                            return "Cancelled";
-                                        //case server.bookingStatus.AutoCancelled:
-                                        //    return "AutoCancelled";
-                                        case server.bookingStatus.Confirmed:
-                                            return "Confirmed";
-                                        case server.bookingStatus.WaitingPayment:
-                                            return "WaitingPayment";
-                                    }
-                                }
-                                booking.status = r.booking.status;
-                                booking.statusName = bookingStatusToString(booking.status);
+                                //function bookingStatusToString(s: server.bookingStatus): string {
+                                //    switch (s) {
+                                //        case server.bookingStatus.WaitingApproval:
+                                //            return "WaitingApproval";
+                                //        case server.bookingStatus.Cancelled:
+                                //            return "Cancelled";
+                                //        //case server.bookingStatus.AutoCancelled:
+                                //        //    return "AutoCancelled";
+                                //        case server.bookingStatus.Confirmed:
+                                //            return "Confirmed";
+                                //        case server.bookingStatus.WaitingPayment:
+                                //            return "WaitingPayment";
+                                //    }
+                                //}
+                                booking.status = r.booking.status;                                
+                                booking.statusName = this.bookingStatusToString(booking.status);
                                 var rowElement = $(ct).closest("tr");
                                 var d = this.dataTable.row(rowElement).data();
                                 var snIndex = this.propertyInfo.getValue("statusName");
@@ -795,6 +795,20 @@ module fastnet {
                             }
                         });
                         break;
+                }
+            }
+            private bookingStatusToString(s: server.bookingStatus): string {
+                switch (s) {
+                    case server.bookingStatus.WaitingApproval:
+                        return "WaitingApproval";
+                    case server.bookingStatus.Cancelled:
+                        return "Cancelled";
+                    //case server.bookingStatus.AutoCancelled:
+                    //    return "AutoCancelled";
+                    case server.bookingStatus.Confirmed:
+                        return "Confirmed";
+                    case server.bookingStatus.WaitingPayment:
+                        return "WaitingPayment";
                 }
             }
             private findBooking(list: bookingModel[], id: number): bookingModel {
