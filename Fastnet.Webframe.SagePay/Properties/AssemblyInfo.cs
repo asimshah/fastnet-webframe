@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Fastnet.Webframe.SagePay")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Asim & Mike")]
 [assembly: AssemblyProduct("Fastnet.Webframe.SagePay")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright © 2016-17")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

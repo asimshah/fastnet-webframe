@@ -23,7 +23,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             sb.AppendLine(string.Format("daily choice for {0}", Day.ToDefault()));
             foreach (var bc in Choices)
             {
-                sb.AppendLine(string.Format("\tbooking choice for {0} people)", bc.Capacity));
+                sb.AppendLine(string.Format("\tbooking choice for {0} people", bc.Capacity));
                 foreach (var item in bc.Accomodation)
                 {
                     sb.AppendLine(string.Format("\t\taccomodation: {0} for {1}", item.Name, item.Capacity));

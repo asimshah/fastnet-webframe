@@ -487,70 +487,88 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         }
         private IEnumerable<DailyChoices> CreateChoices(int peopleCount, List<DayInformation> dayList)
         {
-            List<BookingChoice> choices = new List<BookingChoice>();
+            //List<BookingChoice> choices = new List<BookingChoice>();
             List<DailyChoices> dcsList = new List<DailyChoices>();
+            //HACK ALERT!!
+            // the code below does not work in the case of the booking including a
+            // Friday for 12 people - no choice is offered because 12beds is found
+            // but whole hut for 12 people is not found and therefore DWHChoiceFilter
+            // returns and empty choices
+            var isFridayIncluded = dayList.Select(x => x.Day).Any(x => x.DayOfWeek == DayOfWeek.Friday);
+
             foreach (var day in dayList)
             {
                 var dcs = new DailyChoices();
                 dcs.Day = day.Day;
-                foreach (AccomodationType at in Enum.GetValues(typeof(AccomodationType)))
+                if (isFridayIncluded && peopleCount == 12)
                 {
-                    var list = day.FindAvailableAccomodation(at);
-                    if (list.Count() > 0)
+                    var list = day.FindAvailableAccomodation(AccomodationType.Hut);
+                    var bc3 = new BookingChoice { Day = day.Day };
+                    bc3.Accomodation = list.Take(1);
+                    bc3.Capacity = bc3.Accomodation.First().Capacity;
+                    dcs.Choices.Add(bc3);
+                }
+                else
+                {
+                    foreach (AccomodationType at in Enum.GetValues(typeof(AccomodationType)))
                     {
-                        int capacity = list.Select(l => l.SelfAndDescendants.Count(x => x.Type == AccomodationType.Bed)).Sum();
-                        if (capacity == peopleCount)
+                        var list = day.FindAvailableAccomodation(at);
+                        if (list.Count() > 0)
                         {
-                            var bc = new BookingChoice { Day = day.Day, Accomodation = list, Capacity = capacity };
-                            dcs.Choices.Add(bc);
-                            choices.Add(bc);
-                        }
-                        else
-                        {
-                            switch (at)
+                            int capacity = list.Select(l => l.SelfAndDescendants.Count(x => x.Type == AccomodationType.Bed)).Sum();
+                            if (capacity == peopleCount)
                             {
-                                case AccomodationType.Bed:
-                                    var bc = new BookingChoice { Day = day.Day };
-                                    bc.Accomodation = list.Take(peopleCount);
-                                    bc.Capacity = peopleCount;
-                                    dcs.Choices.Add(bc);
-                                    choices.Add(bc);
-                                    break;
-                                case AccomodationType.Room:
-                                    var wholeRooms = day.FindWholeRooms(list, peopleCount);
-                                    // wholerooms maybe the same as the whole of the level above
-                                    foreach (var wr in wholeRooms)
-                                    {
-                                        int roomCapacity = wr.Sum(x => x.Capacity);
-                                        if (roomCapacity >= peopleCount)
+                                var bc = new BookingChoice { Day = day.Day, Accomodation = list, Capacity = capacity };
+                                dcs.Choices.Add(bc);
+                                //choices.Add(bc);
+                            }
+                            else
+                            {
+                                switch (at)
+                                {
+                                    case AccomodationType.Bed:
+                                        var bc = new BookingChoice { Day = day.Day };
+                                        bc.Accomodation = list.Take(peopleCount);
+                                        bc.Capacity = peopleCount;
+                                        dcs.Choices.Add(bc);
+                                        //choices.Add(bc);
+                                        break;
+                                    case AccomodationType.Room:
+                                        var wholeRooms = day.FindWholeRooms(list, peopleCount);
+                                        // wholerooms maybe the same as the whole of the level above
+                                        foreach (var wr in wholeRooms)
+                                        {
+                                            int roomCapacity = wr.Sum(x => x.Capacity);
+                                            if (roomCapacity >= peopleCount)
+                                            {
+                                                var bc2 = new BookingChoice { Day = day.Day };
+                                                bc2.Accomodation = wr;
+                                                bc2.Capacity = wr.Sum(x => x.Capacity);
+                                                dcs.Choices.Add(bc2);
+                                                //choices.Add(bc2);
+                                            }
+                                        }
+                                        var splitAccomdation = day.FindSplitAccomodation(list, peopleCount, day.FindAvailableAccomodation(AccomodationType.Bed));
+                                        foreach (var sa in splitAccomdation)
                                         {
                                             var bc2 = new BookingChoice { Day = day.Day };
-                                            bc2.Accomodation = wr;
-                                            bc2.Capacity = wr.Sum(x => x.Capacity);
+                                            bc2.Accomodation = sa;
+                                            bc2.Capacity = sa.Sum(x => x.Capacity);
                                             dcs.Choices.Add(bc2);
-                                            choices.Add(bc2);
+                                            //choices.Add(bc2);
                                         }
-                                    }
-                                    var splitAccomdation = day.FindSplitAccomodation(list, peopleCount, day.FindAvailableAccomodation(AccomodationType.Bed));
-                                    foreach (var sa in splitAccomdation)
-                                    {
-                                        var bc2 = new BookingChoice { Day = day.Day };
-                                        bc2.Accomodation = sa;
-                                        bc2.Capacity = sa.Sum(x => x.Capacity);
-                                        dcs.Choices.Add(bc2);
-                                        choices.Add(bc2);
-                                    }
-                                    break;
-                                case AccomodationType.Hut:
-                                    var bc3 = new BookingChoice { Day = day.Day };
-                                    bc3.Accomodation = list.Take(1);
-                                    bc3.Capacity = bc3.Accomodation.First().Capacity;
-                                    dcs.Choices.Add(bc3);
-                                    choices.Add(bc3);
-                                    break;
+                                        break;
+                                    case AccomodationType.Hut:
+                                        var bc3 = new BookingChoice { Day = day.Day };
+                                        bc3.Accomodation = list.Take(1);
+                                        bc3.Capacity = bc3.Accomodation.First().Capacity;
+                                        dcs.Choices.Add(bc3);
+                                        //choices.Add(bc3);
+                                        break;
+                                }
                             }
+                            //Debug.Print("Day {0}: {2}(s) {1} available, capacity: {3}", day.Day.ToDefault(), at.ToString(), list.Count(), capacity);
                         }
-                        //Debug.Print("Day {0}: {2}(s) {1} available, capacity: {3}", day.Day.ToDefault(), at.ToString(), list.Count(), capacity);
                     }
                 }
                 dcsList.Add(dcs);
