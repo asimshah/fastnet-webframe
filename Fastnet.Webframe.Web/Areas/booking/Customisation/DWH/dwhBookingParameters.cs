@@ -24,7 +24,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
             if (para is DWHParameter)
             {
                 var p = para as DWHParameter;
-                p.NonBMCMembers = this.nonBMCMembers?.Name;
+                //p.NonBMCMembers = this.nonBMCMembers?.Name;
                 p.PaymentInterval = this.paymentInterval;
                 p.EntryCodeNotificationInterval = this.entryCodeNotificationInterval;
                 p.EntryCodeBridgeInterval = this.entryCodeBridgeInterval;
