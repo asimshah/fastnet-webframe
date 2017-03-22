@@ -22,14 +22,14 @@ var fastnet;
             rules.push({ name: "emailInUse", async: true, validator: testValidations.emailInUse, message: "This email address not found" });
             return rules;
         };
-        testValidations.emailInUse = function (val, params, callback) {
-            var url = str.format("bookingapi/test/{0}/", val);
-            ajax.Get({ url: url }).then(function (r) {
-                callback({ isValid: r.Success, message: r.Error });
-            });
-        };
         return testValidations;
     }());
+    testValidations.emailInUse = function (val, params, callback) {
+        var url = str.format("bookingapi/test/{0}/", val);
+        ajax.Get({ url: url }).then(function (r) {
+            callback({ isValid: r.Success, message: r.Error });
+        });
+    };
     var configuration = (function () {
         function configuration() {
         }

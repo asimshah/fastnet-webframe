@@ -13,7 +13,7 @@ var fastnet;
         var bookingModel = (function (_super) {
             __extends(bookingModel, _super);
             function bookingModel() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             return bookingModel;
         }(forms.model));
@@ -23,29 +23,30 @@ var fastnet;
             //numberOfNights: number;
             //hasMultipleDays: boolean;
             function observableBookingModel(b) {
-                _super.call(this);
-                this.bookingId = b.bookingId;
-                this.reference = b.reference;
-                this.status = b.status;
-                this.statusName = b.statusName;
-                this.memberId = b.memberId;
-                this.memberName = b.memberName;
-                this.memberEmailAddress = b.memberEmailAddress;
-                this.memberPhoneNumber = ko.observable(b.memberPhoneNumber).extend({
+                var _this = _super.call(this) || this;
+                _this.bookingId = b.bookingId;
+                _this.reference = b.reference;
+                _this.status = b.status;
+                _this.statusName = b.statusName;
+                _this.memberId = b.memberId;
+                _this.memberName = b.memberName;
+                _this.memberEmailAddress = b.memberEmailAddress;
+                _this.memberPhoneNumber = ko.observable(b.memberPhoneNumber).extend({
                     required: { message: "A mobile number is required" },
                     phoneNumber: true
                 });
-                this.from = b.from;
-                this.to = b.to;
-                this.createdOn = b.createdOn;
-                this.partySize = b.partySize;
-                this.description = b.description;
-                this.under18sInParty = b.under18sInParty;
-                this.formattedCost = b.formattedCost;
-                this.isPaid = b.isPaid; // ko.observable(b.isPaid);
-                this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);
-                this.history = b.history;
-                this.duration = str.format("{0} for {1} night{2}", b.from, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
+                _this.from = b.from;
+                _this.to = b.to;
+                _this.createdOn = b.createdOn;
+                _this.partySize = b.partySize;
+                _this.description = b.description;
+                _this.under18sInParty = b.under18sInParty;
+                _this.formattedCost = b.formattedCost;
+                _this.isPaid = b.isPaid; // ko.observable(b.isPaid);
+                _this.notes = b.notes == null ? ko.observable('') : ko.observable(b.notes);
+                _this.history = b.history;
+                _this.duration = str.format("{0} for {1} night{2}", b.from, b.numberOfNights, b.numberOfNights > 1 ? "s" : "");
+                return _this;
             }
             return observableBookingModel;
         }(forms.viewModel));
@@ -53,7 +54,7 @@ var fastnet;
         var bookingModels = (function (_super) {
             __extends(bookingModels, _super);
             function bookingModels() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             return bookingModels;
         }(forms.models));
@@ -61,7 +62,7 @@ var fastnet;
         var manageDaysModels = (function (_super) {
             __extends(manageDaysModels, _super);
             function manageDaysModels() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             return manageDaysModels;
         }(forms.models));
@@ -69,10 +70,11 @@ var fastnet;
         var manageDaysModel = (function (_super) {
             __extends(manageDaysModel, _super);
             function manageDaysModel(d) {
-                _super.call(this);
+                var _this = _super.call(this) || this;
                 //this.data = d;
-                this.isOpen = d.bookingOpen;
-                this.blockedPeriods = d.blockedPeriods;
+                _this.isOpen = d.bookingOpen;
+                _this.blockedPeriods = d.blockedPeriods;
+                return _this;
             }
             return manageDaysModel;
         }(forms.model));
@@ -89,22 +91,22 @@ var fastnet;
         var observableManageDaysModel = (function (_super) {
             __extends(observableManageDaysModel, _super);
             function observableManageDaysModel(m) {
-                var _this = this;
-                _super.call(this);
-                this.isOpen = ko.observable(m.isOpen);
-                this.blockedPeriods = [];
+                var _this = _super.call(this) || this;
+                _this.isOpen = ko.observable(m.isOpen);
+                _this.blockedPeriods = [];
                 m.blockedPeriods.forEach(function (bp, index, list) {
                     _this.blockedPeriods.push(new observableBlockedPeriod(bp));
                 });
-                this.newPeriodFrom = ko.observable()
+                _this.newPeriodFrom = ko.observable()
                     .extend({
                     required: { message: "A starting date is required." }
                 });
-                this.newPeriodRemarks = ko.observable();
-                this.newPeriodDuration = ko.observable().extend({
+                _this.newPeriodRemarks = ko.observable();
+                _this.newPeriodDuration = ko.observable().extend({
                     required: { message: "Please provide a duration (in days) for the new blocked period" },
                     min: { params: 1, message: "The minumum duration is one day" }
                 });
+                return _this;
             }
             observableManageDaysModel.prototype.canOpen = function () {
                 return !this.isOpen();
@@ -115,7 +117,7 @@ var fastnet;
         var pricingModels = (function (_super) {
             __extends(pricingModels, _super);
             function pricingModels() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             return pricingModels;
         }(forms.models));
@@ -123,10 +125,9 @@ var fastnet;
         var pricingModel = (function (_super) {
             __extends(pricingModel, _super);
             function pricingModel(minDate, prices) {
-                var _this = this;
-                _super.call(this);
-                this.minDate = minDate;
-                this.prices = [];
+                var _this = _super.call(this) || this;
+                _this.minDate = minDate;
+                _this.prices = [];
                 prices.forEach(function (item, index, list) {
                     var p = {
                         priceId: item.priceId,
@@ -137,6 +138,7 @@ var fastnet;
                     };
                     _this.prices.push(p);
                 });
+                return _this;
                 //this.prices = prices;
             }
             return pricingModel;
@@ -150,9 +152,8 @@ var fastnet;
         var observablePricingModel = (function (_super) {
             __extends(observablePricingModel, _super);
             function observablePricingModel(m) {
-                var _this = this;
-                _super.call(this);
-                this.prices = [];
+                var _this = _super.call(this) || this;
+                _this.prices = [];
                 m.prices.forEach(function (item, index, list) {
                     var p = new observablePrice();
                     p.priceId = item.priceId;
@@ -167,15 +168,16 @@ var fastnet;
                     _this.prices.push(p);
                 });
                 //this.prices = m.prices;
-                this.minDate = m.minDate.add(-1, 'd');
-                this.newFrom = ko.observable().extend({
+                _this.minDate = m.minDate.add(-1, 'd');
+                _this.newFrom = ko.observable().extend({
                     required: { message: "A new price requires a date from which it applies" },
-                    dateGreaterThan: { params: this.minDate, message: "Prices cannot be back dated" }
+                    dateGreaterThan: { params: _this.minDate, message: "Prices cannot be back dated" }
                 });
-                this.newAmount = ko.observable().extend({
+                _this.newAmount = ko.observable().extend({
                     required: { message: "Enter a price (in pounds)" },
                     pattern: { params: /^[1-9][0-9]+$/, message: "The price (in pounds) must be a whole number and not start with 0" }
                 });
+                return _this;
             }
             return observablePricingModel;
         }(forms.viewModel));
@@ -183,10 +185,11 @@ var fastnet;
         var editTemplateModel = (function (_super) {
             __extends(editTemplateModel, _super);
             function editTemplateModel(templateList) {
-                _super.call(this);
-                this.availableTemplates = templateList;
-                this.subjectText = "";
-                this.bodyHtml = "";
+                var _this = _super.call(this) || this;
+                _this.availableTemplates = templateList;
+                _this.subjectText = "";
+                _this.bodyHtml = "";
+                return _this;
             }
             return editTemplateModel;
         }(forms.model));
@@ -194,16 +197,17 @@ var fastnet;
         var observableEditTemplateModel = (function (_super) {
             __extends(observableEditTemplateModel, _super);
             function observableEditTemplateModel(m) {
-                _super.call(this);
-                this.currentTemplate = null;
-                this.availableTemplates = m.availableTemplates;
-                this.subjectText = ko.observable(m.subjectText).extend({
+                var _this = _super.call(this) || this;
+                _this.currentTemplate = null;
+                _this.availableTemplates = m.availableTemplates;
+                _this.subjectText = ko.observable(m.subjectText).extend({
                     required: { message: "some subject text is required" }
                 });
-                this.bodyHtml = ko.observable(m.bodyHtml).extend({
+                _this.bodyHtml = ko.observable(m.bodyHtml).extend({
                     required: { message: "some email text is required" }
                 });
-                this.selectedTemplate = ko.observable();
+                _this.selectedTemplate = ko.observable();
+                return _this;
             }
             return observableEditTemplateModel;
         }(forms.viewModel));
@@ -211,7 +215,7 @@ var fastnet;
         var editTemplateModels = (function (_super) {
             __extends(editTemplateModels, _super);
             function editTemplateModels() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             return editTemplateModels;
         }(forms.models));

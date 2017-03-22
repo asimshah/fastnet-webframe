@@ -10,7 +10,7 @@ var fastnet;
         var dwhRequestCustomiser = (function (_super) {
             __extends(dwhRequestCustomiser, _super);
             function dwhRequestCustomiser() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             dwhRequestCustomiser.prototype.customise_Step1 = function (stepObservable) {
                 stepObservable.startDate.subscribe(function (sd) {

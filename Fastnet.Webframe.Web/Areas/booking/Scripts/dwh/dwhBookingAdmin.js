@@ -14,7 +14,7 @@ var fastnet;
         var dwhAdminIndex = (function (_super) {
             __extends(dwhAdminIndex, _super);
             function dwhAdminIndex() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             dwhAdminIndex.prototype.handleCommand = function (pf, app, cmd) {
                 var handled = false;
@@ -34,7 +34,7 @@ var fastnet;
         var entryCodeApp = (function (_super) {
             __extends(entryCodeApp, _super);
             function entryCodeApp(app) {
-                _super.call(this, app);
+                return _super.call(this, app) || this;
             }
             entryCodeApp.prototype.start = function () {
                 var _this = this;

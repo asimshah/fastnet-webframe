@@ -11,7 +11,7 @@ var fastnet;
         var dwhParameters = (function (_super) {
             __extends(dwhParameters, _super);
             function dwhParameters() {
-                _super.apply(this, arguments);
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             dwhParameters.prototype.getObservable = function () {
                 return new observableDwhParameters(this);
@@ -22,17 +22,16 @@ var fastnet;
         var observableDwhParameters = (function (_super) {
             __extends(observableDwhParameters, _super);
             function observableDwhParameters(model) {
-                var _this = this;
-                _super.call(this, model);
-                this.__$className = "observableDwhParameters";
-                this.privilegedMembers = null;
-                this.paymentInterval = ko.observable(model.paymentInterval);
-                this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
-                this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
-                this.cancellationInterval = ko.observable(model.cancellationInterval);
-                this.firstReminderInterval = ko.observable(model.firstReminderInterval);
-                this.secondReminderInterval = ko.observable(model.secondReminderInterval);
-                this.reminderSuppressionInterval = ko.observable(model.reminderSuppressionInterval);
+                var _this = _super.call(this, model) || this;
+                _this.__$className = "observableDwhParameters";
+                _this.privilegedMembers = null;
+                _this.paymentInterval = ko.observable(model.paymentInterval);
+                _this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
+                _this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
+                _this.cancellationInterval = ko.observable(model.cancellationInterval);
+                _this.firstReminderInterval = ko.observable(model.firstReminderInterval);
+                _this.secondReminderInterval = ko.observable(model.secondReminderInterval);
+                _this.reminderSuppressionInterval = ko.observable(model.reminderSuppressionInterval);
                 if (!h$.isNullOrUndefined(model.privilegedMembers)) {
                     $.each(model.availableGroups, function (i, item) {
                         if (item.Id === model.privilegedMembers.Id) {
@@ -42,8 +41,9 @@ var fastnet;
                     });
                 }
                 else {
-                    this.privilegedMembers = ko.observable();
+                    _this.privilegedMembers = ko.observable();
                 }
+                return _this;
             }
             observableDwhParameters.prototype.clearPrivilegedMembers = function () {
                 this.privilegedMembers(null);
