@@ -10,43 +10,16 @@ using System.Web;
 
 namespace Fastnet.Webframe.Web.Common
 {
-    public class SendMailObject
+    public class MailSender
     {
-        public MailMessage MailMessage { get; set; }
-        public string Template { get; set; }
-        public bool Redirected { get; set; }
-        public string OriginalAddress { get; set; }
-        public int RetryCount { get; set; }
-        public string Remark { get; set; }
-        public SendMailObject()
-        {
-
-        }
-        public SendMailObject(MailMessage mailmessage, string templateName)
-        {
-            MailMessage = mailmessage;
-            Template = templateName;
-        }
-        public SendMailObject(string destination, string subject, string body, string templateName)
-        {
-            MailMessage mail = new MailMessage("noreply@webframe.co.uk", destination, subject, body);
-            mail.IsBodyHtml = true;
-            MailMessage = mail;
-            Template = templateName;
-        }
-    }
-    public class MailSender : TaskBase
-    {
-        const string taskId = "06862096-D2D6-4A00-93A0-5E46226F01A6";
         private SendMailObject smo;
-        public MailSender(SendMailObject smo) : base(taskId)
+        public MailSender(SendMailObject smo)
         {
             this.smo = smo;
         }
-
-        protected override async Task<WebtaskResult> Execute()
+        public async Task<Exception> SendMailAsync()
         {
-            WebtaskResult wtr = new WebtaskResult { User = smo };
+            Exception result = null;
             bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
             if (mailEnabled)
             {
@@ -59,16 +32,15 @@ namespace Fastnet.Webframe.Web.Common
                 }
                 catch (Exception xe)
                 {
-                    wtr.HasFailed = true;
-                    wtr.Exception = xe;
                     RecordMailException(smo, xe);
+                    result = xe;
                 }
             }
             else
             {
                 RecordMail(smo, true);
             }
-            return wtr;
+            return result;
         }
         private void RecordMailException(SendMailObject smo, Exception mailError)
         {

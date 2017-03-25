@@ -26,8 +26,9 @@ namespace Fastnet.Webframe.Web.Common
             //string text = EmailTemplate.AccountActivation.GetTemplate();
 
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            MailSender ms = new MailSender(new SendMailObject(destination, subject, body, "AccountActivation"));
-            ms.StartAndForget();
+            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "AccountActivation"));
+            //ms.StartAndForget();
+            SendAndForget(new SendMailObject(destination, subject, body, "AccountActivation"));
         }
         public void SendPasswordResetAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string code)
         {
@@ -37,8 +38,9 @@ namespace Fastnet.Webframe.Web.Common
             var tl = TemplateLibrary.GetInstance();
             string text = tl.GetTemplate("main-emails", "PasswordReset");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            MailSender ms = new MailSender(new SendMailObject(destination, subject, body, "PasswordReset"));
-            ms.StartAndForget();
+            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "PasswordReset"));
+            //ms.StartAndForget();
+            SendAndForget(new SendMailObject(destination, subject, body, "PasswordReset"));
         }
         public void SendEmailAddressChangedAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
         {
@@ -49,19 +51,26 @@ namespace Fastnet.Webframe.Web.Common
             string text = tl.GetTemplate("main-emails", "EmailAddressChanged");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
             //await SendMailAsync(destination, subject, body, "EmailAddressChanged");
-            MailSender ms = new MailSender(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
-            ms.StartAndForget();
-
+            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
+            //ms.StartAndForget();
+            SendAndForget(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
         }
         public void SendTestMailAsync(string destination, string subject, string body)
         {
-            MailSender ms = new MailSender(new SendMailObject(destination, subject, body, "TestMail"));
-            //Log.Write("Test mail delay started ...");
-            //await Task.Delay(2000 * 60);
-            //Log.Write("...Test mail delay finished");
-            //await ms.Start();
-            ms.StartAndForget();
-           // Log.Write("Test mail sent");
+            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "TestMail"));
+            //ms.StartAndForget();
+            SendAndForget(new SendMailObject(destination, subject, body, "TestMail"));
+        }
+        private void SendAndForget(SendMailObject smo)
+        {
+            Task.Run(async () => {
+                var ms = new MailSender(smo);
+                var exception = await ms.SendMailAsync();
+                if(exception != null)
+                {
+                    Log.Write(exception);
+                }
+            });
         }
         private string GetSiteUrl(string UrlScheme, string UrlAuthority)
         {

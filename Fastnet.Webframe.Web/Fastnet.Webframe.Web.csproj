@@ -355,6 +355,7 @@
     <Compile Include="Common\HtmlParser.cs" />
     <Compile Include="Common\MailHelper.cs" />
     <Compile Include="Common\MailSender.cs" />
+    <Compile Include="Common\MailSenderTask.cs" />
     <Compile Include="Common\MenuExtensions.cs" />
     <Compile Include="Common\PageExtensions.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -1812,7 +1813,7 @@
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
-      <UserProperties test_1json__JSONSchema="customisation.schema.json" customisation_1dwh_1json__JSONSchema="customisation.schema.json" />
+      <UserProperties customisation_1dwh_1json__JSONSchema="customisation.schema.json" test_1json__JSONSchema="customisation.schema.json" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

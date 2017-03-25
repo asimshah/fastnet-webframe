@@ -79,7 +79,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
 
                             SendMailObject smo = new SendMailObject(mail.EmailAddress, mail.Subject, mail.Body, mail.Template.ToString());
                             smo.Remark = booking.Reference;
-                            MailSender ms = new MailSender(smo);
+                            MailSenderTask ms = new MailSenderTask(smo);
                             await ms.Start();
                             mail.Status = BookingEmailStatus.Sent;
                             mail.UtcSentAt = DateTime.UtcNow;
