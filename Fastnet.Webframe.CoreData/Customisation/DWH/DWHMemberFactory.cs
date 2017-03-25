@@ -117,6 +117,7 @@ namespace Fastnet.Webframe.CoreData
                 else
                 {
                     result.Success = false;
+                    result.ApiEnabled = true;
                     result.Error = "This BMC membership is already in use";
                 }
             }
