@@ -341,7 +341,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
         public async Task Poll()
         {
             DateTime time = DateTime.Now;
-            Log.Write("Polled received");
+            //Log.Write("Polled received");
             //TestTask tt = new TestTask();
             //await tt.Start();
             await StartStandardTasks();

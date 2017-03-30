@@ -222,7 +222,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 }
                 else
                 {
-                    Log.Write($"No bookings selected for reminders");
+                    //Log.Write($"No bookings selected for reminders");
                 }
                 foreach (var booking in reminderSet)
                 {
@@ -302,7 +302,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                 }
                 else
                 {
-                    Log.Write($"No bookings selected for final reminders");
+                    //Log.Write($"No bookings selected for final reminders");
                 }
                 foreach (var booking in finalSet)
                 {

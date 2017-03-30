@@ -19,28 +19,36 @@ namespace Fastnet.Webframe.Web.Common
         }
         public async Task<Exception> SendMailAsync()
         {
-            Exception result = null;
-            bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
-            if (mailEnabled)
+            try
             {
-                try
+                Exception result = null;
+                bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
+                if (mailEnabled)
                 {
-                    SmtpClient client = new SmtpClient();
-                    smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
-                    await client.SendMailAsync(smo.MailMessage);
-                    RecordMail(smo);
+                    try
+                    {
+                        SmtpClient client = new SmtpClient();
+                        smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
+                        await client.SendMailAsync(smo.MailMessage);
+                        RecordMail(smo);
+                    }
+                    catch (Exception xe)
+                    {
+                        RecordMailException(smo, xe);
+                        result = xe;
+                    }
                 }
-                catch (Exception xe)
+                else
                 {
-                    RecordMailException(smo, xe);
-                    result = xe;
+                    RecordMail(smo, true);
                 }
+                return result;
             }
-            else
+            catch (Exception xe)
             {
-                RecordMail(smo, true);
+                Log.Write(xe);
+                throw;
             }
-            return result;
         }
         private void RecordMailException(SendMailObject smo, Exception mailError)
         {
@@ -87,7 +95,7 @@ namespace Fastnet.Webframe.Web.Common
                 ma.Remark = smo.Remark;
                 dctx.Actions.Add(ma);
                 dctx.SaveChanges();
-                Log.Write($"Mail sent to {mail.To.First().Address}: Subject {mail.Subject}, using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
+                Log.Write($"Mail sent to {mail.To.First().Address}: Subject \"{mail.Subject}\", using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
             }
         }
         private MailAction GetBaseRecord(SendMailObject smo)

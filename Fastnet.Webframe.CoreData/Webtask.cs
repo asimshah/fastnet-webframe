@@ -58,7 +58,7 @@ namespace Fastnet.Webframe.CoreData
             bool canExecute = CanExecute();
             if (canExecute)
             {
-                Log.Write("Task {0} started", this.GetType().Name);
+                //Log.Write("Task {0} started", this.GetType().Name);
                 try
                 {
                     WebtaskResult r = await Execute();

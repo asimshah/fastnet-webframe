@@ -54,7 +54,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
                     break;
             }
             bp.factoryName = FactoryName.ToString();
-            Log.Write($"Factory name is {FactoryName.ToString()}");
+            //Log.Write($"Factory name is {FactoryName.ToString()}");
             return bp;
         }
         public static DayInformation GetDayInformationInstance(BookingDataContext bctx,long abodeId, DateTime day)

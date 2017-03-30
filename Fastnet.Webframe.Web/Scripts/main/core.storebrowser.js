@@ -28,7 +28,7 @@
                         loadDirectoryContent();
                     }
                 });
-        };
+        }
         function showGroupSelector(directoryId, onclose) {
             var groupList = null;
             function saveRestrictionChanges(f) {
@@ -141,7 +141,7 @@
                     });
                     sf.find(".group-box:not(.group-selected)").each(function () {
                         $(this).find(".access-settings input.edit-checkbox").prop("disabled", true);
-                    })
+                    });
                     sf.disableCommand("save-changes");
                 });
             });
@@ -153,7 +153,7 @@
                 var postData = { id: id, name: data.name };
                 $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
                     f.close();
-                    var node = findDirectoryNode(id)
+                    var node = findDirectoryNode(id);
                     node.find(".title").text(data.name);
                 });
             }
@@ -182,7 +182,7 @@
                 };
                 var dpf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/directoryproperties", options, r);
                 var validator = new $.fastnet$validators.Create(dpf);
-                validator.AddIsRequired("name", "A folder name is required")
+                validator.AddIsRequired("name", "A folder name is required");
                 dpf.disableCommand("save-changes");
                 dpf.show();
             });
@@ -231,7 +231,7 @@
                     }
                 });
             });
-        };
+        }
         function loadSubdirectories(node, directoryId) {
             var url = $U.Format("store/directories/{0}", directoryId);
             $.when($U.AjaxGet({ url: url }, true)).then(function (data) {
@@ -343,9 +343,9 @@
                                         target.addClass("selected");
                                         var id = parseInt(dataRow.attr("data-id"));
                                         var name = dataRow.attr("data-name");
-                                        var type = dataRow.attr("data-type");
+                                        var type2 = dataRow.attr("data-type");
                                         var url = dataRow.attr("data-url");
-                                        selectItem(type, id, name, url);
+                                        selectItem(type2, id, name, url);
                                     }
                                 }
                             });
@@ -369,7 +369,7 @@
                         });
                     } else {
                         $(".browser-folder-content .data").off();
-                        $(".browser-folder-content").empty().html("<div>Folder is empty</div>")
+                        $(".browser-folder-content").empty().html("<div>Folder is empty</div>");
                     }
                 });
         }
@@ -417,7 +417,7 @@
                     var pageId = result.PageId;
                     loadDirectoryContent();
                 });
-        };
+        }
         function onCommand(cmd) {
             switch (cmd) {
                 case "system-close":
@@ -460,7 +460,7 @@
                     base64: bufctl.buffer[bufctl.chunkNumber],
                     base64Length: bufctl.buffer[bufctl.chunkNumber].length
                 };
-                if (bufctl.chunkNumber == 0) {
+                if (bufctl.chunkNumber === 0) {
                     $.extend(postdata, {
                         directoryId: bufctl.directoryId,
                         filename: bufctl.filename,
@@ -482,7 +482,7 @@
                 //    }
                 //}, 500);
                 $.when($U.AjaxPost({ url: url, data: postdata })).then(function (r) {
-                    if (bufctl.chunkNumber == 0) {
+                    if (bufctl.chunkNumber === 0) {
                         bufctl.key = r;
                     }
                     if (bufctl.progessElement !== null) {
@@ -496,12 +496,15 @@
                         // here this upload is finished
                         uploadCount--;
                         if (uploadCount === 0) {
-                            ulf.disableCommand("cancel");
-                            ulf.enableCommand("close-upload");
+                            ulf.close();
+                            $U.MessageBox("Upload finished");
+                            loadDirectoryContent();
+                            //ulf.disableCommand("cancel");
+                            //ulf.enableCommand("close-upload");
                         }
                     }
                 });
-            };
+            }
             function bufferedUpload(fileInfo) {
                 var bufctl = {
                     buffer: [],
@@ -530,7 +533,7 @@
                 bufctl.binaryLength = fileInfo.binaryLength;
                 bufctl.progressElement = fileInfo.progressElement;
                 sendChunk(bufctl);
-            };
+            }
             //var currentDirectoryId = currentDirectoryId;
             var ulf = new $.fastnet$forms.CreateForm("template/get/main-forms-editor/uploadfile", {
                 Title: "File Upload",
@@ -546,7 +549,7 @@
                             loadDirectoryContent();
                             break;
                     }
-                },
+                }
             }, {});
             ulf.show(function () {
                 //ulf.disableCommand("cancel-upload");
@@ -583,7 +586,7 @@
                             var string = event.target.result;
                             var base64Data = string.substr(string.indexOf('base64') + 7);
                             bufferedUpload({ directoryId: currentDirectoryId, filename: file.name, mimetype: file.type, binaryLength: file.size, base64: base64Data, base64Length: base64Data.length, progressElement: file.previewElement });
-                        }
+                        };
                         fr.readAsDataURL(file);
                     });
                 };
@@ -637,8 +640,8 @@
             tview = $.fastnet$treeview.NewTreeview({
                 EnableContextMenu: options.AllowEditing,
                 Selector: ".store-browser .browser-tree",
-                OnSelectChanged: function (d) { onFolderSelectChanged( d) },
-                OnExpandCollapse: function (d) { onExpandCollapse( d) },
+                OnSelectChanged: function (d) { onFolderSelectChanged(d); },
+                OnExpandCollapse: function (d) { onExpandCollapse(d); },
                 OnBeforeContextMenu: function (cm, userData) {
                     var id = parseInt(userData);
                     if (currentDirectoryId === id) {
@@ -690,5 +693,5 @@
     }
     return {
         get: getInstance
-    }
+    };
 })(jQuery);

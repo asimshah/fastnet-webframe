@@ -23,11 +23,8 @@ namespace Fastnet.Webframe.Web.Common
             string callbackUrl = string.Format("{0}/activate/{1}/{2}", siteUrl, userId, activationCode);
             var tl = TemplateLibrary.GetInstance();
             string text = tl.GetTemplate("main-emails", "AccountActivation");
-            //string text = EmailTemplate.AccountActivation.GetTemplate();
-
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "AccountActivation"));
-            //ms.StartAndForget();
+            Log.Write($"Account activation email prepared for {destination}");
             SendAndForget(new SendMailObject(destination, subject, body, "AccountActivation"));
         }
         public void SendPasswordResetAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string code)
@@ -38,8 +35,7 @@ namespace Fastnet.Webframe.Web.Common
             var tl = TemplateLibrary.GetInstance();
             string text = tl.GetTemplate("main-emails", "PasswordReset");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "PasswordReset"));
-            //ms.StartAndForget();
+            Log.Write($"PasswordReset email prepared for {destination}");
             SendAndForget(new SendMailObject(destination, subject, body, "PasswordReset"));
         }
         public void SendEmailAddressChangedAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
@@ -50,25 +46,29 @@ namespace Fastnet.Webframe.Web.Common
             var tl = TemplateLibrary.GetInstance();
             string text = tl.GetTemplate("main-emails", "EmailAddressChanged");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
-            //await SendMailAsync(destination, subject, body, "EmailAddressChanged");
-            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
-            //ms.StartAndForget();
+            Log.Write($"EmailAddressChanged email prepared for {destination}");
             SendAndForget(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
         }
         public void SendTestMailAsync(string destination, string subject, string body)
         {
-            //MailSenderTask ms = new MailSenderTask(new SendMailObject(destination, subject, body, "TestMail"));
-            //ms.StartAndForget();
+            Log.Write($"TestMail email prepared for {destination}");
             SendAndForget(new SendMailObject(destination, subject, body, "TestMail"));
         }
         private void SendAndForget(SendMailObject smo)
         {
             Task.Run(async () => {
-                var ms = new MailSender(smo);
-                var exception = await ms.SendMailAsync();
-                if(exception != null)
+                try
                 {
-                    Log.Write(exception);
+                    var ms = new MailSender(smo);
+                    var exception = await ms.SendMailAsync();
+                    if (exception != null)
+                    {
+                        Log.Write(exception);
+                    }
+                }
+                catch (Exception xe)
+                {
+                    Log.Write(xe);
                 }
             });
         }

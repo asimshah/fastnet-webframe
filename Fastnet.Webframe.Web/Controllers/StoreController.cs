@@ -210,6 +210,9 @@ namespace Fastnet.Webframe.Web.Controllers
                     case "directory":
                         await DeleteDirectory(id);
                         break;
+                    case "document":
+                        await DeleteDocument(id);
+                        break;
                     default:
                         Log.Write($"Delete request for type {(string)data.type}, id {id} - not implemented");
                         break;
@@ -793,6 +796,14 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             DataContext.Directories.Remove(dir);
            
+            await DataContext.SaveChangesAsync();
+        }
+        private async Task DeleteDocument(long id)
+        {
+            CD.Document doc = DataContext.Documents.Find(id);
+            var pages = doc.Pages.ToArray();
+            doc.Pages.Clear();
+            DataContext.Documents.Remove(doc);
             await DataContext.SaveChangesAsync();
         }
         private async Task DeletePage(long id)
