@@ -312,8 +312,8 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             dynamic r = await mf.ValidateRegistration(data);
             if (r.Success || r.ApiEnabled == false)
             {
-                using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                {
+                //using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                //{
                     try
                     {
                         //r.Success, etc
@@ -328,12 +328,14 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             member.ActivationCode = Guid.NewGuid().ToString();
                             member.ActivationEmailSentDate = DateTime.UtcNow;
                             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.New);
-                            await DataContext.SaveChangesAsync();
+                            //await DataContext.SaveChangesAsync();
+                            DataContext.SaveChanges();
                             mf.AssignGroups(member);
-                            await DataContext.SaveChangesAsync();
+                            //await DataContext.SaveChangesAsync();
+                            DataContext.SaveChanges();
                             MailHelper mh = new MailHelper();
-                            mh.SendAccountActivationAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
-                            tran.Complete();
+                            mh.SendAccountActivationAsync(DataContext, member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.ActivationCode);
+                            //tran.Complete();
                             Log.Write("Member {0} created", member.EmailAddress);
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true });
                         }
@@ -348,7 +350,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                         return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = "Internal System Error!" });
                         throw;
                     }
-                }
+                //}
             }
             else
             {
@@ -413,8 +415,8 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                 dynamic r = await m.Update(data);
                 if (r.Success)
                 {
-                    using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                    {
+                    //using (TransactionScope tran = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    //{
                         try
                         {
                             if (emailAddressChanged)// || passwordHasChanged)
@@ -435,11 +437,11 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             {
                                 MailHelper mh = new MailHelper();
                                 var request = HttpContext.Current.Request;
-                                mh.SendEmailAddressChangedAsync(m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
+                                mh.SendEmailAddressChangedAsync(DataContext, m.EmailAddress, request.Url.Scheme, request.Url.Authority, m.Id, m.ActivationCode);
                                 m.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.Deactivation);
                                 await DataContext.SaveChangesAsync();
                             }
-                            tran.Complete();
+                            //tran.Complete();
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = true, MemberDetails = m.GetMemberListDetails() });
                         }
                         catch (Exception xe)
@@ -447,7 +449,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
                             Log.Write(xe);
                             return this.Request.CreateResponse(HttpStatusCode.OK, new { Success = false, Error = xe.Message });
                         }
-                    }
+                    //}
                 }
                 else
                 {
@@ -480,7 +482,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             }
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();
-            mh.SendAccountActivationAsync(m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
+            mh.SendAccountActivationAsync(DataContext, m.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, m.Id, m.ActivationCode);
             var r = (object)m.GetMinimumDetails();
             return this.Request.CreateResponse(HttpStatusCode.OK, r);
         }
@@ -495,7 +497,7 @@ namespace Fastnet.Webframe.Web.Areas.membership.Controllers
             member.RecordChanges(this.GetCurrentMember().Fullname, MemberAction.MemberActionTypes.PasswordResetRequest);
             await DataContext.SaveChangesAsync();
             MailHelper mh = new MailHelper();
-            mh.SendPasswordResetAsync(member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
+            mh.SendPasswordResetAsync(DataContext, member.EmailAddress, this.Request.RequestUri.Scheme, this.Request.RequestUri.Authority, member.Id, member.PasswordResetCode);
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }
         [HttpGet]

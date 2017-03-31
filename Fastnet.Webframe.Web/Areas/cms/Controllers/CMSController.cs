@@ -313,7 +313,7 @@ namespace Fastnet.Webframe.Web.Areas.cms.Controllers
             //MailHelper mh = new MailHelper();
             //await mh.SendMailAsync(to, subject, body, "TestMail");
             MailHelper mh = new MailHelper();
-            mh.SendTestMailAsync(to, subject, body);
+            mh.SendTestMailAsync(DataContext, to, subject, body);
             Log.Write("cmscontroller(): mailhelper called for testmail");
             return this.Request.CreateResponse(HttpStatusCode.OK);
         }

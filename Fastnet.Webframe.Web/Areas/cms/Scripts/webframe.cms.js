@@ -70,7 +70,7 @@
                             openNavigationTable();
                             break;
                         case "send-mail":
-                            var data = stm.getData()
+                            var data = stm.getData();
                             var postData = { to: data["mail-to"], subject: data.subject, body: data["body-text"] };
                             $.when($U.AjaxPost({ url: "cmsapi/sendmail", data: postData })).then(function () {
                                 $U.MessageBox("Mail sent");
@@ -79,7 +79,7 @@
                     }
                 },
                 AfterItemValidation: function (f, r) {
-                    if (r.totalErrors == 0) {
+                    if (r.totalErrors === 0) {
                         stm.enableCommand("send-mail");
                     } else {
                         stm.disableCommand("send-mail");
@@ -186,7 +186,7 @@
                             var x = data[0];
                             var y = moment(moment.utc(data[0]).toDate()).format("DDMMMYYYY HH:mm:ss");
                             row.cells[0].innerText = y;
-                            $U.Debug("{0} changed to {1}", x, y)
+                            $U.Debug("{0} changed to {1}", x, y);
                         }
                     });
                 });

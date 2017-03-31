@@ -16,7 +16,7 @@ namespace Fastnet.Webframe.Web.Common
 {
     public class MailHelper
     {
-        public void SendAccountActivationAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
+        public void SendAccountActivationAsync(CoreDataContext ctx, string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
             string subject = string.Format("Welcome to {0}", siteUrl);
@@ -25,9 +25,9 @@ namespace Fastnet.Webframe.Web.Common
             string text = tl.GetTemplate("main-emails", "AccountActivation");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
             Log.Write($"Account activation email prepared for {destination}");
-            SendAndForget(new SendMailObject(destination, subject, body, "AccountActivation"));
+            SendAndForget(ctx, new SendMailObject(destination, subject, body, "AccountActivation"));
         }
-        public void SendPasswordResetAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string code)
+        public void SendPasswordResetAsync(CoreDataContext ctx, string destination, string UrlScheme, string UrlAuthority, string userId, string code)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
             string subject = string.Format("Password Reset for {0}", siteUrl);
@@ -36,9 +36,9 @@ namespace Fastnet.Webframe.Web.Common
             string text = tl.GetTemplate("main-emails", "PasswordReset");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
             Log.Write($"PasswordReset email prepared for {destination}");
-            SendAndForget(new SendMailObject(destination, subject, body, "PasswordReset"));
+            SendAndForget(ctx, new SendMailObject(destination, subject, body, "PasswordReset"));
         }
-        public void SendEmailAddressChangedAsync(string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
+        public void SendEmailAddressChangedAsync(CoreDataContext ctx, string destination, string UrlScheme, string UrlAuthority, string userId, string activationCode)
         {
             string siteUrl = GetSiteUrl(UrlScheme, UrlAuthority);// string.Format("{0}://{1}", UrlScheme, UrlAuthority);
             string subject = string.Format("New email address for {0}", siteUrl);
@@ -47,20 +47,21 @@ namespace Fastnet.Webframe.Web.Common
             string text = tl.GetTemplate("main-emails", "EmailAddressChanged");
             string body = string.Format(text, siteUrl, callbackUrl, Globals.AdminEmailAddress);
             Log.Write($"EmailAddressChanged email prepared for {destination}");
-            SendAndForget(new SendMailObject(destination, subject, body, "EmailAddressChanged"));
+            SendAndForget(ctx, new SendMailObject(destination, subject, body, "EmailAddressChanged"));
         }
-        public void SendTestMailAsync(string destination, string subject, string body)
+        public void SendTestMailAsync(CoreDataContext ctx, string destination, string subject, string body)
         {
             Log.Write($"TestMail email prepared for {destination}");
-            SendAndForget(new SendMailObject(destination, subject, body, "TestMail"));
+            SendAndForget(ctx, new SendMailObject(destination, subject, body, "TestMail"));
         }
-        private void SendAndForget(SendMailObject smo)
+        private void SendAndForget(CoreDataContext ctx, SendMailObject smo)
         {
             Task.Run(async () => {
                 try
                 {
+                    var dctx = new CoreDataContext();
                     var ms = new MailSender(smo);
-                    var exception = await ms.SendMailAsync();
+                    var exception = await ms.SendMailAsync(dctx);
                     if (exception != null)
                     {
                         Log.Write(exception);

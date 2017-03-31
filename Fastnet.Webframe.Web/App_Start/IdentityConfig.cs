@@ -96,8 +96,8 @@ namespace Fastnet.Webframe.Web
         {
             // I don't use the EmailService above as I need more control over the parameters than available using
             // IdentityMessage
-            MailHelper mh = new MailHelper();
-            mh.SendAccountActivationAsync(destination, UrlScheme, UrlAuthority, userId, activationCode);
+            //MailHelper mh = new MailHelper();
+            //mh.SendAccountActivationAsync(destination, UrlScheme, UrlAuthority, userId, activationCode);
         }
     }
 

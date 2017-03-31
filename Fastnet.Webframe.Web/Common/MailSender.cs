@@ -17,10 +17,11 @@ namespace Fastnet.Webframe.Web.Common
         {
             this.smo = smo;
         }
-        public async Task<Exception> SendMailAsync()
+        public async Task<Exception> SendMailAsync(CoreDataContext ctx)
         {
             try
             {
+
                 Exception result = null;
                 bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
                 if (mailEnabled)
@@ -30,17 +31,17 @@ namespace Fastnet.Webframe.Web.Common
                         SmtpClient client = new SmtpClient();
                         smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
                         await client.SendMailAsync(smo.MailMessage);
-                        RecordMail(smo);
+                        RecordMail(ctx, smo);
                     }
                     catch (Exception xe)
                     {
-                        RecordMailException(smo, xe);
+                        RecordMailException(ctx, smo, xe);
                         result = xe;
                     }
                 }
                 else
                 {
-                    RecordMail(smo, true);
+                    RecordMail(ctx, smo, true);
                 }
                 return result;
             }
@@ -50,11 +51,12 @@ namespace Fastnet.Webframe.Web.Common
                 throw;
             }
         }
-        private void RecordMailException(SendMailObject smo, Exception mailError)
+        private void RecordMailException(CoreDataContext dctx, SendMailObject smo, Exception mailError)
         {
-            using (var dctx = new CoreDataContext())
-            {
-                MailAction ma = GetBaseRecord(smo);
+            //using (var dctx = new CoreDataContext())
+            //{
+            
+            MailAction ma = GetBaseRecord(smo);
                 if (mailError is SmtpFailedRecipientException)
                 {
                     SmtpFailedRecipientException fre = mailError as SmtpFailedRecipientException;
@@ -82,12 +84,13 @@ namespace Fastnet.Webframe.Web.Common
                 }
                 dctx.Actions.Add(ma);
                 dctx.SaveChanges();
-            }
+            //}
         }
-        private void RecordMail(SendMailObject smo, bool mailDisabled = false)
+        private void RecordMail(CoreDataContext dctx, SendMailObject smo, bool mailDisabled = false)
         {
-            using (var dctx = new CoreDataContext())
-            {
+            //using (var dctx = new CoreDataContext())
+            //{
+
                 MailMessage mail = smo.MailMessage;
                 string templateName = smo.Template;
                 MailAction ma = GetBaseRecord(smo);
@@ -96,7 +99,7 @@ namespace Fastnet.Webframe.Web.Common
                 dctx.Actions.Add(ma);
                 dctx.SaveChanges();
                 Log.Write($"Mail sent to {mail.To.First().Address}: Subject \"{mail.Subject}\", using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
-            }
+            //}
         }
         private MailAction GetBaseRecord(SendMailObject smo)
         {

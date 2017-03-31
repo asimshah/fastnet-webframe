@@ -48,33 +48,15 @@ namespace Fastnet.Webframe.Web.Common
         {
             WebtaskResult wtr = new WebtaskResult { User = smo };
             var ms = new MailSender(smo);
-            Exception r = await ms.SendMailAsync();
-            if(r != null)
+            using (var ctx = new CoreDataContext())
             {
-                wtr.HasFailed = true;
-                wtr.Exception = r;
+                Exception r = await ms.SendMailAsync(ctx);
+                if (r != null)
+                {
+                    wtr.HasFailed = true;
+                    wtr.Exception = r;
+                }
             }
-            //bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
-            //if (mailEnabled)
-            //{
-            //    try
-            //    {
-            //        SmtpClient client = new SmtpClient();
-            //        smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
-            //        await client.SendMailAsync(smo.MailMessage);
-            //        RecordMail(smo);
-            //    }
-            //    catch (Exception xe)
-            //    {
-            //        wtr.HasFailed = true;
-            //        wtr.Exception = xe;
-            //        RecordMailException(smo, xe);
-            //    }
-            //}
-            //else
-            //{
-            //    RecordMail(smo, true);
-            //}
             return wtr;
         }
         //private void RecordMailException(SendMailObject smo, Exception mailError)

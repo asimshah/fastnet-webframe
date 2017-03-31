@@ -335,7 +335,7 @@ namespace Fastnet.Webframe.Web.Controllers
                 member.RecordChanges(null, MemberAction.MemberActionTypes.PasswordResetRequest);
                 await DataContext.SaveChangesAsync();
                 MailHelper mh = new MailHelper();
-                mh.SendPasswordResetAsync(member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.PasswordResetCode);
+                mh.SendPasswordResetAsync(DataContext, member.EmailAddress, this.Request.Url.Scheme, this.Request.Url.Authority, member.Id, member.PasswordResetCode);
                 return Json(new { Success = true });
             }
             else
