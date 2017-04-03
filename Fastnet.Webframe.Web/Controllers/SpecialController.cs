@@ -40,24 +40,24 @@ namespace Fastnet.Webframe.Web.Controllers
             Thread.Sleep(TimeSpan.FromSeconds(delay));
             return this.Request.CreateResponse(HttpStatusCode.OK, new { Counter = counter, Delay = delay });
         }
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("test")]
-        public HttpResponseMessage Test1()
-        {
-            Debugger.Break();
-            //Directory leaf = DataContext.Directories.Find(5);
-            //foreach (var d in leaf.Parents)
-            //{
-            //    Debug.Print("{0}", d.Name);
-            //}
-            foreach (Member m in DataContext.Members)
-            {
-                Page p = m.FindLandingPage();
-                Debug.Print("{0}, home {1}", m.Fullname, p.Url);
-            }
-            return this.Request.CreateResponse(HttpStatusCode.OK);
-        }
+        //[HttpGet]
+        //[AllowAnonymous]
+        //[Route("test")]
+        //public HttpResponseMessage Test1()
+        //{
+        //    Debugger.Break();
+        //    //Directory leaf = DataContext.Directories.Find(5);
+        //    //foreach (var d in leaf.Parents)
+        //    //{
+        //    //    Debug.Print("{0}", d.Name);
+        //    //}
+        //    foreach (Member m in DataContext.Members)
+        //    {
+        //        Page p = m.FindLandingPage();
+        //        Debug.Print("{0}, home {1}", m.Fullname, p.Url);
+        //    }
+        //    return this.Request.CreateResponse(HttpStatusCode.OK);
+        //}
         [HttpGet]
         [AllowAnonymous]
         [Route("logroutes")]

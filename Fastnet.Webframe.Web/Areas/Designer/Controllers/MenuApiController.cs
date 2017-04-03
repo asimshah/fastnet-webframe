@@ -235,8 +235,8 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
             catch (Exception xe)
             {
                 Log.Write(xe);
-                Debugger.Break();
-                throw;
+                //Debugger.Break();
+                //throw;
             }
         }
         [HttpGet]
