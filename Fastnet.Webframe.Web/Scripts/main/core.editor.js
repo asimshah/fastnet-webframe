@@ -390,6 +390,7 @@
                 if ($.isFunction(callback)) {
                     callback();
                 }
+                $U.Confirm("Changes Saved", function () { });
                 //$U.SetEnabled($(".edit-toolbar button[data-cmd='save-changes']"), false);
             });
         }
