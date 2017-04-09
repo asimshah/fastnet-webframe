@@ -236,7 +236,7 @@ namespace Fastnet.Webframe.Web.Areas.Designer.Controllers
             {
                 Log.Write(xe);
                 //Debugger.Break();
-                //throw;
+                throw;
             }
         }
         [HttpGet]

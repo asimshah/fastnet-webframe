@@ -187,6 +187,7 @@
                             var success = result.Success;
                             if (success) {
                                 cpf.close();
+                                window.location.href = "/home";
                                 //$F.Close();
                                 //if ($.isFunction($T.onComplete)) {
                                 //    $T.onComplete();

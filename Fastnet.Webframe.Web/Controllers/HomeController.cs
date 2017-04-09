@@ -385,6 +385,9 @@ namespace Fastnet.Webframe.Web.Controllers
                     user.SecurityStamp = Guid.NewGuid().ToString();
                     await appDb.SaveChangesAsync();
                     await SignInManager.SignInAsync(user, false, false);
+                    Session["current-member"] = member.Id;
+                    //Redirect("/home");
+                    //return RedirectToAction("Index");
                     return Json(new { Success = true });
                 }
             }
