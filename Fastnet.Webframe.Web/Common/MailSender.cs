@@ -21,8 +21,15 @@ namespace Fastnet.Webframe.Web.Common
         {
             try
             {
-
                 Exception result = null;
+                var redirectTo = ApplicationSettings.Key<string>("RedirectMailTo", null);
+                if (redirectTo != null)
+                {
+                    smo.OriginalAddress = smo.MailMessage.To.First().Address;
+                    smo.MailMessage.To.Clear();
+                    smo.MailMessage.To.Add(new MailAddress(redirectTo));
+                    smo.Redirected = true;
+                }
                 bool mailEnabled = ApplicationSettings.Key("MailEnabled", false);
                 if (mailEnabled)
                 {
@@ -30,6 +37,7 @@ namespace Fastnet.Webframe.Web.Common
                     {
                         SmtpClient client = new SmtpClient();
                         smo.MailMessage.Sender = new MailAddress(ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk"));
+
                         await client.SendMailAsync(smo.MailMessage);
                         RecordMail(ctx, smo);
                     }
@@ -55,35 +63,35 @@ namespace Fastnet.Webframe.Web.Common
         {
             //using (var dctx = new CoreDataContext())
             //{
-            
+
             MailAction ma = GetBaseRecord(smo);
-                if (mailError is SmtpFailedRecipientException)
+            if (mailError is SmtpFailedRecipientException)
+            {
+                SmtpFailedRecipientException fre = mailError as SmtpFailedRecipientException;
+                SmtpStatusCode status = fre.StatusCode;
+                if (status == SmtpStatusCode.MailboxBusy ||
+                    status == SmtpStatusCode.MailboxUnavailable)
                 {
-                    SmtpFailedRecipientException fre = mailError as SmtpFailedRecipientException;
-                    SmtpStatusCode status = fre.StatusCode;
-                    if (status == SmtpStatusCode.MailboxBusy ||
-                        status == SmtpStatusCode.MailboxUnavailable)
-                    {
-                        ma.Failure = string.Format("Mailbox busy or unavailable, mail delayed");
-                    }
-                    else // delivery failed
-                    {
-                        ma.Failure = string.Format("Delivery failed - status {0}", status.ToString());
-                    }
-                    Log.Write(EventSeverities.Error, $"Mail to {smo.MailMessage.To.First().Address} failed: {ma.Failure}");
+                    ma.Failure = string.Format("Mailbox busy or unavailable, mail delayed");
                 }
-                else if (mailError is SmtpFailedRecipientsException)
+                else // delivery failed
                 {
-                    Log.Write(EventSeverities.Error, "MailSender does not handle multiple failed recipients");
-                    ma.Failure = string.Format("Delivery failed - {0}", mailError.Message);
+                    ma.Failure = string.Format("Delivery failed - status {0}", status.ToString());
                 }
-                else
-                {
-                    Log.Write("RecordMailException: {0} - how should this be handled?", mailError.Message);
-                    ma.Failure = string.Format("Delivery failed - {0}", mailError.Message);
-                }
-                dctx.Actions.Add(ma);
-                dctx.SaveChanges();
+                Log.Write(EventSeverities.Error, $"Mail to {smo.MailMessage.To.First().Address} failed: {ma.Failure}");
+            }
+            else if (mailError is SmtpFailedRecipientsException)
+            {
+                Log.Write(EventSeverities.Error, "MailSender does not handle multiple failed recipients");
+                ma.Failure = string.Format("Delivery failed - {0}", mailError.Message);
+            }
+            else
+            {
+                Log.Write("RecordMailException: {0} - how should this be handled?", mailError.Message);
+                ma.Failure = string.Format("Delivery failed - {0}", mailError.Message);
+            }
+            dctx.Actions.Add(ma);
+            dctx.SaveChanges();
             //}
         }
         private void RecordMail(CoreDataContext dctx, SendMailObject smo, bool mailDisabled = false)
@@ -91,14 +99,14 @@ namespace Fastnet.Webframe.Web.Common
             //using (var dctx = new CoreDataContext())
             //{
 
-                MailMessage mail = smo.MailMessage;
-                string templateName = smo.Template;
-                MailAction ma = GetBaseRecord(smo);
-                ma.MailDisabled = mailDisabled;
-                ma.Remark = smo.Remark;
-                dctx.Actions.Add(ma);
-                dctx.SaveChanges();
-                Log.Write($"Mail sent to {mail.To.First().Address}: Subject \"{mail.Subject}\", using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
+            MailMessage mail = smo.MailMessage;
+            string templateName = smo.Template;
+            MailAction ma = GetBaseRecord(smo);
+            ma.MailDisabled = mailDisabled;
+            ma.Remark = smo.Remark;
+            dctx.Actions.Add(ma);
+            dctx.SaveChanges();
+            Log.Write($"Mail sent to {mail.To.First().Address}: Subject \"{mail.Subject}\", using template {templateName}, mail is {(mailDisabled ? "disabled" : "enabled") }");
             //}
         }
         private MailAction GetBaseRecord(SendMailObject smo)

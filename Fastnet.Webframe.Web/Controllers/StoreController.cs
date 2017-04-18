@@ -213,6 +213,9 @@ namespace Fastnet.Webframe.Web.Controllers
                     case "document":
                         await DeleteDocument(id);
                         break;
+                    case "image":
+                        await DeleteImage(id);
+                        break;
                     default:
                         Log.Write($"Delete request for type {(string)data.type}, id {id} - not implemented");
                         break;
@@ -796,6 +799,12 @@ namespace Fastnet.Webframe.Web.Controllers
             }
             DataContext.Directories.Remove(dir);
            
+            await DataContext.SaveChangesAsync();
+        }
+        private async Task DeleteImage(long id)
+        {
+            CD.Image image = DataContext.Images.Find(id);;
+            DataContext.Images.Remove(image);
             await DataContext.SaveChangesAsync();
         }
         private async Task DeleteDocument(long id)
