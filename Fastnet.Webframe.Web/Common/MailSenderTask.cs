@@ -29,7 +29,8 @@ namespace Fastnet.Webframe.Web.Common
         }
         public SendMailObject(string destination, string subject, string body, string templateName)
         {
-            MailMessage mail = new MailMessage("noreply@webframe.co.uk", destination, subject, body);
+            string from = ApplicationSettings.Key("MailSender", "noreply@sitemail.webframe.co.uk");
+            MailMessage mail = new MailMessage(from, destination, subject, body);
             mail.IsBodyHtml = true;
             MailMessage = mail;
             Template = templateName;
