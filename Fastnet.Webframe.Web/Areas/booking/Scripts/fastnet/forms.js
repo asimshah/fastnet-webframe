@@ -22,19 +22,19 @@ var fastnet;
                 rules.push({ name: "isChecked", async: false, validator: validations.isChecked, message: "Box must be checked" });
                 return rules;
             };
-            validations.isChecked = function (val, params) {
-                return val === true;
-            };
-            validations.phoneNumber = function (val, params) {
-                var pattern = /^[+0-9][0-9]*$/;
-                return ko.validation.rules.pattern.validator(val, pattern);
-            };
-            validations.passwordComplexity = function (val, params) {
-                var pattern = /(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
-                return ko.validation.rules.pattern.validator(val, pattern);
-            };
             return validations;
         }());
+        validations.isChecked = function (val, params) {
+            return val === true;
+        };
+        validations.phoneNumber = function (val, params) {
+            var pattern = /^[+0-9][0-9]*$/;
+            return ko.validation.rules.pattern.validator(val, pattern);
+        };
+        validations.passwordComplexity = function (val, params) {
+            var pattern = /(?=^.{8,}$)(?=.*\d)(?=.*[$-/:-?{-~!"^_`\[\]\\])(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
+            return ko.validation.rules.pattern.validator(val, pattern);
+        };
         forms.validations = validations;
         /**
          * data returned to a CommandCallback.
@@ -671,6 +671,7 @@ var fastnet;
                             }
                         }
                     }
+                    //this.resizeRichText();
                 }
             };
             //private resizeRichText(): void {
@@ -751,14 +752,14 @@ var fastnet;
                     }
                 });
             };
-            form.formStack = new collections.Stack();
-            form.asyncValCounter = 0;
-            form.systemInitialised = false;
-            form.formCount = 0;
-            form.config = null;
-            form.modelessFormTemplate = "\n            <div class='ui-form' >\n                <div class='ui-form-titlebar' >\n                    <span class='ui-form-title' ></span>\n                </div>\n                <div class='ui-form-content' ></div>\n                <div class='ui-form-buttonpane' >\n                    <div class='ui-form-buttonset' ></div>\n                </div>\n            </div>".trim();
             return form;
         }());
+        form.formStack = new collections.Stack();
+        form.asyncValCounter = 0;
+        form.systemInitialised = false;
+        form.formCount = 0;
+        form.config = null;
+        form.modelessFormTemplate = "\n            <div class='ui-form' >\n                <div class='ui-form-titlebar' >\n                    <span class='ui-form-title' ></span>\n                </div>\n                <div class='ui-form-content' ></div>\n                <div class='ui-form-buttonpane' >\n                    <div class='ui-form-buttonset' ></div>\n                </div>\n            </div>".trim();
         forms.form = form;
         var messageBox = (function () {
             function messageBox() {
@@ -783,3 +784,4 @@ var fastnet;
         forms.messageBox = messageBox;
     })(forms = fastnet.forms || (fastnet.forms = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=forms.js.map

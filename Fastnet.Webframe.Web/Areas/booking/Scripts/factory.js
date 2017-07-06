@@ -2,11 +2,11 @@ var fastnet;
 (function (fastnet) {
     var booking;
     (function (booking) {
+        var FactoryName;
         (function (FactoryName) {
             FactoryName[FactoryName["None"] = 0] = "None";
             FactoryName[FactoryName["DonWhillansHut"] = 1] = "DonWhillansHut";
-        })(booking.FactoryName || (booking.FactoryName = {}));
-        var FactoryName = booking.FactoryName;
+        })(FactoryName = booking.FactoryName || (booking.FactoryName = {}));
         var factory = (function () {
             function factory() {
             }
@@ -62,10 +62,11 @@ var fastnet;
                         return null;
                 }
             };
-            // NB DO NOT use "name" as it has a special use in javascript
-            factory.nameInternal = FactoryName.None;
             return factory;
         }());
+        // NB DO NOT use "name" as it has a special use in javascript
+        factory.nameInternal = FactoryName.None;
         booking.factory = factory;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
+//# sourceMappingURL=factory.js.map

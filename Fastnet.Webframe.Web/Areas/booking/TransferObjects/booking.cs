@@ -65,6 +65,7 @@ namespace Fastnet.Webframe.Web.Areas.booking
         }
         protected virtual void SetMemberInformation(CoreDataContext ctx, MemberBase m)
         {
+            // could add firstName, lastName here
             this.memberName = m.Fullname;
             this.memberEmailAddress = m.EmailAddress;
             this.memberPhoneNumber = m.PhoneNumber;         

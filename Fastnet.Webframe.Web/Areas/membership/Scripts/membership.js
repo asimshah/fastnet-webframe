@@ -30,7 +30,13 @@
             }
         }
         function _sendPaswordReset() {
-            alert("Not Implemented!")
+            var id = currentForm.find(".member-details").attr("data-id");
+            var url = "membershipapi/send/passwordresetrequest";
+            var postData = { id: id };
+            $.when($U.AjaxPost({ url: url, data: postData })).then(function (r) {
+                alert("Password reset email sent")
+            });
+            
         }
         function _sendActivationMail() {
             function _sendActivationEmail(id) {
