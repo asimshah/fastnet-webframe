@@ -130,7 +130,8 @@
                 if (h$.isNullOrUndefined(d)) {
                     return null;
                 } else {
-                    return moment(d);
+                    return str.toMoment(d);
+                    //return moment(d);
                 }
             }
             public reset(): void {

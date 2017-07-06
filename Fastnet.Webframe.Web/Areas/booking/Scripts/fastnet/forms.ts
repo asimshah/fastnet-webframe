@@ -348,7 +348,7 @@ module fastnet {
                         var formatted = ""; // throw instead?
                         var unwrapped = ko.utils.unwrapObservable(val);
                         if (typeof unwrapped !== "undefined") {
-                            var date = moment(unwrapped);
+                            var date = str.toMoment(unwrapped);// moment(unwrapped);
                             if (date && date.isValid()) {
                                 formatted = date.format(format);
                             }

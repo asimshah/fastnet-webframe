@@ -49,15 +49,42 @@
                 var diff = thisDate.diff(refDate, 'd');
                 return diff >= 0;
             }
+            //public static validateBookingStartDate: forms.knockoutValidator = function (val, params): boolean {
+            //    if (h$.isNullOrUndefined(val)) {
+            //        return true;
+            //    }
+            //    var shortTermBookingAllowed: boolean = params.shortTermBookingAllowed;
+            //    var under18Present = ko.unwrap(params.under18Present);
+            //    var today = moment(params.today);
+            //    var fmt = "";
+            //    var startMoment = moment(val);
+            //    var minStart = today;
+            //    var interval = 0;// params.shortBookingInterval;
+            //    if (under18Present) {
+            //        // interval = params.shortBookingInterval + 14;
+            //        interval = 14;
+            //        fmt = "When any under 18s are present, bookings need to be at least {0} days in advance, i.e. from {1}";
+            //    } else if (shortTermBookingAllowed == false) {
+            //        interval = params.shortBookingInterval;
+            //        fmt = "Bookings need to be at least {0} days in advance, i.e.from {1}";
+            //    }
+            //    minStart = today.add(interval, 'd');
+            //    if (startMoment < minStart) {
+            //        this.message = str.format(fmt, interval, str.toDateString(minStart));
+            //        return false;
+            //    } else {
+            //        return true;
+            //    }
+            //}
             public static validateBookingStartDate: forms.knockoutValidator = function (val, params): boolean {
                 if (h$.isNullOrUndefined(val)) {
                     return true;
                 }
                 var shortTermBookingAllowed: boolean = params.shortTermBookingAllowed;
                 var under18Present = ko.unwrap(params.under18Present);
-                var today = moment(params.today);
+                var today = str.toMoment(params.today);// moment(params.today);
                 var fmt = "";
-                var startMoment = moment(val);
+                var startMoment = str.toMoment(val);// moment(val);
                 var minStart = today;
                 var interval = 0;// params.shortBookingInterval;
                 if (under18Present) {
@@ -76,6 +103,25 @@
                     return true;
                 }
             }
+            //public static validateBookingEndDate: forms.knockoutValidator = function (val, params): boolean {
+            //    if (h$.isNullOrUndefined(val)) {
+            //        return true;
+            //    }
+            //    var startDate = ko.unwrap(params.startDate);
+            //    if (h$.isNullOrUndefined(startDate)) {
+            //        this.message = "No departure date is valid without an arrival date";
+            //        return false;
+            //    }
+            //    var startMoment = moment(startDate);
+            //    var endMoment = moment(val);
+            //    var d = endMoment.diff(startMoment, 'd');
+            //    if (d > 0) {
+            //        return true;
+            //    } else {
+            //        this.message = "Departure date must be after the arrival date";
+            //        return false;
+            //    }
+            //}
             public static validateBookingEndDate: forms.knockoutValidator = function (val, params): boolean {
                 if (h$.isNullOrUndefined(val)) {
                     return true;
@@ -85,8 +131,8 @@
                     this.message = "No departure date is valid without an arrival date";
                     return false;
                 }
-                var startMoment = moment(startDate);
-                var endMoment = moment(val);
+                var startMoment = str.toMoment(startDate);// moment(startDate);
+                var endMoment = str.toMoment(val);// moment(val);
                 var d = endMoment.diff(startMoment, 'd');
                 if (d > 0) {
                     return true;

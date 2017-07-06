@@ -73,9 +73,9 @@ var fastnet;
                 // how to call a system form here? alert()??
                 alert(errorMessage);
             };
+            ajax.rootUrl = "/";
             return ajax;
         }());
-        ajax.rootUrl = "/";
         util.ajax = ajax;
         var str = (function () {
             function str() {
@@ -169,9 +169,9 @@ var fastnet;
                     console.log(message);
                 }
             };
+            debug.routeMessagesToVisualStudio = false;
             return debug;
         }());
-        debug.routeMessagesToVisualStudio = false;
         util.debug = debug;
         var helper = (function () {
             function helper() {
@@ -200,11 +200,10 @@ var fastnet;
             helper.isNullOrUndefined = function (obj) {
                 return obj === null || obj === undefined;
             };
+            helper.nameSpace = "fastnet-";
             return helper;
         }());
-        helper.nameSpace = "fastnet-";
         util.helper = helper;
         utilOnReady.init();
     })(util = fastnet.util || (fastnet.util = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=utilities.js.map

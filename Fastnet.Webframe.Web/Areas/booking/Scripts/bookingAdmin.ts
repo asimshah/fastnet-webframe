@@ -581,7 +581,8 @@ module fastnet {
             }
             private saveBlockedPeriod(m: manageDaysModel): JQueryPromise<blockerPeriodSaveResult> {
                 var deferred = $.Deferred<blockerPeriodSaveResult>();
-                var endsOn = moment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate()
+                //var endsOn = moment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate()
+                var endsOn = str.toMoment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate();
                 var from = str.toDateString(m.newPeriodFrom);
                 var to = str.toDateString(endsOn);
                 var abodeId = this.app.parameters.currentAbode.id;
@@ -779,7 +780,7 @@ module fastnet {
                                 //            return "WaitingPayment";
                                 //    }
                                 //}
-                                booking.status = r.booking.status;                                
+                                booking.status = r.booking.status;
                                 booking.statusName = this.bookingStatusToString(booking.status);
                                 var rowElement = $(ct).closest("tr");
                                 var d = this.dataTable.row(rowElement).data();
@@ -1104,9 +1105,9 @@ module fastnet {
                                 { text: "Home page", command: "back-to-site", position: forms.buttonPosition.left },
                                 { text: "Help with templates ...", command: "template-key-words", position: forms.buttonPosition.left }
                             ],
-                            
+
                         }, vetm);
-                        f.setContentHtml(r.template);                        
+                        f.setContentHtml(r.template);
                         f.open((ctx: any, f: forms.form, cmd: string, data: editTemplateModels) => {
                             switch (cmd) {
                                 case "ok-command":
@@ -1143,7 +1144,7 @@ module fastnet {
                                         var editor = f.findRichTextEditor("bodyHtml");
                                         editor.setContent(r.bodyText);
                                         f.enableCommand("ok-command");
-                                    });                                   
+                                    });
                                 } else {
                                     f.find(".template-editor").addClass("hidden");
                                     f.disableCommand("ok-command");
@@ -1151,9 +1152,9 @@ module fastnet {
                             } else {
                                 debug.print("property {0} changed", pn);
                             }
-                            }).then(() => {
-                                f.disableCommand("ok-command");
-                            });
+                        }).then(() => {
+                            f.disableCommand("ok-command");
+                        });
                     });
                 });
             }
@@ -1175,7 +1176,7 @@ module fastnet {
                     });
                 });
             }
-            private saveEmailTemplate(template: string, subjectText: string, bodyHtml: string): JQueryPromise<void>  {
+            private saveEmailTemplate(template: string, subjectText: string, bodyHtml: string): JQueryPromise<void> {
                 var deferred = $.Deferred<void>();
                 var url = "bookingadmin/update/emailTemplate";
                 var data = { template: template, subjectText: subjectText, bodyText: bodyHtml };

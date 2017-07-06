@@ -1,13 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var fastnet;
 (function (fastnet) {
     var booking;
@@ -16,7 +11,7 @@ var fastnet;
         var dwhParameters = (function (_super) {
             __extends(dwhParameters, _super);
             function dwhParameters() {
-                return _super !== null && _super.apply(this, arguments) || this;
+                _super.apply(this, arguments);
             }
             dwhParameters.prototype.getObservable = function () {
                 return new observableDwhParameters(this);
@@ -27,16 +22,17 @@ var fastnet;
         var observableDwhParameters = (function (_super) {
             __extends(observableDwhParameters, _super);
             function observableDwhParameters(model) {
-                var _this = _super.call(this, model) || this;
-                _this.__$className = "observableDwhParameters";
-                _this.privilegedMembers = null;
-                _this.paymentInterval = ko.observable(model.paymentInterval);
-                _this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
-                _this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
-                _this.cancellationInterval = ko.observable(model.cancellationInterval);
-                _this.firstReminderInterval = ko.observable(model.firstReminderInterval);
-                _this.secondReminderInterval = ko.observable(model.secondReminderInterval);
-                _this.reminderSuppressionInterval = ko.observable(model.reminderSuppressionInterval);
+                var _this = this;
+                _super.call(this, model);
+                this.__$className = "observableDwhParameters";
+                this.privilegedMembers = null;
+                this.paymentInterval = ko.observable(model.paymentInterval);
+                this.entryCodeNotificationInterval = ko.observable(model.entryCodeNotificationInterval);
+                this.entryCodeBridgeInterval = ko.observable(model.entryCodeBridgeInterval);
+                this.cancellationInterval = ko.observable(model.cancellationInterval);
+                this.firstReminderInterval = ko.observable(model.firstReminderInterval);
+                this.secondReminderInterval = ko.observable(model.secondReminderInterval);
+                this.reminderSuppressionInterval = ko.observable(model.reminderSuppressionInterval);
                 if (!h$.isNullOrUndefined(model.privilegedMembers)) {
                     $.each(model.availableGroups, function (i, item) {
                         if (item.Id === model.privilegedMembers.Id) {
@@ -46,9 +42,8 @@ var fastnet;
                     });
                 }
                 else {
-                    _this.privilegedMembers = ko.observable();
+                    this.privilegedMembers = ko.observable();
                 }
-                return _this;
             }
             observableDwhParameters.prototype.clearPrivilegedMembers = function () {
                 this.privilegedMembers(null);
@@ -62,4 +57,3 @@ var fastnet;
         booking.observableDwhParameters = observableDwhParameters;
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=dwhBookingCommon.js.map

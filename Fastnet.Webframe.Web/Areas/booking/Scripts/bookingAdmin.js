@@ -1,15 +1,10 @@
 /// <reference path="../../../scripts/typings/mustache/mustache.d.ts" />
 /// <reference path="../../../scripts/typings/jquery.datatables/jquery.datatables.d.ts" />
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var fastnet;
 (function (fastnet) {
     var ajax = fastnet.util.ajax;
@@ -84,7 +79,7 @@ var fastnet;
             __extends(adminIndex, _super);
             //private app: adminApp;
             function adminIndex(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
                 //this.app = app;
             }
             adminIndex.prototype.start = function () {
@@ -169,7 +164,7 @@ var fastnet;
         var configIndex = (function (_super) {
             __extends(configIndex, _super);
             function configIndex(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
                 //this.app = app;
             }
             configIndex.prototype.start = function () {
@@ -221,7 +216,7 @@ var fastnet;
         var parametersApp = (function (_super) {
             __extends(parametersApp, _super);
             function parametersApp(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
                 //this.app = app;
             }
             parametersApp.prototype.start = function () {
@@ -298,7 +293,7 @@ var fastnet;
         var managePricing = (function (_super) {
             __extends(managePricing, _super);
             function managePricing(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
             }
             managePricing.prototype.start = function () {
                 this.showForm();
@@ -381,7 +376,7 @@ var fastnet;
         var manageDays = (function (_super) {
             __extends(manageDays, _super);
             function manageDays(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
             }
             manageDays.prototype.start = function () {
                 var _this = this;
@@ -596,7 +591,8 @@ var fastnet;
             manageDays.prototype.saveBlockedPeriod = function (m) {
                 var _this = this;
                 var deferred = $.Deferred();
-                var endsOn = moment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate();
+                //var endsOn = moment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate()
+                var endsOn = str.toMoment(m.newPeriodFrom).add(m.newPeriodDuration - 1, 'd').toDate();
                 var from = str.toDateString(m.newPeriodFrom);
                 var to = str.toDateString(endsOn);
                 var abodeId = this.app.parameters.currentAbode.id;
@@ -631,10 +627,9 @@ var fastnet;
         var bookingReport = (function (_super) {
             __extends(bookingReport, _super);
             function bookingReport(app) {
-                var _this = _super.call(this, app) || this;
-                _this.propertyInfo = new collections.Dictionary();
-                _this.dataTable = null;
-                return _this;
+                _super.call(this, app);
+                this.propertyInfo = new collections.Dictionary();
+                this.dataTable = null;
             }
             bookingReport.prototype.start = function (rt) {
                 var _this = this;
@@ -782,8 +777,6 @@ var fastnet;
                                 $(rowElement).find("button[data-table-cmd]").on("click", function (e) {
                                     _this.embeddedButtonHandler(bookingList, e);
                                 });
-                                //var d2 = this.dataTable.row(rowElement).data();
-                                //debug.print("after change: {0}", d2[pnIndex]);
                             }
                             else if (r.statusChanged) {
                                 //function bookingStatusToString(s: server.bookingStatus): string {
@@ -1010,7 +1003,7 @@ var fastnet;
         var occupancyReport = (function (_super) {
             __extends(occupancyReport, _super);
             function occupancyReport(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
             }
             occupancyReport.prototype.start = function () {
                 var _this = this;
@@ -1108,7 +1101,7 @@ var fastnet;
         var emailTemplates = (function (_super) {
             __extends(emailTemplates, _super);
             function emailTemplates(app) {
-                return _super.call(this, app) || this;
+                _super.call(this, app);
             }
             emailTemplates.prototype.start = function () {
                 var _this = this;
@@ -1215,4 +1208,3 @@ var fastnet;
         }(adminSubapp));
     })(booking = fastnet.booking || (fastnet.booking = {}));
 })(fastnet || (fastnet = {}));
-//# sourceMappingURL=bookingAdmin.js.map
