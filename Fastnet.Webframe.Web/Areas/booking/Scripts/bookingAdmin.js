@@ -1,10 +1,15 @@
 /// <reference path="../../../scripts/typings/mustache/mustache.d.ts" />
 /// <reference path="../../../scripts/typings/jquery.datatables/jquery.datatables.d.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var fastnet;
 (function (fastnet) {
     var ajax = fastnet.util.ajax;
@@ -777,6 +782,8 @@ var fastnet;
                                 $(rowElement).find("button[data-table-cmd]").on("click", function (e) {
                                     _this.embeddedButtonHandler(bookingList, e);
                                 });
+                                //var d2 = this.dataTable.row(rowElement).data();
+                                //debug.print("after change: {0}", d2[pnIndex]);
                             }
                             else if (r.statusChanged) {
                                 //function bookingStatusToString(s: server.bookingStatus): string {

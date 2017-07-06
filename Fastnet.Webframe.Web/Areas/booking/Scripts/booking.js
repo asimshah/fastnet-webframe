@@ -255,6 +255,7 @@ var fastnet;
                     else {
                         //debug.print("day dictionary does not contain key {0}", day.format("DDMMMYYYY"));
                         return [true, "free", "This day is free"];
+                        //return [false, "blocked", "not ready"];
                     }
                 }
             };

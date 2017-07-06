@@ -671,6 +671,7 @@ var fastnet;
                             }
                         }
                     }
+                    //this.resizeRichText();
                 }
             };
             //private resizeRichText(): void {
