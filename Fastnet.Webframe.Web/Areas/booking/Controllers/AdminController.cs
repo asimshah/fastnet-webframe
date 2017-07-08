@@ -271,7 +271,7 @@ namespace Fastnet.Webframe.Web.Areas.booking.Controllers
                     {
                         currentEntryCode = current != null ? new entryCode(current) : null,
                         validFrom = current?.ApplicableFrom.ToDefault(),
-                        validTo = next?.ApplicableFrom.AddDays(-1).ToDefault(),
+                        validTo =  next == null ? today.AddYears(1).ToDefault() : next.ApplicableFrom.AddDays(-1).ToDefault(),
                         allCodes = allCodes
                     };
                 }
